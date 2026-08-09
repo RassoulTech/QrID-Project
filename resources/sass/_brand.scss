@@ -1,0 +1,97 @@
+// =============================================================================
+// MARQUE — pastille monogramme + nom.
+//
+// La pastille porte l'identité, le mot porte le nom. C'est le contraste entre
+// les deux qui donne du poids à la marque, PAS la mise en capitales du nom :
+// « QRID » tout en majuscules se lit mal et alourdit chaque écran où il
+// apparaît. La casse vient de APP_NAME et n'est jamais forcée en CSS.
+//
+// Trois tailles, deux tons. Le ton clair sert sur les fonds verts (pied de
+// page public, en-tête d'administration).
+// =============================================================================
+
+.brand{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  line-height:1.15;
+
+  // La couleur est déclarée pour TOUS les états : aucune marque ne doit
+  // attendre un survol pour être lisible.
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
+    text-decoration:none;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// La pastille
+// -----------------------------------------------------------------------------
+.brand__mark{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  font-weight:800;
+  letter-spacing:.02em;
+  // Le monogramme est une abréviation : les capitales y sont légitimes,
+  // contrairement au nom complet.
+  text-transform:uppercase;
+  background:$vert-fonce;
+  color:$blanc;
+}
+
+.brand__words{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+
+.brand__name{
+  font-weight:800;
+  letter-spacing:-.02em;
+  white-space:nowrap;
+}
+
+.brand__tagline{
+  font-weight:400;
+  color:$gris-second;
+  margin-top:1px;
+}
+
+// -----------------------------------------------------------------------------
+// Tailles
+// -----------------------------------------------------------------------------
+.brand--sm{
+  gap:8px;
+  .brand__mark{width:26px;height:26px;font-size:11px;border-radius:7px}
+  .brand__name{font-size:14px}
+  .brand__tagline{font-size:10px}
+}
+
+.brand--md{
+  .brand__mark{width:32px;height:32px;font-size:13px}
+  .brand__name{font-size:17px}
+  .brand__tagline{font-size:11px}
+}
+
+.brand--lg{
+  gap:12px;
+  .brand__mark{width:42px;height:42px;font-size:17px;border-radius:12px}
+  .brand__name{font-size:22px}
+  .brand__tagline{font-size:12px}
+}
+
+// -----------------------------------------------------------------------------
+// Tons
+// -----------------------------------------------------------------------------
+.brand--dark{
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{color:$texte}
+  .brand__mark{background:$vert-fonce;color:$blanc}
+}
+
+// Sur fond vert foncé : la pastille s'inverse pour rester détachée du fond.
+.brand--light{
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{color:$blanc}
+  .brand__mark{background:$blanc;color:$vert-fonce}
+  .brand__tagline{color:rgba($blanc,.7)}
+}

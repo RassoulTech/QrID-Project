@@ -1,0 +1,68 @@
+{{--
+  Activité récente — histogramme des vues, RENDU CÔTÉ SERVEUR.
+
+  Aucune bibliothèque de graphiques, aucun canvas : des <div> dont la hauteur
+  est un pourcentage. Cela tient en quelques lignes de CSS, s'imprime, se lit
+  au lecteur d'écran grâce au tableau de secours, et ne dépend d'aucun script.
+
+  Le sélecteur de période est un jeu de LIENS vers la même page avec
+  ?periode=N : l'état vit dans l'URL, il est partageable et rechargeable.
+
+  Quand il n'y a aucune vue, le contrôleur renvoie null : on n'affiche jamais
+  un graphique plat, qui laisserait croire à une panne.
+--}}
+<section class="db-card">
+    <div class="db-card__tete">
+        <h2 class="db-card__titre">Activité récente</h2>
+
+        <div class="periode" role="group" aria-label="Période affichée">
+            @foreach ($periodes as $p)
+                <a href="{{ route('dashboard', ['periode' => $p]) }}"
+                   @class(['periode__item', 'is-active' => $p === $periode])
+                   @if ($p === $periode) aria-current="true" @endif>
+                    {{ $p }} jours
+                </a>
+            @endforeach
+        </div>
+    </div>
+
+    @if ($serie)
+        @php $max = max(array_column($serie, 'total')) ?: 1; @endphp
+
+        <div class="chart" role="img"
+             aria-label="Vues de la carte sur les {{ $periode }} derniers jours">
+            @foreach ($serie as $jour)
+                <span class="chart__col" title="{{ $jour['jour'] }} · {{ $jour['total'] }} vue{{ $jour['total'] > 1 ? 's' : '' }}">
+                    <span class="chart__barre" style="height:{{ max(3, round($jour['total'] / $max * 100)) }}%"></span>
+                    <span class="chart__jour">{{ $jour['libelle'] }}</span>
+                </span>
+            @endforeach
+        </div>
+
+        {{-- Équivalent textuel : un histogramme en CSS reste illisible pour un
+             lecteur d'écran. Le tableau porte les mêmes chiffres. --}}
+        <table class="visually-hidden">
+            <caption>Vues par jour</caption>
+            <thead><tr><th>Jour</th><th>Vues</th></tr></thead>
+            <tbody>
+                @foreach ($serie as $jour)
+                    <tr><td>{{ $jour['jour'] }}</td><td>{{ $jour['total'] }}</td></tr>
+                @endforeach
+            </tbody>
+        </table>
+    @else
+        <div class="db-vide">
+            <svg width="26" height="26" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M2 2h2v2H2z"/>
+                <path d="M6 0v6H0V0zM5 1H1v4h4zM4 12H2v2h2z"/>
+                <path d="M6 10v6H0v-6zm-5 1v4h4v-4zm11-9h2v2h-2z"/>
+                <path d="M10 0v6h6V0zm5 1v4h-4V1zM8 8v2H6V8zm2 2V8h2v2zm-2 2v-2H6v2zm2 0h2v-2h-2zm4 0v2h-2v-2z"/>
+            </svg>
+            <p class="db-vide__titre">Aucune vue pour l'instant</p>
+            <p class="db-vide__texte">
+                Partagez votre QR Code ou votre lien&nbsp;: les consultations
+                apparaîtront ici, jour par jour.
+            </p>
+        </div>
+    @endif
+</section>

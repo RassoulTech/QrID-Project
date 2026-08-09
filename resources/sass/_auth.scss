@@ -1,0 +1,701 @@
+// =============================================================================
+// AUTHENTIFICATION — les sept écrans
+//
+// Une coquille commune : conteneur blanc arrondi posé sur $gris-fond, colonne
+// de gauche pour le formulaire, colonne de droite verte pour le produit.
+// La colonne de droite disparaît ENTIÈREMENT sous 992px (elle n'est pas
+// simplement masquée : elle n'occupe plus la grille).
+//
+// Tout est repris de la landing : $vert-fonce, $r-lg, $shadow-2, .btn-pill,
+// .f / .f__control / .f__error. Rien de neuf en dehors de ce qu'exigeaient
+// réellement les maquettes.
+// =============================================================================
+
+.auth{
+  min-height:100vh;
+  background:$gris-fond;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+
+// Le conteneur blanc. overflow:hidden pour que le vert de droite soit
+// détouré par le rayon du conteneur.
+.auth__shell{
+  width:100%;
+  max-width:1120px;
+  background:$blanc;
+  border-radius:$r-lg;
+  box-shadow:$shadow-2;
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:1fr;
+}
+
+// -----------------------------------------------------------------------------
+// COLONNE GAUCHE — logo, formulaire centré, mentions légales
+// -----------------------------------------------------------------------------
+.auth__panel{
+  display:flex;
+  flex-direction:column;
+  padding:28px 24px;
+  min-width:0;
+}
+
+.auth__brand{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:-.01em;
+  align-self:flex-start;
+
+  &,&:link,&:visited,&:hover,&:focus{color:$texte}
+}
+
+.auth__mark{
+  width:28px;height:28px;
+  flex:0 0 auto;
+  border-radius:8px;
+  background:$vert-fonce;
+  color:$blanc;
+  display:grid;
+  place-items:center;
+}
+
+// Le formulaire occupe la place restante et se centre dedans.
+.auth__body{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:32px 0;
+  max-width:420px;
+  width:100%;
+  margin-inline:auto;
+}
+
+.auth__title{
+  font-size:24px;
+  font-weight:700;
+  letter-spacing:-.025em;
+  color:$texte;
+  margin:0;
+}
+
+.auth__lead{
+  font-size:14px;
+  line-height:1.6;
+  color:$gris-second;
+  margin:8px 0 0;
+}
+
+.auth__legal{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px 14px;
+  font-size:11.5px;
+  color:$gris-second;
+
+  a{
+    color:$gris-second;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    &:hover{color:$texte}
+  }
+}
+
+// -----------------------------------------------------------------------------
+// SÉLECTEUR CONNEXION / CRÉER UN COMPTE
+//
+// Deux LIENS vers deux routes distinctes, jamais un basculement JavaScript :
+// chaque écran garde son URL, son historique et son bouton retour.
+// -----------------------------------------------------------------------------
+.auth-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+  padding:4px;
+  background:$gris-fond;
+  border-radius:$r-full;
+  margin:24px 0 22px;
+}
+
+.auth-tabs__item{
+  height:38px;
+  border-radius:$r-full;
+  display:grid;
+  place-items:center;
+  font-size:13.5px;
+  font-weight:600;
+  text-align:center;
+  transition:background 180ms ease, color 180ms ease;
+
+  // La couleur du texte est déclarée pour tous les états : aucun libellé
+  // n'attend un survol pour devenir lisible.
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible{color:$gris-second}
+  &:hover{background:rgba($blanc,.7);color:$texte}
+
+  &.is-active{
+    &,&:link,&:visited,&:hover,&:focus,&:focus-visible{
+      background:$blanc;
+      color:$texte;
+    }
+    box-shadow:$shadow-1;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// CHAMPS — reprise de .f, avec l'état d'erreur des maquettes
+// (bordure rouge + icône d'alerte + message SOUS le champ concerné)
+// -----------------------------------------------------------------------------
+.auth-fields{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+// Enveloppe nécessaire dès qu'une icône se superpose au champ : œil du mot
+// de passe, triangle d'alerte.
+.f__wrap{
+  position:relative;
+  display:block;
+}
+
+.f__wrap .f__control{padding-right:46px}
+
+// Bouton œil. type="button" : sans JavaScript il ne fait rien, et le champ
+// reste type="password". Retiré du parcours clavier (le champ juste avant
+// suffit), d'où tabindex="-1" côté Blade.
+.f__eye{
+  position:absolute;
+  top:50%;right:6px;
+  transform:translateY(-50%);
+  width:34px;height:34px;
+  display:grid;place-items:center;
+  border:0;
+  background:transparent;
+  border-radius:8px;
+  color:$gris-second;
+  cursor:pointer;
+
+  &:hover{color:$texte;background:$gris-fond}
+  &:focus-visible{outline:2px solid $vert-accent;outline-offset:1px}
+}
+
+// Icône d'alerte dans le champ en erreur. Décorative : le message écrit
+// juste dessous porte l'information.
+.f__alert{
+  position:absolute;
+  top:50%;right:12px;
+  transform:translateY(-50%);
+  color:$rouge-erreur;
+  pointer-events:none;
+  display:grid;
+}
+
+// Un champ de mot de passe porte l'œil ET l'alerte : on décale l'alerte pour
+// qu'elles ne se superposent pas. Classe explicite plutôt que :has(), qui
+// laisserait les deux icônes empilées sur les navigateurs qui l'ignorent.
+.f__alert--decale{right:46px}
+
+.f__error{
+  display:flex;
+  align-items:flex-start;
+  gap:6px;
+}
+
+// -----------------------------------------------------------------------------
+// ROBUSTESSE DU MOT DE PASSE
+// Purement indicative : masquée tant que le JavaScript ne l'a pas remplie,
+// donc invisible et sans place perdue quand il est absent.
+// -----------------------------------------------------------------------------
+.pw-meter[hidden]{display:none}
+
+.pw-meter{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.pw-meter__track{
+  display:flex;
+  gap:5px;
+}
+
+.pw-meter__seg{
+  height:4px;
+  flex:1 1 0;
+  border-radius:$r-full;
+  background:$gris-fond;
+  transition:background 200ms ease;
+}
+
+.pw-meter__label{font-size:12px;color:$gris-second}
+
+.pw-meter--1 .pw-meter__seg:nth-child(-n+1),
+.pw-meter--2 .pw-meter__seg:nth-child(-n+2),
+.pw-meter--3 .pw-meter__seg:nth-child(-n+3),
+.pw-meter--4 .pw-meter__seg:nth-child(-n+4){background:$vert-accent}
+
+.pw-meter--1 .pw-meter__seg:nth-child(-n+1){background:$rouge-erreur}
+.pw-meter--2 .pw-meter__seg:nth-child(-n+2){background:#B8791A}  // ambre, 3,6:1 — trait décoratif
+.pw-meter--4 .pw-meter__seg{background:$vert-fonce}
+
+// -----------------------------------------------------------------------------
+// CONFIRMATION D'E-MAIL
+// -----------------------------------------------------------------------------
+.mail-icon{
+  width:56px;height:56px;
+  border-radius:18px;
+  background:$vert-clair;
+  color:$vert-fonce;
+  display:grid;place-items:center;
+  margin-bottom:20px;
+}
+
+.mail-address{
+  font-weight:600;
+  color:$texte;
+  word-break:break-all;
+}
+
+.mail-steps{
+  list-style:none;
+  margin:24px 0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  counter-reset:mail-step;
+}
+
+.mail-steps li{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  font-size:13.5px;
+  line-height:1.55;
+  color:$gris-second;
+  counter-increment:mail-step;
+
+  &::before{
+    content:counter(mail-step);
+    flex:0 0 auto;
+    width:22px;height:22px;
+    border-radius:$r-full;
+    background:$vert-clair;
+    color:$vert-fonce;
+    font-size:11.5px;
+    font-weight:700;
+    display:grid;place-items:center;
+  }
+}
+
+.mail-spam{
+  display:flex;
+  gap:10px;
+  padding:14px 16px;
+  border-radius:$r-sm;
+  background:$gris-fond;
+  border:1px solid $bordure;
+  font-size:12.5px;
+  line-height:1.55;
+  color:$gris-second;
+
+  svg{flex:0 0 auto;color:$vert-accent;margin-top:2px}
+}
+
+// Compteur avant renvoi possible. Vide sans JavaScript : le bouton reste
+// utilisable, le serveur applique de toute façon son propre délai.
+.resend-note{
+  font-size:12px;
+  color:$gris-second;
+  text-align:center;
+  margin:10px 0 0;
+  // Réserve la hauteur d'une ligne : le compteur qui s'efface ne doit pas
+  // faire sauter le bloc de liens juste dessous.
+  min-height:1.4em;
+}
+
+// -----------------------------------------------------------------------------
+// COLONNE DROITE
+//
+// DEUX TONS, selon la maquette de la page : vert foncé (connexion, erreur de
+// saisie) ou fond clair (inscription, mot de passe oublié, confirmation,
+// réinitialisation). Le contenu, lui, vient du slot « aside » de chaque page :
+// il n'y a plus de visuel unique partagé par tous les écrans.
+// -----------------------------------------------------------------------------
+.auth__aside{
+  display:none;              // absente sous 992px, pas seulement invisible
+  position:relative;
+  overflow:hidden;
+  padding:48px 44px;
+}
+
+// Motif de grille. Purement décoratif, donc en pseudo-élément.
+.auth__aside::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-size:44px 44px;
+  mask-image:radial-gradient(90% 70% at 50% 30%, #000 30%, transparent 100%);
+}
+
+// --- Ton sombre --------------------------------------------------------------
+.auth__aside--dark{
+  color:$blanc;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba($vert-accent,.34) 0%, rgba($vert-accent,0) 58%),
+    linear-gradient(160deg, lighten($vert-fonce,4%) 0%, $vert-fonce 52%, darken($vert-fonce,4%) 100%);
+
+  &::before{
+    background-image:
+      linear-gradient(to right, rgba($blanc,.055) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba($blanc,.055) 1px, transparent 1px);
+  }
+
+  .auth-aside__mark{background:rgba($blanc,.14);border-color:rgba($blanc,.22);color:$blanc}
+  .auth-aside__title{color:$blanc}
+  .auth-aside__text{color:rgba($blanc,.74)}
+  .auth-aside__dot{background:rgba($blanc,.24)}
+  .auth-aside__dot.is-on{background:$blanc}
+}
+
+// --- Ton clair ---------------------------------------------------------------
+// Le texte passe en $texte / $gris-second : sur ce fond, le blanc tomberait
+// à 1,1:1. Aucun libellé ne doit dépendre du ton pour rester lisible.
+.auth__aside--light{
+  color:$texte;
+  background:
+    radial-gradient(110% 80% at 90% 5%, rgba($vert-accent,.16) 0%, rgba($vert-accent,0) 60%),
+    linear-gradient(165deg, $blanc 0%, $gris-fond 55%, darken($gris-fond,3%) 100%);
+  border-left:1px solid $bordure;
+
+  &::before{
+    background-image:
+      linear-gradient(to right, rgba($texte,.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba($texte,.045) 1px, transparent 1px);
+  }
+
+  .auth-aside__mark{background:$vert-fonce;border-color:$vert-fonce;color:$blanc}
+  .auth-aside__title{color:$texte}
+  .auth-aside__text{color:$gris-second}
+  .auth-aside__dot{background:rgba($texte,.16)}
+  .auth-aside__dot.is-on{background:$vert-fonce}
+}
+
+.auth__aside > *{position:relative}
+
+.auth-aside{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.auth-aside__mark{
+  width:34px;height:34px;
+  border-radius:10px;
+  border:1px solid transparent;
+  display:grid;place-items:center;
+}
+
+// Scène des cartes flottantes, au centre de la colonne.
+.auth-aside__stage{
+  flex:1 1 auto;
+  display:grid;
+  place-items:center;
+  padding:36px 0;
+}
+
+.auth-aside__cards{
+  position:relative;
+  width:100%;
+  max-width:270px;
+}
+
+.auth-aside__title{
+  font-size:24px;
+  font-weight:700;
+  letter-spacing:-.025em;
+  line-height:1.25;
+  margin:0;
+}
+
+.auth-aside__text{
+  font-size:13.5px;
+  line-height:1.65;
+  margin:12px 0 0;
+}
+
+// Indicateur de progression — quatre traits.
+.auth-aside__dots{
+  display:flex;
+  gap:7px;
+  margin-top:26px;
+}
+
+.auth-aside__dot{
+  height:3px;
+  width:26px;
+  border-radius:$r-full;
+
+  &.is-on{width:34px}
+}
+
+// =============================================================================
+// BRIQUES VISUELLES (av-*) — posées dans le slot « aside » par chaque page.
+//
+// Aucune n'est imposée : une page n'affiche que celles que sa maquette montre.
+// Tout est en CSS, aucune image, aucune requête, aucune donnée lue en base.
+// =============================================================================
+
+// --- Carte professionnelle miniature -----------------------------------------
+.av-card{
+  background:$blanc;
+  border-radius:$r-md;
+  box-shadow:$shadow-3;
+  overflow:hidden;
+  color:$texte;
+}
+
+.av-card__head{
+  background:$vert-fonce;
+  padding:20px 18px 16px;
+  text-align:center;
+  color:$blanc;
+  display:flex;
+  flex-direction:column;
+}
+
+.av-card__avatar{
+  width:52px;height:52px;
+  margin:0 auto 10px;
+  border-radius:$r-full;
+  background:rgba($blanc,.16);
+  border:2px solid rgba($blanc,.4);
+  display:grid;place-items:center;
+  font-size:16px;
+  font-weight:700;
+}
+
+.av-card__name{font-size:14px;font-weight:700;line-height:1.3}
+.av-card__role{font-size:11px;color:rgba($blanc,.72);margin-top:3px}
+
+.av-card__body{
+  padding:16px 18px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+
+.av-card__line{
+  height:8px;
+  border-radius:$r-full;
+  background:$gris-fond;
+
+  &--w70{width:70%}
+  &--w50{width:50%}
+}
+
+.av-card__cta{
+  margin-top:6px;
+  height:30px;
+  border-radius:$r-full;
+  background:$vert-clair;
+}
+
+// --- Pastille flottante ------------------------------------------------------
+.av-chip{
+  position:absolute;
+  z-index:2;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 13px;
+  border-radius:$r-full;
+  background:$blanc;
+  color:$texte;
+  box-shadow:$shadow-2;
+  font-size:11.5px;
+  font-weight:600;
+  white-space:nowrap;
+
+  svg{color:$vert-accent;flex:0 0 auto}
+
+  &--hg{top:-14px;left:-42px}
+  &--hd{top:-14px;right:-42px}
+  &--bg{bottom:-16px;left:-42px}
+  &--bd{bottom:-16px;right:-42px}
+}
+
+// --- Carte de statistiques ---------------------------------------------------
+.av-stat{
+  position:absolute;
+  z-index:2;
+  background:$blanc;
+  border-radius:$r-sm;
+  box-shadow:$shadow-2;
+  padding:12px 14px;
+  color:$texte;
+  min-width:118px;
+
+  &--hg{top:-24px;left:-56px}
+  &--hd{top:-24px;right:-56px}
+  &--bg{bottom:-26px;left:-56px}
+  &--bd{bottom:-26px;right:-56px}
+}
+
+.av-stat__value{display:block;font-size:20px;font-weight:800;line-height:1}
+.av-stat__label{display:block;font-size:10px;color:$gris-second;margin-top:3px}
+
+.av-stat__chart{
+  display:flex;
+  align-items:flex-end;
+  gap:3px;
+  height:26px;
+  margin-top:9px;
+}
+
+.av-stat__bar{
+  flex:1 1 0;
+  border-radius:2px 2px 0 0;
+  background:$vert-clair;
+
+  &:last-child{background:$vert-accent}
+}
+
+// --- Illustration tenant lieu de photographie --------------------------------
+// Les maquettes montrent des photographies. Elles sont remplacées par ce bloc,
+// construit en CSS : aucun fichier externe, aucune licence, aucun visage réel.
+// C'est un écart assumé et validé, pas une omission.
+.av-portrait{
+  background:$blanc;
+  border-radius:$r-md;
+  box-shadow:$shadow-3;
+  overflow:hidden;
+}
+
+.av-portrait__image{
+  position:relative;
+  aspect-ratio:4 / 3;
+  overflow:hidden;
+  background:linear-gradient(160deg, $vert-clair 0%, lighten($vert-accent,34%) 100%);
+}
+
+// Buste stylisé : une tête et des épaules, sans aucun trait de visage.
+.av-portrait__head{
+  position:absolute;
+  left:50%;bottom:38%;
+  transform:translateX(-50%);
+  width:34%;aspect-ratio:1;
+  border-radius:$r-full;
+  background:$vert-fonce;
+  opacity:.9;
+}
+
+.av-portrait__bust{
+  position:absolute;
+  left:50%;bottom:-14%;
+  transform:translateX(-50%);
+  width:66%;aspect-ratio:1.35;
+  border-radius:50% 50% 0 0;
+  background:$vert-fonce;
+  opacity:.9;
+}
+
+// Scène : trois silhouettes derrière un plan de travail.
+.av-portrait__figure{
+  position:absolute;
+  bottom:26%;
+  width:20%;aspect-ratio:.62;
+  border-radius:$r-full $r-full 6px 6px;
+  background:$vert-fonce;
+
+  &--a{left:14%;opacity:.85}
+  &--b{left:40%;bottom:30%;width:23%;opacity:.95}
+  &--c{left:68%;opacity:.75}
+}
+
+.av-portrait__desk{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  height:26%;
+  background:rgba($vert-fonce,.14);
+  border-top:2px solid rgba($vert-fonce,.28);
+}
+
+.av-portrait__meta{
+  padding:14px 16px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.av-portrait__name{font-size:13.5px;font-weight:700;color:$texte}
+.av-portrait__role{font-size:11.5px;color:$gris-second}
+
+// --- Carte verte à icône -----------------------------------------------------
+.av-badge{
+  background:$vert-fonce;
+  color:$blanc;
+  border-radius:$r-md;
+  box-shadow:$shadow-2;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.av-badge__icon{
+  width:40px;height:40px;
+  border-radius:12px;
+  background:rgba($blanc,.16);
+  display:grid;place-items:center;
+  margin-bottom:6px;
+}
+
+.av-badge__title{font-size:15px;font-weight:700;line-height:1.3}
+.av-badge__text{font-size:12px;line-height:1.6;color:rgba($blanc,.76)}
+
+// Empilement vertical des briques dans une même scène.
+.av-pile{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  width:100%;
+}
+
+// -----------------------------------------------------------------------------
+// ≥ 992px : deux colonnes, la droite apparaît
+// -----------------------------------------------------------------------------
+@media (min-width:992px){
+  .auth{padding:32px}
+
+  .auth__shell{grid-template-columns:minmax(0,1fr) minmax(0,.86fr)}
+
+  .auth__panel{padding:40px 48px}
+
+  .auth__aside{display:block}
+}
+
+// -----------------------------------------------------------------------------
+// 375px — aucun débordement horizontal, boutons pleine largeur
+// -----------------------------------------------------------------------------
+@media (max-width:400px){
+  .auth{padding:10px}
+  .auth__panel{padding:22px 18px}
+  .auth__title{font-size:21px}
+  .auth-tabs__item{font-size:12.5px}
+}
+
+// -----------------------------------------------------------------------------
+// Mouvement réduit : les transitions décoratives s'effacent.
+// -----------------------------------------------------------------------------
+@media (prefers-reduced-motion:reduce){
+  .auth-tabs__item,
+  .pw-meter__seg{transition:none}
+}

@@ -1,0 +1,74 @@
+# =============================================================================
+# Ce qui n'entre PAS dans l'image.
+#
+# Deux raisons de tenir cette liste sérieusement :
+#
+#   1. LE POIDS — node_modules et vendor pèsent plusieurs centaines de Mo. Ils
+#      sont reconstruits proprement dans les étapes 1 et 2 du Dockerfile ; les
+#      copier depuis la machine reviendrait à embarquer les dépendances de
+#      Windows dans une image Alpine.
+#
+#   2. LES SECRETS — le fichier .env contient le mot de passe de la base et la
+#      clé applicative. Il ne doit jamais entrer dans une image : une image se
+#      pousse, se partage, se télécharge. Sur Render, ces valeurs sont des
+#      variables d'environnement, saisies dans leur interface.
+# =============================================================================
+
+# --- Secrets et configuration locale ---
+.env
+.env.*
+!.env.example
+auth.json
+
+# --- Dépendances : reconstruites dans le Dockerfile ---
+node_modules
+vendor
+
+# --- Artefacts de build : reconstruits par Vite ---
+public/build
+
+# public/hot EST LE PIÈGE À CONNAÎTRE.
+# Ce fichier est déposé par `npm run dev`. Tant qu'il existe, Laravel considère
+# que le serveur Vite tourne et fait pointer TOUS les assets vers
+# http://localhost:5173 — inexistant en production. La page se charge sans
+# aucun style et sans erreur explicite.
+public/hot
+
+# --- Liens et fichiers générés ---
+public/storage
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+bootstrap/cache/*.php
+
+# --- Développement ---
+tests
+.phpunit.cache
+.phpunit.result.cache
+phpunit.xml
+dev.bat
+mailpit.exe
+mailpit.zip
+
+# --- Outils et éditeurs ---
+.git
+.github
+.gitignore
+.gitattributes
+.editorconfig
+.idea
+.vscode
+.fleet
+.nova
+.zed
+.phpactor.json
+
+# --- Documentation : inutile dans un conteneur qui sert des pages ---
+docs
+README.md
+
+# --- Docker lui-même ---
+Dockerfile
+.dockerignore
+render.yaml

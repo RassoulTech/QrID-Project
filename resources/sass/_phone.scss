@@ -1,0 +1,403 @@
+// =============================================================================
+// CADRE DE SMARTPHONE — composant unique, utilisé partout.
+//
+// Dimensions : 280px (bureau) · 240px (section sombre) · 220px (mobile).
+// Ratio 9/19.5 strict — la hauteur découle de la largeur, jamais fixée.
+// Aucun overflow:hidden sur un conteneur parent : le cadre n'est jamais rogné.
+//
+// Toutes les animations n'utilisent que transform et opacity.
+// =============================================================================
+
+$phone-frame: 10px;
+$phone-radius-out: 44px;
+$phone-radius-in: 36px;
+$ease: cubic-bezier(.2,.8,.2,1);
+
+// -----------------------------------------------------------------------------
+// SCÈNE — dimensionnée pour accueillir le téléphone ET ses cartes flottantes
+// -----------------------------------------------------------------------------
+.stage{
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:40px 0;
+  min-height:620px;          // hauteur du téléphone (280 × 19.5/9 ≈ 607) + marge
+  // Aucun overflow:hidden ici : les cartes débordent volontairement.
+
+  // Dégradé radial vert très clair derrière le téléphone.
+  &::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(closest-side, rgba($vert-clair,.85), transparent 72%);
+    z-index:0;
+    pointer-events:none;
+  }
+
+  @media(max-width:767px){
+    min-height:520px;
+    padding:24px 0;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// CHÂSSIS
+// -----------------------------------------------------------------------------
+.phone{
+  position:relative;
+  z-index:2;
+  width:280px;
+  max-width:100%;
+  aspect-ratio:9 / 19.5;
+  flex:0 0 auto;
+  background:$texte;
+  border-radius:$phone-radius-out;
+  padding:$phone-frame;
+  box-shadow:0 32px 64px rgba(10,31,26,.24);
+  transition:transform .2s ease, box-shadow .2s ease;
+  animation:phone-breathe 9s ease-in-out infinite;
+  will-change:transform;
+
+  &:hover{
+    box-shadow:0 44px 80px rgba(10,31,26,.30);
+  }
+
+  // Section sombre : 240px
+  &--sm{
+    width:240px;
+    border-radius:38px;
+    padding:8px;
+
+    .phone__screen{border-radius:31px}
+    .phone__notch{width:76px;height:20px}
+    .phone__avatar{width:58px;height:58px;font-size:18px}
+    .phone__name{font-size:14px}
+    .phone__role,.phone__company{font-size:10px}
+    .phone__action{height:42px}
+    .phone__save{height:34px;font-size:10px}
+  }
+
+  // Mobile : 220px pour les deux variantes
+  @media(max-width:767px){
+    width:220px;
+    border-radius:38px;
+    padding:8px;
+
+    .phone__screen{border-radius:31px}
+    .phone__notch{width:70px;height:19px}
+    .phone__avatar{width:54px;height:54px;font-size:17px}
+    .phone__name{font-size:13px}
+    .phone__action{height:40px}
+  }
+}
+
+// Détails du châssis
+.phone__side{
+  position:absolute;right:-2px;top:120px;
+  width:3px;height:48px;
+  background:lighten($texte,10%);
+  border-radius:0 2px 2px 0;
+}
+.phone__vol{
+  position:absolute;left:-2px;
+  width:3px;height:32px;
+  background:lighten($texte,10%);
+  border-radius:2px 0 0 2px;
+
+  &--up{top:100px}
+  &--down{top:140px}
+}
+.phone__gloss{
+  position:absolute;inset:0;
+  border-radius:$phone-radius-out;
+  background:linear-gradient(135deg, rgba(#fff,.08) 0%, transparent 42%);
+  pointer-events:none;
+}
+
+// -----------------------------------------------------------------------------
+// ÉCRAN
+// -----------------------------------------------------------------------------
+.phone__screen{
+  position:relative;
+  height:100%;
+  background:$blanc;
+  border-radius:$phone-radius-in;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.phone__notch{
+  position:absolute;top:0;left:50%;
+  transform:translateX(-50%);
+  width:90px;height:24px;
+  background:$texte;
+  border-radius:0 0 999px 999px;
+  z-index:4;
+}
+
+// Barre d'état, sur le fond vert
+.phone__status{
+  background:$vert-fonce;
+  color:rgba($blanc,.9);
+  padding:7px 14px 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:9px;
+  font-weight:600;
+}
+.phone__icons{display:flex;align-items:center;gap:3px}
+
+// En-tête vert foncé
+.phone__header{
+  // Teinte du profil, avec le vert de la marque en repli : le rendu reste
+  // correct si la variable n'est pas posée (landing, profil sans couleur).
+  background:var(--phone-accent, #{$vert-fonce});
+  padding:14px 14px 30px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.phone__avatar{
+  position:relative;
+  width:66px;height:66px;
+  border-radius:50%;
+  background:$vert-clair;
+  color:$vert-fonce;
+  display:grid;place-items:center;
+  font-size:20px;font-weight:700;
+  margin-bottom:10px;
+
+  img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+}
+
+.phone__halo{
+  position:absolute;inset:0;
+  border-radius:50%;
+  background:$vert-clair;
+  animation:phone-halo 3s ease-out infinite;
+  pointer-events:none;
+  z-index:-1;
+}
+
+.phone__name{color:$blanc;font-size:15px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+.phone__role{color:rgba($blanc,.78);font-size:11px;margin-top:2px}
+.phone__company{color:rgba($blanc,.55);font-size:9px;margin-top:1px}
+
+// Quatre actions, remontant sur l'en-tête
+.phone__actions{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:5px;
+  padding:0 10px;
+  margin-top:-20px;
+  position:relative;
+  z-index:2;
+}
+
+.phone__action{
+  background:$blanc;
+  border:1px solid $bordure;
+  border-radius:11px;
+  height:46px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  color:$vert-fonce;
+  box-shadow:0 1px 3px rgba(10,31,26,.06);
+
+  span{font-size:7px;font-weight:600;color:$gris-second;letter-spacing:.01em}
+}
+
+// Coordonnées
+.phone__list{
+  padding:14px 12px 8px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.phone__row{display:flex;align-items:center;gap:8px}
+
+.phone__row-icon{
+  width:22px;height:22px;
+  border-radius:7px;
+  background:$vert-clair;
+  color:$vert-fonce;
+  display:grid;place-items:center;
+  flex:0 0 auto;
+}
+
+.phone__row-text{
+  font-size:9px;
+  color:$gris-second;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+// Réseaux sociaux
+.phone__socials{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  padding:6px 12px 10px;
+}
+.phone__social{
+  width:24px;height:24px;
+  border-radius:50%;
+  background:$gris-fond;
+  border:1px solid $bordure;
+  // Initiale du réseau quand la pastille porte un vrai lien.
+  display:grid;place-items:center;
+  font-size:10px;font-weight:700;
+  color:$gris-second;
+  text-transform:uppercase;
+}
+
+// Bouton pleine largeur
+.phone__save{
+  margin:auto 12px 14px;
+  height:36px;
+  border-radius:999px;
+  background:$texte;
+  color:$blanc;
+  display:grid;place-items:center;
+  font-size:11px;font-weight:600;
+}
+
+// -----------------------------------------------------------------------------
+// ANIMATIONS DU TÉLÉPHONE
+// -----------------------------------------------------------------------------
+@keyframes phone-enter{
+  from{opacity:0;transform:translateY(40px) scale(.94)}
+  to  {opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes phone-breathe{
+  0%,100%{transform:translateY(0)}
+  50%    {transform:translateY(-6px)}
+}
+@keyframes phone-halo{
+  0%  {opacity:.4;transform:scale(1)}
+  100%{opacity:0;transform:scale(1.4)}
+}
+
+// Entrée 700ms, retard 400ms, puis respiration continue.
+.phone--enter{
+  opacity:0;
+  animation:
+    phone-enter 700ms $ease 400ms forwards,
+    phone-breathe 9s ease-in-out 1100ms infinite;
+}
+
+// -----------------------------------------------------------------------------
+// CARTES FLOTTANTES
+// -----------------------------------------------------------------------------
+.float{
+  position:absolute;
+  z-index:5;
+  background:$blanc;
+  border:1px solid $bordure;
+  border-radius:16px;
+  box-shadow:$shadow-2;
+  padding:10px 14px;
+  display:none;
+  opacity:0;
+  will-change:transform;
+
+  @media(min-width:992px){display:flex;align-items:center;gap:10px}
+}
+
+@keyframes float-in-left{
+  from{opacity:0;transform:translateX(-24px)}
+  to  {opacity:1;transform:translateX(0)}
+}
+@keyframes float-in-right{
+  from{opacity:0;transform:translateX(24px)}
+  to  {opacity:1;transform:translateX(0)}
+}
+@keyframes float-drift{
+  0%,100%{transform:translateY(0)}
+  50%    {transform:translateY(-10px)}
+}
+
+// « QR Code généré » — 600ms, retard 700ms
+.float--qr{
+  top:8%;left:-6%;
+  animation:
+    float-in-left 600ms $ease 700ms forwards,
+    float-drift 7s ease-in-out 1300ms infinite;
+}
+.float--qr .icon{
+  width:32px;height:32px;border-radius:9px;
+  background:$vert-clair;color:$vert-accent;
+  display:grid;place-items:center;flex:0 0 auto;
+}
+.float--qr .label{font-size:12px;font-weight:600;color:$texte;white-space:nowrap}
+
+// « Vues totales » — 600ms, retard 850ms
+.float--views{
+  top:40%;right:-4%;
+  display:none;
+  text-align:center;
+  padding:12px 18px;
+  animation:
+    float-in-right 600ms $ease 850ms forwards,
+    float-drift 7s ease-in-out 2200ms infinite;
+
+  @media(min-width:992px){display:block}
+}
+.float--views .n{font-size:22px;font-weight:800;color:$texte;line-height:1}
+.float--views .l{
+  font-size:9px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:$gris-second;margin-top:4px;
+}
+
+// « Contact enregistré » — 600ms, retard 1000ms
+.float--saved{
+  bottom:12%;left:-8%;
+  background:$vert-fonce;
+  border-color:$vert-fonce;
+  color:$blanc;
+  border-radius:999px;
+  padding:11px 18px;
+  animation:
+    float-in-left 600ms $ease 1000ms forwards,
+    float-drift 7s ease-in-out 3100ms infinite;
+}
+.float--saved .label{font-size:12px;font-weight:600;white-space:nowrap}
+
+// -----------------------------------------------------------------------------
+// SOCLE DE LA SECTION SOMBRE
+// -----------------------------------------------------------------------------
+.phone-pedestal{
+  background:lighten($vert-fonce,5%);
+  border-radius:32px;
+  box-shadow:inset 0 2px 24px rgba(10,31,26,.35);
+  padding:0 28px 28px;
+  margin-top:40px;
+  display:flex;
+  justify-content:center;
+
+  .phone{margin-top:-40px}
+}
+
+// -----------------------------------------------------------------------------
+// MOUVEMENT RÉDUIT
+// -----------------------------------------------------------------------------
+@media (prefers-reduced-motion: reduce){
+  .phone,.phone--enter,.phone__halo,
+  .float,.float--qr,.float--views,.float--saved{
+    animation:none !important;
+    opacity:1 !important;
+    transform:none !important;
+    will-change:auto;
+  }
+  .phone:hover{transform:none !important}
+}

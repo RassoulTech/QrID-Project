@@ -1,0 +1,419 @@
+// =============================================================================
+// COMPOSANTS — landing QrID.
+// Toutes les couleurs viennent de _variables.scss.
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// 1. NAVBAR — fond blanc, fine bordure inférieure
+// -----------------------------------------------------------------------------
+.site-nav{
+  position:sticky;top:0;z-index:50;
+  background:$blanc;
+  border-bottom:1px solid $bordure;
+  transition:box-shadow .25s ease, background-color .25s ease;
+
+  // Ajouté par le module navbar-scroll après 40px de défilement.
+  // Sans JavaScript, la navbar garde cet état de repos : parfaitement lisible.
+  &.is-scrolled{
+    background:rgba($blanc,.94);
+    backdrop-filter:blur(12px);
+    box-shadow:0 4px 20px rgba(10,31,26,.07);
+  }
+
+  &__in{display:flex;align-items:center;justify-content:space-between;height:68px}
+
+  &__brand{font-size:19px;font-weight:800;letter-spacing:-.03em;color:$vert-fonce}
+
+  &__menu{display:none;align-items:center;gap:28px}
+  &__link{font-size:14px;font-weight:500;color:$gris-second}
+  &__link:hover{color:$texte}
+
+  // Sur téléphone, la droite porte trois éléments : bascule de thème, bouton
+  // d'inscription et menu. À 375px, un écart de 20px les fait déborder — d'où
+  // l'écart resserré par défaut, élargi seulement quand la place existe.
+  &__right{display:flex;align-items:center;gap:10px}
+  &__signin{display:none;font-size:14px;font-weight:500;color:$gris-second}
+  &__signin:hover{color:$texte}
+
+  &__burger{
+    background:none;border:0;color:$vert-fonce;padding:6px;line-height:0;
+  }
+
+  @media(min-width:992px){
+    &__menu{display:flex}
+    &__signin{display:inline}
+    &__burger{display:none}
+    &__right{gap:20px}
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 2. BOUTONS
+// -----------------------------------------------------------------------------
+.btn-pill{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:46px;padding:0 24px;
+  border-radius:$r-full;
+  font-size:14px;font-weight:600;
+  border:1px solid transparent;
+  cursor:pointer;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+
+  &:active{transform:translateY(1px)}
+}
+
+// RÈGLE : la couleur du texte est identique dans TOUS les états.
+// Au survol, seul le FOND change. Aucun bouton ne dépend d'une interaction
+// pour être lisible. Les états sont listés explicitement pour qu'aucune
+// pseudo-classe extérieure ne puisse les écraser par spécificité.
+
+.btn-dark{
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
+    background:$vert-fonce;
+    color:$blanc;          // #FFFFFF dans tous les états
+    border-color:$vert-fonce;
+  }
+  &:hover{background:darken($vert-fonce,4%);border-color:darken($vert-fonce,4%);box-shadow:$shadow-2;transform:translateY(-1px)}
+}
+
+.btn-outline{
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
+    background:$blanc;
+    color:$texte;          // #0A1F1A dans tous les états
+    border-color:$bordure-forte;
+  }
+  &:hover{background:$gris-fond;transform:translateY(-1px)}
+}
+
+// Bouton posé sur un fond sombre.
+.btn-light{
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
+    background:$blanc;
+    color:$vert-fonce;     // #0B3B2E dans tous les états
+    border-color:$blanc;
+  }
+  &:hover{background:$gris-fond;border-color:$gris-fond;transform:translateY(-1px)}
+}
+
+// Variante fantôme sur fond sombre : contour blanc, fond transparent.
+// Chaque état déclare sa couleur : jamais de texte révélé au survol.
+.btn-ghost-light{
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
+    background:transparent; color:$blanc; border-color:rgba($blanc,.45);
+  }
+  &:hover{background:rgba($blanc,.12);border-color:rgba($blanc,.7)}
+}
+
+// Taille réduite, pour les actions secondaires d'une carte.
+.btn-pill--sm{padding:8px 16px;font-size:13px}
+
+// Action pas encore disponible.
+// .is-disabled : portée par un <span>, jamais par un lien mort.
+// :disabled    : vrai bouton refusé par le serveur (renvoi d'e-mail épuisé).
+//                Sans cette règle, les couleurs déclarées pour tous les états
+//                ci-dessus le laissaient paraître cliquable.
+.btn-pill.is-disabled,
+.btn-pill:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  box-shadow:none;
+  transform:none;
+}
+
+.btn-pill.is-disabled{pointer-events:none}
+
+.btn-sm-pill{height:40px;padding:0 20px;font-size:13px}
+.btn-block{width:100%}
+
+// -----------------------------------------------------------------------------
+// SIMULATION D'ÉTATS — page /design-system uniquement.
+// Permet d'afficher les cinq états côte à côte et de repérer d'un coup d'œil
+// un texte qui ne serait lisible qu'au survol.
+// -----------------------------------------------------------------------------
+.state-hover.btn-dark{background:darken($vert-fonce,4%);border-color:darken($vert-fonce,4%);box-shadow:$shadow-2;transform:translateY(-1px)}
+.state-hover.btn-outline{background:$gris-fond;transform:translateY(-1px)}
+.state-hover.btn-light{background:$gris-fond;border-color:$gris-fond;transform:translateY(-1px)}
+
+.state-focus{outline:3px solid $vert-accent;outline-offset:3px}
+.state-active{transform:translateY(1px)}
+
+// -----------------------------------------------------------------------------
+// 3. HERO — texte à gauche, visuel à droite
+// -----------------------------------------------------------------------------
+.hero{padding:72px 0 96px}
+
+.hero__grid{
+  display:grid;gap:56px;align-items:center;grid-template-columns:1fr;
+  @media(min-width:992px){grid-template-columns:1.05fr 1fr;gap:48px}
+}
+
+.hero__title{
+  font-size:clamp(38px,6.4vw,60px);
+  font-weight:800;
+  line-height:1.04;
+  letter-spacing:-.035em;
+  max-width:11ch;
+}
+
+.hero__lead{
+  margin-top:22px;
+  font-size:14px;
+  line-height:1.7;
+  color:$gris-second;
+  max-width:42ch;
+}
+
+.hero__cta{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap}
+
+// Le cadre de smartphone, les cartes flottantes et le socle de la section
+// sombre sont définis dans _phone.scss (composant unique, aucune duplication).
+
+// -----------------------------------------------------------------------------
+// 4. BANDEAU DES MÉTIERS — fondu progressif sur les bords
+// -----------------------------------------------------------------------------
+.trades{
+  background:$gris-fond;
+  padding:26px 0;
+  overflow:hidden;
+}
+
+// Piste défilant en boucle, indépendamment du défilement de la page.
+// Le contenu est dupliqué dans le markup pour que la boucle soit continue.
+.trades__row{
+  display:flex;align-items:center;
+  gap:38px;
+  white-space:nowrap;
+  width:max-content;
+  animation:trades-scroll 36s linear infinite;
+  will-change:transform;
+
+  // Fondu progressif gauche et droite
+  mask-image:linear-gradient(90deg,transparent 0%,#000 14%,#000 86%,transparent 100%);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 14%,#000 86%,transparent 100%);
+}
+
+// -50% : la seconde copie prend exactement la place de la première.
+@keyframes trades-scroll{
+  from{transform:translateX(0)}
+  to  {transform:translateX(-50%)}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .trades__row{animation:none;justify-content:center;width:auto}
+}
+
+.trades__item{
+  font-size:clamp(15px,2.4vw,22px);
+  font-weight:600;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  color:$gris-second;   // 5.03:1 sur le fond gris — l'estompage vient du masque
+}
+// Les items du centre sont plus contrastés
+.trades__item--strong{color:$texte;opacity:1}
+
+// -----------------------------------------------------------------------------
+// 5. CHIFFRES CLÉS — cartes blanches sur fond gris clair
+// -----------------------------------------------------------------------------
+.figures{background:$gris-fond;padding:8px 0 72px}
+
+.figures__grid{
+  display:grid;gap:20px;grid-template-columns:1fr;
+  @media(min-width:768px){grid-template-columns:repeat(3,1fr)}
+}
+
+.figure-card{
+  background:$blanc;
+  border-radius:$r-md;
+  padding:38px 24px;
+  text-align:center;
+  box-shadow:$shadow-1;
+}
+.figure-card__n{font-size:44px;font-weight:800;line-height:1;color:$texte}
+.figure-card__w{font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:$texte;margin-top:10px}
+.figure-card__l{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:$gris-second;margin-top:8px}
+
+// -----------------------------------------------------------------------------
+// 6. SECTIONS GÉNÉRIQUES
+// -----------------------------------------------------------------------------
+.section{padding:88px 0}
+.section--tint{background:$gris-fond}
+
+.section-title{
+  font-size:clamp(24px,3.6vw,30px);
+  font-weight:700;
+  text-align:center;
+  letter-spacing:-.02em;
+}
+
+// Trait vert court sous le titre
+.section-title--underlined::after{
+  content:"";
+  display:block;
+  width:56px;height:3px;
+  background:$vert-accent;
+  border-radius:$r-full;
+  margin:14px auto 0;
+}
+
+.section-sub{
+  text-align:center;color:$gris-second;
+  font-size:13px;margin-top:10px;
+}
+
+// -----------------------------------------------------------------------------
+// 7. COMMENT ÇA MARCHE — cercles fins bordés
+// -----------------------------------------------------------------------------
+.steps{
+  display:grid;gap:36px;grid-template-columns:1fr;margin-top:56px;
+  @media(min-width:768px){grid-template-columns:repeat(3,1fr);gap:32px}
+}
+.step__num{
+  width:38px;height:38px;border-radius:50%;
+  border:1px solid $bordure-forte;
+  display:grid;place-items:center;
+  font-size:13px;font-weight:600;color:$gris-second;
+  margin-bottom:20px;
+}
+.step__title{font-size:16px;font-weight:700;color:$texte}
+.step__text{font-size:12px;line-height:1.7;color:$gris-second;margin-top:8px;margin-bottom:0}
+
+// -----------------------------------------------------------------------------
+// 8. SECTION SOMBRE — pleine largeur, fond vert foncé
+// -----------------------------------------------------------------------------
+.showcase{background:$vert-fonce;color:$blanc;padding:80px 0}
+
+.showcase__grid{
+  display:grid;gap:48px;align-items:center;grid-template-columns:1fr;
+  @media(min-width:992px){grid-template-columns:1fr 1fr;gap:56px}
+}
+
+.showcase__title{
+  font-size:clamp(24px,3.4vw,32px);
+  font-weight:800;color:$blanc;line-height:1.2;max-width:16ch;
+}
+.showcase__text{
+  margin-top:18px;font-size:13px;line-height:1.8;
+  color:rgba($blanc,.72);max-width:44ch;
+}
+
+.showcase__meta{margin-top:36px;display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+
+// Icône carrée blanche + légende
+.scan-badge{text-align:center}
+.scan-badge__box{
+  width:44px;height:44px;border-radius:12px;
+  background:$blanc;color:$vert-fonce;
+  display:grid;place-items:center;margin:0 auto;
+}
+.scan-badge__label{font-size:10px;font-weight:600;color:rgba($blanc,.8);margin-top:8px}
+
+// Avatars superposés + pastille +500
+.avatars{display:flex;align-items:center}
+.avatars__item{
+  width:32px;height:32px;border-radius:50%;
+  background:$vert-clair;color:$vert-fonce;
+  border:2px solid $vert-fonce;
+  display:grid;place-items:center;
+  font-size:10px;font-weight:700;
+  margin-left:-10px;
+}
+.avatars__item:first-child{margin-left:0}
+.avatars__more{
+  // Fond vert FONCÉ : blanc sur vert accent ne donnait que 3.37:1.
+  background:$vert-fonce;color:$blanc;font-size:9px;font-weight:700;
+}
+
+// Carte claire arrondie contenant le téléphone
+.showcase__frame{
+  background:rgba($blanc,.1);
+  border-radius:$r-lg;
+  padding:28px;
+  display:grid;place-items:center;
+}
+.showcase__frame .phone{width:200px;border-width:8px;border-radius:34px}
+.showcase__frame .phone__screen{padding:20px 14px 18px}
+
+// -----------------------------------------------------------------------------
+// 9. TARIFS
+// -----------------------------------------------------------------------------
+.plans{
+  display:grid;gap:20px;grid-template-columns:1fr;margin-top:52px;align-items:stretch;
+  @media(min-width:900px){grid-template-columns:repeat(3,1fr)}
+}
+
+.plan{
+  background:$blanc;
+  border:1px solid $bordure;
+  border-radius:$r-md;
+  padding:32px 24px;
+  text-align:center;
+  display:flex;flex-direction:column;
+  transition:transform .2s ease,box-shadow .2s ease;
+  position:relative;
+}
+.plan:hover{transform:translateY(-4px);box-shadow:$shadow-2}
+
+// Carte mise en avant : bordure verte
+.plan--featured{border:2px solid $vert-accent}
+
+.plan__badge{
+  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  // Fond vert FONCÉ : blanc sur vert accent ne donnait que 3.37:1.
+  background:$vert-fonce;color:$blanc;
+  font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:5px 14px;border-radius:$r-full;white-space:nowrap;
+}
+
+.plan__name{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:$gris-second}
+.plan__price{font-size:26px;font-weight:800;color:$texte;margin-top:14px;line-height:1}
+.plan__price small{font-size:15px;font-weight:700}
+.plan__period{font-size:11px;color:$gris-second;margin-top:8px}
+
+.plan__list{list-style:none;padding:0;margin:26px 0 28px;text-align:left}
+.plan__list li{
+  display:flex;align-items:center;gap:9px;
+  padding:6px 0;font-size:12px;color:$gris-second;
+}
+.plan__list li svg{color:$vert-accent;flex:0 0 auto}
+.plan__list li.is-muted{opacity:.4}
+
+.plan .btn-pill{margin-top:auto}
+
+// Moyens de paiement rappelés
+.pay-note{text-align:center;font-size:11px;color:$gris-second;margin-top:8px}
+
+// -----------------------------------------------------------------------------
+// 10. APPEL À L'ACTION FINAL — fond vert très clair
+// -----------------------------------------------------------------------------
+.final{background:$vert-clair;padding:88px 0;text-align:center}
+.final__title{font-size:clamp(22px,3.4vw,28px);font-weight:700;color:$texte}
+.final__text{
+  font-size:13px;color:$gris-second;margin:14px auto 0;max-width:48ch;line-height:1.7;
+}
+.final .btn-pill{margin-top:32px}
+
+// -----------------------------------------------------------------------------
+// 11. PIED DE PAGE — fond très sombre
+// -----------------------------------------------------------------------------
+.site-footer{
+  background:$texte;
+  color:rgba($blanc,.6);
+  padding:64px 0 40px;
+  font-size:12px;
+}
+
+.site-footer__grid{
+  display:grid;gap:40px;grid-template-columns:1fr;
+  @media(min-width:768px){grid-template-columns:1.6fr repeat(3,1fr);gap:32px}
+}
+
+.site-footer__brand{font-size:15px;font-weight:800;color:$blanc;letter-spacing:-.02em}
+.site-footer__about{margin-top:16px;line-height:1.8;max-width:34ch}
+
+.site-footer__title{
+  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:$blanc;margin-bottom:14px;
+}
+.site-footer a{display:block;padding:5px 0;color:rgba($blanc,.6)}
+.site-footer a:hover{color:$blanc}

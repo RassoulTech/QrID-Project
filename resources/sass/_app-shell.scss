@@ -1,0 +1,641 @@
+// =============================================================================
+// ESPACE CLIENT — coque d'application et parcours de création.
+//
+// Aucune valeur nouvelle : tout vient de _variables.scss.
+// Structure : menu latéral blanc · barre supérieure blanche · contenu gris.
+// =============================================================================
+
+$sidebar-w: 232px;
+$topbar-h: 64px;
+
+// -----------------------------------------------------------------------------
+// COQUE — SUPPRIMÉE, ELLE VIT DÉSORMAIS DANS _admin.scss
+// -----------------------------------------------------------------------------
+// 175 lignes tenaient ici .app, .app-side, .app-side__link, .app-main,
+// .app-top, .app-top__user, .app-avatar et .app-content — c'est-à-dire, au
+// pixel près, ce que _admin.scss décrit sous le préfixe .adm-.
+//
+// Deux jeux de composants identiques ont un coût qui ne se voit qu'au moment
+// d'un défaut : le fond de colonne effacé par le !important de Bootstrap sur
+// .offcanvas-lg a dû être corrigé DEUX FOIS, à deux moments différents, parce
+// que personne ne pouvait deviner en lisant l'un que l'autre existait.
+//
+// Les gabarits des deux espaces emploient maintenant les mêmes classes .adm-.
+// Ce fichier ne garde que ce qui appartient VRAIMENT à l'espace client : le
+// bandeau d'essai gratuit, le parcours de création, l'aperçu et le paiement.
+
+// --- Bandeau d'essai gratuit --------------------------------------------------
+// Propre à l'espace client : l'administration n'a pas d'abonnement à surveiller.
+.app-trial{
+  background:$vert-clair;
+  color:$vert-fonce;
+  font-size:13px;
+  text-align:center;
+  padding:9px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+
+  a{font-weight:600;color:$vert-fonce;text-decoration:underline}
+  &.is-urgent{background:#FEF3E2;color:#7A4100;a{color:#7A4100}}
+}
+
+// -----------------------------------------------------------------------------
+// CARTE CENTRALE — le parcours de création vit ici
+// -----------------------------------------------------------------------------
+.step-card{
+  max-width:640px;
+  margin-inline:auto;
+  background:$blanc;
+  border-radius:$r-lg;
+  box-shadow:$shadow-2;
+  padding:36px 40px 0;
+  overflow:hidden;
+}
+
+.step-card__kicker{
+  font-size:12px;
+  color:$gris-second;
+  letter-spacing:.01em;
+}
+
+// Barre de progression : trois segments de 4px, gouttière de 8px.
+.step-bar{
+  display:flex;
+  gap:8px;
+  margin:10px 0 28px;
+}
+.step-bar__seg{
+  height:4px;
+  flex:1 1 0;
+  border-radius:$r-full;
+  background:$gris-fond;
+  transition:background 300ms ease;
+  &.is-done{background:$vert-fonce}
+}
+
+.step-card__title{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.step-card__sub{color:$gris-second;font-size:14px;margin:6px 0 28px}
+
+.step-fields{display:flex;flex-direction:column;gap:20px}
+
+.step-card__foot{
+  margin:32px -40px 0;
+  padding:20px 40px;
+  border-top:1px solid $bordure;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+.step-back{
+  font-size:14px;font-weight:500;color:$gris-second;
+  padding:8px 4px;border-radius:$r-sm;
+  &:hover{color:$texte}
+}
+
+// -----------------------------------------------------------------------------
+// CHAMPS
+//
+// $bordure-forte (14 % de noir) ne fait que 1,33:1 sur blanc : suffisant pour
+// un trait décoratif, insuffisant pour délimiter un composant de saisie, que
+// WCAG 1.4.11 exige à 3:1. D'où cette teinte propre aux champs.
+// -----------------------------------------------------------------------------
+$bordure-champ: rgba($texte, .48);   // 3,16:1 sur blanc · 3,07:1 sur gris fond
+
+.f{display:flex;flex-direction:column;gap:7px}
+
+.f__label{
+  font-size:13px;font-weight:600;color:$texte;
+  display:flex;align-items:baseline;gap:6px;
+}
+.f__opt{font-size:12px;font-weight:400;color:$gris-second}
+
+.f__control{
+  width:100%;
+  padding:12px 14px;
+  font-family:inherit;
+  font-size:15px;
+  color:$texte;
+  background:$blanc;
+  border:1px solid $bordure-champ;
+  border-radius:$r-sm;
+  transition:border-color 160ms ease, box-shadow 160ms ease;
+
+  // Un marque-place se lit : pas d'opacité qui le ferait tomber sous 4,5:1.
+  &::placeholder{color:$gris-second;opacity:1}
+  &:focus{
+    outline:0;
+    border-color:$vert-accent;
+    box-shadow:0 0 0 3px rgba($vert-accent,.18);
+  }
+  &.is-invalid{border-color:$rouge-erreur;box-shadow:0 0 0 3px rgba($rouge-erreur,.12)}
+}
+
+textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
+
+.f__hint{font-size:12px;color:$gris-second}
+.f__error{font-size:12.5px;color:$rouge-erreur;font-weight:500}
+.f__count{font-size:12px;color:$gris-second;text-align:right}
+
+// MOBILE FIRST : une colonne par défaut, deux quand la place existe.
+// Deux champs côte à côte sur 375px laissent 155px par champ — un prénom
+// long y est illisible pendant la frappe, et le clavier virtuel masque
+// déjà la moitié de l'écran.
+.f-row{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:20px;
+
+  @media (min-width:576px){grid-template-columns:1fr 1fr}
+}
+
+// -----------------------------------------------------------------------------
+// PAIEMENT — choix de formule et de moyen
+//
+// Une option entière est cliquable, pas seulement le petit rond : sur mobile,
+// viser un radio de 16px est une cause d'abandon à elle seule.
+// -----------------------------------------------------------------------------
+.pay-option{display:block;cursor:pointer}
+
+.pay-option__input{
+  position:absolute;
+  width:1px;height:1px;
+  opacity:0;
+  // Jamais display:none : le champ doit rester atteignable au clavier et
+  // annonçable par un lecteur d'écran.
+}
+
+.pay-option__box{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  flex-wrap:wrap;
+  padding:14px 16px;
+  border:1px solid $bordure-champ;
+  border-radius:$r-sm;
+  transition:border-color 160ms ease, background 160ms ease;
+}
+
+.pay-option:hover .pay-option__box{background:$gris-fond}
+
+.pay-option__input:checked + .pay-option__box{
+  border-color:$vert-fonce;
+  background:$vert-clair;
+}
+
+// L'état de focus est porté par la boîte, le champ étant hors écran.
+.pay-option__input:focus-visible + .pay-option__box{
+  outline:3px solid $vert-accent;
+  outline-offset:2px;
+}
+
+.pay-option__name{font-size:14.5px;font-weight:600;color:$texte}
+.pay-option__price{font-size:14.5px;font-weight:700;color:$vert-fonce;margin-left:auto}
+.pay-option__meta{font-size:12px;color:$gris-second;width:100%}
+
+// -----------------------------------------------------------------------------
+// PHOTO — zone de dépôt
+// -----------------------------------------------------------------------------
+.drop{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:16px;
+  border:1.5px dashed $bordure-champ;
+  border-radius:$r-md;
+  background:$gris-fond;
+  cursor:pointer;
+  transition:border-color 160ms ease, background 160ms ease;
+
+  &:hover,&.is-over{border-color:$vert-accent;background:$vert-clair}
+  &:focus-within{border-color:$vert-accent;box-shadow:0 0 0 3px rgba($vert-accent,.18)}
+}
+
+.drop__thumb{
+  width:64px;height:64px;flex:0 0 64px;
+  border-radius:$r-md;
+  background:$blanc;
+  border:1px solid $bordure;
+  object-fit:cover;
+  display:grid;place-items:center;
+  color:$gris-second;
+  overflow:hidden;
+}
+.drop__thumb img{width:100%;height:100%;object-fit:cover;display:block}
+
+.drop__text{font-size:14px;font-weight:600;color:$texte}
+.drop__hint{font-size:12px;color:$gris-second;margin-top:2px}
+
+// Champ fichier natif : visible pour le clavier, discret à l'œil.
+.drop__input{
+  position:absolute;
+  width:1px;height:1px;
+  padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+
+// -----------------------------------------------------------------------------
+// RÉSEAUX SOCIAUX — lignes ajoutables
+// -----------------------------------------------------------------------------
+.socials{display:flex;flex-direction:column;gap:12px}
+
+.social-row{
+  display:grid;
+  grid-template-columns:150px 1fr 40px;
+  gap:10px;
+  align-items:center;
+}
+
+.social-row__del{
+  width:40px;height:40px;
+  display:grid;place-items:center;
+  border:1px solid $bordure-champ;
+  border-radius:$r-sm;
+  background:$blanc;
+  color:$gris-second;
+  cursor:pointer;
+  &:hover{border-color:$rouge-erreur;color:$rouge-erreur;background:rgba($rouge-erreur,.04)}
+}
+
+.social-add{
+  align-self:flex-start;
+  display:inline-flex;align-items:center;gap:7px;
+  padding:9px 14px;
+  font-size:13.5px;font-weight:600;
+  color:$vert-fonce;
+  background:$vert-clair;
+  border:0;
+  border-radius:$r-full;
+  cursor:pointer;
+  &:hover{background:darken($vert-clair,4%)}
+}
+
+// -----------------------------------------------------------------------------
+// MODÈLES — cartes cliquables
+// -----------------------------------------------------------------------------
+// MOBILE FIRST : deux modèles par ligne sur téléphone, trois ensuite.
+// À trois colonnes sur 375px, chaque aperçu tombait à 105px de large —
+// on ne distinguait plus un modèle d'un autre, alors que c'est
+// précisément ce que cet écran demande de faire.
+.tpl-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+
+  @media (min-width:576px){grid-template-columns:repeat(3,1fr)}
+}
+
+.tpl{
+  position:relative;
+  display:block;
+  cursor:pointer;
+  text-align:center;
+
+  &:hover .tpl__box{border-color:$texte}
+}
+
+// L'entrée radio reste dans le flux pour le clavier, invisible à l'œil.
+.tpl__input{
+  position:absolute;opacity:0;width:1px;height:1px;
+
+  &:focus-visible + .tpl__box{box-shadow:0 0 0 3px rgba($vert-accent,.35)}
+  &:checked + .tpl__box{
+    border-color:$vert-fonce;
+    .tpl__check{opacity:1;transform:scale(1)}
+  }
+}
+
+.tpl__box{
+  display:block;
+  border:2px solid $bordure-champ;
+  border-radius:$r-md;
+  padding:12px;
+  background:$blanc;
+  transition:border-color 160ms ease, box-shadow 160ms ease;
+  position:relative;
+}
+
+// Aperçu miniature : un écran de profil schématisé, en CSS pur.
+.tpl__mini{
+  aspect-ratio:9/16;
+  border-radius:10px;
+  background:$gris-fond;
+  border:1px solid $bordure;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.tpl__mini-head{height:38%;background:var(--tpl-color,#{$vert-fonce});position:relative}
+.tpl__mini-ava{
+  position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);
+  width:22px;height:22px;border-radius:$r-full;
+  background:$blanc;border:2px solid $blanc;box-shadow:$shadow-1;
+}
+.tpl__mini-body{flex:1;padding:16px 10px 8px;display:flex;flex-direction:column;gap:5px}
+.tpl__mini-line{height:4px;border-radius:$r-full;background:$bordure-forte}
+.tpl__mini-line--w60{width:60%;margin-inline:auto}
+.tpl__mini-line--w40{width:40%;margin-inline:auto;background:$bordure}
+.tpl__mini-btns{display:flex;gap:4px;margin-top:auto}
+.tpl__mini-btn{flex:1;height:8px;border-radius:3px;background:var(--tpl-color,#{$vert-fonce});opacity:.25}
+
+// Variante « Moderne » : bandeau haut plus court, boutons pleins.
+.tpl__mini--moderne{
+  .tpl__mini-head{height:26%;border-radius:0 0 14px 14px}
+  .tpl__mini-btn{opacity:.5}
+}
+// Variante « Minimal » : pas de bandeau coloré, trait seul.
+.tpl__mini--minimal{
+  .tpl__mini-head{height:6px;background:var(--tpl-color,#{$vert-fonce})}
+  .tpl__mini-ava{position:static;transform:none;margin:10px auto 0;border-color:$bordure}
+  .tpl__mini-btn{opacity:.18}
+}
+
+.tpl__name{font-size:13px;font-weight:600;margin-top:10px;color:$texte}
+
+.tpl__check{
+  position:absolute;top:-8px;right:-8px;
+  width:24px;height:24px;border-radius:$r-full;
+  background:$vert-fonce;color:$blanc;
+  display:grid;place-items:center;
+  opacity:0;transform:scale(.6);
+  transition:opacity 160ms ease, transform 160ms ease;
+  box-shadow:$shadow-1;
+}
+
+// -----------------------------------------------------------------------------
+// COULEURS — pastilles rondes de 40px
+// -----------------------------------------------------------------------------
+.swatches{display:flex;flex-wrap:wrap;gap:14px}
+
+.swatch{position:relative;cursor:pointer;line-height:0}
+
+.swatch__input{
+  position:absolute;opacity:0;width:1px;height:1px;
+
+  &:focus-visible + .swatch__dot{box-shadow:0 0 0 3px rgba($vert-accent,.4)}
+  &:checked + .swatch__dot{box-shadow:0 0 0 3px $blanc, 0 0 0 5px $vert-accent}
+}
+
+.swatch__dot{
+  display:block;
+  width:40px;height:40px;
+  border-radius:$r-full;
+  border:1px solid rgba($texte,.10);
+  transition:box-shadow 160ms ease, transform 160ms ease;
+}
+.swatch:hover .swatch__dot{transform:scale(1.06)}
+
+// -----------------------------------------------------------------------------
+// APERÇU FINAL — la page la plus importante du produit
+// -----------------------------------------------------------------------------
+.preview{
+  min-height:calc(100vh - #{$topbar-h});
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:48px 20px 64px;
+}
+.preview__title{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.preview__sub{color:$gris-second;font-size:15px;margin:8px 0 40px}
+.preview__stage{margin-bottom:40px}
+.preview__edit{
+  display:inline-block;margin-top:18px;
+  font-size:13.5px;color:$gris-second;
+  &:hover{color:$texte}
+}
+
+// -----------------------------------------------------------------------------
+// RESPONSIVE — 375px est la largeur de référence
+// -----------------------------------------------------------------------------
+// Le repli de la colonne et la barre supérieure sont désormais tenus par
+// _admin.scss, coque commune aux deux espaces. Ne restent ici que les règles
+// mobiles du CONTENU propre au client.
+@media (max-width: 575.98px){
+
+  .step-card{
+    padding:24px 18px 0;
+    border-radius:$r-md;
+    box-shadow:$shadow-1;
+  }
+  .step-card__foot{
+    margin:24px -18px 0;
+    padding:16px 18px;
+    // Le bouton principal passe en premier et occupe toute la largeur.
+    flex-direction:column-reverse;
+    align-items:stretch;
+    gap:10px;
+    .btn-pill{width:100%;justify-content:center}
+  }
+  .step-back{text-align:center}
+
+  .f-row{grid-template-columns:1fr}
+  .social-row{grid-template-columns:1fr 40px;grid-template-areas:"p d" "u u";
+    .social-row__platform{grid-area:p}
+    .social-row__url{grid-area:u}
+    .social-row__del{grid-area:d}
+  }
+  .tpl-grid{grid-template-columns:1fr;gap:12px}
+  .tpl__mini{aspect-ratio:16/7}
+  .tpl__mini--minimal .tpl__mini-ava{margin-top:6px}
+
+  .preview{padding:28px 14px 48px}
+  .preview__title{font-size:21px}
+  .preview__sub{margin-bottom:28px}
+}
+
+// =============================================================================
+// TABLEAU DE BORD
+// =============================================================================
+
+// --- État vide : une carte, un bouton ----------------------------------------
+.board-empty{
+  display:flex;
+  justify-content:center;
+  padding-top:32px;
+}
+.board-empty__card{
+  width:100%;
+  max-width:520px;
+  background:$blanc;
+  border-radius:$r-lg;
+  box-shadow:$shadow-2;
+  padding:48px 40px;
+  text-align:center;
+}
+.board-empty__icon{
+  display:grid;place-items:center;
+  width:56px;height:56px;
+  margin:0 auto 20px;
+  border-radius:$r-full;
+  background:$vert-clair;
+  color:$vert-fonce;
+}
+.board-empty__title{font-size:21px;font-weight:700;letter-spacing:-.02em}
+.board-empty__text{color:$gris-second;font-size:14.5px;margin:8px auto 28px;max-width:340px}
+
+// --- Grille du dashboard actif ------------------------------------------------
+.board{
+  display:grid;
+  grid-template-columns:minmax(0,340px) minmax(0,1fr);
+  gap:20px;
+  align-items:start;
+  max-width:980px;
+  margin-inline:auto;
+}
+.board__side{display:flex;flex-direction:column;gap:20px;min-width:0}
+
+// --- Carte QR Code : l'élément mis en avant ------------------------------------
+.qr-card{
+  background:$vert-fonce;
+  border-radius:$r-lg;
+  box-shadow:$shadow-2;
+  padding:24px;
+  text-align:center;
+  color:$blanc;
+}
+.qr-card__label{
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:rgba($blanc,.75);   // 7,07:1 sur le vert foncé
+  margin:0 0 16px;
+}
+.qr-card__frame{
+  background:$blanc;
+  border-radius:$r-md;
+  padding:20px;
+  display:grid;
+  place-items:center;
+  aspect-ratio:1;
+  max-width:220px;
+  margin-inline:auto;
+}
+.qr-card__img{width:100%;height:100%;object-fit:contain;display:block}
+
+// Attente de génération : motif inerte, mais jamais un cadre vide.
+// Même opacité que $bordure-champ : à 22 % le motif tombait à 1,59:1, on
+// croyait à un défaut d'affichage plutôt qu'à un état d'attente.
+.qr-card__pending{color:rgba($texte,.48)}   // 3,16:1 sur blanc
+
+.qr-card__hint{
+  font-size:12.5px;
+  color:rgba($blanc,.8);    // 8,02:1
+  margin:16px auto 20px;
+  max-width:250px;
+  line-height:1.5;
+}
+.qr-card__actions{display:flex;flex-direction:column;gap:8px}
+
+// --- Cartes latérales ----------------------------------------------------------
+.board-card{
+  background:$blanc;
+  border-radius:$r-lg;
+  box-shadow:$shadow-1;
+  border:1px solid $bordure;
+  padding:24px;
+}
+.board-card__head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-bottom:14px;
+}
+.board-card__title{font-size:15px;font-weight:700;margin:0}
+.board-card__name{font-size:16px;font-weight:600;margin:0}
+.board-card__meta{font-size:13.5px;color:$gris-second;margin:2px 0 0}
+.board-card__notice{
+  font-size:13px;color:$gris-second;
+  background:$gris-fond;border-radius:$r-sm;
+  padding:12px 14px;margin:16px 0 0;
+}
+.board-card__foot{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+  margin-top:20px;
+}
+
+// --- Lien public : champ readonly + copie ---------------------------------------
+.board-link{display:block;margin-top:18px}
+.board-link__label{
+  display:block;font-size:12px;font-weight:600;
+  color:$gris-second;margin-bottom:6px;
+}
+.board-link__row{display:flex;gap:8px}
+.board-link__input{
+  flex:1 1 auto;min-width:0;
+  padding:10px 12px;
+  font-family:inherit;font-size:13px;
+  color:$texte;background:$gris-fond;
+  border:1px solid $bordure-champ;
+  border-radius:$r-sm;
+  text-overflow:ellipsis;
+  &:focus{outline:0;border-color:$vert-accent;box-shadow:0 0 0 3px rgba($vert-accent,.18)}
+}
+.board-link__copy{
+  flex:0 0 auto;
+  padding:0 16px;
+  font-size:13px;font-weight:600;
+  color:$vert-fonce;background:$vert-clair;
+  border:0;border-radius:$r-sm;
+  cursor:pointer;
+  &:hover{background:darken($vert-clair,4%)}
+}
+
+// --- Statistiques ---------------------------------------------------------------
+.board-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.board-stat{text-align:center;padding:14px 8px;background:$gris-fond;border-radius:$r-md}
+.board-stat__n{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em}
+.board-stat__l{display:block;font-size:11.5px;color:$gris-second;margin-top:2px}
+
+// --- 375px -----------------------------------------------------------------------
+@media (max-width: 767.98px){
+  .board{grid-template-columns:1fr;max-width:520px}
+}
+@media (max-width: 575.98px){
+  .board{gap:14px}
+  .board-empty__card{padding:32px 20px;border-radius:$r-md;box-shadow:$shadow-1}
+  .board-empty__text{margin-bottom:22px}
+  .qr-card,.board-card{padding:18px;border-radius:$r-md}
+  .qr-card__frame{padding:14px;max-width:190px}
+  .board-card__foot{
+    flex-direction:column;align-items:stretch;
+    .btn-pill,form,form .btn-pill{width:100%;justify-content:center;text-align:center}
+  }
+  .board-stats{gap:8px}
+  .board-stat{padding:12px 4px}
+  .board-stat__n{font-size:19px}
+}
+
+// =============================================================================
+// PROFIL PUBLIC — page de destination d'un scan
+// =============================================================================
+.pub{
+  max-width:420px;
+  margin-inline:auto;
+  padding:32px 20px 48px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:28px;
+}
+.pub__actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.pub__socials{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pub__social{
+  padding:7px 14px;
+  font-size:13px;font-weight:600;
+  color:$vert-fonce;background:$vert-clair;
+  border-radius:$r-full;
+  &:hover{background:darken($vert-clair,4%)}
+}
+.pub__foot{
+  font-size:12.5px;color:$gris-second;text-align:center;margin:0;
+  a{color:$vert-fonce;font-weight:600}
+}
+
+@media (max-width: 575.98px){
+  .pub{padding:20px 14px 36px;gap:22px}
+  .pub__actions .btn-pill{flex:1 1 auto;justify-content:center;min-width:110px}
+}

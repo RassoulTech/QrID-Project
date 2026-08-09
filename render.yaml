@@ -1,0 +1,170 @@
+# =============================================================================
+# QrID — description des services Render (Blueprint)
+#
+# POURQUOI CE FICHIER PLUTÔT QUE L'INTERFACE : la configuration d'un service
+# créé à la souris ne vit que dans le compte Render. Personne ne peut la
+# relire, la comparer, ni savoir qui a changé quoi. Ici, elle est dans le
+# dépôt, versionnée, et relue comme du code.
+#
+# LES SECRETS N'Y SONT PAS. Les variables marquées `sync: false` sont saisies
+# une fois dans l'interface de Render et n'apparaissent jamais dans Git.
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # SERVICE WEB — l'application
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: qrid
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+
+    # Frankfurt : le plus proche du Sénégal parmi les régions proposées.
+    # La latence compte — une carte se scanne en réunion, pas au bureau.
+    region: frankfurt
+
+    plan: free
+    branch: main
+
+    # Render appelle cette adresse pour savoir si le conteneur est vivant.
+    # La landing est publique et ne touche pas la base : c'est le bon choix.
+    # Une page protégée renverrait 302 et Render la lirait comme un échec.
+    healthCheckPath: /
+
+    envVars:
+      # --- Identité de l'application ---------------------------------------
+      - key: APP_NAME
+        value: QrID
+      - key: APP_ENV
+        value: production
+
+      # JAMAIS true en production : une page d'erreur Laravel en mode debug
+      # affiche les variables d'environnement, dont le mot de passe de la base.
+      - key: APP_DEBUG
+        value: false
+
+      # Saisie à la main : Render fournit l'URL une fois le service créé, et
+      # elle est GRAVÉE dans chaque QR Code généré.
+      - key: APP_URL
+        sync: false
+
+      - key: APP_LOCALE
+        value: fr
+      - key: APP_FALLBACK_LOCALE
+        value: fr
+
+      # `php artisan key:generate --show` en local, puis coller la valeur.
+      # Changer cette clé invalide toutes les sessions et rend illisible tout
+      # ce qui a été chiffré avec l'ancienne.
+      - key: APP_KEY
+        sync: false
+
+      # --- Base de données ---------------------------------------------------
+      # MySQL managé externe : décision du 6 août 2026 (voir docs/DEPLOIEMENT.md).
+      # Aucun portage PostgreSQL, donc aucune ligne de code applicatif touchée.
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+
+      # --- Sessions, cache, file d'attente -----------------------------------
+      # TOUT EN BASE, RIEN SUR LE DISQUE. Le disque du conteneur disparaît à
+      # chaque déploiement : en `file`, chaque mise en ligne déconnecterait
+      # l'ensemble des utilisateurs.
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_LIFETIME
+        value: 1440
+      - key: CACHE_STORE
+        value: database
+
+      # `sync` pour démarrer : le plan gratuit n'exécute pas de worker, et un
+      # e-mail de confirmation qui reste en file signifie « personne ne peut
+      # créer de compte ». L'inscription attendra l'envoi — une seconde de
+      # plus, mais elle aboutit.
+      # À passer en `database` le jour où un service worker est ajouté.
+      - key: QUEUE_CONNECTION
+        value: sync
+
+      # --- Stockage des fichiers ----------------------------------------------
+      # DÉCISION EN ATTENTE. En `local`, les photos de profil sont écrites sur
+      # le disque du conteneur et DISPARAISSENT au déploiement suivant. C'est
+      # une perte de données client, silencieuse.
+      # À basculer sur `s3` (Cloudflare R2, Amazon S3) avant toute mise en
+      # service réelle — voir l'obstacle 2 de docs/DEPLOIEMENT.md.
+      - key: FILESYSTEM_DISK
+        value: local
+
+      # --- Envoi des e-mails ---------------------------------------------------
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: QrID
+
+      # --- Journaux --------------------------------------------------------------
+      # `stderr` et non `single` : un journal écrit dans un fichier disparaît
+      # avec le conteneur. Render collecte la sortie d'erreur.
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+
+      # --- Marque ------------------------------------------------------------------
+      # Imprimé sur la carte PVC, indépendamment de APP_URL.
+      - key: BRAND_WEBSITE
+        value: qrid.sn
+
+# =============================================================================
+# CE QUI N'EST PAS ENCORE ICI, ET POURQUOI
+# =============================================================================
+#
+# UN SERVICE « CRON » pour le planificateur.
+#   routes/console.php déclare deux tâches (purge des inscriptions expirées,
+#   surveillance de la file). Un service web ne les exécute pas.
+#   À ajouter quand le budget le permet :
+#
+#     - type: cron
+#       name: qrid-scheduler
+#       runtime: docker
+#       dockerfilePath: ./Dockerfile
+#       schedule: "* * * * *"
+#       dockerCommand: php artisan schedule:run
+#       envVars:
+#         - fromGroup: qrid-env
+#
+#   Tant qu'il n'existe pas, les inscriptions abandonnées s'accumulent en base.
+#   Ce n'est pas bloquant, mais il faut le savoir.
+#
+# UN SERVICE « WORKER » pour la file d'attente.
+#   Inutile tant que QUEUE_CONNECTION vaut `sync`. Le jour où on le crée, il
+#   faut basculer la variable — l'oublier arrêterait tous les e-mails sans
+#   aucun message d'erreur.
+#
+# UN DISQUE PERSISTANT.
+#   Alternative au stockage objet pour les photos. Une ligne suffit, mais
+#   c'est payant et cela lie les fichiers à Render.
+#
+# LA BASE DE DONNÉES.
+#   Volontairement absente : elle est chez un hébergeur MySQL externe, hors
+#   de ce Blueprint. Render ne propose pas de MySQL managé.

@@ -1,0 +1,26 @@
+// =============================================================================
+// QrID — feuille de style principale
+//
+// ORDRE IMPÉRATIF :
+//   1. nos variables (surchargent celles de Bootstrap)
+//   2. Bootstrap (navbar repliable, offcanvas)
+//   3. la base, les composants, puis le cadre de smartphone
+// =============================================================================
+
+@import "variables";
+@import "bootstrap/scss/bootstrap";
+@import "base";
+@import "theme";
+@import "brand";
+@import "components";
+@import "phone";
+@import "app-shell";
+@import "auth";
+@import "pvc";
+@import "dashboard";
+@import "topbar";
+@import "admin";
+
+// EN DERNIER, impérativement. Ce fichier redéclare les surfaces de tout ce qui
+// précède : il doit gagner par l'ordre de cascade, jamais par !important.
+@import "theme-dark";

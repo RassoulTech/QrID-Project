@@ -1,0 +1,1616 @@
+// =============================================================================
+// ESPACE ADMINISTRATEUR
+//
+// Préfixe `adm-` pour tout. L'espace client utilise `app-` : deux coques
+// distinctes, deux préfixes distincts, et aucune règle de l'une ne peut
+// atteindre l'autre par accident.
+//
+// LA COLONNE LATÉRALE RESTE SOMBRE DANS LES DEUX THÈMES. Ce n'est pas un
+// oubli de la bascule : c'est le repère qui dit « vous gérez la plateforme,
+// pas votre compte ». Une colonne qui blanchirait en thème clair perdrait
+// exactement ce qu'elle sert à dire.
+// =============================================================================
+
+$adm-side-w: 248px;
+$adm-top-h: 62px;
+
+// Vert plus profond que $vert-fonce : la colonne doit rester en retrait du
+// contenu, pas rivaliser avec lui.
+$adm-nuit: #0A2A21;
+
+.adm {
+  display: flex;
+  min-height: 100vh;
+  background: var(--surface-2);
+}
+
+// -----------------------------------------------------------------------------
+// COLONNE LATÉRALE
+// -----------------------------------------------------------------------------
+.adm-side {
+  width: $adm-side-w;
+  flex: 0 0 $adm-side-w;
+  color: rgba($blanc, .74);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+
+  /*
+   | LE SEUL !important DE CETTE FEUILLE, et il répond à celui de Bootstrap.
+   |
+   | L'élément porte `offcanvas-lg` pour se replier sous 992px. Or Bootstrap
+   | écrit, au-dessus de ce seuil :
+   |
+   |     @media (min-width:992px){ .offcanvas-lg{ background-color:#0000!important } }
+   |
+   | La colonne devenait donc TRANSPARENTE sur écran large : le texte blanc
+   | se retrouvait posé sur le fond clair de la page, illisible. Aucune
+   | spécificité ne bat un !important — seul un autre !important le peut.
+   |
+   | Le fond ne suit volontairement pas le thème : cette colonne est le
+   | repère qui distingue « je gère la plateforme » de « je gère mon
+   | compte ». La voir blanchir en thème clair lui ferait perdre son rôle.
+   */
+  background: $adm-nuit !important;
+}
+
+/*
+| EN-TÊTE DE COLONNE — pastille, nom, mention.
+|
+| La mention était indentée de 36px pour se glisser sous le nom. Résultat :
+| un bloc de trois éléments alignés sur trois axes différents — pastille à
+| gauche, nom décalé, mention flottant entre les deux — pendant que les
+| entrées du menu en dessous suivaient, elles, un seul axe.
+|
+| Tout part maintenant du MÊME bord gauche que les icônes du menu. Le bloc se
+| lit comme un en-tête, séparé par un trait, et non comme une entrée de menu
+| ratée.
+*/
+.adm-side__marque {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 2px 11px 18px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba($blanc, .10);
+}
+
+.adm-side__portail {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: rgba($blanc, .52);
+  // Aucune indentation : la mention s'aligne sur la pastille, pas sur le nom.
+}
+
+// -----------------------------------------------------------------------------
+// NAVIGATION — onze entrées, quatre sections
+// -----------------------------------------------------------------------------
+.adm-nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+// Intitulé de section. Il doit être DISCRET, pas invisible : à 36 % de blanc
+// sur ce vert, il tombait sous 2:1 et disparaissait. 62 % le tient au-dessus
+// de 4,5:1 tout en le laissant clairement en retrait des entrées.
+.adm-nav__titre {
+  margin: 16px 0 6px;
+  padding: 0 11px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: rgba($blanc, .62);
+
+  &:first-child { margin-top: 0; }
+}
+
+.adm-nav__liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+// L'entrée : pilule arrondie, pleine en vert quand elle est active.
+.adm-nav__lien {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: $r-full;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-align: left;
+  line-height: 1.25;
+
+  // La couleur est déclarée pour TOUS les états : aucune entrée de menu ne
+  // doit attendre un survol pour devenir lisible.
+  // 88 % de blanc : une entrée de menu se lit en diagonale, elle ne se
+  // déchiffre pas. À 74 % elle passait tout juste, et la moindre luminosité
+  // d'écran basse la faisait décrocher.
+  &, &:link, &:visited, &:hover, &:focus, &:focus-visible {
+    color: rgba($blanc, .88);
+    text-decoration: none;
+  }
+
+  &:hover { background: rgba($blanc, .09); color: $blanc; }
+  &:focus-visible { outline: 2px solid $vert-accent; outline-offset: 2px; }
+
+  &.is-active {
+    &, &:link, &:visited, &:hover, &:focus, &:focus-visible {
+      background: $vert-accent;
+      color: #06231B;          // 8,4:1 sur le vert accent
+      font-weight: 600;
+    }
+    .adm-nav__icone { opacity: 1; }
+  }
+
+  /*
+   | Écran non encore construit : non cliquable, mais LISIBLE.
+   |
+   | À 28 % de blanc, ces huit entrées étaient illisibles — le menu paraissait
+   | vide. Une entrée désactivée doit se lire : c'est elle qui annonce ce que
+   | le produit contiendra. C'est l'opacité de l'icône et le curseur qui
+   | disent l'indisponibilité, pas l'effacement du texte.
+   */
+  &.is-muted {
+    color: rgba($blanc, .58);
+    cursor: not-allowed;
+
+    .adm-nav__icone { opacity: .45; }
+
+    &:hover { background: transparent; color: rgba($blanc, .58); }
+  }
+}
+
+.adm-nav__lien--action { cursor: pointer; }
+
+.adm-nav__icone { flex: 0 0 16px; opacity: .8; }
+
+.adm-nav__bas {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba($blanc, .10);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+// -----------------------------------------------------------------------------
+// BARRE SUPÉRIEURE
+// -----------------------------------------------------------------------------
+.adm-main {
+  flex: 1 1 auto;
+  min-width: 0;              // sans quoi un tableau large pousse toute la page
+  display: flex;
+  flex-direction: column;
+}
+
+.adm-top {
+  min-height: $adm-top-h;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--bord);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.adm-top__burger {
+  display: none;
+  border: 0;
+  background: transparent;
+  color: var(--texte);
+  padding: 6px;
+  border-radius: $r-sm;
+  &:hover { background: var(--survol); }
+}
+
+.adm-top__section {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--texte-2);
+  white-space: nowrap;
+}
+
+.adm-top__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adm-search {
+  position: relative;
+  flex: 0 1 300px;
+  min-width: 0;
+  margin: 0;
+}
+
+.adm-search__icone {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--texte-2);
+  pointer-events: none;
+}
+
+.adm-search__champ {
+  width: 100%;
+  height: 35px;
+  padding: 0 12px 0 32px;
+  border: 1px solid var(--bord);
+  border-radius: $r-full;
+  background: var(--surface-2);
+  color: var(--texte);
+  font-size: 12.5px;
+
+  &::placeholder { color: var(--texte-2); }
+  &:focus { outline: 2px solid var(--accent-vif); outline-offset: -1px; }
+}
+
+.adm-top__user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  background: transparent;
+  padding: 4px 6px;
+  border-radius: $r-full;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--texte);
+
+  &:hover, &[aria-expanded="true"] { background: var(--survol); }
+}
+
+.adm-avatar {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: $r-full;
+  background: $vert-accent;
+  color: #06231B;
+  display: grid;
+  place-items: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.adm-avatar--sm {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  background: var(--accent-doux);
+  color: var(--accent);
+  font-size: 11px;
+}
+
+// -----------------------------------------------------------------------------
+// ZONE DE CONTENU
+// -----------------------------------------------------------------------------
+.adm-content {
+  flex: 1 1 auto;
+  background: var(--surface-2);
+  padding: 22px 20px 40px;
+}
+
+.adm-page {
+  max-width: 1320px;
+  margin-inline: auto;
+}
+
+.adm-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.adm-head__titre {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--texte);
+  margin: 0;
+}
+
+.adm-head__sous {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--texte-2);
+  max-width: 64ch;
+}
+
+.adm-head__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+// -----------------------------------------------------------------------------
+// BOUTONS ET CHAMPS DE L'ADMINISTRATION
+// -----------------------------------------------------------------------------
+.adm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 35px;
+  padding: 0 14px;
+  border-radius: $r-full;
+  border: 1px solid transparent;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:focus-visible { outline: 2px solid var(--accent-vif); outline-offset: 2px; }
+}
+
+// La couleur du texte ne bouge dans AUCUN état : seul le fond change.
+.adm-btn--vert {
+  &, &:link, &:visited, &:hover, &:focus, &:active {
+    background: $vert-fonce;
+    color: $blanc;
+    border-color: $vert-fonce;
+    text-decoration: none;
+  }
+  &:hover { background: darken($vert-fonce, 4%); }
+}
+
+.adm-btn--clair {
+  &, &:link, &:visited, &:hover, &:focus, &:active {
+    background: var(--surface);
+    color: var(--texte);
+    border-color: var(--bord-fort);
+    text-decoration: none;
+  }
+  &:hover { background: var(--survol); }
+}
+
+.adm-select {
+  height: 35px;
+  padding: 0 30px 0 12px;
+  border: 1px solid var(--bord-fort);
+  border-radius: $r-full;
+  background: var(--surface);
+  color: var(--texte);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+
+  // La flèche native disparaît sur certains navigateurs quand on retire
+  // l'apparence : on la redessine, en SVG intégré (aucune requête).
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16' fill='%235C6B66'%3E%3Cpath d='M8 11 3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+
+  &:focus { outline: 2px solid var(--accent-vif); outline-offset: -1px; }
+}
+
+.adm-lien {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  &:hover { text-decoration: underline; }
+}
+
+// -----------------------------------------------------------------------------
+// LES SIX CARTES — la première pleine, en vert foncé
+// -----------------------------------------------------------------------------
+.adm-stats {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 16px;
+
+  @media (min-width: 768px)  { grid-template-columns: repeat(3, 1fr); }
+  @media (min-width: 1200px) { grid-template-columns: repeat(6, 1fr); }
+}
+
+.adm-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  background: var(--surface);
+  border: 1px solid var(--bord);
+  border-radius: $r-sm;
+  padding: 14px;
+  min-width: 0;
+}
+
+// Couleurs FIXES : c'est un accent graphique, pas une surface qui suit le thème.
+.adm-stat--vedette {
+  background: $vert-fonce;
+  border-color: $vert-fonce;
+
+  .adm-stat__libelle { color: rgba($blanc, .68); }
+  .adm-stat__valeur  { color: $blanc; }
+  .adm-stat__ref     { color: rgba($blanc, .60); }
+  .adm-stat__var.is-hausse { color: #7BE3BE; }
+  .adm-stat__var.is-baisse { color: #FFB4AC; }
+  .adm-stat__var.is-neutre { color: rgba($blanc, .60); }
+}
+
+.adm-stat__libelle {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--texte-2);
+  line-height: 1.4;
+}
+
+.adm-stat__valeur {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  color: var(--texte);
+  // Un montant long ne doit pas déborder de sa carte sur écran étroit.
+  overflow-wrap: anywhere;
+
+  small { font-size: 11px; font-weight: 700; }
+}
+
+.adm-stat__var {
+  font-size: 10.5px;
+  font-weight: 700;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+
+  &.is-hausse { color: $vert-accent; }
+  &.is-baisse { color: $rouge-erreur; }
+  &.is-neutre { color: var(--texte-2); font-weight: 500; }
+}
+
+.adm-stat__ref { font-weight: 400; color: var(--texte-2); }
+
+// -----------------------------------------------------------------------------
+// GRILLES
+// -----------------------------------------------------------------------------
+.adm-grille {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+  margin-bottom: 14px;
+
+  &--2-1 { @media (min-width: 992px) { grid-template-columns: 1.9fr 1fr; } }
+  &--1-1 { @media (min-width: 992px) { grid-template-columns: 1fr 1fr; } }
+}
+
+.adm-colonne {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.adm-bloc {
+  background: var(--surface);
+  border: 1px solid var(--bord);
+  border-radius: $r-sm;
+  padding: 16px;
+  min-width: 0;
+}
+
+.adm-bloc__tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.adm-bloc__titre {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0;
+}
+
+// -----------------------------------------------------------------------------
+// HISTOGRAMME — barres en CSS pur, hauteurs posées par le serveur
+// -----------------------------------------------------------------------------
+.adm-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 200px;
+  padding-top: 18px;   // place pour la valeur affichée au-dessus des barres
+}
+
+.adm-chart__col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+}
+
+.adm-chart__barre {
+  position: relative;
+  width: 100%;
+  max-width: 38px;
+  border-radius: 5px 5px 2px 2px;
+  background: $vert-fonce;
+  // Une valeur nulle reste visible : un jour sans inscription est une
+  // information, pas un trou dans le graphique.
+  min-height: 3px;
+}
+
+// Alternance de teinte : sur trente barres, l'œil retrouve sa colonne.
+.adm-chart__col:nth-child(even) .adm-chart__barre { background: $vert-accent; }
+
+.adm-chart__valeur {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--texte-2);
+}
+
+.adm-chart__libelle {
+  font-size: 8.5px;
+  color: var(--texte-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+// Au-delà de quinze barres, les valeurs au-dessus se chevauchent : on les
+// retire plutôt que de les laisser illisibles.
+.adm-chart:has(.adm-chart__col:nth-child(16)) .adm-chart__valeur { display: none; }
+
+.adm-legende {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--texte-2);
+  margin: 0;
+}
+
+.adm-legende__puce {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: $vert-fonce;
+  flex: 0 0 8px;
+}
+
+// -----------------------------------------------------------------------------
+// ENCADRÉ D'ALERTE
+// -----------------------------------------------------------------------------
+.adm-alerte {
+  border-radius: $r-sm;
+  padding: 14px;
+  border: 1px solid transparent;
+}
+
+.adm-alerte--attention {
+  background: var(--pastel-3);
+  border-color: rgba(214, 150, 80, .38);
+}
+
+.adm-alerte--info {
+  background: var(--accent-doux);
+  border-color: rgba(30, 158, 122, .30);
+}
+
+.adm-alerte__titre {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 5px;
+}
+
+.adm-alerte__texte {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--texte-2);
+  margin: 0 0 9px;
+}
+
+.adm-alerte__lien {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--accent);
+  &:hover { text-decoration: underline; }
+}
+
+// -----------------------------------------------------------------------------
+// MOYENS DE PAIEMENT — barres horizontales
+// -----------------------------------------------------------------------------
+.adm-parts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.adm-part {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px 10px;
+  align-items: center;
+}
+
+.adm-part__nom {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--texte);
+  min-width: 0;
+}
+
+.adm-part__chiffre {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texte);
+}
+
+.adm-part__piste {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: $r-full;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.adm-part__barre {
+  display: block;
+  height: 100%;
+  border-radius: $r-full;
+  background: $vert-accent;
+}
+
+.adm-part__puce {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: 0 0 8px;
+  background: $vert-accent;
+}
+
+// Une teinte par opérateur : la barre se lit sans relire l'étiquette.
+// Ce sont les couleurs officielles des trois services.
+.adm-part__puce--wave,         .adm-part__barre--wave         { background: #1DC8FF; }
+.adm-part__puce--orange_money, .adm-part__barre--orange_money { background: #FF7900; }
+.adm-part__puce--free_money,   .adm-part__barre--free_money   { background: #CD1719; }
+
+// -----------------------------------------------------------------------------
+// LIGNES DE LISTE
+// -----------------------------------------------------------------------------
+.adm-ligne {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--bord);
+  min-width: 0;
+
+  &:last-child { border-bottom: 0; padding-bottom: 0; }
+}
+
+.adm-ligne__texte {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.adm-ligne__nom {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--texte);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adm-ligne__meta {
+  font-size: 11px;
+  color: var(--texte-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adm-ligne__droite {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.adm-ligne__montant {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--texte);
+  white-space: nowrap;
+}
+
+// =============================================================================
+// BOÎTE DE DIALOGUE D'ACTION — <dialog> natif
+// =============================================================================
+// Le navigateur gère le voile, le piège du focus et la fermeture par Échap.
+// On ne décrit ici que l'apparence.
+.adm-modale {
+  border: 0;
+  padding: 0;
+  border-radius: $r-md;
+  background: var(--surface);
+  color: var(--texte);
+  max-width: min(460px, calc(100vw - 24px));
+  width: 100%;
+  box-shadow: var(--ombre-2);
+
+  &::backdrop { background: rgba(6, 20, 16, .55); }
+}
+
+.adm-modale__corps,
+.adm-modale__repli {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.adm-modale__titre { font-size: 15px; font-weight: 700; margin: 0; }
+
+.adm-modale__texte {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--texte-2);
+  margin: 0;
+}
+
+.adm-modale__label {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.adm-modale__obligatoire {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: $rouge-erreur;
+}
+
+.adm-modale__champ {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--texte);
+  background: var(--surface);
+  // Bordure à 3:1 minimum : WCAG 1.4.11 l'exige pour délimiter un champ.
+  border: 1px solid var(--bord-fort);
+  border-radius: $r-sm;
+  resize: vertical;
+
+  &::placeholder { color: var(--texte-2); opacity: 1; }
+  &:focus { outline: 2px solid var(--accent-vif); outline-offset: -1px; }
+}
+
+.adm-modale__erreur { font-size: 12px; color: $rouge-erreur; margin: 0; }
+
+.adm-modale__pied {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.adm-modale__repli {
+  border: 1px solid var(--bord-fort);
+  border-radius: $r-sm;
+  margin-top: 8px;
+}
+
+.adm-btn--danger {
+  &, &:link, &:visited, &:hover, &:focus, &:active {
+    background: $rouge-erreur;
+    color: $blanc;
+    border-color: $rouge-erreur;
+    text-decoration: none;
+  }
+  &:hover { background: darken($rouge-erreur, 5%); }
+}
+
+// Un <button> qui ouvre une boîte de dialogue, présenté comme un lien de
+// tableau : même apparence que les autres actions de la colonne.
+.adm-lien--action {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+// =============================================================================
+// CONTRÔLES DE FILTRE — une seule apparence pour les deux espaces
+// =============================================================================
+/*
+| TOUJOURS UN FORMULAIRE GET. Les critères restent dans l'URL : la liste
+| filtrée se partage, se met en signet, et le bouton « précédent » du
+| navigateur retrouve exactement ce qu'on regardait.
+|
+| UNE SEULE HAUTEUR — 38px — pour le champ de recherche, les listes
+| déroulantes, les dates et les boutons. Des contrôles qui ne s'alignent pas
+| au pixel donnent une barre qui « vibre », et c'est ce qu'on lit d'abord
+| comme un défaut de finition.
+|
+| 38px et pas 35 : c'est le plancher confortable au doigt sur téléphone.
+*/
+$adm-controle-h: 38px;
+
+.adm-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--bord);
+  border-radius: $r-sm;
+  margin-bottom: 12px;
+}
+
+// Chaque contrôle porte son libellé VISIBLE au-dessus, en petites capitales.
+// Les libellés cachés obligeaient à ouvrir la liste pour savoir ce qu'elle
+// filtre — sur une barre de quatre contrôles, on ouvre les quatre.
+.adm-filtre {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+
+  > label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--texte-2);
+    padding-left: 2px;
+  }
+}
+
+.adm-filtre--large { flex: 1 1 230px; }
+
+// Variante sans cadre : un contrôle isolé posé dans un en-tête d'écran n'a
+// pas besoin de la boîte qui regroupe une vraie barre de filtres.
+.adm-filtres--nu {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  margin-bottom: 0;
+}
+
+// Socle commun. Tout contrôle de filtre hérite d'ici : une seule bordure,
+// un seul rayon, un seul comportement au survol et au focus.
+%adm-controle {
+  height: $adm-controle-h;
+  width: 100%;
+  padding: 0 13px;
+  border: 1px solid var(--bord-fort);
+  border-radius: $r-sm;
+  background: var(--surface);
+  color: var(--texte);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+
+  &:hover { border-color: var(--accent); }
+
+  // Anneau doux plutôt qu'un contour dur : le champ reste dans sa boîte, la
+  // barre ne se décale pas d'un pixel à la prise de focus.
+  &:focus,
+  &:focus-visible {
+    outline: 0;
+    border-color: var(--accent-vif);
+    box-shadow: 0 0 0 3px var(--accent-doux);
+  }
+}
+
+.adm-filtres__champ {
+  @extend %adm-controle;
+  padding-left: 35px;
+  &::placeholder { color: var(--texte-2); opacity: 1; }
+}
+
+.adm-filtres__recherche { position: relative; }
+
+.adm-filtres__loupe {
+  position: absolute;
+  left: 12px;
+  // 50% placerait la loupe au milieu du groupe libellé + champ.
+  bottom: calc(#{$adm-controle-h} / 2);
+  transform: translateY(50%);
+  color: var(--texte-2);
+  pointer-events: none;
+}
+
+// LE CHAMP DE DATE A DISPARU DE L'APPLICATION.
+// Il vivait ici sous .adm-filtres__date, sur deux écrans. Remplacé par une
+// liste de périodes : deux champs demandaient deux saisies pour un seul
+// résultat, ouvraient deux fois le sélecteur natif sur téléphone, et
+// laissaient saisir une fin antérieure au début — la liste se vidait alors
+// sans que rien ne dise pourquoi. Voir App\Support\FiltrePeriode.
+
+
+.adm-select {
+  @extend %adm-controle;
+  padding-right: 34px;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 150px;
+
+  // La flèche native disparaît dès qu'on retire l'apparence : on la
+  // redessine en SVG intégré, donc sans aucune requête réseau.
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7' fill='none' stroke='%235C6B66' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4.5 4.5L10 1'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+}
+
+// En thème sombre, un chevron gris foncé sur fond sombre est invisible.
+.theme-dark .adm-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7' fill='none' stroke='%239BB0A8' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4.5 4.5L10 1'/%3E%3C/svg%3E");
+}
+
+// Les boutons de la barre s'alignent sur la même hauteur que les contrôles.
+.adm-filtres .adm-btn { height: $adm-controle-h; }
+
+// =============================================================================
+// PAGINATION
+// =============================================================================
+.pagin {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pagin__lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--bord-fort);
+  border-radius: $r-sm;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--surface);
+
+  &, &:link, &:visited, &:hover, &:focus { color: var(--texte); text-decoration: none; }
+  &:hover { border-color: var(--accent); background: var(--survol); }
+  &:focus-visible { outline: 2px solid var(--accent-vif); outline-offset: 2px; }
+
+  // Une borne atteinte reste VISIBLE, simplement inactive. La faire
+  // disparaître déplacerait les deux autres commandes à chaque page.
+  &.is-muted {
+    color: var(--texte-2);
+    border-color: var(--bord);
+    background: transparent;
+    cursor: default;
+  }
+}
+
+.pagin__position {
+  font-size: 12px;
+  color: var(--texte-2);
+  padding: 0 8px;
+  white-space: nowrap;
+
+  strong { color: var(--texte); font-weight: 700; }
+}
+
+// Le champ « Aller à … OK » a été retiré : deux commandes de plus pour un
+// geste que personne ne fait — on ne connaît pas d'avance le numéro de la
+// page cherchée. Ce sont les filtres, juste au-dessus, qui servent à cela.
+
+
+// Sur téléphone, les mots cèdent la place aux flèches : « Précédent » et
+// « Suivant » écrits en toutes lettres poussaient la position hors écran.
+@media (max-width: 479.98px) {
+  .pagin__mot { display: none; }
+  .pagin__lien { padding: 0 11px; }
+}
+
+// =============================================================================
+// ONGLETS À COMPTEURS
+// =============================================================================
+.adm-onglets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.adm-onglet {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: $r-full;
+  font-size: 12.5px;
+  font-weight: 600;
+
+  &, &:link, &:visited, &:hover, &:focus { color: var(--texte-2); text-decoration: none; }
+  &:hover { background: var(--survol); color: var(--texte); }
+
+  &.is-active {
+    &, &:link, &:visited, &:hover, &:focus {
+      background: var(--accent-doux);
+      color: var(--accent);
+    }
+  }
+}
+
+// Le compteur fait partie de l'onglet : « En attente (18) » se lit d'un coup,
+// alors qu'un chiffre posé ailleurs oblige à faire le rapprochement.
+.adm-onglet__n {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: $r-full;
+  background: var(--surface-3);
+  color: var(--texte-2);
+}
+
+// Le compteur de l'onglet actif : fond accent, texte --sur-accent. C'est ici
+// que le jeton manquait — le chiffre tombait à 1,33:1 en thème clair.
+.adm-onglet.is-active .adm-onglet__n {
+  background: var(--accent);
+  color: var(--sur-accent);
+}
+
+// =============================================================================
+// TABLEAUX
+// =============================================================================
+// Le conteneur défile, jamais la page. `.table-scroll` porte le débordement
+// (voir _base.scss) ; ici, seulement l'apparence.
+.adm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  // Sans largeur minimale, les colonnes se compriment jusqu'à l'illisible
+  // au lieu de déclencher le défilement du conteneur.
+  min-width: 720px;
+
+  th, td {
+    padding: 11px 12px;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead th {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--texte-2);
+    border-bottom: 1px solid var(--bord);
+    white-space: nowrap;
+  }
+
+  tbody tr { border-bottom: 1px solid var(--bord); }
+  tbody tr:last-child { border-bottom: 0; }
+  tbody tr:hover { background: var(--survol); }
+
+  td { color: var(--texte); }
+}
+
+.adm-table__principal { font-weight: 600; }
+.adm-table__second { font-size: 11px; color: var(--texte-2); }
+
+// Colonne d'actions : toujours à droite, jamais compressée.
+.adm-table__actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+// Cellule identité : avatar + deux lignes.
+.adm-cell-id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.adm-cell-id__texte { min-width: 0; display: flex; flex-direction: column; }
+
+// =============================================================================
+// PIED DE LISTE — compteur et pagination
+// =============================================================================
+.adm-pied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 2px 0;
+  border-top: 1px solid var(--bord);
+  margin-top: 4px;
+}
+
+.adm-pied__compte { font-size: 11.5px; color: var(--texte-2); }
+
+// =============================================================================
+// FIL D'ARIANE ET FICHE CLIENT
+// =============================================================================
+.adm-fil {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  color: var(--texte-2);
+  margin-bottom: 12px;
+
+  a { color: var(--accent); font-weight: 600; &:hover { text-decoration: underline; } }
+}
+
+.adm-fiche__tete {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.adm-avatar--xl {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  font-size: 19px;
+  background: var(--accent-doux);
+  color: var(--accent);
+}
+
+.adm-fiche__ident { min-width: 0; flex: 1 1 260px; }
+
+.adm-fiche__nom {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 5px;
+}
+
+.adm-fiche__coord {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 12px;
+  color: var(--texte-2);
+  margin: 0 0 9px;
+}
+
+.adm-fiche__etats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.adm-fiche__motif {
+  margin: 9px 0 0;
+  font-size: 12px;
+  color: $rouge-erreur;
+}
+
+// Liste de définitions : libellé à gauche, valeur à droite. Une seule colonne
+// sur téléphone — deux colonnes sur 340px rendraient les deux illisibles.
+.adm-defs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px 16px;
+  margin: 0;
+  font-size: 12.5px;
+
+  dt {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--texte-2);
+    margin-top: 10px;
+  }
+
+  dd { margin: 0; color: var(--texte); overflow-wrap: break-word; }
+
+  @media (min-width: 480px) {
+    grid-template-columns: 140px minmax(0, 1fr);
+    align-items: baseline;
+    dt { margin-top: 0; }
+    dd { margin-bottom: 9px; }
+  }
+}
+
+// =============================================================================
+// MODÈLES DE CARTE — grille d'aperçus
+// =============================================================================
+.adm-modeles {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (min-width: 768px)  { grid-template-columns: repeat(3, 1fr); }
+  @media (min-width: 1200px) { grid-template-columns: repeat(4, 1fr); }
+}
+
+.adm-modele {
+  background: var(--surface);
+  border: 1px solid var(--bord);
+  border-radius: $r-sm;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+// L'aperçu est RECONSTRUIT, pas photographié : un fichier d'image se
+// désynchronise du rendu réel dès la première retouche du gabarit, et
+// personne ne s'en aperçoit.
+.adm-modele__apercu {
+  position: relative;
+  aspect-ratio: 1.586;          // le format d'une carte ISO 7810
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.adm-modele__bandeau {
+  position: absolute;
+  inset: 0 0 62% 0;
+  background: $vert-fonce;
+}
+
+.adm-modele__pastille {
+  position: absolute;
+  left: 12%;
+  top: 26%;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--surface);
+}
+
+.adm-modele__trait {
+  position: absolute;
+  left: 12%;
+  right: 24%;
+  top: 62%;
+  height: 6%;
+  border-radius: 2px;
+  background: var(--bord-fort);
+}
+
+.adm-modele__trait--court { top: 74%; right: 52%; }
+
+// Variantes par gabarit : le bandeau change de teinte, l'œil distingue.
+.adm-modele__apercu--moderne .adm-modele__bandeau { background: $vert-accent; }
+.adm-modele__apercu--minimal .adm-modele__bandeau { inset: 0 0 86% 0; }
+
+.adm-modele__corps { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+.adm-modele__tete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.adm-modele__nom {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0;
+  min-width: 0;
+}
+
+.adm-modele__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.adm-modele__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 2px;
+  padding-top: 9px;
+  border-top: 1px solid var(--bord);
+}
+
+// Interrupteur : un vrai <button role="switch">, donc annonçable et
+// actionnable au clavier. Un <div> stylé ne l'aurait été ni l'un ni l'autre.
+.adm-switch {
+  position: relative;
+  width: 38px;
+  height: 21px;
+  flex: 0 0 38px;
+  border: 0;
+  border-radius: $r-full;
+  background: var(--bord-fort);
+  cursor: pointer;
+  transition: background 160ms ease;
+
+  &:focus-visible { outline: 2px solid var(--accent-vif); outline-offset: 2px; }
+  &.is-on { background: $vert-accent; }
+}
+
+.adm-switch__bille {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: $blanc;
+  transition: transform 160ms ease;
+
+  .adm-switch.is-on & { transform: translateX(17px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adm-switch, .adm-switch__bille { transition: none; }
+}
+
+// =============================================================================
+// PARAMÈTRES — offres et formulaires
+// =============================================================================
+.adm-offre {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 13px;
+  border: 1px solid var(--bord);
+  border-radius: $r-sm;
+  margin-bottom: 9px;
+
+  &, &:link, &:visited, &:hover, &:focus { color: var(--texte); text-decoration: none; }
+  &:hover { border-color: var(--bord-fort); background: var(--survol); }
+
+  // La formule ouverte dans l'éditeur est marquée : sans cela, on modifie
+  // une formule sans savoir laquelle.
+  &.is-active {
+    border-color: $vert-accent;
+    background: var(--accent-doux);
+  }
+}
+
+.adm-offre__tete { display: flex; align-items: center; gap: 8px; }
+.adm-offre__nom { font-size: 13.5px; font-weight: 700; }
+
+.adm-offre__periode {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--texte-2);
+}
+
+.adm-offre__prix {
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--texte);
+  small { font-size: 11px; font-weight: 700; }
+}
+
+.adm-offre__liste { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; }
+
+.adm-offre__item {
+  font-size: 11.5px;
+  color: var(--texte-2);
+  padding-left: 15px;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+}
+
+.adm-creer { margin-top: 14px; }
+
+.adm-creer__ouvrir {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.adm-form { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+
+.adm-champ {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+
+  > label, > legend {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--texte);
+    padding: 0;
+  }
+}
+
+.adm-champ__aide { font-size: 11px; line-height: 1.5; color: var(--texte-2); }
+.adm-champ__ligne { margin-bottom: 6px; }
+
+.adm-coche {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--texte);
+  cursor: pointer;
+
+  input { width: 17px; height: 17px; accent-color: $vert-accent; cursor: pointer; }
+}
+
+// =============================================================================
+// MOBILE — 375px est la largeur de référence
+// =============================================================================
+
+/*
+| SOUS 992px : LA COLONNE DEVIENT UN TIROIR.
+|
+| Bootstrap pose `position:fixed` sur `.offcanvas-lg` en dessous de ce seuil,
+| et gère l'ouverture, le voile et la translation. Mais notre `.adm-side`
+| déclare `position:sticky` pour le bureau, avec la MÊME spécificité et un
+| import postérieur : notre règle gagnait, la colonne restait donc plantée
+| dans la grille, 248px pris sur les 375px de l'écran, et le contenu écrasé
+| dans ce qui restait.
+|
+| On rend donc explicitement le terrain à Bootstrap. C'est un cas où il faut
+| écrire la règle même quand la bibliothèque la porte déjà : ce n'est pas une
+| redondance, c'est l'annulation de notre propre règle de bureau.
+*/
+@media (max-width: 991.98px) {
+
+  .adm-side {
+    position: fixed;
+    height: 100%;
+    // Sur un écran de 375px, 248px de tiroir laissent voir 127px de page
+    // derrière : trop peu pour se repérer, assez pour croire à un bug
+    // d'affichage. On élargit et on plafonne.
+    width: min(292px, 84vw);
+    flex-basis: auto;
+    box-shadow: $shadow-3;
+  }
+
+  .adm-top__burger { display: inline-flex; }
+
+  /*
+   | LA BARRE PASSE SUR DEUX LIGNES.
+   |
+   | Burger, titre, recherche, cloche, thème et compte ne tiennent pas sur
+   | 375px. Plutôt que de rétrécir la recherche jusqu'à l'inutilisable, on la
+   | renvoie seule sur une deuxième ligne, pleine largeur — c'est le seul
+   | champ de la barre où l'on écrit vraiment.
+   */
+  .adm-top {
+    flex-wrap: wrap;
+    padding: 9px 12px;
+    row-gap: 9px;
+  }
+
+  .adm-top__section { display: none; }
+
+  .adm-search {
+    flex: 1 1 100%;
+    order: 5;               // après les actions, donc sur la seconde ligne
+  }
+
+  .adm-top__actions { margin-left: auto; }
+
+  .adm-content { padding: 16px 12px 32px; }
+  .adm-head { margin-bottom: 16px; }
+  .adm-head__titre { font-size: 19px; }
+
+  // Les actions d'en-tête passent pleine largeur : deux boutons à demi
+  // coupés au bord droit de l'écran ne se cliquent pas.
+  .adm-head__actions {
+    width: 100%;
+    > * { flex: 1 1 auto; justify-content: center; }
+  }
+}
+
+@media (max-width: 575.98px) {
+
+  /*
+   | L'HISTOGRAMME DÉFILE PLUTÔT QUE DE SE COMPRIMER.
+   |
+   | Trente jours sur 350px donnent des barres de 8px séparées de 4px : ni les
+   | libellés ni les valeurs ne se lisent, et le graphique ne dit plus rien.
+   | On fixe une largeur minimale par colonne et on laisse la zone défiler
+   | horizontalement — dans SON conteneur, jamais la page entière.
+   */
+  // Le défilement est porté par le graphique LUI-MÊME, pas par un conteneur
+  // parent en :has() : la règle reste comprise des navigateurs plus anciens,
+  // et surtout la page, elle, ne défile jamais latéralement.
+  .adm-chart {
+    height: 178px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  // Chaque colonne garde une largeur minimale tactile. Au-delà de ce que
+  // l'écran contient, la zone défile au lieu de tout comprimer.
+  .adm-chart__col { min-width: 27px; }
+
+  // Les six cartes restent à deux colonnes : une seule par ligne
+  // demanderait six écrans de défilement avant d'atteindre le graphique.
+  .adm-stats { gap: 9px; }
+  .adm-stat { padding: 12px; }
+  .adm-stat__valeur { font-size: 19px; }
+
+  .adm-bloc { padding: 13px; }
+  .adm-grille { gap: 11px; }
+
+  // Le nom du compte disparaît, l'initiale suffit : elle sert de repère,
+  // pas d'identification.
+  .adm-top__user > span:not(.adm-avatar) { display: none; }
+}

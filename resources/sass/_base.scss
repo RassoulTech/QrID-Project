@@ -1,0 +1,188 @@
+// =============================================================================
+// BASE — police locale, reset, typographie, liens, focus, conteneurs.
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// POLICE LOCALE — jamais de CDN.
+// Déposer les .woff2 dans public/fonts/ puis décommenter.
+// Tant qu'ils sont absents, la pile système sert de repli.
+// -----------------------------------------------------------------------------
+// @font-face{font-family:'QrID';src:url('/fonts/qrid-400.woff2') format('woff2');font-weight:400;font-display:swap}
+// @font-face{font-family:'QrID';src:url('/fonts/qrid-500.woff2') format('woff2');font-weight:500;font-display:swap}
+// @font-face{font-family:'QrID';src:url('/fonts/qrid-600.woff2') format('woff2');font-weight:600;font-display:swap}
+// @font-face{font-family:'QrID';src:url('/fonts/qrid-700.woff2') format('woff2');font-weight:700;font-display:swap}
+// @font-face{font-family:'QrID';src:url('/fonts/qrid-800.woff2') format('woff2');font-weight:800;font-display:swap}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+body{
+  margin:0;
+  background:$blanc;
+  color:$texte;
+  font-family:$font-base;
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+
+  /*
+   | LA PAGE NE DÉFILE JAMAIS LATÉRALEMENT.
+   |
+   | Un seul élément trop large — un tableau, un e-mail sans espace, une
+   | grille oubliée — et toute la page se décale sur mobile : les titres
+   | partent hors écran, le menu se décentre, et l'on croit l'application
+   | cassée alors qu'un seul bloc déborde.
+   |
+   | `clip` ET NON `hidden`, et la nuance décide de tout. `overflow-x:hidden`
+   | force `overflow-y` à `auto` : le corps devient un conteneur de
+   | défilement, et TOUS les `position:sticky` qu'il contient cessent de
+   | coller — ici, la colonne latérale et la barre supérieure des deux
+   | espaces. `clip` coupe sans créer de conteneur de défilement : les
+   | éléments collants continuent de coller.
+   |
+   | Sur un Safari antérieur à 16, `clip` est ignoré et l'on retombe sur le
+   | défilement latéral. C'est le bon sens de la dégradation : une page qui
+   | glisse se rattrape, une barre qui ne colle plus ne se voit pas.
+   |
+   | Ce qui doit défiler le fait DANS SON PROPRE conteneur — voir
+   | `.table-scroll` plus bas.
+   */
+  overflow-x:clip;
+}
+
+// -----------------------------------------------------------------------------
+// GARDE-FOUS MOBILES GLOBAUX
+// -----------------------------------------------------------------------------
+
+// Une image sans contrainte impose sa largeur naturelle à toute sa colonne.
+img,svg,video,canvas{max-width:100%}
+img{height:auto}
+
+// Les mots interminables — adresses e-mail, jetons, URL de profil — sont la
+// première cause de débordement en français comme en wolof. On les coupe
+// plutôt que de laisser la carte s'élargir.
+p,li,dd,dt,td,th,figcaption{overflow-wrap:break-word}
+
+// Un tableau garde sa largeur naturelle : c'est le conteneur qui défile.
+// Sans cette classe, chaque tableau de l'administration devrait porter sa
+// propre gestion du débordement.
+.table-scroll{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+
+  > table{margin-bottom:0}
+}
+
+// Zone tactile : 40px de côté au minimum sur les commandes isolées.
+// En dessous, un doigt vise deux commandes à la fois.
+@media (hover:none) and (pointer:coarse){
+  .theme-toggle,.app-bell,.adm-top__burger{min-width:40px;min-height:40px}
+}
+
+h1,h2,h3,h4{margin:0;font-family:$font-base;color:$texte;letter-spacing:-.02em}
+
+// Aucun lien souligné, dans aucun état.
+//
+// ATTENTION : ne JAMAIS mettre `color` sur `a:link` / `a:visited`.
+// Une pseudo-classe donne une spécificité (0,1,1), supérieure à une classe
+// de composant comme `.btn-dark` (0,1,0) : la couleur du bouton serait
+// écrasée au repos et ne réapparaîtrait qu'au survol (texte invisible).
+// La décoration seule est sûre, la couleur ne l'est pas.
+a,a:link,a:visited,a:hover,a:active,a:focus,a:focus-visible{text-decoration:none}
+
+// Couleur héritée par défaut, avec une spécificité minimale (0,0,1) que
+// toute classe de composant peut surcharger.
+a{color:inherit;transition:color .18s ease,opacity .18s ease}
+.btn-link,.nav-link,.dropdown-item,.navbar-brand,.page-link{text-decoration:none !important}
+
+// Focus visible : seul repère au clavier.
+a:focus-visible,button:focus-visible{outline:3px solid $vert-accent;outline-offset:3px;border-radius:8px}
+
+.wrap{width:100%;max-width:1180px;margin-inline:auto;padding-inline:20px}
+
+.skip-link{
+  position:absolute;left:-9999px;top:0;z-index:100;
+  padding:12px 16px;background:$vert-fonce;color:$blanc;border-radius:0 0 8px 0;
+}
+.skip-link:focus{left:0}
+
+// -----------------------------------------------------------------------------
+// SÉQUENCE D'ENTRÉE DU HERO — CSS pur, déclenchée au CHARGEMENT.
+// Courbe unique : cubic-bezier(.2,.8,.2,1). Aucun JavaScript nécessaire.
+// -----------------------------------------------------------------------------
+$ease-hero: cubic-bezier(.2,.8,.2,1);
+
+@keyframes hero-in{
+  from{opacity:0;transform:translateY(20px)}
+  to  {opacity:1;transform:translateY(0)}
+}
+
+// Pastille d'accroche — 400ms, retard 0
+.hero-eyebrow{opacity:0;animation:hero-in 400ms $ease-hero 0ms forwards}
+
+// Titre — 600ms, retard 100ms
+.hero-title{opacity:0;animation:hero-in 600ms $ease-hero 100ms forwards}
+
+// Sous-titre — 600ms, retard 250ms
+.hero-lead{opacity:0;animation:hero-in 600ms $ease-hero 250ms forwards}
+
+// Boutons — 600ms, retard 350ms
+.hero-actions{opacity:0;animation:hero-in 600ms $ease-hero 350ms forwards}
+
+// Surlignement vert — 600ms, retard 500ms, gauche → droite
+.hero-mark{position:relative;display:inline-block;white-space:nowrap}
+.hero-mark::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:.06em;
+  height:.28em;
+  // Jeton, pas le vert clair figé. Ce surlignement passe DERRIÈRE le mot
+  // (z-index:-1) : en thème sombre, un aplat pâle opaque rendait le texte
+  // blanc illisible sur sa moitié basse. Le jeton donne le même vert pâle en
+  // clair, et un voile vert translucide en sombre.
+  background:var(--accent-doux);
+  border-radius:4px;
+  z-index:-1;
+  transform-origin:left center;
+  transform:scaleX(0);
+  animation:hero-mark 600ms $ease-hero 500ms forwards;
+}
+@keyframes hero-mark{to{transform:scaleX(1)}}
+
+// -----------------------------------------------------------------------------
+// APPARITION AU DÉFILEMENT
+//
+// Élément VISIBLE par défaut : si le JavaScript ne se charge pas, le contenu
+// reste lisible. C'est le module scroll-reveal qui ajoute `.is-hidden` au
+// démarrage, puis le retire à l'entrée dans le champ de vision.
+// -----------------------------------------------------------------------------
+[data-reveal]{
+  transition:opacity 600ms $ease-hero, transform 600ms $ease-hero;
+}
+[data-reveal].is-hidden{
+  opacity:0;
+  transform:translateY(30px);
+}
+
+// Section sombre : léger agrandissement en plus.
+[data-reveal="scale"].is-hidden{
+  transform:translateY(30px) scale(.97);
+}
+
+// -----------------------------------------------------------------------------
+// FINITIONS — éléments interactifs
+// -----------------------------------------------------------------------------
+a,button,.btn-pill,.plan,.figure-card,.step{
+  transition:transform 200ms ease, box-shadow 200ms ease,
+             background-color 200ms ease, color 200ms ease,
+             border-color 200ms ease, opacity 200ms ease;
+}
+
+button:active,.btn-pill:active{transform:translateY(1px)}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+  .rise{opacity:1;transform:none}
+}
+
+@media print{.site-nav,.site-footer{display:none !important}}

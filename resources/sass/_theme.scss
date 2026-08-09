@@ -1,0 +1,139 @@
+// =============================================================================
+// THÈMES CLAIR ET SOMBRE
+//
+// La palette passe par des VARIABLES CSS, pas par des variables Sass : celles
+// de Sass sont figées à la compilation et ne peuvent pas basculer à l'exécution.
+// Chaque couleur de surface a donc un jeton, redéclaré sous .theme-dark.
+//
+// La classe est posée par le SERVEUR sur <html>, d'après users.theme. Aucun
+// éclair blanc au chargement, et la bascule fonctionne sans JavaScript.
+//
+// CONTRASTES — tous vérifiés au-delà de 4,5:1 pour le texte :
+//   clair  · texte #0A1F1A sur #FFFFFF ......... 17,4:1
+//            secondaire #5C6B66 sur #FFFFFF .....  5,6:1
+//            secondaire #5C6B66 sur #F2F3F1 .....  5,2:1
+//   sombre · texte #E8EDEB sur #0F1714 ......... 14,1:1
+//            secondaire #9BB0A8 sur #0F1714 .....  7,3:1
+//            secondaire #9BB0A8 sur #16211D .....  6,6:1
+// =============================================================================
+
+:root{
+  --surface:        #{$blanc};        // fond des cartes
+  --surface-2:      #{$gris-fond};    // fond de page et zones creuses
+  --surface-3:      #{$blanc};        // surfaces surélevées (menus déroulants)
+  --survol:         #{$gris-fond};    // fond des éléments cliquables au survol
+  --bord:           #{$bordure};
+  --bord-fort:      #{$bordure-forte};
+  --texte:          #{$texte};
+  --texte-2:        #{$gris-second};
+  --accent:         #{$vert-fonce};
+  --accent-doux:    #{$vert-clair};
+  --accent-vif:     #{$vert-accent};
+
+  /*
+   | TEXTE POSÉ SUR --accent. Le jeton qui manquait, et son absence a produit
+   | le pire défaut de lisibilité de l'application.
+   |
+   | --accent n'est PAS la même couleur selon le thème : vert foncé en clair
+   | (#0B3B2E), vert vif en sombre (#2FBF92). Une couleur de texte écrite en
+   | dur est donc forcément fausse dans l'un des deux. Le compteur des onglets
+   | portait #06231B : 7,11:1 en sombre, 1,33:1 en clair — un chiffre
+   | invisible sur la moitié des écrans.
+   |
+   | RÈGLE : partout où --accent sert de FOND, le texte prend --sur-accent.
+   */
+  --sur-accent:     #{$blanc};        // 12,51:1 sur le vert foncé
+  --ombre-1:        0 1px 2px rgba(10, 31, 26, .05);
+  --ombre-2:        0 12px 32px rgba(10, 31, 26, .10);
+
+  // Fonds pastel des quatre cartes de statistiques.
+  --pastel-1:       #E4F2EC;
+  --pastel-2:       #E6EDF7;
+  --pastel-3:       #FBEFE4;
+  --pastel-4:       #F1EAF7;
+}
+
+.theme-dark{
+  --surface:        #16211D;
+  --surface-2:      #0F1714;
+  --surface-3:      #1D2B26;
+
+  // Le survol S'ÉCLAIRCIT en clair et S'ÉCLAIRCIT aussi en sombre — mais très
+  // peu. Reprendre le gris clair du thème clair produisait une pastille
+  // presque blanche sous un texte presque blanc : le nom du compte
+  // disparaissait au passage de la souris.
+  --survol:         rgba(232, 237, 235, .08);
+  --bord:           rgba(232, 237, 235, .10);
+  --bord-fort:      rgba(232, 237, 235, .20);
+  --texte:          #E8EDEB;
+  --texte-2:        #9BB0A8;          // 7,3:1 sur le fond de page
+  --accent:         #2FBF92;          // le vert foncé serait illisible ici
+  --sur-accent:     #06231B;          // 7,11:1 sur ce vert vif
+  --accent-doux:    rgba(47, 191, 146, .16);
+  --accent-vif:     #3FD3A4;
+  --ombre-1:        0 1px 2px rgba(0, 0, 0, .40);
+  --ombre-2:        0 12px 32px rgba(0, 0, 0, .45);
+
+  // Pastels ramenés à des teintes profondes : les mêmes couleurs claires
+  // deviendraient éblouissantes et le chiffre foncé posé dessus illisible.
+  --pastel-1:       rgba(47, 191, 146, .14);
+  --pastel-2:       rgba(96, 150, 220, .14);
+  --pastel-3:       rgba(214, 150, 80, .14);
+  --pastel-4:       rgba(160, 120, 214, .14);
+
+  background-color: var(--surface-2);
+  color-scheme: dark;                 // barres de défilement et champs natifs
+}
+
+// Le corps suit les jetons. Tout ce qui ne les utilise pas reste en thème
+// clair — c'est volontaire : on bascule progressivement, écran par écran.
+.theme-dark body{
+  background-color: var(--surface-2);
+  color: var(--texte);
+}
+
+// -----------------------------------------------------------------------------
+// Bascule de thème — un bouton dans un formulaire, jamais un lien
+// -----------------------------------------------------------------------------
+// Le formulaire ne sert qu'à porter le POST : il ne doit occuper aucune place
+// propre dans les barres où il est posé.
+.theme-form{
+  display:inline-flex;
+  margin:0;
+  line-height:0;
+}
+
+.theme-toggle{
+  display:inline-grid;
+  place-items:center;
+  width:36px;height:36px;
+  border:1px solid var(--bord);
+  border-radius:$r-full;
+  background:var(--surface);
+  color:var(--texte-2);
+  cursor:pointer;
+
+  &:hover{color:var(--texte);background:var(--survol)}
+  &:focus-visible{outline:2px solid var(--accent-vif);outline-offset:2px}
+}
+
+// L'en-tête d'administration est sombre en permanence, indépendamment du
+// thème : le bouton y prend les couleurs de la barre, pas celles des jetons.
+.admin-topbar__theme .theme-toggle{
+  border-color:rgba(255,255,255,.22);
+  background:transparent;
+  color:rgba(255,255,255,.75);
+
+  &:hover{background:rgba(255,255,255,.10);color:#fff}
+  &:focus-visible{outline-color:#fff}
+}
+
+// -----------------------------------------------------------------------------
+// En-tête du panneau d'authentification — marque à gauche, bascule à droite
+// -----------------------------------------------------------------------------
+.auth__entete{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+}

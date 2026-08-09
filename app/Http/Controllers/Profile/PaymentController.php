@@ -1,0 +1,155 @@
+<?php
+
+namespace App\Http\Controllers\Profile;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Profile\CheckoutRequest;
+use App\Models\Payment;
+use App\Models\Plan;
+use App\Services\Payment\CheckoutService;
+use App\Services\QrCodeService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+/**
+ * Paiement de l'abonnement — quatre écrans, une seule règle.
+ *
+ * RIEN n'est accordé avant le retour de l'opérateur. Le Payment naît en
+ * « pending », l'abonnement n'est ouvert qu'à la confirmation, et le profil
+ * n'est publié que dans la même transaction que l'abonnement.
+ *
+ * L'ordre des gardes suit la matrice de redirections : pas de profil, pas de
+ * paiement — on ne fait pas payer quelqu'un pour une carte qui n'existe pas.
+ */
+class PaymentController extends Controller
+{
+    public function __construct(private CheckoutService $checkout) {}
+
+    /**
+     * Choix de la formule et du moyen de paiement.
+     *
+     * Première souscription ou RENOUVELLEMENT : c'est le même écran, mais il
+     * ne raconte pas la même chose. On ne propose pas « souscrire » à qui a
+     * déjà un abonnement en cours.
+     */
+    public function show(Request $request): View|RedirectResponse
+    {
+        $user = $request->user();
+
+        if (! $user->profile) {
+            return redirect()->route('profile.create.step1')
+                ->with('info', 'Créez d\'abord votre carte, vous choisirez votre formule ensuite.');
+        }
+
+        $abonnement = $user->activeSubscription();
+
+        return view('abonnement.paiement', [
+            'plans' => Plan::active()->where('price_fcfa', '>', 0)->orderBy('price_fcfa')->get(),
+            'methods' => Payment::METHODS,
+            'subscription' => $abonnement,
+
+            // Un essai gratuit en cours n'est pas un abonnement payé : celui
+            // qui en dispose fait bien une PREMIÈRE souscription.
+            'renewal' => $abonnement !== null && ! $abonnement->isTrial(),
+        ]);
+    }
+
+    /** Ouvre le paiement puis envoie l'utilisateur chez l'opérateur. */
+    public function store(CheckoutRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if (! $user->profile) {
+            return redirect()->route('profile.create.step1');
+        }
+
+        $payment = $this->checkout->start($user, $request->plan(), $request->string('method')->value());
+
+        return redirect()->away($this->checkout->redirectUrl($payment));
+    }
+
+    /**
+     * Écran de simulation — DÉVELOPPEMENT UNIQUEMENT.
+     *
+     * Il tient la place de la page de l'opérateur et offre les trois issues
+     * réelles : encaissement, refus, abandon. Sans lui, un parcours de
+     * paiement ne serait testable qu'en supposant qu'il réussit toujours.
+     */
+    public function simulate(Request $request, Payment $payment): View
+    {
+        abort_unless(app()->environment(['local', 'testing']), 404);
+        abort_unless($payment->user_id === $request->user()->id, 403);
+
+        return view('abonnement.simulation', ['payment' => $payment]);
+    }
+
+    /**
+     * Retour de l'opérateur.
+     *
+     * Le paiement appartient-il bien à la personne connectée ? Sinon un lien
+     * de retour recopié activerait l'abonnement de quelqu'un d'autre.
+     */
+    public function callback(Request $request, Payment $payment): RedirectResponse
+    {
+        abort_unless($payment->user_id === $request->user()->id, 403);
+
+        $statut = (string) $request->query('statut', 'echec');
+
+        if ($statut === 'annule') {
+            $this->checkout->fail($payment, 'abandon de l\'utilisateur');
+
+            return redirect()->route('abonnement.paiement')->with(
+                'warning',
+                'Paiement annulé. Rien n\'a été débité et vos informations sont intactes.'
+            );
+        }
+
+        $confirme = $this->checkout->succeed($payment, [
+            'statut' => $statut,
+            'reference' => $request->query('reference'),
+        ]);
+
+        if (! $confirme) {
+            return redirect()->route('abonnement.paiement')->with(
+                'error',
+                'Le paiement n\'a pas abouti. Aucune somme n\'a été débitée — vous pouvez réessayer.'
+            );
+        }
+
+        // Écran de confirmation plutôt que retour sec au tableau de bord :
+        // c'est le moment où l'on remet au client ce qu'il vient d'acheter —
+        // sa carte, son lien, ses fichiers à imprimer.
+        return redirect()->route('abonnement.confirmation');
+    }
+
+    /**
+     * Confirmation — la carte est en ligne.
+     *
+     * Accessible uniquement à qui possède une carte publiée : y arriver sans
+     * avoir payé n'aurait aucun sens, et l'écran promettrait des
+     * téléchargements que la policy refuserait ensuite.
+     */
+    public function confirmation(Request $request, QrCodeService $qr): View|RedirectResponse
+    {
+        /*
+         | Relecture en base, et non la relation déjà chargée : cet écran suit
+         | IMMÉDIATEMENT l'écriture qui publie la carte et ouvre l'abonnement.
+         | Un modèle mis en cache avant ce changement conclurait que la carte
+         | n'est pas en ligne et renverrait le client au tableau de bord juste
+         | après son paiement.
+         */
+        $profile = $request->user()->profile()->with('user.subscriptions')->first();
+
+        if (! $profile || ! $profile->isPubliclyVisible()) {
+            return redirect()->route('dashboard');
+        }
+
+        return view('abonnement.confirmation', [
+            'profile' => $profile,
+            'qrSvg' => $qr->svg($profile),
+            'publicUrl' => route('profile.public', $profile->slug),
+            'subscription' => $request->user()->activeSubscription(),
+        ]);
+    }
+}

@@ -1,0 +1,461 @@
+// =============================================================================
+// CARTE PVC — recto porteur, verso plateforme.
+//
+// FORMAT : ratio 1,586 (85,6 × 54 mm, norme ISO/IEC 7810 ID-1), porté par
+// aspect-ratio. Le conteneur s'adapte à la carte, JAMAIS l'inverse : aucune
+// hauteur fixe, aucun overflow qui la rognerait.
+//
+// TYPOGRAPHIE EN UNITÉS DE CONTENEUR (cqw). C'est le correctif du débordement :
+// à 190 px de large, la carte fait 120 px de haut, et un nom en 22 px fixes n'y
+// tenait pas — il était coupé. En cqw, tout suit la largeur réelle de la carte,
+// donc le contenu tient à TOUTE largeur, par construction.
+// Une valeur en px précède chaque déclaration : c'est le repli des navigateurs
+// qui ignorent les unités de conteneur.
+//
+// SANS JAVASCRIPT, les deux faces s'empilent. La bascule 3D n'existe que si le
+// script a posé .is-flippable — le CSS seul ne masque jamais une face.
+// =============================================================================
+
+.pvc{
+  --pvc-teinte: #{$vert-fonce};
+  width:100%;
+  max-width:420px;
+}
+
+.pvc--sm{max-width:300px}
+.pvc--lg{max-width:520px}
+
+.pvc__scene{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+// -----------------------------------------------------------------------------
+// Les deux faces
+// -----------------------------------------------------------------------------
+.pvc__face{
+  container-type:inline-size;      // c'est la CARTE qui devient l'unité
+  position:relative;
+  width:100%;
+  aspect-ratio:1.586;
+  // RAYON ZÉRO — rectangle strict, sur les deux faces et à toutes les tailles.
+  // Le !important n'est pas une facilité : il neutralise par avance toute
+  // règle d'un conteneur de carte générique qui réappliquerait un arrondi.
+  border-radius:0 !important;
+  overflow:hidden;
+  color:$blanc;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:6cqw 6cqw 5cqw;
+
+  // Dégradé diagonal : vert plus clair en haut à gauche, très foncé en bas
+  // à droite. Surface mate — aucun éclat, seulement le reflet oblique.
+  background:linear-gradient(135deg,
+    color-mix(in srgb, var(--pvc-teinte) 74%, white) 0%,
+    var(--pvc-teinte) 42%,
+    color-mix(in srgb, var(--pvc-teinte) 62%, black) 100%);
+
+  // Ombre portée diffuse + fine arête claire suggérant l'épaisseur du PVC.
+  box-shadow:
+    0 22px 45px rgba(10,31,26,.30),
+    0 4px 10px rgba(10,31,26,.18),
+    inset 0 0 0 1px rgba(255,255,255,.15);
+}
+
+// Reflet oblique : ce qui donne l'impression du plastique.
+.pvc__reflet{
+  position:absolute;
+  inset:-40% -10%;
+  // z-index 3 : le reflet traverse TOUT, visuel et bande comprise. C'est ce
+  // qui donne l'unité de surface d'une carte plastique.
+  z-index:3;
+  background:linear-gradient(102deg,
+    transparent 38%, rgba($blanc,.14) 47%, rgba($blanc,.03) 54%, transparent 62%);
+  pointer-events:none;
+}
+
+// --- RECTO : nom, QR inversé, fonction. Rien d'autre. ------------------------
+//
+// Le nom occupe la largeur, comme le « QR CODE » de la référence.
+//
+// AUCUNE TRONCATURE, ici non plus. Le -webkit-line-clamp posait des points de
+// suspension au-delà de deux lignes : sur une carte imprimée, un nom coupé est
+// un défaut définitif. Le texte s'enroule librement ; c'est le QR, en flex,
+// qui cède l'espace nécessaire.
+.pvc__nom{
+  position:relative;
+  font-size:9.5cqw;
+  font-weight:800;
+  font-stretch:condensed;          // honoré si la police en dispose
+  letter-spacing:-.02em;
+  line-height:.98;
+  text-align:center;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+
+// QR INVERSÉ : modules blancs à même le vert, aucun cadre.
+// ≈45 % de la hauteur de la carte, soit ≈28 % de sa largeur (ratio 1,586).
+.pvc__qr{
+  position:relative;
+  flex:1 1 auto;
+  display:grid;
+  place-items:center;
+  width:28cqw;
+  margin:2cqw 0;
+
+  svg{width:100%;height:auto;display:block}
+  // La zone de silence du SVG est transparente : c'est le vert qui la remplit,
+  // et c'est lui qui contraste avec les modules blancs.
+  svg path{fill:#FFFFFF}
+}
+
+.pvc__qr-absent{
+  font-size:2.6cqw;
+  color:rgba($blanc,.7);
+  text-align:center;
+  line-height:1.3;
+}
+
+// La fonction s'enroule elle aussi plutôt que d'être coupée.
+.pvc__fonction{
+  position:relative;
+  font-size:3.4cqw;
+  font-weight:600;
+  letter-spacing:.28em;
+  line-height:1.4;
+  color:rgba($blanc,.88);
+  text-align:center;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+
+// --- VERSO : visuel organique + bande verticale à texte tourné --------------
+//
+// CONTREPOINT DU RECTO. Le recto est centré, symétrique, horizontal, dominé
+// par le QR sur fond uni. Le verso est vertical, asymétrique, dominé par un
+// visuel plein cadre et par une typographie tournée. C'est ce contraste qui
+// fait la qualité du jeu recto verso.
+.pvc__face--verso{
+  padding:0;
+  align-items:stretch;
+  justify-content:flex-start;
+}
+
+// VISUEL ORGANIQUE — des FORMES, pas une brume.
+//
+// La version précédente s'arrêtait trop tôt (transparence dès 62 %) : les
+// halos se fondaient les uns dans les autres et le résultat était un flou
+// vert uniforme. Ici chaque dégradé garde sa couleur pleine jusqu'à 34-46 %
+// puis chute vite — c'est cette pente raide qui donne un bord lisible, donc
+// une forme identifiable.
+//
+// Tailles et positions volontairement dissemblables : deux formes larges et
+// sombres, deux formes vives à forte opacité, deux zones de lumière franche.
+// Aucune trame, aucune grille, aucune image — ce sont des dégradés peints par
+// le compositeur du navigateur, sans coût mesurable.
+.pvc__visuel{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(34% 44% at 24% 82%, rgba(90,240,190,.72) 0%, rgba(90,240,190,.30) 46%, rgba(90,240,190,0) 63%),
+    radial-gradient(26% 32% at 52% 30%, rgba(160,255,215,.42) 0%, rgba(160,255,215,.10) 44%, rgba(160,255,215,0) 60%),
+    radial-gradient(44% 56% at 78% 74%, rgba(30,158,122,.66) 0%, rgba(30,158,122,.22) 42%, rgba(30,158,122,0) 62%),
+    radial-gradient(52% 40% at 4% 22%, rgba(3,22,17,.92) 0%, rgba(3,22,17,.45) 40%, rgba(3,22,17,0) 66%),
+    radial-gradient(38% 50% at 86% 8%, rgba(3,22,17,.80) 0%, rgba(3,22,17,.30) 38%, rgba(3,22,17,0) 64%),
+    radial-gradient(30% 36% at 12% 54%, rgba(255,255,255,.20) 0%, rgba(255,255,255,0) 52%);
+}
+
+// BANDE VERTICALE — un tiers de la largeur, sur le bord droit, vert très
+// foncé et légèrement translucide pour laisser deviner le visuel dessous.
+.pvc__bande{
+  position:absolute;
+  top:0;right:0;bottom:0;
+  z-index:2;
+  width:34%;
+  background:rgba(4,26,20,.72);
+  border-left:1px solid rgba($blanc,.10);
+
+  // row-reverse : le premier enfant — le nom — se place contre le bord droit.
+  display:flex;
+  flex-direction:row-reverse;
+  align-items:center;
+  justify-content:flex-start;
+  gap:1.6cqw;
+  // Marge haute et basse généreuse : c'est elle qui garantit que le texte
+  // tourné ne touche jamais les bords.
+  padding:5cqw 3cqw;
+}
+
+/*
+ | TEXTE TOURNÉ À 90°, lu de bas en haut.
+ |
+ | writing-mode place l'axe du texte à la verticale ; la rotation de 180°
+ | inverse le sens de lecture pour qu'il monte. Un simple rotate(-90deg)
+ | aurait laissé la boîte horizontale et cassé la mise en page — ici la boîte
+ | devient réellement haute et étroite, donc la bande la contient.
+ |
+ | AUCUNE TRONCATURE. text-overflow:ellipsis a été retiré : sur une carte
+ | destinée à l'impression, un texte coupé par des points de suspension est
+ | un défaut définitif. Les tailles ci-dessous sont calculées pour que tout
+ | tienne dans la hauteur disponible, et l'accroche passe sur plusieurs
+ | colonnes plutôt que d'être rognée.
+ */
+.pvc__bande-nom,
+.pvc__bande-accroche,
+.pvc__bande-site{
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  max-height:100%;
+}
+
+/*
+ | Le nom occupe une grande part de la hauteur, sans la dépasser.
+ |
+ | Hauteur utile = (largeur / 1,586) − 2 × 5cqw de marge ≈ 53cqw.
+ | « QRID » fait 4 caractères ; en gras, l'avance moyenne vaut ≈ 0,72 em,
+ | soit 2,9 × la taille de police. À 14cqw : 40,6cqw, largement dans les
+ | 53cqw disponibles. Une marque plus longue réduirait d'autant la marge —
+ | d'où le max-height, qui borne sans jamais couper.
+ */
+.pvc__bande-nom{
+  font-size:14cqw;
+  font-weight:800;
+  font-stretch:condensed;
+  letter-spacing:-.02em;
+  line-height:1;
+  color:$blanc;
+  white-space:nowrap;
+}
+
+// L'accroche s'enroule sur plusieurs colonnes si nécessaire : jamais coupée.
+.pvc__bande-accroche{
+  font-size:2.6cqw;
+  font-weight:600;
+  letter-spacing:.05em;
+  line-height:1.35;
+  color:$vert-accent;
+  white-space:normal;
+}
+
+.pvc__bande-site{
+  font-size:2.2cqw;
+  font-weight:600;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:rgba($blanc,.55);
+  white-space:nowrap;
+}
+
+// -----------------------------------------------------------------------------
+// ZONE VISUELLE — deux tiers gauche : logo en haut, code-barres en bas
+// -----------------------------------------------------------------------------
+.pvc__zone{
+  position:absolute;
+  top:0;left:0;bottom:0;
+  z-index:2;
+  width:66%;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:5cqw;
+}
+
+// Logo posé à même le visuel, détaché par une ombre douce.
+.pvc__logo{
+  width:7cqw;height:7cqw;
+  flex:0 0 auto;
+  color:$blanc;
+  filter:drop-shadow(0 .6cqw 1.2cqw rgba(0,0,0,.45));
+}
+
+.pvc__barres{
+  display:flex;
+  flex-direction:column;
+  gap:.8cqw;
+  width:76%;
+
+  svg{
+    width:100%;
+    height:6cqw;
+    display:block;
+    filter:drop-shadow(0 .3cqw .6cqw rgba(0,0,0,.4));
+  }
+}
+
+.pvc__barres-slug{
+  font-size:2cqw;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:rgba($blanc,.62);
+}
+
+// -----------------------------------------------------------------------------
+// PERSPECTIVE ET PERMUTATION 3D — activées par le script uniquement
+// -----------------------------------------------------------------------------
+.pvc.is-flippable{
+  .pvc__scene{
+    display:block;
+    position:relative;
+    aspect-ratio:1.586;
+    perspective:1600px;
+  }
+
+  .pvc__face{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    // Légère inclinaison au repos : la carte se détache du fond.
+    transition:transform 600ms cubic-bezier(.2,.7,.2,1);
+  }
+
+  .pvc__face--recto{transform:rotateY(-7deg) rotateX(3deg)}
+  .pvc__face--verso{transform:rotateY(173deg) rotateX(3deg)}
+
+  &.is-flipped .pvc__face--recto{transform:rotateY(-187deg) rotateX(3deg)}
+  &.is-flipped .pvc__face--verso{transform:rotateY(-7deg) rotateX(3deg)}
+}
+
+.pvc__commande{
+  margin-top:16px;
+  display:flex;
+  justify-content:center;
+
+  &[hidden]{display:none}
+}
+
+// Mouvement réduit : la carte permute sans rotation ni inclinaison.
+@media (prefers-reduced-motion:reduce){
+  .pvc.is-flippable{
+    .pvc__face{transition:none}
+    .pvc__face--recto{transform:none}
+    .pvc__face--verso{transform:rotateY(180deg)}
+    &.is-flipped .pvc__face--recto{transform:rotateY(-180deg)}
+    &.is-flipped .pvc__face--verso{transform:none}
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Repli : navigateurs sans unités de conteneur.
+// Les tailles reviennent au pixel, calibrées sur la largeur médiane.
+// -----------------------------------------------------------------------------
+@supports not (container-type: inline-size){
+  .pvc__face{padding:20px}
+  .pvc__nom{font-size:32px}
+  .pvc__fonction{font-size:11px}
+  .pvc__qr{width:95px}
+  .pvc__bande-nom{font-size:48px}
+  .pvc__bande-accroche{font-size:9px}
+  .pvc__bande-site{font-size:8px}
+  .pvc__zone{padding:17px}
+  .pvc__logo{width:24px;height:24px}
+  .pvc__barres svg{height:20px}
+  .pvc__barres-slug{font-size:7px}
+}
+
+// -----------------------------------------------------------------------------
+// PRÉSENTATION « DUO » — les deux faces superposées en perspective,
+// comme sur la référence. Sert au design-system et à l'aperçu.
+// -----------------------------------------------------------------------------
+.pvc--duo{
+  max-width:520px;
+
+  .pvc__scene{
+    display:block;
+    position:relative;
+    padding:6% 0 18%;
+  }
+
+  .pvc__face{
+    transform-origin:center;
+    transition:none;
+  }
+
+  // Le recto passe devant, incliné ; le verso apparaît derrière, décalé.
+  .pvc__face--recto{
+    position:relative;
+    z-index:2;
+    width:78%;
+    transform:rotate(-7deg);
+  }
+
+  .pvc__face--verso{
+    position:absolute;
+    z-index:1;
+    right:0;bottom:6%;
+    width:74%;
+    transform:rotate(4deg);
+  }
+}
+
+@media (max-width:520px){
+  // Sous 520px la superposition devient illisible : on empile.
+  .pvc--duo .pvc__scene{display:flex;flex-direction:column;gap:16px;padding:0}
+  .pvc--duo .pvc__face{position:relative;width:100%;transform:none;right:auto;bottom:auto}
+}
+
+// =============================================================================
+// APERÇU — les deux visuels côte à côte
+// =============================================================================
+.preview__duo{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:44px;
+  justify-items:center;
+  margin:32px 0 40px;
+}
+
+.preview__col{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  width:100%;
+  max-width:520px;
+}
+
+.preview__legend{
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--texte-2);
+  margin:0 0 18px;
+}
+
+.preview__note{
+  font-size:12.5px;
+  color:var(--texte-2);
+  margin:16px 0 0;
+  text-align:center;
+}
+
+.preview__action{margin-top:8px}
+
+@media (min-width:900px){
+  .preview__duo{
+    grid-template-columns:1fr 1fr;
+    align-items:start;
+    gap:56px;
+  }
+}
+
+// Coche de confirmation après paiement.
+.confirm__coche{
+  width:64px;height:64px;
+  margin:0 auto 20px;
+  border-radius:$r-full;
+  background:var(--accent-doux);
+  color:var(--accent);
+  display:grid;place-items:center;
+}
+
+// Téléchargements sous la carte.
+.board-downloads{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:20px;
+}

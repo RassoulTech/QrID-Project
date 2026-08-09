@@ -1,0 +1,66 @@
+// =============================================================================
+// ANIMATIONS — CSS UNIQUEMENT, aucune ligne de JavaScript.
+// Déclenchées au CHARGEMENT ou au SURVOL. Jamais au défilement (impossible
+// sans JS). Toutes désactivées sous prefers-reduced-motion.
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Entrée : opacité 0 → 1 et translateY(24px) → 0, sur 500ms
+// -----------------------------------------------------------------------------
+@keyframes enter-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim-enter {
+  opacity: 0;
+  animation: enter-up 500ms cubic-bezier(.22, .61, .36, 1) forwards;
+}
+
+// Retard progressif de 100ms entre les éléments du hero
+@for $i from 1 through 6 {
+  .anim-delay-#{$i} { animation-delay: #{$i * 100}ms; }
+}
+
+// -----------------------------------------------------------------------------
+// Soulignement du groupe de mots : trait épais 8px vert-050 DERRIÈRE le texte,
+// animé en largeur de 0 à 100 % sur 600ms au chargement.
+// -----------------------------------------------------------------------------
+@keyframes underline-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.headline-mark {
+  position: relative;
+  color: $vert-900;
+  white-space: nowrap;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    height: 8px;
+    background: $vert-050;
+    z-index: -1;
+    transform-origin: left center;
+    animation: underline-grow 600ms cubic-bezier(.22, .61, .36, 1) 400ms backwards;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Désactivation stricte
+// -----------------------------------------------------------------------------
+@media (prefers-reduced-motion: reduce) {
+  .anim-enter,
+  .headline-mark::after {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .card--hover:hover { transform: none !important; }
+  .btn:active { transform: none !important; }
+}
