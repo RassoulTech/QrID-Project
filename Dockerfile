@@ -139,6 +139,13 @@ COPY docker/php.ini          /usr/local/etc/php/conf.d/qrid.ini
 COPY docker/nginx.conf       /etc/nginx/nginx.conf.template
 COPY docker/supervisord.conf /etc/supervisord.conf
 COPY docker/entrypoint.sh    /usr/local/bin/entrypoint
+
+# « zzz » pour être chargé EN DERNIER : php-fpm lit son dossier de
+# configuration par ordre alphabétique, et la dernière valeur l'emporte.
+# Ce fichier impose clear_env = no — sans lui, aucune variable de Render
+# n'atteindrait PHP. Voir le commentaire détaillé dans le fichier.
+COPY docker/php-fpm.conf     /usr/local/etc/php-fpm.d/zzz-qrid.conf
+
 RUN chmod +x /usr/local/bin/entrypoint
 
 WORKDIR /var/www

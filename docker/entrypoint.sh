@@ -53,6 +53,35 @@ if [ -z "${APP_URL:-}" ]; then
 fi
 
 # -----------------------------------------------------------------------------
+# 1 bis. CERTIFICAT TLS DE LA BASE DE DONNÉES
+# -----------------------------------------------------------------------------
+# Aiven impose le chiffrement (ssl-mode=REQUIRED) et présente un certificat
+# signé par SA PROPRE autorité, pas par une autorité publique. Le magasin de
+# certificats du système ne peut donc pas le valider : sans le fichier ca.pem
+# d'Aiven, la connexion est refusée.
+#
+# LE CERTIFICAT ARRIVE PAR UNE VARIABLE, PAS PAR LE DÉPÔT. Un fichier .pem
+# versionné ne serait pas un secret — un certificat d'autorité est public par
+# nature — mais ce dépôt-ci est public, et le fichier lierait le code à un
+# projet Aiven précis. Surtout, le jour où Aiven renouvelle son autorité, il
+# faudrait modifier le code et redéployer ; ici, c'est une variable à changer.
+#
+# Laissée vide, la connexion se fera sans vérification du certificat : elle
+# reste chiffrée, mais rien ne prouve l'identité du serveur. Acceptable pour
+# un essai, pas pour de vraies données de clients.
+if [ -n "${DB_SSL_CA_CONTENT:-}" ]; then
+    echo "→ certificat TLS de la base"
+    printf '%s\n' "$DB_SSL_CA_CONTENT" > /tmp/mysql-ca.pem
+    chmod 644 /tmp/mysql-ca.pem
+
+    # Le nom lu par config/database.php (clé MYSQL_ATTR_SSL_CA).
+    MYSQL_ATTR_SSL_CA=/tmp/mysql-ca.pem
+    export MYSQL_ATTR_SSL_CA
+else
+    echo "→ pas de certificat TLS fourni (DB_SSL_CA_CONTENT absente)"
+fi
+
+# -----------------------------------------------------------------------------
 # 2. LE PORT IMPOSÉ PAR RENDER
 # -----------------------------------------------------------------------------
 # Render choisit le port et le transmet par la variable PORT. nginx ne lit pas

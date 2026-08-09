@@ -76,6 +76,16 @@ services:
       - key: DB_PASSWORD
         sync: false
 
+      # Contenu du fichier ca.pem d'Aiven, collé tel quel (plusieurs lignes,
+      # de « -----BEGIN CERTIFICATE----- » à « -----END CERTIFICATE----- »).
+      # L'entrypoint l'écrit dans un fichier et le passe à PDO.
+      #
+      # Aiven exige ssl-mode=REQUIRED et signe avec sa propre autorité : le
+      # magasin du système ne peut pas la valider. Sans cette variable, la
+      # connexion reste chiffrée mais l'identité du serveur n'est pas vérifiée.
+      - key: DB_SSL_CA_CONTENT
+        sync: false
+
       # --- Sessions, cache, file d'attente -----------------------------------
       # TOUT EN BASE, RIEN SUR LE DISQUE. Le disque du conteneur disparaît à
       # chaque déploiement : en `file`, chaque mise en ligne déconnecterait
