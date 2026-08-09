@@ -97,6 +97,34 @@ else
 fi
 
 # -----------------------------------------------------------------------------
+# 4 bis. DONNÉES DE RÉFÉRENCE
+# -----------------------------------------------------------------------------
+# `migrate` crée les tables VIDES. Sans cette étape, une base neuve n'aurait
+# ni formule tarifaire ni modèle de carte :
+#
+#   · aucune formule → l'inscription échoue, l'essai gratuit n'existant pas ;
+#   · aucun modèle   → l'étape 2 du parcours de création est vide ;
+#   · aucun compte administrateur.
+#
+# Autrement dit : l'application démarrerait, et personne ne pourrait s'en
+# servir. Le défaut ne se serait vu qu'à la première inscription.
+#
+# TROIS GARANTIES rendent cette commande sûre à chaque démarrage :
+#
+#   1. les trois seeders passent par updateOrCreate — rejouables sans doublon ;
+#   2. DatabaseSeeder n'appelle DemoSeeder et AdminDemoSeeder que si
+#      app()->environment('local'). En production, APP_ENV vaut « production » :
+#      les 60 comptes de démonstration ne peuvent PAS arriver en ligne ;
+#   3. AdminSeeder s'ignore de lui-même si ADMIN_EMAIL et ADMIN_PASSWORD sont
+#      absents, sans faire échouer le démarrage.
+if [ "${RUN_SEEDERS:-true}" = "true" ]; then
+    echo "→ données de référence (formules, modèles, administrateur)"
+    php artisan db:seed --force --ansi
+else
+    echo "→ données de référence ignorées (RUN_SEEDERS=false)"
+fi
+
+# -----------------------------------------------------------------------------
 # 5. LIEN DE STOCKAGE
 # -----------------------------------------------------------------------------
 # public/storage → storage/app/public. Sans lui, aucune photo de profil ni
