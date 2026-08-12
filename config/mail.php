@@ -45,7 +45,23 @@ return [
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+
+            /*
+             | DÉLAI D'ATTENTE SMTP — 10 secondes, et ce n'est pas un détail.
+             |
+             | À `null`, PHP retombe sur default_socket_timeout : SOIXANTE
+             | SECONDES. En production, QUEUE_CONNECTION vaut `sync` : l'envoi
+             | se fait donc DANS la requête HTTP. Un serveur SMTP lent à
+             | répondre bloquait ainsi la page une minute entière avant même
+             | d'échouer — l'utilisateur regarde un écran figé et recharge,
+             | ce qui déclenche une seconde tentative.
+             |
+             | Dix secondes suffisent largement à Gmail depuis Francfort. Au
+             | delà, quelque chose ne va pas et il vaut mieux le dire vite que
+             | de faire patienter.
+             */
+            'timeout' => (int) env('MAIL_TIMEOUT', 10),
+
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
