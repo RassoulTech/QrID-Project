@@ -16,6 +16,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0B5D3B">
 
+    @include('layouts.partials.icons')
+
     <title>{{ $title ?? config('app.name') }}</title>
 
     @isset($description)

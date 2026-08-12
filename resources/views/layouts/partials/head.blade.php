@@ -4,6 +4,8 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="theme-color" content="#0B3B2E">
 
+@include('layouts.partials.icons')
+
 <title>{{ isset($title) ? $title.' — '.config('app.name') : config('app.name') }}</title>
 
 @isset($description)

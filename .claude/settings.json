@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Windows/Fonts//**)",
+      "Bash(grep -iE \"^\\(arialbd|arial|segoeuib|calibrib|verdanab\\)\\\\.ttf$\")",
+      "Bash(php -r 'echo implode\\(\", \", array_filter\\([\"gd\"=>extension_loaded\\(\"gd\"\\),\"freetype\"=>function_exists\\(\"imagettftext\"\\)], fn\\($v\\)=>$v\\) ? [\"gd\",\"freetype\"] : []\\), PHP_EOL;')",
+      "Bash(git check-ignore *)",
+      "Bash(php -r ' *)"
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="QrID">
+  <!--
+    Icône vectorielle de QrID — reprend .brand__mark : pastille arrondie en
+    vert foncé, monogramme QI en blanc.
+
+    POURQUOI UNE VERSION SVG EN PLUS DES PNG : elle reste nette sur un écran
+    à haute densité comme dans un onglet épinglé, et pèse moins qu'un PNG de
+    32 pixels. Les navigateurs qui ne la comprennent pas retombent sur le
+    favicon.ico déclaré juste après.
+
+    textLength FORCE LA LARGEUR DU MONOGRAMME. C'est le point délicat d'un
+    SVG contenant du texte : la police demandée n'existe pas forcément sur la
+    machine du visiteur, et une substitution plus large déborderait de la
+    pastille. Avec textLength et lengthAdjust, les deux lettres occupent
+    exactement 34 unités quelle que soit la police retenue.
+  -->
+  <rect width="64" height="64" rx="18" fill="#0B3B2E"/>
+  <text x="32" y="32"
+        text-anchor="middle" dominant-baseline="central"
+        font-family="Arial Black, Arial Bold, Arial, Helvetica, sans-serif"
+        font-weight="800" font-size="27"
+        textLength="34" lengthAdjust="spacingAndGlyphs"
+        fill="#FFFFFF">QI</text>
+</svg>

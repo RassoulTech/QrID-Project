@@ -6,6 +6,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0B5D3B">
+
+    @include('layouts.partials.icons')
     <title>@yield('title') — {{ config('app.name') }}</title>
     @vite(['resources/sass/app.scss'])
 </head>

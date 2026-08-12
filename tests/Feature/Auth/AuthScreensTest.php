@@ -134,11 +134,23 @@ class AuthScreensTest extends TestCase
         );
     }
 
-    /** Aucune connexion par un tiers : ni Google, ni Apple, ni Facebook. */
+    /**
+     * Aucune connexion par un tiers : ni Google, ni Apple, ni Facebook.
+     *
+     * LES BALISES <link> SONT RETIRÉES AVANT LA RECHERCHE, et c'est une
+     * précision, pas un assouplissement. La déclaration d'icône iOS s'écrit
+     * `rel="apple-touch-icon"` — un nom imposé par le système, qu'aucune
+     * alternative ne remplace. Sans ce retrait, le test déclarait une
+     * « connexion Apple » sur les sept écrans à cause d'un favori.
+     *
+     * Ce qu'il continue de surveiller reste entier : boutons, liens,
+     * formulaires, scripts et texte visible. Une balise <link> ne peut pas
+     * être un bouton de connexion ; tout le reste, si.
+     */
     #[DataProvider('ecrans')]
     public function test_no_third_party_sign_in(string $ecran): void
     {
-        $html = mb_strtolower($this->html($ecran));
+        $html = mb_strtolower(preg_replace('/<link\b[^>]*>/i', '', $this->html($ecran)));
 
         foreach (['google', 'apple', 'facebook'] as $tiers) {
             $this->assertStringNotContainsString(
