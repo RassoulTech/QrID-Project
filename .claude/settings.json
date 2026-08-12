@@ -5,7 +5,24 @@
       "Bash(grep -iE \"^\\(arialbd|arial|segoeuib|calibrib|verdanab\\)\\\\.ttf$\")",
       "Bash(php -r 'echo implode\\(\", \", array_filter\\([\"gd\"=>extension_loaded\\(\"gd\"\\),\"freetype\"=>function_exists\\(\"imagettftext\"\\)], fn\\($v\\)=>$v\\) ? [\"gd\",\"freetype\"] : []\\), PHP_EOL;')",
       "Bash(git check-ignore *)",
-      "Bash(php -r ' *)"
+      "Bash(php -r ' *)",
+      "Bash(grep -n \"config\\\\|@include\\\\|\\\\$\" resources/views/legal/page.blade.php)",
+      "Bash(grep -v \"^\\\\s*//\")",
+      "Bash(cd \"C:/Users/HP/.claude/projects/c--Users-HP-Documents-perso-PROJECTS-SamaKart-identite-pro/memory\" && ls && echo \"--- MEMORY.md ---\" && cat MEMORY.md 2>/dev/null || echo \"\\(absent\\)\")",
+      "Read(//c/Users/HP/.claude/projects/c--Users-HP-Documents-perso-PROJECTS-SamaKart-identite-pro/memory/**)",
+      "Bash(rm -f /tmp/adm.sqlite)",
+      "Bash(touch /tmp/adm.sqlite)",
+      "Bash(export APP_ENV=production DB_CONNECTION=sqlite DB_DATABASE=/tmp/adm.sqlite \\\\ *)",
+      "Bash(curl -s -o /dev/null -w \"  accueil  : %{http_code}\\\\n\" --max-time 90 https://qrid-uutz.onrender.com/)",
+      "Bash(curl -s -o /dev/null -w \"  connexion: %{http_code}\\\\n\" --max-time 90 https://qrid-uutz.onrender.com/login)",
+      "Bash(curl -s -o /dev/null -w \"  favicon.svg : %{http_code}\\\\n\" --max-time 60 https://qrid-uutz.onrender.com/favicon.svg)",
+      "Bash(curl -s --max-time 90 https://qrid-uutz.onrender.com/login)",
+      "Bash(curl -s -o /dev/null -w \"  /forgot-password : %{http_code}\\\\n\" --max-time 60 https://qrid-uutz.onrender.com/forgot-password)",
+      "Bash(php -r 'echo \"  default_socket_timeout = \", ini_get\\(\"default_socket_timeout\"\\), \" secondes\\\\n\";')",
+      "Bash(php -l config/mail.php)",
+      "Bash(php -r 'echo \"  timeout lu : \", \\(int\\) \\(getenv\\(\"MAIL_TIMEOUT\"\\) ?: 10\\), \" s\\\\n\";')",
+      "Bash(curl -s -I --max-time 90 https://qrid-uutz.onrender.com/build/assets/app-DuaEYclB.css)",
+      "Bash(curl -s -H \"Accept-Encoding: gzip\" -o /dev/null -w \"  accueil compresse : %{size_download} o \\(contre 34429 non compresse\\)\\\\n\" --max-time 90 https://qrid-uutz.onrender.com/)"
     ]
   }
 }

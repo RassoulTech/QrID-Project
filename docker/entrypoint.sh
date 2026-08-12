@@ -115,6 +115,34 @@ else
 fi
 
 # -----------------------------------------------------------------------------
+# 1 quater. FILE D'ATTENTE SANS WORKER — le piège silencieux
+# -----------------------------------------------------------------------------
+# Les e-mails partent par Mail::queue(). Avec un pilote autre que « sync », le
+# message est écrit dans la table `jobs` et attend qu'un worker le reprenne.
+#
+# Or aucun worker ne tourne : le plan gratuit de Render n'exécute qu'un
+# service web. Les messages s'empilent donc sans jamais partir, ET SANS LA
+# MOINDRE ERREUR — la page confirme même l'envoi à l'utilisateur.
+#
+# C'est exactement ce qui a fait échouer la réinitialisation de mot de passe :
+# la page répondait, le jeton était créé, le délai de sécurité s'armait, et
+# aucun message n'arrivait.
+#
+# On avertit ici plutôt que d'imposer `sync` de force : le jour où un worker
+# existera, `database` deviendra le bon réglage et rien ne devra être défait.
+if [ "${QUEUE_CONNECTION:-sync}" != "sync" ]; then
+    echo ""
+    echo "  ATTENTION — QUEUE_CONNECTION vaut « ${QUEUE_CONNECTION} »."
+    echo ""
+    echo "    Les e-mails seront déposés dans la table jobs et n'en sortiront"
+    echo "    que si un worker exécute « php artisan queue:work »."
+    echo "    Sans worker, AUCUN e-mail ne partira, et aucune erreur ne le dira."
+    echo ""
+    echo "    Passez QUEUE_CONNECTION à « sync » tant qu'aucun worker n'existe."
+    echo ""
+fi
+
+# -----------------------------------------------------------------------------
 # 2. LE PORT IMPOSÉ PAR RENDER
 # -----------------------------------------------------------------------------
 # Render choisit le port et le transmet par la variable PORT. nginx ne lit pas
