@@ -21,6 +21,41 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+
+        /*
+         |---------------------------------------------------------------------
+         | DERRIÈRE UN PROXY — Render, et tout hébergeur qui termine le TLS
+         |---------------------------------------------------------------------
+         | Render déchiffre le HTTPS sur son proxy et transmet la requête EN
+         | CLAIR au conteneur, en signalant l'origine par l'en-tête
+         | X-Forwarded-Proto: https.
+         |
+         | Sans cette ligne, Laravel ne lit pas cet en-tête : il se croit en
+         | HTTP et fabrique TOUTES ses adresses en http://. La page, elle, est
+         | servie en https. Le navigateur bloque alors le contenu mixte — sans
+         | le moindre message visible.
+         |
+         | C'est ce qui a produit, au premier déploiement réussi, une page
+         | complète et entièrement dépouillée de son style : le fichier CSS
+         | existait bien (200, 316 Ko), seule son adresse était en http.
+         |
+         | ET LE CSS N'ÉTAIT QUE LA PARTIE VISIBLE. La même erreur touchait :
+         |
+         |   · les QR Codes, qui auraient encodé une adresse en http —
+         |     imprimée sur des cartes PVC, donc irrattrapable ;
+         |   · les liens des e-mails de confirmation d'inscription ;
+         |   · le cookie de session marqué « secure », qu'un navigateur refuse
+         |     de poser sur ce qu'il croit être une connexion non chiffrée.
+         |
+         | POURQUOI « * » ET NON UNE LISTE D'ADRESSES : Render ne publie pas
+         | les adresses de ses proxys, et elles changent. Sur une plateforme de
+         | ce type, seul le proxy peut atteindre le conteneur — l'application
+         | n'est pas joignable directement depuis Internet. Restreindre à une
+         | liste qu'on ne peut pas tenir à jour reviendrait à casser le site au
+         | premier changement d'infrastructure.
+         */
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'wizard.step' => EnsureWizardStepIsAvailable::class,
             'admin' => EnsureUserIsAdmin::class,
