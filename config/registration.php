@@ -38,7 +38,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Compte administrateur (AdminSeeder)
+    | Comptes administrateurs (AdminSeeder)
     |--------------------------------------------------------------------------
     | Sans ADMIN_EMAIL ni ADMIN_PASSWORD, aucun compte privilégié n'est créé.
     */
@@ -48,6 +48,35 @@ return [
         'password' => env('ADMIN_PASSWORD'),
         'name' => env('ADMIN_NAME', 'Administrateur'),
         'phone' => env('ADMIN_PHONE'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | L'ÉQUIPE — comptes administrateurs supplémentaires
+    |--------------------------------------------------------------------------
+    | Format attendu, séparé par des virgules :
+    |
+    |   ADMIN_TEAM="adresse@exemple.sn|Prénom Nom, autre@exemple.sn|Prénom Nom"
+    |
+    | Le mot de passe initial est commun à tous : ADMIN_TEAM_PASSWORD. Chacun
+    | le change depuis « Mon compte » dès sa première connexion.
+    |
+    | CE MOT DE PASSE N'EST POSÉ QU'À LA CRÉATION DU COMPTE. Le seeder tourne
+    | à chaque démarrage du conteneur ; s'il le réécrivait, tout changement
+    | serait annulé au déploiement suivant — silencieusement.
+    */
+    'team' => [
+        'members' => env('ADMIN_TEAM'),
+        'password' => env('ADMIN_TEAM_PASSWORD'),
+
+        /*
+         | Un compte d'administration peut bloquer un client, désactiver un
+         | profil et modifier les tarifs. Un mot de passe initial court, même
+         | destiné à être changé, reste en base tant qu'il ne l'est pas — et
+         | il est identique pour toute l'équipe. Douze caractères est un
+         | plancher, pas un objectif.
+         */
+        'longueur_minimale' => 12,
     ],
 
 ];
