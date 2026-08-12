@@ -77,6 +77,27 @@ return [
             // ],
         ],
 
+        /*
+        |----------------------------------------------------------------------
+        | RESEND — envoi par HTTPS, et non par SMTP
+        |----------------------------------------------------------------------
+        | LA RAISON D'ÊTRE DE CE TRANSPORT dans ce projet : SMTP ne fonctionne
+        | pas de façon fiable depuis un conteneur Render. La connexion vers
+        | smtp.gmail.com n'aboutit pas, le délai d'attente expire, et la
+        | requête HTTP finit en erreur 500 sous les yeux de l'utilisateur.
+        |
+        | Resend envoie par une requête HTTPS ordinaire sur le port 443 :
+        |
+        |   · aucun port exotique susceptible d'être filtré ;
+        |   · quelques centaines de millisecondes au lieu de plusieurs
+        |     secondes d'échanges SMTP ;
+        |   · une erreur de l'API est explicite, là où un échec SMTP se
+        |     résume souvent à un délai dépassé.
+        |
+        | Aucun nom de domaine n'est nécessaire pour démarrer : Resend fournit
+        | une adresse d'expédition de test. Le jour où qrid.sn existera, il
+        | suffira de vérifier le domaine et de changer MAIL_FROM_ADDRESS.
+        */
         'resend' => [
             'transport' => 'resend',
         ],

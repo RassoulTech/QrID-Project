@@ -25,7 +25,12 @@
       "Bash(curl -s -H \"Accept-Encoding: gzip\" -o /dev/null -w \"  accueil compresse : %{size_download} o \\(contre 34429 non compresse\\)\\\\n\" --max-time 90 https://qrid-uutz.onrender.com/)",
       "Bash(python -)",
       "Bash(php -l app/Models/User.php)",
-      "Bash(php -l app/Services/RegistrationService.php)"
+      "Bash(php -l app/Services/RegistrationService.php)",
+      "Bash(composer require *)",
+      "Bash(composer audit *)",
+      "Bash(composer show *)",
+      "Bash(composer update *)",
+      "Bash(php -l app/Http/Controllers/Auth/PasswordResetLinkController.php)"
     ]
   }
 }
