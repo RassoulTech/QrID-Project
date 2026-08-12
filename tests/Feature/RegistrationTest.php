@@ -52,7 +52,7 @@ class RegistrationTest extends TestCase
         $this->assertNotNull($pending->ip_hash);
         $this->assertNotNull($pending->created_at);
 
-        Mail::assertQueued(ConfirmRegistrationMail::class);
+        Mail::assertSent(ConfirmRegistrationMail::class);
     }
 
     /**

@@ -37,7 +37,7 @@ class PasswordResetTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertSessionHas('status');
 
-        Mail::assertQueued(
+        Mail::assertSent(
             ResetPasswordMail::class,
             fn (ResetPasswordMail $mail) => $mail->hasTo($user->email)
         );
@@ -50,7 +50,7 @@ class PasswordResetTest extends TestCase
 
         $this->post('/forgot-password', ['email' => 'personne@exemple.sn']);
 
-        Mail::assertNothingQueued();
+        Mail::assertNothingSent();
     }
 
     public function test_reset_password_screen_can_be_rendered(): void
@@ -114,12 +114,19 @@ class PasswordResetTest extends TestCase
 
     // -----------------------------------------------------------------------
 
-    /** L'URL exacte contenue dans l'e-mail mis en file. */
+    /**
+     * L'URL exacte contenue dans l'e-mail ENVOYÉ.
+     *
+     * `Mail::sent()` et non `Mail::queued()` : le lien de réinitialisation
+     * part désormais immédiatement, sans passer par la file. Aucun worker
+     * n'existe en production ; un message mis en file n'en serait jamais
+     * ressorti.
+     */
     private function lienDeReinitialisation(): string
     {
-        $mail = Mail::queued(ResetPasswordMail::class)->first();
+        $mail = Mail::sent(ResetPasswordMail::class)->first();
 
-        $this->assertNotNull($mail, 'Aucun e-mail de réinitialisation n\'a été mis en file.');
+        $this->assertNotNull($mail, 'Aucun e-mail de réinitialisation n\'a été envoyé.');
 
         return $mail->resetUrl;
     }

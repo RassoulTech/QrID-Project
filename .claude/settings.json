@@ -22,7 +22,10 @@
       "Bash(php -l config/mail.php)",
       "Bash(php -r 'echo \"  timeout lu : \", \\(int\\) \\(getenv\\(\"MAIL_TIMEOUT\"\\) ?: 10\\), \" s\\\\n\";')",
       "Bash(curl -s -I --max-time 90 https://qrid-uutz.onrender.com/build/assets/app-DuaEYclB.css)",
-      "Bash(curl -s -H \"Accept-Encoding: gzip\" -o /dev/null -w \"  accueil compresse : %{size_download} o \\(contre 34429 non compresse\\)\\\\n\" --max-time 90 https://qrid-uutz.onrender.com/)"
+      "Bash(curl -s -H \"Accept-Encoding: gzip\" -o /dev/null -w \"  accueil compresse : %{size_download} o \\(contre 34429 non compresse\\)\\\\n\" --max-time 90 https://qrid-uutz.onrender.com/)",
+      "Bash(python -)",
+      "Bash(php -l app/Models/User.php)",
+      "Bash(php -l app/Services/RegistrationService.php)"
     ]
   }
 }

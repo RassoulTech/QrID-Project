@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -211,9 +212,30 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Remplace la notification Laravel par défaut (anglaise, marquée « Laravel »)
-     * par le Mailable du produit, mis en file comme tous les autres e-mails.
-     * L'URL est construite à partir d'APP_URL via route(), jamais en dur.
+     * ENVOI IMMÉDIAT, JAMAIS PAR LA FILE.
+     *
+     * Cette méthode appelait Mail::queue(). Le message partait alors dans la
+     * table `jobs` et n'en ressortait que si un worker exécutait
+     * `queue:work`. Or aucun worker ne tourne : le plan gratuit de Render
+     * n'héberge qu'un service web.
+     *
+     * Conséquence exacte, constatée en production : la page répondait, le
+     * jeton de réinitialisation était créé, le délai de sécurité de soixante
+     * secondes s'armait — et AUCUN E-MAIL NE PARTAIT. Sans erreur, sans
+     * trace. L'utilisateur recliquait, tombait sur « Merci de patienter »,
+     * et concluait que l'application était cassée.
+     *
+     * `send()` supprime cette dépendance. Le message part pendant la requête,
+     * quelle que soit la valeur de QUEUE_CONNECTION. C'est une seconde
+     * d'attente de plus — et un lien qui arrive.
+     *
+     * LA RÉINITIALISATION DE MOT DE PASSE EST LE PIRE ENDROIT OÙ DIFFÉRER UN
+     * ENVOI : quelqu'un qui ne peut plus se connecter attend devant sa boîte.
+     * Le jour où un worker existera, les e-mails de confort — récapitulatifs,
+     * rappels — pourront repasser en file. Celui-ci restera immédiat.
+     *
+     * L'échec est journalisé ET relancé : une panne SMTP doit se voir, pas
+     * se taire derrière un « lien envoyé » qui serait faux.
      */
     public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
     {
@@ -224,8 +246,29 @@ class User extends Authenticatable implements MustVerifyEmail
 
         $ttl = config('auth.passwords.users.expire', 60);
 
-        Mail::to($this->email)->queue(
-            (new ResetPasswordMail($url, $ttl, $this->email))->onQueue('mail')
-        );
+        try {
+            Mail::to($this->email)->send(
+                new ResetPasswordMail($url, $ttl, $this->email)
+            );
+        } catch (\Throwable $e) {
+            // Trace en base : c'est ce que l'écran « État système » affiche,
+            // et le seul endroit où l'on constate une panne d'envoi.
+            MailLog::create([
+                'recipient' => $this->email,
+                'subject' => 'Réinitialisation du mot de passe',
+                'mailable' => ResetPasswordMail::class,
+                'mailer' => config('mail.default'),
+                'status' => 'failed',
+                'error' => mb_substr($e->getMessage(), 0, 500),
+                'sent_at' => null,
+            ]);
+
+            Log::channel('mail')->error('Envoi du lien de réinitialisation impossible', [
+                'to' => $this->email,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
     }
 }

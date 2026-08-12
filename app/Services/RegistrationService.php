@@ -69,11 +69,14 @@ class RegistrationService
             // Une éventuelle demande en attente devient caduque.
             PendingRegistration::where('email', $email)->delete();
 
-            Mail::to($email)->queue((new AlreadyRegisteredMail(
+            // Immédiat, comme la confirmation : c'est la seule réponse que
+            // recevra quelqu'un dont l'adresse est déjà prise. Différée, elle
+            // le laisse devant un écran qui ne dit rien.
+            Mail::to($email)->send(new AlreadyRegisteredMail(
                 loginUrl: route('login'),
                 resetUrl: route('password.request'),
                 recipient: $email,
-            ))->onQueue('mail'));
+            ));
 
             return RegistrationOutcome::AccountExists;
         }
@@ -186,13 +189,25 @@ class RegistrationService
             session()->put('registration.dev_token', $rawToken);
         }
 
-        Mail::to($pending->email)->queue(
-            (new ConfirmRegistrationMail(
+        /*
+         | ENVOI IMMÉDIAT — `send()` et non `queue()`.
+         |
+         | Sans worker exécutant queue:work, un message mis en file reste
+         | dans la table `jobs` et n'en sort jamais. Cet e-mail-ci porte le
+         | lien de confirmation : différé, il rend TOUTE création de compte
+         | impossible, sans qu'aucune erreur ne le signale.
+         |
+         | Quelqu'un qui vient de s'inscrire attend devant sa boîte. Une
+         | seconde d'attente sur la requête vaut mieux qu'un lien qui
+         | n'arrive pas.
+         */
+        Mail::to($pending->email)->send(
+            new ConfirmRegistrationMail(
                 $pending->name,
                 route('registration.confirm', ['token' => $rawToken]),
                 $ttl,
                 $pending->email
-            ))->onQueue('mail')
+            )
         );
     }
 

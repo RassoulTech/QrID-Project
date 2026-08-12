@@ -70,7 +70,7 @@ class RegistrationMatrixTest extends TestCase
         $this->assertDatabaseCount('users', 0);
         $this->assertDatabaseHas('pending_registrations', ['email' => 'inconnu@example.com']);
 
-        Mail::assertQueued(ConfirmRegistrationMail::class);
+        Mail::assertSent(ConfirmRegistrationMail::class);
         Mail::assertNotQueued(AlreadyRegisteredMail::class);
     }
 
@@ -89,7 +89,7 @@ class RegistrationMatrixTest extends TestCase
         $this->assertDatabaseCount('users', 1);              // rien créé
         $this->assertDatabaseCount('pending_registrations', 0);
 
-        Mail::assertQueued(AlreadyRegisteredMail::class);
+        Mail::assertSent(AlreadyRegisteredMail::class);
         Mail::assertNotQueued(ConfirmRegistrationMail::class);
     }
 
@@ -112,7 +112,7 @@ class RegistrationMatrixTest extends TestCase
         $this->assertNotSame($originalHash, $pending->token_hash); // jeton régénéré
         $this->assertSame(1, $pending->resend_count);
 
-        Mail::assertQueued(ConfirmRegistrationMail::class);
+        Mail::assertSent(ConfirmRegistrationMail::class);
     }
 
     // -----------------------------------------------------------------------
@@ -129,7 +129,7 @@ class RegistrationMatrixTest extends TestCase
         $this->register('limite@example.com')
             ->assertRedirect(route('registration.pending')); // écran IDENTIQUE
 
-        Mail::assertNothingQueued();
+        Mail::assertNothingSent();
     }
 
     // -----------------------------------------------------------------------
@@ -154,7 +154,7 @@ class RegistrationMatrixTest extends TestCase
         $this->assertSame(0, $fresh->resend_count);       // compteur remis à zéro
         $this->assertTrue($fresh->expires_at->isFuture());
 
-        Mail::assertQueued(ConfirmRegistrationMail::class);
+        Mail::assertSent(ConfirmRegistrationMail::class);
     }
 
     // -----------------------------------------------------------------------
@@ -174,7 +174,7 @@ class RegistrationMatrixTest extends TestCase
         $this->assertDatabaseCount('users', 1);
         $this->assertDatabaseCount('pending_registrations', 0);
 
-        Mail::assertQueued(AlreadyRegisteredMail::class);
+        Mail::assertSent(AlreadyRegisteredMail::class);
     }
 
     // -----------------------------------------------------------------------
@@ -253,7 +253,7 @@ class RegistrationMatrixTest extends TestCase
             ->assertRedirect(route('registration.pending'));
 
         $this->assertDatabaseHas('pending_registrations', ['email' => 'jetable@gwshare.com']);
-        Mail::assertQueued(ConfirmRegistrationMail::class);
+        Mail::assertSent(ConfirmRegistrationMail::class);
     }
 
     public function test_case_9_invalid_email_format_is_rejected(): void
@@ -262,7 +262,7 @@ class RegistrationMatrixTest extends TestCase
 
         $this->register('pas-une-adresse')->assertSessionHasErrors('email');
 
-        Mail::assertNothingQueued();
+        Mail::assertNothingSent();
     }
 
     // -----------------------------------------------------------------------
