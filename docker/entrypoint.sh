@@ -45,6 +45,39 @@ if [ -z "${DB_HOST:-}" ]; then
     exit 1
 fi
 
+# -----------------------------------------------------------------------------
+# 1 ter. MARQUE-PLACES NON REMPLACÉS
+# -----------------------------------------------------------------------------
+# Le premier déploiement a échoué exactement ainsi : DB_HOST valait la chaîne
+# « COLLEZ_ICI_L_HOTE_AIVEN », recopiée depuis un modèle de configuration.
+#
+# Tester seulement l'ABSENCE d'une variable ne suffit donc pas : un marque-place
+# est une valeur non vide, il franchit le contrôle, et l'erreur ne sort que
+# quarante lignes de trace PDO plus loin — sous la forme « Name does not
+# resolve », qui envoie chercher un problème de réseau ou de pare-feu.
+#
+# Une variable dont la valeur ressemble à une consigne n'est pas configurée.
+# On le dit en une ligne, à l'endroit où c'est réparable.
+for _cle in APP_KEY APP_URL DB_HOST DB_PORT DB_PASSWORD DB_USERNAME \
+            MAIL_PASSWORD ADMIN_PASSWORD; do
+    eval "_valeur=\${$_cle:-}"
+
+    case "$_valeur" in
+        *COLLEZ_ICI*|*CHOISISSEZ_*|*VOTRE_*|*A_REMPLIR*|*CHANGE_ME*|*xxxxx*)
+            echo "ERREUR — ${_cle} contient encore un marque-place :"
+            echo ""
+            echo "    ${_cle}=${_valeur}"
+            echo ""
+            echo "  Cette valeur vient d'un modèle de configuration et n'a pas été"
+            echo "  remplacée. Ouvrez les variables d'environnement de Render et"
+            echo "  saisissez la valeur réelle."
+            echo ""
+            echo "  Rien n'a été modifié en base : le démarrage s'arrête ici."
+            exit 1
+            ;;
+    esac
+done
+
 # APP_URL est GRAVÉE dans les QR Codes. Une carte imprimée avec la mauvaise
 # adresse est une carte à jeter, et le PDF est déjà chez le client.
 if [ -z "${APP_URL:-}" ]; then
