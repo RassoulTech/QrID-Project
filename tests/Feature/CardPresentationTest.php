@@ -6,6 +6,7 @@ use App\Enums\VarianteCarte;
 use App\Models\Profile;
 use App\Models\User;
 use App\Support\Marque;
+use App\Support\NomSurCarte;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -145,8 +146,204 @@ class CardPresentationTest extends TestCase
     }
 
     // =======================================================================
+    // LE NOM TIENT SUR UNE LIGNE
+    // =======================================================================
+
+    /**
+     * LA TAILLE SUIT LA LONGUEUR DU NOM.
+     *
+     * C'est tout l'objet du calcul : à taille fixe, « MOUHAMED DIONE » passait
+     * à la ligne — deux lignes serrées au-dessus du QR, et toute la
+     * composition déséquilibrée.
+     */
+    public function test_a_longer_name_gets_a_smaller_size(): void
+    {
+        $court = NomSurCarte::taille('AWA NDIAYE', 92, 100);
+        $moyen = NomSurCarte::taille('MOUHAMED DIONE', 92, 100);
+        $long = NomSurCarte::taille('ABDOULAYE MOUHAMADOU NDIAYE', 92, 100);
+
+        $this->assertGreaterThan($moyen, $court);
+        $this->assertGreaterThan($long, $moyen);
+    }
+
+    /**
+     * TOUT NOM RENDU SUR UNE LIGNE TIENT DANS LA LARGEUR UTILE.
+     *
+     * La propriété qui compte n'est pas la valeur d'une taille, mais le fait
+     * qu'un nom affiché sur une seule ligne ne déborde jamais — car il y
+     * serait alors coupé, et un nom coupé sur une carte imprimée est un défaut
+     * définitif.
+     *
+     * Les noms très longs sortent légitimement de cette garantie : le plancher
+     * de lisibilité s'applique, surUneLigne() rend false, et le nom s'enroule
+     * sur deux lignes. C'est le compromis voulu — deux lignes valent mieux
+     * qu'un texte illisible, et infiniment mieux qu'un texte tronqué.
+     */
+    public function test_no_name_rendered_on_one_line_ever_overflows(): void
+    {
+        $noms = [
+            'PAPA',                            // très court : le plafond s'applique
+            'AWA NDIAYE',
+            'CHEIKH GUEYE',
+            'MOUHAMED DIONE',
+            'MARIE-THÉRÈSE DIATTA',
+            'SERIGNE MOUHAMADOU BAMBA FALL',   // très long : doit s'enrouler
+        ];
+
+        $surUneLigne = 0;
+
+        foreach ($noms as $nom) {
+            $taille = NomSurCarte::taille($nom, 92, 100);
+
+            if (! NomSurCarte::surUneLigne($taille, 100)) {
+                continue;   // il s'enroule : la garantie ne le concerne pas
+            }
+
+            $surUneLigne++;
+
+            // Avance réelle mesurée ≈ 0,58 em ; le calcul retient 0,63.
+            $largeurOccupee = mb_strlen($nom) * 0.58 * $taille;
+
+            $this->assertLessThanOrEqual(
+                92,
+                $largeurOccupee,
+                "« {$nom} » est rendu sur une ligne et déborde de la carte."
+            );
+        }
+
+        // Sans cette vérification, un calcul qui ferait TOUT s'enrouler
+        // passerait le test en n'exécutant aucune assertion.
+        $this->assertGreaterThanOrEqual(
+            5,
+            $surUneLigne,
+            'Presque plus aucun nom ne tient sur une ligne : le calcul est devenu trop prudent.'
+        );
+    }
+
+    /** Un nom très court ne devient pas plus haut que le QR Code. */
+    public function test_a_very_short_name_is_capped(): void
+    {
+        $this->assertSame(15.0, NomSurCarte::taille('AWA', 92, 100));
+    }
+
+    /**
+     * UN NOM DÉMESURÉ S'ENROULE PLUTÔT QUE DE DEVENIR ILLISIBLE.
+     *
+     * Le plancher protège la lisibilité à l'impression. Passé ce seuil, deux
+     * lignes valent mieux qu'un texte minuscule — et infiniment mieux qu'un
+     * texte tronqué, qui serait un défaut définitif sur un support imprimé.
+     */
+    public function test_an_extreme_name_wraps_rather_than_shrinking_forever(): void
+    {
+        $demesure = str_repeat('A', 60);
+
+        $taille = NomSurCarte::taille($demesure, 92, 100);
+
+        $this->assertSame(5.5, $taille);
+        $this->assertFalse(NomSurCarte::surUneLigne($taille, 100));
+    }
+
+    /** Le nom courant est bien rendu sur une seule ligne. */
+    public function test_a_normal_name_is_rendered_on_a_single_line(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create([
+            'first_name' => 'Mouhamed',
+            'last_name' => 'Dione',
+            'slug' => 'mouhamed-dione',
+        ]);
+
+        $rendu = view('components.pvc-card-face-recto', ['profile' => $profile])->render();
+
+        $this->assertStringContainsString('pvc__nom--ligne', $rendu);
+        $this->assertStringContainsString('font-size:', $rendu);
+    }
+
+    /**
+     * L'ÉCRAN ET LE PAPIER PARTAGENT LE MÊME CALCUL.
+     *
+     * Deux implémentations du même coefficient divergeraient, et la divergence
+     * se constaterait sur des cartes déjà tirées — où le nom serait plus petit
+     * qu'à l'aperçu.
+     */
+    public function test_screen_and_print_share_one_single_calculation(): void
+    {
+        $recto = (string) file_get_contents(
+            resource_path('views/components/pvc-card-face-recto.blade.php')
+        );
+        $service = (string) file_get_contents(app_path('Services/PrintableCardService.php'));
+
+        $this->assertStringContainsString('NomSurCarte::taille', $recto);
+        $this->assertStringContainsString('NomSurCarte::taille', $service);
+
+        // Et le coefficient n'existe qu'à un seul endroit.
+        $this->assertStringNotContainsString('0.63', $recto);
+        $this->assertStringNotContainsString('0.63', $service);
+    }
+
+    // =======================================================================
     // DENSITÉ
     // =======================================================================
+
+    /**
+     * MARGE RÉGULIÈRE SUR LES QUATRE CÔTÉS.
+     *
+     * Elle valait 6 % en haut et sur les côtés, 5 % en bas : trois valeurs
+     * différentes, donc une bordure irrégulière que l'œil perçoit sans savoir
+     * la nommer.
+     */
+    public function test_the_card_margin_is_the_same_on_all_four_sides(): void
+    {
+        preg_match('/\.pvc__face\{.*?padding:([^;]+);/s', $this->pvc(), $trouve);
+
+        $this->assertNotEmpty($trouve, 'La marge de la carte est introuvable.');
+
+        $this->assertSame(
+            1,
+            count(preg_split('/\s+/', trim($trouve[1]))),
+            'La carte a de nouveau des marges différentes selon les côtés.'
+        );
+    }
+
+    /**
+     * Les trois blocs du recto se répartissent sur TOUTE la hauteur.
+     *
+     * Le `flex:1` du bloc QR absorbait tout l'espace disponible et centrait son
+     * contenu : il en résultait deux vides inégaux, un au-dessus du nom et un
+     * autre sous la fonction.
+     */
+    public function test_the_front_spreads_its_three_blocks(): void
+    {
+        $css = $this->pvc();
+
+        $this->assertMatchesRegularExpression(
+            '/\.pvc__face--recto\{\s*justify-content:space-between/s',
+            $css
+        );
+
+        $this->assertStringNotContainsString('flex:1 1 auto', $css);
+    }
+
+    /** Le carré et le nom de la marque sont sur la même ligne. */
+    public function test_the_brand_square_and_name_sit_on_one_line(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.pvc__v-marque\{\s*display:flex;\s*align-items:center/s',
+            $this->pvc()
+        );
+
+        $rendu = view('components.pvc-card-face-verso', [
+            'variante' => VarianteCarte::Verte,
+        ])->render();
+
+        // Le carré et le nom appartiennent au même conteneur.
+        $this->assertMatchesRegularExpression(
+            '/pvc__v-marque.*?brand__mark.*?pvc__v-nom/s',
+            $rendu
+        );
+    }
 
     /**
      * Le QR occupe ≈47 % de la HAUTEUR de la carte.

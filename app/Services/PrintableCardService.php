@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Profile;
+use App\Support\NomSurCarte;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
@@ -34,13 +35,37 @@ class PrintableCardService
      * destiné à l'imprimeur, ce silence est inacceptable — les octets voyagent
      * donc avec le document.
      */
+    /** Marge intérieure, en millimètres depuis le BORD DE PAGE. */
+    private const MARGE_MM = 6.4;
+
+    /** Largeur de page, fonds perdus compris. */
+    private const PAGE_L = 91.6;
+
     public function render(Profile $profile): string
     {
         $variante = $profile->variante();
 
+        $nom = mb_strtoupper($profile->full_name);
+
+        /*
+         | LA TAILLE DU NOM VIENT DU MÊME CALCUL QU'À L'ÉCRAN.
+         |
+         | NomSurCarte est sans unité : on lui passe des millimètres, il rend
+         | des millimètres. La conversion en points PostScript se fait ensuite,
+         | une seule fois. Reproduire ici le coefficient d'avance aurait garanti
+         | une divergence entre l'aperçu et le tirage.
+         */
+        $utile = self::PAGE_L - 2 * self::MARGE_MM;
+        $tailleMm = NomSurCarte::taille($nom, $utile, self::PAGE_L);
+
         return Pdf::loadView('profile.printable', [
             'profile' => $profile,
             'variante' => $variante,
+            'nom' => $nom,
+            'marge' => self::MARGE_MM,
+            'utile' => $utile,
+            'tailleNom' => round($tailleMm * 2.8346, 1),   // mm → points
+            'surUneLigne' => NomSurCarte::surUneLigne($tailleMm, self::PAGE_L),
 
             // RECTO — le QR du porteur, aux couleurs de la variante. Le fond
             // est CUIT dans l'image plutôt que laissé transparent, la

@@ -40,13 +40,17 @@
          plus une marque : c'est le composant x-brand qui sert ici, comme dans
          la navbar et le menu latéral.
 
-         Seul le CARRÉ est rendu — le nom figure en grand juste en dessous, et
-         l'écrire deux fois côte à côte affaiblirait les deux. --}}
+         LE CARRÉ ET LE NOM SONT SUR LA MÊME LIGNE. Empilés — carré au-dessus,
+         nom en dessous — ils formaient deux blocs distincts au lieu d'une
+         signature, et le regard devait redescendre pour lire la marque.
+         Côte à côte, ils se lisent d'un seul tenant, comme dans la navbar. --}}
     <span class="pvc__v-texte">
-        <x-brand :words="false" :link="false" class="pvc__v-logo"
-                 :tone="$variante === \App\Enums\VarianteCarte::Verte ? 'light' : 'dark'" />
+        <span class="pvc__v-marque">
+            <x-brand :words="false" :link="false" class="pvc__v-logo"
+                     :tone="$variante === \App\Enums\VarianteCarte::Verte ? 'light' : 'dark'" />
 
-        <span class="pvc__v-nom">{{ config('app.name') }}</span>
+            <span class="pvc__v-nom">{{ config('app.name') }}</span>
+        </span>
 
         <span class="pvc__v-accroche">{{ config('landing.brand.tagline') }}</span>
     </span>

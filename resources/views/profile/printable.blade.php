@@ -30,7 +30,12 @@
   Ce n'est pas une erreur : la seconde permet à qui reçoit la carte de
   découvrir le produit.
 
-  Reçoit : $profile, $variante, $qrRecto, $qrVerso, $fondVerso.
+  Reçoit : $profile, $variante, $nom, $marge, $utile, $tailleNom, $surUneLigne,
+  $qrRecto, $qrVerso, $fondVerso.
+
+  LA TAILLE DU NOM EST CALCULÉE, non écrite ici : App\Support\NomSurCarte la
+  déduit de la longueur, avec le même coefficient qu'à l'écran. Une valeur
+  fixe faisait passer « MOUHAMED DIONE » à la ligne.
 --}}
 <!DOCTYPE html>
 <html lang="fr">
@@ -61,12 +66,16 @@
             background-color: {{ $variante->fond() }};
         }
 
-        /* Zone de sécurité : 6 mm depuis le bord de page. */
+        /* MARGE RÉGULIÈRE SUR LES QUATRE CÔTÉS — 6,4 mm depuis le bord de
+           page, soit 3,4 mm depuis le trait de coupe. Au-delà des 3 mm de zone
+           de sécurité exigés par l'impression, et exactement les 4 % de largeur
+           employés à l'écran. Trois valeurs différentes donnaient une bordure
+           irrégulière que l'œil perçoit sans savoir la nommer. */
         .zone {
             position: absolute;
-            top: 6mm; left: 6mm;
-            width: 79.6mm;
-            height: 48mm;
+            top: {{ $marge }}mm; left: {{ $marge }}mm;
+            width: {{ $utile }}mm;
+            height: {{ 60 - 2 * $marge }}mm;
         }
 
         /* ============================ RECTO ============================
@@ -75,38 +84,38 @@
            serait le pire des deux : l'aperçu ne dirait plus la vérité sur ce
            que le client va tenir.
 
-           La zone utile fait 79,6 × 48 mm. Le nom, le QR et la fonction s'y
-           répartissent sur toute la hauteur, sans zone morte. */
+           Le nom, le QR et la fonction se répartissent sur toute la hauteur
+           utile, sans zone morte. */
         .nom {
             position: absolute;
             top: 0; left: 0;
-            width: 79.6mm;
+            width: {{ $utile }}mm;
             text-align: center;
-            /* 26pt ≈ 12 % de la largeur de la carte, comme les 12cqw de
-               l'écran. Le resserrement gagne la place du passage à la taille
-               supérieure. */
-            font-size: 26pt;
+            /* Taille CALCULÉE d'après la longueur du nom, par le même code
+               qu'à l'écran — voir App\Support\NomSurCarte. */
+            font-size: {{ $tailleNom }}pt;
             font-weight: bold;
-            letter-spacing: -0.8pt;
+            letter-spacing: -0.7pt;
             color: {{ $variante->encre() }};
             line-height: 0.94;
+            @if ($surUneLigne) white-space: nowrap; @endif
         }
 
-        /* QR à 27,5 mm sur 54 mm de carte utile, soit ≈47 % de la hauteur —
-           la même proportion qu'à l'écran. */
+        /* QR à 27,4 mm sur 54 mm de carte, soit ≈50 % de la hauteur — la même
+           proportion que les 32cqw de l'écran. */
         .qr {
             position: absolute;
-            left: 26.05mm; top: 11.5mm;
-            width: 27.5mm;
-            height: 27.5mm;
+            left: {{ round(($utile - 27.4) / 2, 2) }}mm; top: 10.6mm;
+            width: 27.4mm;
+            height: 27.4mm;
         }
 
-        .qr img { width: 27.5mm; height: 27.5mm; }
+        .qr img { width: 27.4mm; height: 27.4mm; }
 
         .fonction {
             position: absolute;
-            left: 0; bottom: 0.5mm;
-            width: 79.6mm;
+            left: 0; bottom: 0;
+            width: {{ $utile }}mm;
             text-align: center;
             font-size: 7.5pt;
             font-weight: bold;
@@ -139,25 +148,31 @@
            grand juste en dessous. */
         .v-logo {
             position: absolute;
-            left: 6mm; top: 5.5mm;
-            width: 10mm;
-            height: 10mm;
+            left: {{ $marge }}mm; top: {{ $marge }}mm;
+            width: 11mm;
+            height: 11mm;
             background-color: {{ $variante === \App\Enums\VarianteCarte::Verte ? '#1E9E7A' : '#0B3B2E' }};
-            border-radius: 2.4mm;
+            border-radius: 2.6mm;
             text-align: center;
             /* DomPDF ne centre pas verticalement : la hauteur de ligne le fait
                à sa place, réglée sur la hauteur du carré. */
-            line-height: 10mm;
-            font-size: 12pt;
+            line-height: 11mm;
+            font-size: 13pt;
             font-weight: bold;
             color: #FFFFFF;
             letter-spacing: 0.3pt;
         }
 
+        /* LE NOM EST SUR LA MÊME LIGNE QUE LE CARRÉ, à sa droite. Empilés, les
+           deux formaient deux blocs distincts au lieu d'une signature, et le
+           regard devait redescendre pour lire la marque. */
         .v-nom {
             position: absolute;
-            left: 6mm; top: 18mm;
-            font-size: 24pt;
+            left: {{ $marge + 13.4 }}mm; top: {{ $marge }}mm;
+            /* Même hauteur de ligne que le carré : les deux s'alignent sur
+               leur milieu sans calcul de position supplémentaire. */
+            line-height: 11mm;
+            font-size: 25pt;
             font-weight: bold;
             letter-spacing: -0.8pt;
             color: {{ $variante->encre() }};
@@ -165,8 +180,8 @@
 
         .v-accroche {
             position: absolute;
-            left: 6mm; top: 29mm;
-            width: 40mm;
+            left: {{ $marge }}mm; top: {{ $marge + 14 }}mm;
+            width: 41mm;
             font-size: 8pt;
             font-weight: bold;
             line-height: 1.42;
@@ -182,7 +197,7 @@
            la variante — ce code doit rester sombre sur clair. */
         .v-qr {
             position: absolute;
-            right: 6mm; top: 5.5mm;
+            right: {{ $marge }}mm; top: {{ $marge }}mm;
             width: 26mm;
             background-color: #FFFFFF;
             padding: 1.2mm;
@@ -192,7 +207,7 @@
 
         .v-qr-mention {
             position: absolute;
-            right: 6mm; top: 35.5mm;
+            right: {{ $marge }}mm; top: {{ $marge + 30 }}mm;
             width: 28.4mm;
             text-align: center;
             font-size: 6.5pt;
@@ -201,10 +216,12 @@
             color: {{ $variante->encre() }};
         }
 
-        /* --- Pied : nature à gauche, adresse à droite --- */
+        /* --- Pied : nature à gauche, adresse à droite ---
+           Même marge que partout ailleurs : c'est la régularité de la bordure
+           qui fait qu'une carte paraît soignée. */
         .v-nature {
             position: absolute;
-            left: 6mm; bottom: 4.5mm;
+            left: {{ $marge }}mm; bottom: {{ $marge }}mm;
             font-size: 6pt;
             letter-spacing: 0.9pt;
             color: {{ $variante->encre() }};
@@ -212,7 +229,7 @@
 
         .v-site {
             position: absolute;
-            right: 6mm; bottom: 4.5mm;
+            right: {{ $marge }}mm; bottom: {{ $marge }}mm;
             font-size: 6pt;
             font-weight: bold;
             letter-spacing: 0.9pt;
@@ -227,7 +244,7 @@
     <div class="fond"></div>
 
     <div class="zone">
-        <div class="nom">{{ mb_strtoupper($profile->full_name) }}</div>
+        <div class="nom">{{ $nom }}</div>
 
         <div class="qr"><img src="{{ $qrRecto }}" alt=""></div>
 

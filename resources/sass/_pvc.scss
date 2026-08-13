@@ -58,7 +58,19 @@
   display:flex;
   flex-direction:column;
   align-items:center;
-  padding:6cqw 6cqw 5cqw;
+
+  /*
+   | MARGES À 4 % DE LA LARGEUR, sur les quatre côtés et à l'identique.
+   |
+   | Elles valaient 6 % en haut et sur les côtés, 5 % en bas : trois valeurs
+   | différentes, donc une bordure irrégulière que l'œil perçoit sans savoir
+   | la nommer. Une marge régulière est le premier signe d'un objet soigné.
+   |
+   | 4cqw sur une carte ID-1 valent 3,4 mm — au-delà des 3 mm de zone de
+   | sécurité exigés par l'impression, et le gabarit PDF reprend exactement
+   | cette valeur.
+   */
+  padding:4cqw;
 
   // Dégradé diagonal, construit À PARTIR du fond de la variante : plus clair
   // en haut à gauche, plus dense en bas à droite. Surface mate — aucun éclat,
@@ -126,44 +138,57 @@
 //
 // Le nom occupe la largeur, comme le « QR CODE » de la référence.
 //
-// AUCUNE TRONCATURE, ici non plus. Le -webkit-line-clamp posait des points de
-// suspension au-delà de deux lignes : sur une carte imprimée, un nom coupé est
-// un défaut définitif. Le texte s'enroule librement ; c'est le QR, en flex,
-// qui cède l'espace nécessaire.
+// LES TROIS BLOCS SE RÉPARTISSENT SUR TOUTE LA HAUTEUR.
 //
-// DENSITÉ — le nom occupe presque toute la largeur utile.
-//
-// Largeur utile = 100 − 2 × 6cqw de marge = 88cqw. En gras, l'avance moyenne
-// d'un caractère vaut ≈ 0,62 em : « AWA NDIAYE », dix caractères, remplit donc
-// 10 × 0,62 × 12 = 74cqw. Le reste est de la respiration, pas du vide.
-//
-// Le resserrement du lettrage (-.04em) n'est pas cosmétique : il gagne
-// ≈ 3cqw sur cette longueur, ce qui permet la taille supérieure sans risque
-// de passage à la ligne sur un nom moyen.
+// space-between remplace le `flex:1` qui gonflait le bloc du QR : celui-ci
+// absorbait tout l'espace disponible et centrait son contenu, ce qui créait
+// deux vides inégaux — un au-dessus du nom, un autre sous la fonction. Ici
+// les trois blocs touchent leurs marges et les deux intervalles sont égaux.
+.pvc__face--recto{
+  justify-content:space-between;
+}
+
+/*
+ | LE NOM TIENT SUR UNE LIGNE — la taille est calculée dans la vue.
+ |
+ | Une taille fixe ne peut pas convenir : « AWA NDIAYE » et « ABDOULAYE
+ | MOUHAMADOU NDIAYE » n'occupent pas la même place. Le partial du recto
+ | calcule donc la taille à partir du nombre de caractères et la pose en
+ | style en ligne — voir l'explication détaillée là-bas.
+ |
+ | AUCUNE TRONCATURE, JAMAIS. Ni ellipsis ni line-clamp : sur une carte
+ | imprimée, un nom coupé est un défaut définitif. Le nom exceptionnellement
+ | long ne perd pas ses lettres, il perd sa ligne unique — et repasse sur
+ | deux lignes, ce qui reste lisible.
+ */
 .pvc__nom{
   position:relative;
-  font-size:12cqw;
   font-weight:800;
   font-stretch:condensed;          // honoré si la police en dispose
-  letter-spacing:-.04em;
+  letter-spacing:-.035em;
   line-height:.94;
   text-align:center;
   max-width:100%;
   overflow-wrap:anywhere;
 }
 
-// QR de la carte — ≈47 % de la HAUTEUR, soit 30 % de la largeur (ratio 1,586).
+// La ligne unique n'est demandée que lorsque la taille calculée la permet.
+// nowrap sans cette garde couperait les noms les plus longs.
+.pvc__nom--ligne{
+  white-space:nowrap;
+  overflow-wrap:normal;
+}
+
+// QR de la carte — ≈50 % de la HAUTEUR, soit 32 % de la largeur (ratio 1,586).
 //
 // C'est l'élément qui donne sa densité au recto : sous 40 % de la hauteur, la
-// carte paraît vide et le code devient difficile à viser. Au-delà de 50 %, il
-// écrase le nom.
+// carte paraît vide et le code devient difficile à viser.
 .pvc__qr{
   position:relative;
-  flex:1 1 auto;
+  flex:0 0 auto;
   display:grid;
   place-items:center;
-  width:30cqw;
-  margin:1.5cqw 0;
+  width:32cqw;
 
   svg{width:100%;height:auto;display:block}
   // La zone de silence du SVG est transparente : c'est la CARTE qui la
@@ -262,13 +287,24 @@
 // -----------------------------------------------------------------------------
 .pvc__v-texte{
   position:absolute;
-  top:6cqw; left:6cqw;
+  top:4cqw; left:4cqw;
   z-index:2;
-  width:50cqw;
+  width:52cqw;
   display:flex;
   flex-direction:column;
   align-items:flex-start;
-  gap:2.4cqw;
+  gap:3cqw;
+}
+
+// LA SIGNATURE — carré et nom sur une seule ligne.
+//
+// Empilés, ils formaient deux blocs au lieu d'une signature : le regard
+// devait redescendre pour lire la marque, et le carré paraissait être un
+// élément décoratif posé au-dessus plutôt que la moitié gauche d'un logo.
+.pvc__v-marque{
+  display:flex;
+  align-items:center;
+  gap:2.6cqw;
 }
 
 /*
@@ -297,11 +333,16 @@
  | reconnaissable d'un support à l'autre : seul le carré change de teinte.
  */
 .pvc__v-logo{
+  flex:0 0 auto;
+
   .brand__mark{
-    width:11cqw;
-    height:11cqw;
-    font-size:4.6cqw;
-    border-radius:2.6cqw;
+    // Sensiblement la hauteur des capitales du nom qui le suit : les deux
+    // éléments doivent peser pareil, sinon l'un devient l'accessoire de
+    // l'autre.
+    width:12cqw;
+    height:12cqw;
+    font-size:5cqw;
+    border-radius:2.8cqw;
     color:$blanc !important;
   }
 
@@ -323,8 +364,9 @@
   font-size:11cqw;
   font-weight:800;
   letter-spacing:-.035em;
-  line-height:.96;
+  line-height:1;
   color:var(--pvc-encre);
+  white-space:nowrap;
 }
 
 // L'accroche tombe naturellement sur trois lignes à cette largeur. Elle
@@ -335,7 +377,7 @@
   font-weight:600;
   line-height:1.42;
   color:color-mix(in srgb, var(--pvc-encre) 82%, transparent);
-  max-width:44cqw;
+  max-width:46cqw;
 }
 
 // -----------------------------------------------------------------------------
@@ -347,7 +389,7 @@
 // -----------------------------------------------------------------------------
 .pvc__v-qr{
   position:absolute;
-  right:6cqw; top:6cqw;
+  right:4cqw; top:4cqw;
   z-index:2;
   display:flex;
   flex-direction:column;
@@ -391,11 +433,11 @@
 // -----------------------------------------------------------------------------
 // PIED — nature à gauche, adresse à droite
 // -----------------------------------------------------------------------------
-// Le pied reste en bas — c'est sa fonction — mais REMONTE de 5 à 4cqw : le
-// vide au-dessus de lui était la seconde zone morte du verso.
+// Le pied touche la même marge de 4cqw que tout le reste : c'est la
+// régularité de la bordure qui fait qu'une carte paraît soignée.
 .pvc__v-pied{
   position:absolute;
-  left:6cqw; right:6cqw; bottom:4cqw;
+  left:4cqw; right:4cqw; bottom:4cqw;
   z-index:2;
   display:flex;
   align-items:baseline;
@@ -554,20 +596,27 @@
 // Les tailles reviennent au pixel, calibrées sur la largeur médiane.
 // -----------------------------------------------------------------------------
 @supports not (container-type: inline-size){
-  .pvc__face{padding:20px}
-  .pvc__nom{font-size:40px}
-  .pvc__fonction{font-size:12px}
-  .pvc__qr{width:101px}
+  .pvc__face{padding:13px}
 
-  .pvc__v-texte{top:20px;left:20px;width:168px;gap:8px}
-  .pvc__v-logo .brand__mark{width:37px;height:37px;font-size:15px;border-radius:9px}
+  // La taille du nom est posée en style EN LIGNE, en cqw : sans unités de
+  // conteneur elle ne vaut rien, et c'est cette règle qui doit la remplacer.
+  // Le !important n'est pas une facilité — un style en ligne ne cède à rien
+  // d'autre.
+  .pvc__nom{font-size:34px !important}
+
+  .pvc__fonction{font-size:12px}
+  .pvc__qr{width:107px}
+
+  .pvc__v-texte{top:13px;left:13px;width:174px;gap:10px}
+  .pvc__v-marque{gap:9px}
+  .pvc__v-logo .brand__mark{width:40px;height:40px;font-size:17px;border-radius:9px}
   .pvc__v-nom{font-size:37px}
-  .pvc__v-accroche{font-size:12px;max-width:148px}
-  .pvc__v-qr{right:20px;top:20px}
+  .pvc__v-accroche{font-size:12px;max-width:154px}
+  .pvc__v-qr{right:13px;top:13px}
   .pvc__v-qr-cadre{padding:4px}
   .pvc__v-qr-cadre svg{width:87px;height:87px}
   .pvc__v-qr-mention{font-size:9px}
-  .pvc__v-pied{left:20px;right:20px;bottom:13px}
+  .pvc__v-pied{left:13px;right:13px;bottom:13px}
   .pvc__v-nature,.pvc__v-site{font-size:8px}
 }
 
