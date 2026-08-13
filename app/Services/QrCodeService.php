@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Enums\VarianteCarte;
 use App\Models\Profile;
 use BaconQrCode\Common\ErrorCorrectionLevel;
 use BaconQrCode\Encoder\Encoder;
@@ -239,10 +238,45 @@ class QrCodeService
         );
     }
 
-    /** Chemins relatifs des fichiers, sur le disque public. */
+    /**
+     * Chemins relatifs des fichiers, sur le disque public.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * LE NOM PORTE UNE EMPREINTE DE L'ADRESSE ENCODÉE
+     * ═══════════════════════════════════════════════════════════════════
+     * Il valait « qr/{slug}.svg », sans aucune trace de l'URL contenue dans
+     * le code. Cette omission était une bombe à retardement :
+     *
+     * Un QR n'est régénéré qu'au changement de slug ou de variante. Si APP_URL
+     * change — correction d'une faute, achat du domaine, migration
+     * d'hébergeur — les fichiers en cache CONSERVENT L'ANCIENNE ADRESSE.
+     * Ils continuent d'être servis, téléchargés, intégrés au PDF, et
+     * IMPRIMÉS SUR DES CARTES PVC. Rien ne signale l'écart : le code est
+     * valide, il mène simplement au mauvais endroit.
+     *
+     * Le défaut ne se serait pas vu à l'écran, ni dans un test, ni à la
+     * relecture. Il se serait constaté sur cinq cents cartes déjà livrées.
+     *
+     * Avec l'empreinte, un changement d'adresse produit un nom de fichier
+     * différent : le code est régénéré au premier accès, sans intervention et
+     * sans qu'il faille y penser. C'est la même protection que celle du QR de
+     * la plateforme — elle manquait ici.
+     */
     public function path(Profile $profile, string $format): string
     {
-        return "qr/{$profile->slug}.{$format}";
+        return "qr/{$profile->slug}.{$this->empreinteAdresse()}.{$format}";
+    }
+
+    /**
+     * Huit caractères tirés de l'adresse de base du site.
+     *
+     * On empreinte APP_URL et non l'URL complète du profil : le slug figure
+     * déjà dans le nom, et deux profils du même site doivent partager la même
+     * empreinte pour que le nettoyage reste lisible.
+     */
+    private function empreinteAdresse(): string
+    {
+        return substr(sha1(rtrim((string) config('app.url'), '/')), 0, 8);
     }
 
     /** URL publique du fichier, pour un <img> ou un téléchargement. */
@@ -276,20 +310,26 @@ class QrCodeService
      */
     public function forget(Profile $profile): void
     {
-        $formats = ['svg', 'png'];
+        $disque = Storage::disk('public');
 
-        foreach (VarianteCarte::cases() as $variante) {
-            $formats[] = 'carte-'.$variante->name.'.svg';
-            $formats[] = 'carte-'.$variante->name.'.png';
-        }
+        /*
+         | ON SUPPRIME TOUT CE QUI PORTE CE SLUG, quelle que soit l'empreinte
+         | d'adresse ou la variante.
+         |
+         | Énumérer les formats connus ne suffit plus : depuis que le nom porte
+         | une empreinte de APP_URL, les fichiers produits sous une ancienne
+         | adresse ont un nom qu'on ne sait pas reconstruire. Ils resteraient
+         | indéfiniment sur le disque.
+         |
+         | Le préfixe exige le POINT — « awa. » et non « awa » — sans quoi le
+         | nettoyage du profil « awa » emporterait aussi « awa-2 ».
+         */
+        $prefixe = $profile->slug.'.';
 
-        // Fichiers de l'ancienne nomenclature, antérieure aux variantes.
-        $formats[] = 'inverse.svg';
-        $formats[] = 'inverse.png';
-        $formats[] = 'code128.svg';
-
-        foreach ($formats as $format) {
-            Storage::disk('public')->delete($this->path($profile, $format));
+        foreach ($disque->files('qr') as $fichier) {
+            if (str_starts_with(basename($fichier), $prefixe)) {
+                $disque->delete($fichier);
+            }
         }
     }
 

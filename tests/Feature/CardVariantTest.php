@@ -164,14 +164,77 @@ class CardVariantTest extends TestCase
      */
     public function test_switching_variant_regenerates_the_card_files(): void
     {
+        $qr = app(QrCodeService::class);
         $disque = Storage::disk('public');
 
-        $disque->assertExists('qr/awa-ndiaye.carte-Verte.svg');
+        $disque->assertExists($qr->path($this->profile, 'carte-Verte.svg'));
 
         $this->profile->forceFill(['primary_color' => VarianteCarte::Blanche->value])->save();
 
-        $disque->assertExists('qr/awa-ndiaye.carte-Blanche.svg');
-        $disque->assertMissing('qr/awa-ndiaye.carte-Verte.svg');
+        $disque->assertExists($qr->path($this->profile->refresh(), 'carte-Blanche.svg'));
+        $disque->assertMissing($qr->path($this->profile, 'carte-Verte.svg'));
+    }
+
+    /**
+     * CHANGER L'ADRESSE DU SITE RÉGÉNÈRE LES QR CODES.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * CE TEST EXISTE À CAUSE D'UN DÉFAUT TROUVÉ EN PRODUCTION
+     * ═══════════════════════════════════════════════════════════════════
+     * APP_URL était faux sur l'hébergeur — un sous-domaine incomplet. Or un QR
+     * n'était régénéré qu'au changement de slug ou de variante : corriger
+     * l'adresse n'aurait rien changé aux fichiers en cache, qui auraient
+     * continué d'encoder le mauvais domaine.
+     *
+     * Ils sont servis, téléchargés, intégrés au PDF, et IMPRIMÉS SUR DES
+     * CARTES PVC. Rien ne l'aurait signalé : le code reste valide, il mène
+     * simplement ailleurs. Le défaut se serait constaté sur des cartes déjà
+     * livrées, c'est-à-dire trop tard.
+     */
+    public function test_changing_the_site_address_produces_a_new_qr_file(): void
+    {
+        $qr = app(QrCodeService::class);
+
+        $avant = $qr->path($this->profile, 'svg');
+
+        config(['app.url' => 'https://qrid-uutz.onrender.com']);
+
+        $apres = $qr->path($this->profile, 'svg');
+
+        $this->assertNotSame(
+            $avant,
+            $apres,
+            'Un changement d\'adresse ne régénère pas les QR Codes : ils garderont l\'ancien domaine jusqu\'à l\'impression.'
+        );
+    }
+
+    /** Le nettoyage emporte tout ce qui porte le slug, quelle que soit l'adresse. */
+    public function test_forgetting_a_profile_clears_files_from_every_address(): void
+    {
+        $qr = app(QrCodeService::class);
+        $disque = Storage::disk('public');
+
+        // Un fichier produit sous une ancienne adresse, dont on ne sait plus
+        // reconstruire le nom.
+        $disque->put('qr/awa-ndiaye.viEilLe1.svg', 'ancien');
+
+        $qr->forget($this->profile);
+
+        $disque->assertMissing('qr/awa-ndiaye.viEilLe1.svg');
+        $disque->assertMissing($qr->path($this->profile, 'svg'));
+    }
+
+    /** Le nettoyage d'un slug n'emporte pas celui d'un slug voisin. */
+    public function test_forgetting_awa_does_not_clear_awa_2(): void
+    {
+        $qr = app(QrCodeService::class);
+        $disque = Storage::disk('public');
+
+        $disque->put('qr/awa-ndiaye-2.abcdef12.svg', 'voisin');
+
+        $qr->forget($this->profile);
+
+        $disque->assertExists('qr/awa-ndiaye-2.abcdef12.svg');
     }
 
     // =======================================================================

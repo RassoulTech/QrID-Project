@@ -103,11 +103,20 @@ class CardTest extends TestCase
         $this->assertSame(41, (int) round(512 / (float) $m[1]), 'La zone de silence a disparu.');
     }
 
-    /** Le QR est produit À LA CRÉATION, sans action de l'utilisateur. */
+    /**
+     * Le QR est produit À LA CRÉATION, sans action de l'utilisateur.
+     *
+     * Le chemin est demandé au service et non écrit en dur : il porte
+     * désormais une empreinte de APP_URL, pour qu'un changement d'adresse
+     * régénère les codes au lieu de laisser l'ancien domaine partir à
+     * l'impression.
+     */
     public function test_the_qr_is_generated_automatically_when_the_profile_is_created(): void
     {
-        Storage::disk('public')->assertExists('qr/awa-ndiaye.svg');
-        Storage::disk('public')->assertExists('qr/awa-ndiaye.png');
+        $qr = app(QrCodeService::class);
+
+        Storage::disk('public')->assertExists($qr->path($this->profile, 'svg'));
+        Storage::disk('public')->assertExists($qr->path($this->profile, 'png'));
     }
 
     /** Changer le slug change l'URL encodée : le QR doit suivre. */
@@ -115,8 +124,10 @@ class CardTest extends TestCase
     {
         $this->profile->forceFill(['slug' => 'awa-n-diaye'])->save();
 
-        Storage::disk('public')->assertExists('qr/awa-n-diaye.svg');
-        Storage::disk('public')->assertExists('qr/awa-n-diaye.png');
+        $qr = app(QrCodeService::class);
+
+        Storage::disk('public')->assertExists($qr->path($this->profile->refresh(), 'svg'));
+        Storage::disk('public')->assertExists($qr->path($this->profile, 'png'));
     }
 
     /** Un champ sans effet sur le QR ne déclenche aucune régénération. */
