@@ -68,14 +68,25 @@
     var(--pvc-fond) 44%,
     color-mix(in srgb, var(--pvc-fond) 88%, #000) 100%);
 
-  // Ombre portée diffuse + fine arête suggérant l'épaisseur du PVC.
-  //
-  // L'arête est tirée de l'ENCRE et non du blanc : sur la carte blanche, une
-  // arête blanche serait invisible et la carte flotterait sans contour sur un
-  // fond clair. Ici elle devient un filet vert très pâle, qui la pose.
+  /*
+   | DEUX OMBRES, PAS UNE — et c'est ce qui fait la différence entre un objet
+   | posé et une image collée.
+   |
+   |   · la première, courte et dense (6px de flou, 3px de décalage), marque
+   |     le CONTACT avec la surface ;
+   |   · la seconde, longue et diffuse (46px), marque la lumière ambiante.
+   |
+   | Une ombre unique, quelle que soit sa qualité, donne toujours l'impression
+   | d'un autocollant : l'œil cherche le point de contact et ne le trouve pas.
+   |
+   | L'ARÊTE CLAIRE est tirée de l'ENCRE et non du blanc. Sur la carte
+   | blanche, une arête blanche serait invisible et la carte flotterait sans
+   | contour sur un fond clair ; ici elle devient un filet vert très pâle,
+   | qui la pose.
+   */
   box-shadow:
-    0 22px 45px rgba(10,31,26,.30),
-    0 4px 10px rgba(10,31,26,.18),
+    0 3px 6px rgba(10,31,26,.22),
+    0 22px 46px rgba(10,31,26,.28),
     inset 0 0 0 1px color-mix(in srgb, var(--pvc-encre) 16%, transparent);
 }
 
@@ -93,6 +104,22 @@
   background:linear-gradient(102deg,
     transparent 38%, rgba($blanc,.14) 47%, rgba($blanc,.03) 54%, transparent 62%);
   pointer-events:none;
+
+  // Il SUIT le mouvement, légèrement et en retard sur lui. Un reflet fixe
+  // pendant que la carte bouge trahit immédiatement l'effet : sur un objet
+  // réel, c'est la lumière qui balaie la surface quand l'angle change.
+  transition:transform 700ms cubic-bezier(.2,.7,.2,1);
+}
+
+.pvc.is-flippable:hover .pvc__reflet,
+.pvc.is-flippable:focus-within .pvc__reflet{
+  transform:translateX(6%);
+}
+
+@media (prefers-reduced-motion:reduce){
+  .pvc__reflet{transition:none}
+  .pvc.is-flippable:hover .pvc__reflet,
+  .pvc.is-flippable:focus-within .pvc__reflet{transform:none}
 }
 
 // --- RECTO : nom, QR inversé, fonction. Rien d'autre. ------------------------
@@ -103,27 +130,40 @@
 // suspension au-delà de deux lignes : sur une carte imprimée, un nom coupé est
 // un défaut définitif. Le texte s'enroule librement ; c'est le QR, en flex,
 // qui cède l'espace nécessaire.
+//
+// DENSITÉ — le nom occupe presque toute la largeur utile.
+//
+// Largeur utile = 100 − 2 × 6cqw de marge = 88cqw. En gras, l'avance moyenne
+// d'un caractère vaut ≈ 0,62 em : « AWA NDIAYE », dix caractères, remplit donc
+// 10 × 0,62 × 12 = 74cqw. Le reste est de la respiration, pas du vide.
+//
+// Le resserrement du lettrage (-.04em) n'est pas cosmétique : il gagne
+// ≈ 3cqw sur cette longueur, ce qui permet la taille supérieure sans risque
+// de passage à la ligne sur un nom moyen.
 .pvc__nom{
   position:relative;
-  font-size:9.5cqw;
+  font-size:12cqw;
   font-weight:800;
   font-stretch:condensed;          // honoré si la police en dispose
-  letter-spacing:-.02em;
-  line-height:.98;
+  letter-spacing:-.04em;
+  line-height:.94;
   text-align:center;
   max-width:100%;
   overflow-wrap:anywhere;
 }
 
-// QR INVERSÉ : modules blancs à même le vert, aucun cadre.
-// ≈45 % de la hauteur de la carte, soit ≈28 % de sa largeur (ratio 1,586).
+// QR de la carte — ≈47 % de la HAUTEUR, soit 30 % de la largeur (ratio 1,586).
+//
+// C'est l'élément qui donne sa densité au recto : sous 40 % de la hauteur, la
+// carte paraît vide et le code devient difficile à viser. Au-delà de 50 %, il
+// écrase le nom.
 .pvc__qr{
   position:relative;
   flex:1 1 auto;
   display:grid;
   place-items:center;
-  width:28cqw;
-  margin:2cqw 0;
+  width:30cqw;
+  margin:1.5cqw 0;
 
   svg{width:100%;height:auto;display:block}
   // La zone de silence du SVG est transparente : c'est la CARTE qui la
@@ -146,11 +186,11 @@
 // La fonction s'enroule elle aussi plutôt que d'être coupée.
 .pvc__fonction{
   position:relative;
-  font-size:3.4cqw;
+  font-size:3.6cqw;
   font-weight:600;
-  letter-spacing:.28em;
-  line-height:1.4;
-  color:rgba($blanc,.88);
+  letter-spacing:.26em;
+  line-height:1.35;
+  color:color-mix(in srgb, var(--pvc-encre) 88%, transparent);
   text-align:center;
   max-width:100%;
   overflow-wrap:anywhere;
@@ -210,7 +250,15 @@
 }
 
 // -----------------------------------------------------------------------------
-// COLONNE GAUCHE — marque et accroche
+// COLONNE GAUCHE — logo, nom de la marque, accroche
+//
+// DENSITÉ : le bloc part du haut et DESCEND jusqu'au pied. La version
+// précédente le laissait flotter en haut, et l'œil ne voyait plus que le vide
+// du milieu — le défaut exact d'une carte qui paraît à moitié remplie.
+//
+// Le logo est au-DESSUS du nom, jamais à côté : le nom est écrit en grand
+// juste en dessous, et deux occurrences côte à côte s'affaibliraient l'une
+// l'autre.
 // -----------------------------------------------------------------------------
 .pvc__v-texte{
   position:absolute;
@@ -219,26 +267,63 @@
   width:50cqw;
   display:flex;
   flex-direction:column;
-  gap:3cqw;
+  align-items:flex-start;
+  gap:2.4cqw;
 }
 
-.pvc__v-marque{
-  display:flex;
-  align-items:center;
-  gap:2cqw;
-}
-
+/*
+ | Le carré du monogramme, seul.
+ |
+ | LA TAILLE VIENT D'ICI, non du composant : x-brand raisonne en pixels pour
+ | l'interface, la carte en unités de conteneur.
+ |
+ | ═══════════════════════════════════════════════════════════════════════
+ | LES COULEURS AUSSI, ET C'EST LE POINT IMPORTANT
+ | ═══════════════════════════════════════════════════════════════════════
+ | Le thème sombre de l'application repeint .brand__mark en --accent, un vert
+ | vif, avec des lettres sombres — réglage juste pour la navbar, où ce vert
+ | doit ressortir sur un fond noir.
+ |
+ | Appliqué à la carte, il serait FAUX. Une carte PVC est un objet physique :
+ | son logo ne change pas de couleur selon la préférence d'affichage de celui
+ | qui la regarde. Le client qui compose sa carte en thème sombre recevrait
+ | autre chose que ce qu'il a vu à l'écran.
+ |
+ | Les couleurs sont donc figées par VARIANTE, et le !important n'est pas une
+ | facilité : il neutralise par avance toute règle de thème, présente ou à
+ | venir, qui viendrait reprendre la main sur cette pastille.
+ |
+ | LES LETTRES RESTENT BLANCHES DANS LES DEUX CAS. C'est ce qui rend la marque
+ | reconnaissable d'un support à l'autre : seul le carré change de teinte.
+ */
 .pvc__v-logo{
-  width:6.4cqw; height:6.4cqw;
-  flex:0 0 auto;
-  color:var(--pvc-encre);
+  .brand__mark{
+    width:11cqw;
+    height:11cqw;
+    font-size:4.6cqw;
+    border-radius:2.6cqw;
+    color:$blanc !important;
+  }
+
+  // Les deux teintes de carré s'accrochent au TON du composant, non à une
+  // classe de la carte : x-brand pose lui-même brand--light ou brand--dark, et
+  // la règle reste juste même si le logo est rendu hors de son enveloppe —
+  // c'est exactement ce que fait le design-system.
+
+  // Carte VERTE (ton clair) — vert accent : il se détache du fond vert profond
+  // sans y percer un trou de lumière, ce que ferait un carré blanc.
+  &.brand--light .brand__mark{background:$vert-accent !important}
+
+  // Carte BLANCHE (ton sombre) — vert foncé, seule teinte assez dense pour
+  // porter des lettres blanches sur un fond clair.
+  &.brand--dark .brand__mark{background:$vert-fonce !important}
 }
 
 .pvc__v-nom{
-  font-size:7.4cqw;
+  font-size:11cqw;
   font-weight:800;
-  letter-spacing:-.03em;
-  line-height:1;
+  letter-spacing:-.035em;
+  line-height:.96;
   color:var(--pvc-encre);
 }
 
@@ -246,25 +331,28 @@
 // s'enroule librement : sur une carte imprimée, un texte coupé par des points
 // de suspension est un défaut définitif.
 .pvc__v-accroche{
-  font-size:3.4cqw;
+  font-size:3.6cqw;
   font-weight:600;
-  line-height:1.45;
+  line-height:1.42;
   color:color-mix(in srgb, var(--pvc-encre) 82%, transparent);
-  max-width:42cqw;
+  max-width:44cqw;
 }
 
 // -----------------------------------------------------------------------------
 // QR DE LA PLATEFORME — cadre blanc fin, à droite
+//
+// ALIGNÉ SUR LE HAUT DU BLOC DE TEXTE, et non centré verticalement. Deux blocs
+// qui partent de la même ligne se lisent comme une composition ; l'un centré
+// et l'autre en haut se lisent comme deux éléments posés au hasard.
 // -----------------------------------------------------------------------------
 .pvc__v-qr{
   position:absolute;
-  right:6cqw; top:50%;
-  transform:translateY(-50%);
+  right:6cqw; top:6cqw;
   z-index:2;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:1.4cqw;
+  gap:1.6cqw;
 }
 
 /*
@@ -281,21 +369,21 @@
  */
 .pvc__v-qr-cadre{
   background:#FFFFFF;
-  padding:1.4cqw;
+  padding:1.3cqw;
   line-height:0;
   box-shadow:0 .6cqw 1.6cqw rgba(0,0,0,.22);
 
   svg{
-    width:20cqw;
-    height:20cqw;
+    width:26cqw;
+    height:26cqw;
     display:block;
   }
 }
 
 .pvc__v-qr-mention{
-  font-size:2.4cqw;
+  font-size:2.6cqw;
   font-weight:700;
-  letter-spacing:.06em;
+  letter-spacing:.05em;
   text-align:center;
   color:color-mix(in srgb, var(--pvc-encre) 90%, transparent);
 }
@@ -303,9 +391,11 @@
 // -----------------------------------------------------------------------------
 // PIED — nature à gauche, adresse à droite
 // -----------------------------------------------------------------------------
+// Le pied reste en bas — c'est sa fonction — mais REMONTE de 5 à 4cqw : le
+// vide au-dessus de lui était la seconde zone morte du verso.
 .pvc__v-pied{
   position:absolute;
-  left:6cqw; right:6cqw; bottom:5cqw;
+  left:6cqw; right:6cqw; bottom:4cqw;
   z-index:2;
   display:flex;
   align-items:baseline;
@@ -315,8 +405,8 @@
 
 .pvc__v-nature,
 .pvc__v-site{
-  font-size:2.2cqw;
-  letter-spacing:.14em;
+  font-size:2.4cqw;
+  letter-spacing:.13em;
   text-transform:uppercase;
   white-space:nowrap;
 }
@@ -331,30 +421,98 @@
   color:var(--pvc-encre);
 }
 
-// -----------------------------------------------------------------------------
-// PERSPECTIVE ET PERMUTATION 3D — activées par le script uniquement
-// -----------------------------------------------------------------------------
+// =============================================================================
+// UN OBJET, PAS UNE IMAGE
+//
+// La carte était PLATE et posée à même la page : rien ne disait qu'elle
+// représente un morceau de plastique de 0,76 mm d'épaisseur. Quatre effets s'y
+// emploient, et chacun répond à une observation physique précise.
+//
+//   1. DEUX OMBRES, pas une. Une ombre courte et dense marque le CONTACT avec
+//      la surface ; une longue et diffuse marque la LUMIÈRE ambiante. Une
+//      ombre unique donne toujours l'impression d'un autocollant.
+//
+//   2. INCLINAISON AU REPOS. Un objet posé par une main n'est jamais aligné
+//      au pixel. Sept degrés suffisent : au-delà, la carte devient une
+//      illustration en perspective et le texte se déforme.
+//
+//   3. REDRESSEMENT AU SURVOL. C'est le geste que l'on fait pour lire — on
+//      redresse l'objet et on le rapproche. L'ombre s'allonge en même temps,
+//      puisque la carte s'éloigne de la surface.
+//
+//   4. ARÊTE CLAIRE sur le pourtour, qui suggère la tranche du PVC.
+//
+// LE MOUVEMENT EST PORTÉ PAR .is-flippable, donc par le script. Sans
+// JavaScript, les deux faces restent empilées et lisibles : aucun effet ne
+// masque jamais une information.
+// =============================================================================
 .pvc.is-flippable{
   .pvc__scene{
     display:block;
     position:relative;
     aspect-ratio:1.586;
-    perspective:1600px;
+    // Perspective PLUS COURTE qu'auparavant (1600px → 1100px) : c'est elle
+    // qui donne la profondeur. Trop lointaine, la rotation paraît plate.
+    perspective:1100px;
   }
 
   .pvc__face{
     position:absolute;
     inset:0;
     backface-visibility:hidden;
-    // Légère inclinaison au repos : la carte se détache du fond.
-    transition:transform 600ms cubic-bezier(.2,.7,.2,1);
+
+    /*
+     | Deux durées dans une seule déclaration, et c'est voulu.
+     |
+     | La ROTATION dure 600 ms : c'est le retournement, un geste ample.
+     | L'OMBRE suit en 300 ms : une ombre qui met plus d'une demi-seconde à
+     | réagir se détache de l'objet et trahit l'effet.
+     */
+    transition:
+      transform 600ms cubic-bezier(.2,.7,.2,1),
+      box-shadow 300ms ease;
   }
 
+  // Au repos : inclinée, posée. Les deux faces portent la même inclinaison,
+  // à 180° près — sans quoi le retournement révélerait un décalage.
   .pvc__face--recto{transform:rotateY(-7deg) rotateX(3deg)}
   .pvc__face--verso{transform:rotateY(173deg) rotateX(3deg)}
 
   &.is-flipped .pvc__face--recto{transform:rotateY(-187deg) rotateX(3deg)}
   &.is-flipped .pvc__face--verso{transform:rotateY(-7deg) rotateX(3deg)}
+
+  /*
+   | AU SURVOL — la carte se redresse et se soulève.
+   |
+   | :focus-within compte autant que :hover : quelqu'un qui navigue au clavier
+   | doit recevoir le même retour que quelqu'un qui pointe. L'oublier ferait
+   | de cet effet un privilège de souris.
+   */
+  &:hover, &:focus-within{
+    .pvc__face--recto{transform:rotateY(-2deg) rotateX(1deg) translateY(-4px)}
+    .pvc__face--verso{transform:rotateY(178deg) rotateX(1deg) translateY(-4px)}
+
+    &.is-flipped .pvc__face--recto{transform:rotateY(-182deg) rotateX(1deg) translateY(-4px)}
+    &.is-flipped .pvc__face--verso{transform:rotateY(-2deg) rotateX(1deg) translateY(-4px)}
+
+    // L'ombre s'allonge : la carte s'est éloignée de la surface.
+    .pvc__face{
+      box-shadow:
+        0 34px 60px rgba(10,31,26,.34),
+        0 8px 18px rgba(10,31,26,.20),
+        inset 0 0 0 1px color-mix(in srgb, var(--pvc-encre) 22%, transparent);
+    }
+  }
+
+  /*
+   | LA CARTE ELLE-MÊME EST CLIQUABLE, en plus du bouton.
+   |
+   | C'est le geste attendu : on retourne une carte en la touchant, pas en
+   | cherchant une commande à côté. Le bouton reste néanmoins, et reste le
+   | chemin ACCESSIBLE — c'est lui qui porte aria-pressed et l'étiquette qui
+   | change. La scène, elle, n'est qu'un raccourci à la souris et au doigt.
+   */
+  .pvc__scene{cursor:pointer}
 }
 
 .pvc__commande{
@@ -365,7 +523,15 @@
   &[hidden]{display:none}
 }
 
-// Mouvement réduit : la carte permute sans rotation ni inclinaison.
+/*
+ | MOUVEMENT RÉDUIT — la carte permute sans rotation ni inclinaison.
+ |
+ | Ce réglage système est demandé par des personnes que le mouvement rend
+ | malades. On ne le contourne pas, et on ne le contourne pas non plus « un
+ | peu » : ni rotation au repos, ni redressement au survol, ni transition.
+ | La permutation reste fonctionnelle — c'est l'animation qui disparaît, pas
+ | la fonction.
+ */
 @media (prefers-reduced-motion:reduce){
   .pvc.is-flippable{
     .pvc__face{transition:none}
@@ -373,6 +539,13 @@
     .pvc__face--verso{transform:rotateY(180deg)}
     &.is-flipped .pvc__face--recto{transform:rotateY(-180deg)}
     &.is-flipped .pvc__face--verso{transform:none}
+
+    &:hover, &:focus-within{
+      .pvc__face--recto{transform:none}
+      .pvc__face--verso{transform:rotateY(180deg)}
+      &.is-flipped .pvc__face--recto{transform:rotateY(-180deg)}
+      &.is-flipped .pvc__face--verso{transform:none}
+    }
   }
 }
 
@@ -382,20 +555,20 @@
 // -----------------------------------------------------------------------------
 @supports not (container-type: inline-size){
   .pvc__face{padding:20px}
-  .pvc__nom{font-size:32px}
-  .pvc__fonction{font-size:11px}
-  .pvc__qr{width:95px}
+  .pvc__nom{font-size:40px}
+  .pvc__fonction{font-size:12px}
+  .pvc__qr{width:101px}
 
-  .pvc__v-texte{top:20px;left:20px;width:170px;gap:10px}
-  .pvc__v-logo{width:22px;height:22px}
-  .pvc__v-nom{font-size:25px}
-  .pvc__v-accroche{font-size:11px;max-width:142px}
-  .pvc__v-qr{right:20px}
-  .pvc__v-qr-cadre{padding:5px}
-  .pvc__v-qr-cadre svg{width:68px;height:68px}
-  .pvc__v-qr-mention{font-size:8px}
-  .pvc__v-pied{left:20px;right:20px;bottom:17px}
-  .pvc__v-nature,.pvc__v-site{font-size:7px}
+  .pvc__v-texte{top:20px;left:20px;width:168px;gap:8px}
+  .pvc__v-logo .brand__mark{width:37px;height:37px;font-size:15px;border-radius:9px}
+  .pvc__v-nom{font-size:37px}
+  .pvc__v-accroche{font-size:12px;max-width:148px}
+  .pvc__v-qr{right:20px;top:20px}
+  .pvc__v-qr-cadre{padding:4px}
+  .pvc__v-qr-cadre svg{width:87px;height:87px}
+  .pvc__v-qr-mention{font-size:9px}
+  .pvc__v-pied{left:20px;right:20px;bottom:13px}
+  .pvc__v-nature,.pvc__v-site{font-size:8px}
 }
 
 // -----------------------------------------------------------------------------

@@ -34,12 +34,19 @@
     <span class="pvc__visuel" aria-hidden="true"></span>
     <span class="pvc__reflet" aria-hidden="true"></span>
 
-    {{-- ===================== COLONNE GAUCHE ===================== --}}
+    {{-- ===================== COLONNE GAUCHE =====================
+         LE LOGO EST CELUI DE L'APPLICATION, pas un pictogramme propre à la
+         carte. Une marque qui se dessine différemment selon le support n'est
+         plus une marque : c'est le composant x-brand qui sert ici, comme dans
+         la navbar et le menu latéral.
+
+         Seul le CARRÉ est rendu — le nom figure en grand juste en dessous, et
+         l'écrire deux fois côte à côte affaiblirait les deux. --}}
     <span class="pvc__v-texte">
-        <span class="pvc__v-marque">
-            <x-brand-mark class="pvc__v-logo" />
-            <span class="pvc__v-nom">{{ config('app.name') }}</span>
-        </span>
+        <x-brand :words="false" :link="false" class="pvc__v-logo"
+                 :tone="$variante === \App\Enums\VarianteCarte::Verte ? 'light' : 'dark'" />
+
+        <span class="pvc__v-nom">{{ config('app.name') }}</span>
 
         <span class="pvc__v-accroche">{{ config('landing.brand.tagline') }}</span>
     </span>

@@ -6,17 +6,66 @@
             <h1 class="section-title">Système de design</h1>
             <p class="section-sub">Page locale. Voir <code>docs/DESIGN.md</code> pour les règles.</p>
 
+            {{-- ================= LE LOGO =================
+
+                 UN SEUL COMPOSANT POUR TOUT LE PRODUIT : navbar, menu latéral,
+                 pages d'erreur, pied public, cartes PVC et PDF d'impression.
+                 Un second dessin quelque part serait un second logo, qui
+                 divergerait au premier ajustement.
+
+                 Le monogramme est CALCULÉ à partir de APP_NAME, jamais écrit
+                 en dur : « QrID » → « QI ». Changer le nom du produit met le
+                 logo à jour partout, sans toucher un fichier. --}}
+            <h2 class="section-title" style="margin-top:72px">Logo</h2>
+            <p class="section-sub">
+                Monogramme <code>{{ \App\Support\Marque::monogramme() }}</code>, calculé
+                depuis <code>APP_NAME</code>. Le nom du ton désigne le <em>texte</em>,
+                pas le fond : <code>dark</code> se pose sur un fond clair,
+                <code>light</code> sur un fond sombre.
+            </p>
+            <p class="section-sub">
+                Dans les deux tons, <strong>les lettres du monogramme restent
+                blanches</strong> : seul le carré change de teinte. Un monogramme
+                tantôt blanc sur vert, tantôt vert sur blanc, donnerait deux logos.
+            </p>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:32px">
+                <div style="padding:28px;border:1px solid rgba(10,31,26,.10);border-radius:20px;background:#FFFFFF">
+                    <p class="section-sub" style="margin:0 0 20px"><code>tone="dark"</code> — sur fond clair</p>
+                    <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
+                        <x-brand size="lg" :link="false" />
+                        <x-brand size="md" :link="false" />
+                        <x-brand size="sm" :link="false" />
+                        <x-brand :words="false" :link="false" size="lg" />
+                    </div>
+                </div>
+
+                <div style="padding:28px;border-radius:20px;background:#0B3B2E">
+                    <p class="section-sub" style="margin:0 0 20px;color:rgba(255,255,255,.7)"><code>tone="light"</code> — sur fond sombre</p>
+                    <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
+                        <x-brand size="lg" tone="light" :link="false" />
+                        <x-brand size="md" tone="light" :link="false" />
+                        <x-brand size="sm" tone="light" :link="false" />
+                        <x-brand :words="false" :link="false" tone="light" size="lg" />
+                    </div>
+                </div>
+            </div>
+
             {{-- ---------------------------------------------------------- --}}
             <h2 class="section-title" style="margin-top:72px">Carte PVC</h2>
             <p class="section-sub">
-                Ratio 1,586 (85,6 × 54 mm, ISO/IEC 7810 ID-1) · coins à 3 % de la
-                largeur · QR inversé, modules blancs à même le vert · typographie
-                en unités de conteneur.
+                Ratio 1,586 (85,6 × 54 mm, ISO/IEC 7810 ID-1) · coins à angle vif ·
+                typographie en unités de conteneur · deux variantes, verte et blanche.
             </p>
             <p class="section-sub">
-                <strong>Recto</strong> — le porteur : nom, code, fonction.
+                <strong>Recto</strong> — le porteur : nom, code, fonction. Son QR mène
+                à sa carte.
                 <strong>Verso</strong> — la plateforme, identique sur toutes les
-                cartes, sans aucune donnée de profil.
+                cartes, sans aucune donnée de profil. Son QR mène à la plateforme.
+            </p>
+            <p class="section-sub">
+                <strong>Densité</strong> — marges à 6 % de la largeur, QR à ≈47 % de
+                la hauteur, aucune zone morte de plus d'un quart de la hauteur.
             </p>
 
             <div style="margin-top:56px">

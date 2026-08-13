@@ -69,35 +69,48 @@
             height: 48mm;
         }
 
-        /* ============================ RECTO ============================ */
+        /* ============================ RECTO ============================
+           DENSITÉ — les valeurs suivent celles de l'écran, converties dans le
+           repère du papier. Une carte dense à l'écran et aérée à l'impression
+           serait le pire des deux : l'aperçu ne dirait plus la vérité sur ce
+           que le client va tenir.
+
+           La zone utile fait 79,6 × 48 mm. Le nom, le QR et la fonction s'y
+           répartissent sur toute la hauteur, sans zone morte. */
         .nom {
             position: absolute;
             top: 0; left: 0;
             width: 79.6mm;
             text-align: center;
-            font-size: 20pt;
+            /* 26pt ≈ 12 % de la largeur de la carte, comme les 12cqw de
+               l'écran. Le resserrement gagne la place du passage à la taille
+               supérieure. */
+            font-size: 26pt;
             font-weight: bold;
+            letter-spacing: -0.8pt;
             color: {{ $variante->encre() }};
-            line-height: 1;
+            line-height: 0.94;
         }
 
+        /* QR à 27,5 mm sur 54 mm de carte utile, soit ≈47 % de la hauteur —
+           la même proportion qu'à l'écran. */
         .qr {
             position: absolute;
-            left: 26.8mm; top: 13mm;
-            width: 26mm;
-            height: 26mm;
+            left: 26.05mm; top: 11.5mm;
+            width: 27.5mm;
+            height: 27.5mm;
         }
 
-        .qr img { width: 26mm; height: 26mm; }
+        .qr img { width: 27.5mm; height: 27.5mm; }
 
         .fonction {
             position: absolute;
-            left: 0; bottom: 1mm;
+            left: 0; bottom: 0.5mm;
             width: 79.6mm;
             text-align: center;
-            font-size: 7pt;
+            font-size: 7.5pt;
             font-weight: bold;
-            letter-spacing: 2.2pt;
+            letter-spacing: 2pt;
             color: {{ $variante->encre() }};
         }
 
@@ -115,46 +128,74 @@
 
         .verso-fond img { width: 91.6mm; height: 60mm; }
 
-        /* --- Colonne gauche : marque et accroche --- */
+        /* --- Colonne gauche : logo, nom de la marque, accroche ---
+
+           LE LOGO EST CELUI DE L'APPLICATION — le carré du monogramme, dessiné
+           ici en CSS plutôt qu'en image. DomPDF rend fidèlement un bloc à fond
+           plein avec du texte centré, et cette voie évite d'embarquer un
+           fichier de plus dans un document déjà lourd de trois images.
+
+           Le carré est AU-DESSUS du nom, jamais à côté : le nom est écrit en
+           grand juste en dessous. */
+        .v-logo {
+            position: absolute;
+            left: 6mm; top: 5.5mm;
+            width: 10mm;
+            height: 10mm;
+            background-color: {{ $variante === \App\Enums\VarianteCarte::Verte ? '#1E9E7A' : '#0B3B2E' }};
+            border-radius: 2.4mm;
+            text-align: center;
+            /* DomPDF ne centre pas verticalement : la hauteur de ligne le fait
+               à sa place, réglée sur la hauteur du carré. */
+            line-height: 10mm;
+            font-size: 12pt;
+            font-weight: bold;
+            color: #FFFFFF;
+            letter-spacing: 0.3pt;
+        }
+
         .v-nom {
             position: absolute;
-            left: 6mm; top: 6mm;
-            font-size: 17pt;
+            left: 6mm; top: 18mm;
+            font-size: 24pt;
             font-weight: bold;
-            letter-spacing: -0.5pt;
+            letter-spacing: -0.8pt;
             color: {{ $variante->encre() }};
         }
 
         .v-accroche {
             position: absolute;
-            left: 6mm; top: 15mm;
-            width: 38mm;
-            font-size: 7.5pt;
+            left: 6mm; top: 29mm;
+            width: 40mm;
+            font-size: 8pt;
             font-weight: bold;
-            line-height: 1.45;
+            line-height: 1.42;
             color: {{ $variante->encre() }};
         }
 
         /* --- QR de la plateforme, à droite ---
+           ALIGNÉ SUR LE HAUT du bloc de texte, et non centré : deux blocs qui
+           partent de la même ligne se lisent comme une composition.
+
            Cadre blanc réduit à une marge fine et régulière : c'est la zone de
            silence du code, pas une décoration. Blanc en dur, jamais dérivé de
            la variante — ce code doit rester sombre sur clair. */
         .v-qr {
             position: absolute;
-            right: 6mm; top: 17mm;
-            width: 24mm;
+            right: 6mm; top: 5.5mm;
+            width: 26mm;
             background-color: #FFFFFF;
             padding: 1.2mm;
         }
 
-        .v-qr img { width: 24mm; height: 24mm; }
+        .v-qr img { width: 26mm; height: 26mm; }
 
         .v-qr-mention {
             position: absolute;
-            right: 6mm; top: 44mm;
-            width: 26.4mm;
+            right: 6mm; top: 35.5mm;
+            width: 28.4mm;
             text-align: center;
-            font-size: 6pt;
+            font-size: 6.5pt;
             font-weight: bold;
             letter-spacing: 0.3pt;
             color: {{ $variante->encre() }};
@@ -163,18 +204,18 @@
         /* --- Pied : nature à gauche, adresse à droite --- */
         .v-nature {
             position: absolute;
-            left: 6mm; bottom: 5.5mm;
-            font-size: 5.5pt;
-            letter-spacing: 1pt;
+            left: 6mm; bottom: 4.5mm;
+            font-size: 6pt;
+            letter-spacing: 0.9pt;
             color: {{ $variante->encre() }};
         }
 
         .v-site {
             position: absolute;
-            right: 6mm; bottom: 5.5mm;
-            font-size: 5.5pt;
+            right: 6mm; bottom: 4.5mm;
+            font-size: 6pt;
             font-weight: bold;
-            letter-spacing: 1pt;
+            letter-spacing: 0.9pt;
             color: {{ $variante->encre() }};
         }
     </style>
@@ -200,6 +241,7 @@
 <div class="page">
     <div class="verso-fond"><img src="{{ $fondVerso }}" alt=""></div>
 
+    <div class="v-logo">{{ \App\Support\Marque::monogramme() }}</div>
     <div class="v-nom">{{ config('app.name') }}</div>
     <div class="v-accroche">{{ config('landing.brand.tagline') }}</div>
 

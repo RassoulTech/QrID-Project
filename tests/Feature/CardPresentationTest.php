@@ -1,0 +1,308 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Enums\VarianteCarte;
+use App\Models\Profile;
+use App\Models\User;
+use App\Support\Marque;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
+
+/**
+ * LA CARTE EST UN OBJET, ET SON LOGO EST CELUI DU PRODUIT.
+ *
+ * ═══════════════════════════════════════════════════════════════════════
+ * POURQUOI CES TESTS LISENT DES FICHIERS DE STYLE
+ * ═══════════════════════════════════════════════════════════════════════
+ * On ne peut pas mesurer une ombre portée dans un test d'intégration. Mais on
+ * peut constater qu'une RÈGLE a disparu — et c'est ce qui compte : ces
+ * décisions ont chacune une raison écrite, et le défaut à craindre n'est pas
+ * qu'elles rendent mal, c'est qu'elles soient retirées par mégarde lors d'un
+ * remaniement, sans que personne ne s'en aperçoive avant l'impression.
+ *
+ * C'est la démarche déjà employée pour les coins à angle vif et l'absence de
+ * troncature, deux règles qui protègent des défauts définitifs.
+ */
+class CardPresentationTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function pvc(): string
+    {
+        return (string) file_get_contents(resource_path('sass/_pvc.scss'));
+    }
+
+    private function marque(): string
+    {
+        return (string) file_get_contents(resource_path('sass/_brand.scss'));
+    }
+
+    // =======================================================================
+    // LE LOGO
+    // =======================================================================
+
+    /**
+     * LE MONOGRAMME EST CALCULÉ, JAMAIS ÉCRIT EN DUR.
+     *
+     * « QI » n'est pas une constante : c'est ce que donne « QrID ». Le jour où
+     * le nom du produit change, le logo doit suivre partout — navbar, cartes,
+     * PDF — sans qu'aucun fichier ne soit à retoucher.
+     */
+    public function test_the_monogram_is_derived_from_the_product_name(): void
+    {
+        $this->assertSame('QI', Marque::monogramme('QrID'));
+        $this->assertSame('SK', Marque::monogramme('Sama Kart'));
+        $this->assertSame('AB', Marque::monogramme('AlphaBeta'));
+
+        // Un nom sans capitale ne doit pas rendre une chaîne vide.
+        $this->assertNotSame('', Marque::monogramme('boutique'));
+    }
+
+    /**
+     * UN SEUL COMPOSANT DE LOGO DANS TOUT LE PRODUIT.
+     *
+     * Le pictogramme QR générique qui servait sur la carte a été supprimé :
+     * une marque qui se dessine différemment selon le support n'est plus une
+     * marque.
+     */
+    public function test_there_is_no_second_logo_component(): void
+    {
+        $this->assertFileDoesNotExist(
+            resource_path('views/components/brand-mark.blade.php'),
+            'Un second dessin de logo est réapparu : il divergera au premier ajustement.'
+        );
+
+        $vues = array_merge(
+            glob(resource_path('views/**/*.blade.php')) ?: [],
+            glob(resource_path('views/*/*/*.blade.php')) ?: []
+        );
+
+        foreach ($vues as $fichier) {
+            $this->assertStringNotContainsString(
+                'x-brand-mark',
+                (string) file_get_contents($fichier),
+                'Le pictogramme générique est encore employé dans '.basename($fichier)
+            );
+        }
+    }
+
+    /**
+     * LES LETTRES DU MONOGRAMME RESTENT BLANCHES DANS LES DEUX TONS.
+     *
+     * Seul le carré change de teinte. Un monogramme tantôt blanc sur vert,
+     * tantôt vert sur blanc, donnerait deux logos au lieu d'un.
+     */
+    public function test_the_monogram_letters_stay_white_in_both_tones(): void
+    {
+        $css = $this->marque();
+
+        $this->assertMatchesRegularExpression(
+            '/\.brand--dark\{.*?\.brand__mark\{background:\$vert-fonce;color:\$blanc\}/s',
+            $css
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.brand--light\{.*?\.brand__mark\{background:\$vert-accent;color:\$blanc\}/s',
+            $css
+        );
+    }
+
+    /**
+     * L'APPARENCE DE LA CARTE NE DÉPEND PAS DU THÈME DE L'APPLICATION.
+     *
+     * Le thème sombre repeint .brand__mark en vert vif avec des lettres
+     * sombres — juste pour la navbar, faux pour la carte. Une carte PVC est un
+     * objet physique : son logo ne change pas de couleur selon la préférence
+     * d'affichage de celui qui la regarde, sinon le client qui compose en
+     * thème sombre reçoit autre chose que ce qu'il a vu.
+     */
+    public function test_the_card_logo_ignores_the_application_theme(): void
+    {
+        $css = $this->pvc();
+
+        $this->assertStringContainsString('color:$blanc !important', $css);
+        $this->assertStringContainsString('&.brand--light .brand__mark{background:$vert-accent !important}', $css);
+        $this->assertStringContainsString('&.brand--dark .brand__mark{background:$vert-fonce !important}', $css);
+    }
+
+    /** Le verso porte bien le logo de l'application, et le nom une seule fois. */
+    public function test_the_back_carries_the_product_logo_once(): void
+    {
+        $rendu = view('components.pvc-card-face-verso', [
+            'variante' => VarianteCarte::Verte,
+        ])->render();
+
+        // Le carré du monogramme est présent…
+        $this->assertStringContainsString('brand__mark', $rendu);
+        $this->assertStringContainsString(Marque::monogramme(), $rendu);
+
+        // …mais le composant ne rend pas son bloc de mots : le nom est écrit
+        // en grand juste en dessous, et deux occurrences côte à côte
+        // s'affaibliraient l'une l'autre.
+        $this->assertStringNotContainsString('brand__words', $rendu);
+    }
+
+    // =======================================================================
+    // DENSITÉ
+    // =======================================================================
+
+    /**
+     * Le QR occupe ≈47 % de la HAUTEUR de la carte.
+     *
+     * Sous 40 %, la carte paraît vide et le code devient difficile à viser.
+     * Au-delà de 50 %, il écrase le nom. La largeur exprimée en cqw vaut la
+     * proportion de hauteur divisée par 1,586.
+     */
+    public function test_the_front_qr_fills_its_share_of_the_height(): void
+    {
+        preg_match('/\.pvc__qr\{.*?width:([\d.]+)cqw/s', $this->pvc(), $trouve);
+
+        $this->assertNotEmpty($trouve, 'La largeur du QR du recto est introuvable.');
+
+        $partHauteur = ((float) $trouve[1]) * 1.586;
+
+        $this->assertGreaterThanOrEqual(40, $partHauteur);
+        $this->assertLessThanOrEqual(52, $partHauteur);
+    }
+
+    /**
+     * LE QR DU VERSO EST ALIGNÉ SUR LE HAUT DU BLOC DE TEXTE.
+     *
+     * Deux blocs qui partent de la même ligne se lisent comme une composition ;
+     * l'un centré et l'autre en haut se lisent comme deux éléments posés au
+     * hasard. C'est ce que corrigeait la demande « QR remonté, aligné sur le
+     * haut du bloc de texte ».
+     */
+    public function test_the_back_qr_is_aligned_with_the_text_block(): void
+    {
+        $css = $this->pvc();
+
+        preg_match('/\.pvc__v-texte\{.*?top:([\d.]+)cqw/s', $css, $texte);
+        preg_match('/\.pvc__v-qr\{.*?top:([\d.]+)cqw/s', $css, $qr);
+
+        $this->assertNotEmpty($texte);
+        $this->assertNotEmpty($qr);
+
+        $this->assertSame(
+            $texte[1],
+            $qr[1],
+            'Le QR du verso n\'est plus aligné sur le haut du bloc de texte.'
+        );
+
+        // Et il n'est surtout plus centré verticalement.
+        $this->assertStringNotContainsString('.pvc__v-qr{'."\n".'  position:absolute;'."\n".'  right:6cqw; top:50%', $css);
+    }
+
+    // =======================================================================
+    // PRÉSENTATION
+    // =======================================================================
+
+    /**
+     * DEUX OMBRES, PAS UNE.
+     *
+     * Une courte et dense marque le CONTACT avec la surface ; une longue et
+     * diffuse marque la lumière ambiante. Une ombre unique, quelle que soit sa
+     * qualité, donne toujours l'impression d'un autocollant : l'œil cherche le
+     * point de contact et ne le trouve pas.
+     */
+    public function test_the_card_casts_a_contact_shadow_and_an_ambient_one(): void
+    {
+        preg_match('/\.pvc__face\{.*?box-shadow:(.*?);/s', $this->pvc(), $trouve);
+
+        $this->assertNotEmpty($trouve, 'L\'ombre de la carte est introuvable.');
+
+        // Trois couches : contact, ambiante, arête. Deux suffiraient à
+        // « avoir une ombre » — c'est la troisième qui fait l'objet.
+        $this->assertGreaterThanOrEqual(
+            3,
+            substr_count($trouve[1], 'rgba') + substr_count($trouve[1], 'color-mix'),
+            'La carte a perdu une de ses trois couches d\'ombre.'
+        );
+    }
+
+    /** Redressement au survol, ombre accentuée, et le clavier n'est pas oublié. */
+    public function test_hovering_straightens_the_card_and_focus_does_the_same(): void
+    {
+        $css = $this->pvc();
+
+        $this->assertStringContainsString('&:hover, &:focus-within{', $css);
+        $this->assertStringContainsString('translateY(-4px)', $css);
+    }
+
+    /**
+     * LE MOUVEMENT RÉDUIT EST RESPECTÉ, ET PAS « UN PEU ».
+     *
+     * Ce réglage système est demandé par des personnes que le mouvement rend
+     * malades. La permutation doit rester fonctionnelle — c'est l'animation
+     * qui disparaît, jamais la fonction.
+     */
+    public function test_reduced_motion_removes_every_transform(): void
+    {
+        $css = $this->pvc();
+
+        // Le fichier en compte PLUSIEURS : un pour le reflet, un pour la
+        // permutation. On les examine tous — n'en lire qu'un laisserait passer
+        // un mouvement oublié dans l'autre.
+        preg_match_all('/@media \(prefers-reduced-motion:reduce\)\{(.*?)\n\}/s', $css, $blocs);
+
+        $this->assertNotEmpty($blocs[1], 'Le bloc de mouvement réduit a disparu.');
+
+        $reduit = implode("\n", $blocs[1]);
+
+        // Le survol aussi doit être neutralisé : le laisser actif rendrait le
+        // réglage à moitié respecté, donc inutile.
+        $this->assertStringContainsString('&:hover, &:focus-within{', $reduit);
+        $this->assertStringContainsString('transition:none', $reduit);
+    }
+
+    /**
+     * La carte est cliquable, MAIS elle délègue au bouton.
+     *
+     * Le bouton reste le chemin accessible : c'est lui qui porte aria-pressed
+     * et l'étiquette qui change. Deux sources de vérité finiraient par se
+     * désynchroniser.
+     */
+    public function test_clicking_the_card_delegates_to_the_button(): void
+    {
+        $js = (string) file_get_contents(resource_path('js/modules/pvc-flip.js'));
+
+        $this->assertStringContainsString('bouton.click()', $js);
+
+        // Un clic destiné à autre chose n'est jamais détourné : ni un lien,
+        // ni une sélection de texte qu'on cherchait à copier.
+        $this->assertStringContainsString("closest('a, button')", $js);
+        $this->assertStringContainsString('getSelection', $js);
+    }
+
+    // =======================================================================
+    // CE QUI NE DOIT PAS BOUGER
+    // =======================================================================
+
+    /** Les coins restent à angle vif, sur les deux faces et à toute taille. */
+    public function test_the_corners_are_still_square(): void
+    {
+        $this->assertStringContainsString('border-radius:0 !important', $this->pvc());
+    }
+
+    /** Les deux variantes rendent toujours leurs deux faces. */
+    public function test_both_variants_still_render_both_faces(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create(['slug' => 'awa-ndiaye']);
+
+        foreach (VarianteCarte::cases() as $variante) {
+            $profile->forceFill(['primary_color' => $variante->value])->save();
+
+            $rendu = view('components.pvc-card', ['profile' => $profile->refresh()])->render();
+
+            $this->assertStringContainsString('pvc__face--recto', $rendu);
+            $this->assertStringContainsString('pvc__face--verso', $rendu);
+            $this->assertStringContainsString('--pvc-fond:'.$variante->fond(), $rendu);
+            $this->assertStringContainsString('--pvc-encre:'.$variante->encre(), $rendu);
+        }
+    }
+}

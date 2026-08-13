@@ -82,16 +82,34 @@
 }
 
 // -----------------------------------------------------------------------------
-// Tons
+// LES DEUX TONS
+//
+// Le nom du ton désigne le TEXTE, pas le fond : « dark » se pose sur un fond
+// clair, « light » sur un fond sombre. C'est la convention du projet, et elle
+// se lit à l'envers la première fois — d'où ce rappel.
+//
+// DANS LES DEUX CAS, LES LETTRES DU MONOGRAMME SONT BLANCHES. C'est ce qui
+// rend la marque reconnaissable d'un support à l'autre : seul le carré change
+// de teinte, jamais les lettres. Un monogramme tantôt blanc sur vert, tantôt
+// vert sur blanc, donne deux logos au lieu d'un.
 // -----------------------------------------------------------------------------
+
+// Sur fond CLAIR — page, navbar, carte blanche.
 .brand--dark{
-  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{color:$texte}
+  // Le nom prend le vert de la marque, non le noir du texte courant. Il ne
+  // s'agit pas d'un titre : c'est une identité, elle doit se distinguer du
+  // paragraphe qui l'entoure.
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{color:$vert-fonce}
   .brand__mark{background:$vert-fonce;color:$blanc}
 }
 
-// Sur fond vert foncé : la pastille s'inverse pour rester détachée du fond.
+// Sur fond SOMBRE — pied de page public, en-tête d'administration, carte verte.
+//
+// Le carré prend le VERT ACCENT et non le blanc. Un carré blanc sur fond vert
+// foncé est un trou de lumière : il attire l'œil avant le nom et casse le
+// bloc. En vert accent, il reste lisible tout en appartenant à la surface.
 .brand--light{
   &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{color:$blanc}
-  .brand__mark{background:$blanc;color:$vert-fonce}
+  .brand__mark{background:$vert-accent;color:$blanc}
   .brand__tagline{color:rgba($blanc,.7)}
 }
