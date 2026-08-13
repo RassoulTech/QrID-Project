@@ -2,11 +2,19 @@
   x-whatsapp-fab — le bouton d'aide flottant.
 
       <x-whatsapp-fab />
-      <x-whatsapp-fab message="Bonjour, j'ai une question sur mon abonnement." />
+      <x-whatsapp-fab message="Bonjour, question particulière." />
 
-  UN SEUL COMPOSANT POUR LES DEUX ESPACES. Le message pré-rempli change selon
-  l'endroit — un visiteur de la page d'accueil et un client déjà abonné ne
-  posent pas la même question — mais le bouton, lui, est le même partout.
+  UN SEUL COMPOSANT, PARTOUT. Le message pré-rempli est déduit de la PAGE :
+  App\Support\AideContextuelle tient la correspondance, écran par écran.
+
+  Pourquoi pas un message unique : « j'ai une question » oblige à tout écrire
+  au moment précis où l'on est bloqué, souvent sur un téléphone. La moitié
+  renonce, et l'autre produit un message que l'équipe devra faire préciser.
+  « Je suis à l'étape 2 de la création de ma carte » se traite immédiatement.
+
+  Le paramètre `message` reste possible, mais ne sert qu'aux cas hors route —
+  un aperçu, une page de démonstration. La règle est de laisser le composant
+  décider.
 
   IL N'APPARAÎT PAS SI LE NUMÉRO N'EST PAS CONFIGURÉ. Un bouton d'aide qui
   mène à une conversation vide avec un numéro inexistant est pire que pas de
@@ -34,8 +42,10 @@
         // numéro produit un lien qui s'ouvre sur une erreur WhatsApp.
         $chiffres = preg_replace('/\D+/', '', $numero);
 
-        $lien = 'https://wa.me/'.$chiffres
-            .($message ? '?text='.rawurlencode($message) : '');
+        // Le message vient de la PAGE, sauf demande explicite du contraire.
+        $texte = $message ?? \App\Support\AideContextuelle::message();
+
+        $lien = 'https://wa.me/'.$chiffres.'?text='.rawurlencode($texte);
     @endphp
 
     <a href="{{ $lien }}"

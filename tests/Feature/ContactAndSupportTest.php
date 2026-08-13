@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Mail\ContactMail;
 use App\Models\ContactMessage;
 use App\Models\User;
+use App\Support\AideContextuelle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -356,26 +357,162 @@ class ContactAndSupportTest extends TestCase
             ->assertSee('https://wa.me/221773831364', false);
     }
 
-    /** Le message pré-rempli diffère entre la page d'accueil et l'espace client. */
-    public function test_the_prefilled_message_fits_the_place(): void
+    // =======================================================================
+    // LE MESSAGE PRÉ-REMPLI SUIT LA PAGE
+    // =======================================================================
+
+    /** Le texte réellement présent dans le lien WhatsApp d'une page. */
+    private function messageWhatsApp(string $html): string
+    {
+        preg_match('/wa\.me\/\d+\?text=([^"]+)/', $html, $trouve);
+
+        return $trouve ? urldecode($trouve[1]) : '';
+    }
+
+    /**
+     * CHAQUE ÉCRAN PORTE SON PROPRE MESSAGE.
+     *
+     * « J'ai une question » oblige la personne à tout écrire au moment précis
+     * où elle est bloquée, souvent sur un téléphone. Un message qui NOMME
+     * l'écran épargne la saisie ET dit à l'équipe où elle était :
+     * « je suis à l'étape 2 » se traite tout de suite, « j'ai un problème »
+     * demande trois allers-retours.
+     */
+    public function test_every_screen_carries_its_own_prefilled_message(): void
     {
         config(['landing.support.whatsapp' => '221773831364']);
 
-        $public = $this->get(route('home'))->getContent();
+        $user = User::factory()->create(['email_verified_at' => now()]);
+
+        $messages = [
+            'accueil' => $this->messageWhatsApp($this->get(route('home'))->getContent()),
+            'connexion' => $this->messageWhatsApp($this->get(route('login'))->getContent()),
+            'mot de passe' => $this->messageWhatsApp($this->get(route('password.request'))->getContent()),
+            'tableau de bord' => $this->messageWhatsApp(
+                $this->actingAs($user)->get(route('dashboard'))->getContent()
+            ),
+            'étape 1' => $this->messageWhatsApp(
+                $this->actingAs($user)->get(route('profile.create.step1'))->getContent()
+            ),
+        ];
+
+        foreach ($messages as $ecran => $texte) {
+            $this->assertNotSame('', $texte, "L'écran « {$ecran} » n'a aucun message pré-rempli.");
+        }
+
+        $this->assertSame(
+            count($messages),
+            count(array_unique($messages)),
+            'Deux écrans partagent le même message : l\'un des deux ne dit pas où se trouve la personne.'
+        );
+    }
+
+    /** Le message nomme l'écran, en toutes lettres. */
+    public function test_the_message_names_the_screen(): void
+    {
+        config(['landing.support.whatsapp' => '221773831364']);
+
+        /*
+         | L'ÉCRAN INVITÉ EST LU EN PREMIER, et ce n'est pas un détail de mise
+         | en forme : `login` est derrière le middleware « guest ». Une fois
+         | actingAs() appelé, il redirige vers le tableau de bord et la page
+         | lue n'est plus celle qu'on croit.
+         */
+        $connexion = $this->messageWhatsApp($this->get(route('login'))->getContent());
+
+        $this->assertStringContainsString('connecter', $connexion);
 
         $user = User::factory()->create(['email_verified_at' => now()]);
-        $client = $this->actingAs($user)->get(route('dashboard'))->getContent();
 
-        preg_match('/wa\.me\/\d+\?text=([^"]+)/', $public, $a);
-        preg_match('/wa\.me\/\d+\?text=([^"]+)/', $client, $b);
-
-        $this->assertNotEmpty($a);
-        $this->assertNotEmpty($b);
-        $this->assertNotSame(
-            $a[1],
-            $b[1],
-            'Le même message est proposé au visiteur et au client : l\'un des deux devra tout réécrire.'
+        $etape2 = $this->messageWhatsApp(
+            $this->actingAs($user)
+                ->withSession(['profile_wizard' => ['completed' => [1], 'data' => []]])
+                ->get(route('profile.create.step2'))->getContent()
         );
+
+        $this->assertStringContainsString('étape 2', $etape2);
+    }
+
+    /**
+     * LES ÉCRANS D'ACCÈS PORTENT LE BOUTON, et c'est là qu'il compte le plus.
+     *
+     * Quelqu'un qui ne peut pas se connecter n'a aucun autre canal pour le
+     * dire : ni tableau de bord, ni formulaire derrière une session.
+     */
+    public function test_the_authentication_screens_carry_the_help_button(): void
+    {
+        config(['landing.support.whatsapp' => '221773831364']);
+
+        foreach (['login', 'register', 'password.request'] as $ecran) {
+            $this->get(route($ecran))
+                ->assertOk()
+                ->assertSee('wa-fab', false);
+        }
+    }
+
+    /**
+     * AUCUNE DONNÉE PERSONNELLE dans le message pré-rempli.
+     *
+     * Il part dans WhatsApp, hors de l'application, et se retrouve dans une
+     * URL que le navigateur enregistre dans son historique. L'équipe
+     * reconnaîtra la personne à son numéro.
+     */
+    public function test_the_prefilled_message_leaks_no_personal_data(): void
+    {
+        config(['landing.support.whatsapp' => '221773831364']);
+
+        $user = User::factory()->create([
+            'name' => 'Mouhamed Dione',
+            'email' => 'mouhamed@exemple.sn',
+            'email_verified_at' => now(),
+        ]);
+
+        $texte = $this->messageWhatsApp(
+            $this->actingAs($user)->get(route('dashboard'))->getContent()
+        );
+
+        $this->assertStringNotContainsString('Mouhamed', $texte);
+        $this->assertStringNotContainsString('mouhamed@exemple.sn', $texte);
+    }
+
+    /** Une page non listée reçoit un message neutre, jamais un message faux. */
+    public function test_an_unlisted_page_falls_back_to_a_neutral_message(): void
+    {
+        $message = AideContextuelle::message('une.route.qui.nexiste.pas');
+
+        $this->assertStringContainsString('besoin d\'aide', $message);
+        $this->assertStringContainsString(config('app.name'), $message);
+    }
+
+    // =======================================================================
+    // LE MOTIF DU FORMULAIRE
+    // =======================================================================
+
+    /** Le motif peut être présélectionné par l'URL. */
+    public function test_the_contact_subject_can_be_preselected_by_url(): void
+    {
+        $html = $this->get(route('home').'?motif=commande')->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<option value="commande"[^>]*selected/',
+            $html,
+            'Le motif demandé dans l\'URL n\'est pas présélectionné.'
+        );
+    }
+
+    /**
+     * Un motif inventé dans l'URL ne casse rien.
+     *
+     * L'URL est écrite par n'importe qui : une valeur inconnue doit retomber
+     * sur le premier motif, jamais produire un <select> sans sélection ni une
+     * option fantôme.
+     */
+    public function test_an_invented_subject_in_the_url_is_ignored(): void
+    {
+        $html = $this->get(route('home').'?motif=nimporte-quoi')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('nimporte-quoi', $html);
+        $this->assertMatchesRegularExpression('/<option value="information"[^>]*selected/', $html);
     }
 
     /** Le modèle expose l'état de traitement, pour le suivi côté équipe. */

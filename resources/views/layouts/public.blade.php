@@ -37,7 +37,9 @@
 
     {{-- Hors du <main> : c'est une aide permanente, pas un élément du
          contenu. Un lecteur d'écran qui parcourt la page ne doit pas la
-         rencontrer au milieu d'un paragraphe. --}}
-    <x-whatsapp-fab message="Bonjour, j'aimerais en savoir plus sur {{ config('app.name') }}." />
+         rencontrer au milieu d'un paragraphe.
+
+         Aucun message n'est passé : le composant le déduit de la page. --}}
+    <x-whatsapp-fab />
 </body>
 </html>

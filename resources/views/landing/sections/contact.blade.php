@@ -108,10 +108,25 @@
             </div>
 
             <div class="f">
+              {{-- LE MOTIF PEUT ÊTRE PRÉSÉLECTIONNÉ PAR L'URL : /#contact?motif=commande.
+                   Un lien « Nous écrire » posé ailleurs amène ainsi la personne
+                   avec le bon motif déjà choisi, au lieu d'une liste où il faut
+                   deviner lequel s'applique.
+
+                   La valeur est validée contre la liste fermée avant d'être
+                   retenue : un motif inventé dans l'URL retombe sur le premier. --}}
+              @php
+                $motifDemande = request()->query('motif');
+                $motifChoisi = old('subject')
+                    ?? (array_key_exists($motifDemande, \App\Http\Requests\ContactRequest::SUJETS)
+                        ? $motifDemande
+                        : array_key_first(\App\Http\Requests\ContactRequest::SUJETS));
+              @endphp
+
               <label class="f__label" for="contact_subject">Motif</label>
               <select name="subject" id="contact_subject" class="f__input @error('subject') is-invalid @enderror" required>
                 @foreach (\App\Http\Requests\ContactRequest::SUJETS as $cle => $libelle)
-                  <option value="{{ $cle }}" @selected(old('subject') === $cle)>{{ $libelle }}</option>
+                  <option value="{{ $cle }}" @selected($motifChoisi === $cle)>{{ $libelle }}</option>
                 @endforeach
               </select>
               @error('subject')<span class="f__error">{{ $message }}</span>@enderror

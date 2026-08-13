@@ -83,5 +83,12 @@
 
     </div>
 </main>
+
+{{-- L'AIDE COMPTE ICI PLUS QUE PARTOUT AILLEURS.
+     Quelqu'un qui ne peut pas se connecter n'a aucun autre canal pour le
+     dire : ni tableau de bord, ni formulaire de contact derrière une session.
+     Le message pré-rempli nomme l'écran — « je n'arrive pas à réinitialiser
+     mon mot de passe » — donc la demande arrive déjà qualifiée. --}}
+<x-whatsapp-fab />
 </body>
 </html>

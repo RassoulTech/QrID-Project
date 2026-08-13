@@ -141,10 +141,9 @@
     </div>
 </div>
 
-{{-- ESPACE CLIENT — le message pré-rempli est différent de celui de la page
-     d'accueil : ici on s'adresse à quelqu'un qui a déjà un compte, et dont la
-     question porte le plus souvent sur sa carte ou son abonnement. Un message
-     générique l'obligerait à tout réécrire. --}}
-<x-whatsapp-fab message="Bonjour, j'ai besoin d'aide sur mon espace {{ config('app.name') }}." />
+{{-- ESPACE CLIENT — le message est déduit de l'écran exact : étape 2 de la
+     création, paiement, QR Code, statistiques. C'est ce qui permet à l'équipe
+     de savoir où la personne était sans avoir à le lui demander. --}}
+<x-whatsapp-fab />
 </body>
 </html>
