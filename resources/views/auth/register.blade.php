@@ -32,6 +32,12 @@
 
     <x-auth-tabs active="register" />
 
+    {{-- AVANT le formulaire, et c'est encore plus vrai ici : Google supprime
+         le lien de confirmation, donc l'attente devant une boîte de réception,
+         donc la dépendance à une messagerie qui doit fonctionner. Proposer ce
+         raccourci APRÈS six champs déjà remplis n'a aucun sens. --}}
+    <x-google-button label="S'inscrire avec Google" />
+
     <form method="POST" action="{{ route('register.store') }}" novalidate>
         @csrf
 
@@ -86,11 +92,6 @@
             <x-button :block="true">Recevoir mon lien de confirmation</x-button>
         </div>
     </form>
-
-    {{-- Sur CET écran, Google fait gagner davantage : il supprime le lien de
-         confirmation, donc l'attente devant une boîte de réception, donc la
-         dépendance à une messagerie qui doit fonctionner. --}}
-    <x-google-button label="S'inscrire avec Google" />
 
     <p class="f__hint text-center mt-4 mb-0">
         Déjà inscrit&nbsp;? <a href="{{ route('login') }}">Se connecter</a>

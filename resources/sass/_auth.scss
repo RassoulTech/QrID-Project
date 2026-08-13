@@ -322,16 +322,18 @@
 // clair sous leur logo en couleurs. Le choix rejoint donc la contrainte.
 // =============================================================================
 .oauth{
-  margin-top:20px;
+  margin:20px 0 0;
 }
 
 // Le séparateur « ou » : deux filets et un mot, sans image ni pseudo-élément
 // approximatif. Le mot pose son propre fond pour interrompre le trait, ce qui
 // tient quel que soit le fond de la carte — clair ou sombre.
+//
+// Il est SOUS le bouton : c'est lui qui introduit le formulaire qui suit.
 .oauth__ou{
   position:relative;
   text-align:center;
-  margin:0 0 16px;
+  margin:18px 0 0;
 
   &::before{
     content:"";
@@ -394,6 +396,35 @@
 @media (prefers-reduced-motion:reduce){
   .oauth__btn{transition:none}
   .oauth__btn:active{transform:none}
+}
+
+/*
+ | REPÈRE DE DÉVELOPPEMENT — servi uniquement en local.
+ |
+ | Un bouton manquant se cherche dans le code, puis dans la configuration,
+ | puis dans le cache. Ces trois lignes évitent les trois recherches. Elles
+ | n'atteignent jamais un client : le gabarit les conditionne à
+ | l'environnement local, pas à APP_DEBUG.
+ */
+.oauth--absent{
+  padding:14px 16px;
+  border-radius:$r-sm;
+  border:1px dashed var(--bordure-forte, #{$bordure-forte});
+  background:var(--surface-2, #{$gris-fond});
+  font-size:12.5px;
+  line-height:1.5;
+  color:var(--texte-2, #{$gris-second});
+
+  p{margin:0}
+  p + p{margin-top:6px;font-size:11.5px;opacity:.8}
+
+  code{
+    font-size:11.5px;
+    padding:1px 5px;
+    border-radius:4px;
+    background:var(--surface, #{$blanc});
+    color:var(--texte, #{$texte});
+  }
 }
 
 // Compteur avant renvoi possible. Vide sans JavaScript : le bouton reste

@@ -209,6 +209,73 @@ class AuthScreensTest extends TestCase
     }
 
     /**
+     * LE BOUTON EST AVANT LE FORMULAIRE — et ce test existe pour une raison.
+     *
+     * Il était placé après le bouton « Se connecter ». Le raisonnement se
+     * tenait — le mot de passe reste le chemin de tous les comptes existants —
+     * mais il était faux en pratique : sur un écran d'ordinateur ordinaire, le
+     * formulaire occupe toute la hauteur visible, et le bouton tombait SOUS LA
+     * LIGNE DE FLOTTAISON.
+     *
+     * Il a été cherché deux fois sans être trouvé. C'est la seule mesure qui
+     * compte, et elle l'emporte sur le raisonnement.
+     */
+    public function test_the_google_button_comes_before_the_form(): void
+    {
+        config([
+            'services.google.client_id' => 'identifiant-de-test',
+            'services.google.client_secret' => 'secret-de-test',
+        ]);
+
+        /*
+         | On cible le formulaire par SON ACTION, non par « <form method=POST ».
+         |
+         | L'en-tête de la page porte déjà un formulaire — la bascule de thème —
+         | qui apparaît plus haut dans le document. Chercher la première balise
+         | <form> comparait donc le bouton à ce formulaire-là, et le test
+         | échouait alors même que le placement était juste.
+         */
+        $formulaires = [
+            'login' => route('login.store'),
+            'register' => route('register.store'),
+        ];
+
+        foreach ($formulaires as $ecran => $action) {
+            $html = $this->html($ecran);
+
+            $positionBouton = mb_strpos($html, 'oauth__btn');
+            $positionFormulaire = mb_strpos($html, 'action="'.$action.'"');
+
+            $this->assertNotFalse($positionBouton, "Bouton Google absent de « {$ecran} ».");
+            $this->assertNotFalse($positionFormulaire, "Formulaire absent de « {$ecran} ».");
+
+            $this->assertLessThan(
+                $positionFormulaire,
+                $positionBouton,
+                "Sur « {$ecran} », le bouton Google est repassé sous le formulaire : "
+                .'il retombera hors de l\'écran.'
+            );
+        }
+    }
+
+    /**
+     * LE REPÈRE DE DÉVELOPPEMENT N'ATTEINT JAMAIS UN CLIENT.
+     *
+     * En local, l'absence du bouton est expliquée à l'écran — un bouton
+     * manquant se cherche sinon dans le code, puis dans la configuration, puis
+     * dans le cache. Ailleurs, cette explication n'aurait aucun sens et
+     * révélerait des noms de variables d'environnement.
+     */
+    public function test_the_development_hint_never_reaches_a_client(): void
+    {
+        config(['services.google.client_id' => null, 'services.google.client_secret' => null]);
+
+        // L'environnement de test n'est pas « local » : le repère doit rester muet.
+        $this->assertStringNotContainsString('GOOGLE_CLIENT_ID', $this->html('login'));
+        $this->assertStringNotContainsString('oauth--absent', $this->html('login'));
+    }
+
+    /**
      * LE LOGO GOOGLE N'EST JAMAIS CHARGÉ DEPUIS UN SERVEUR GOOGLE.
      *
      * Deux raisons, et la seconde pèse plus lourd : la page ne doit dépendre

@@ -20,6 +20,11 @@
 
     <x-auth-tabs active="login" />
 
+    {{-- AVANT le formulaire. Placé après, il tombait sous la ligne de
+         flottaison sur un écran ordinaire : il fallait faire défiler pour
+         découvrir le chemin le plus rapide. --}}
+    <x-google-button />
+
     <form method="POST" action="{{ route('login.store') }}" novalidate>
         @csrf
 
@@ -76,12 +81,6 @@
             <x-button :block="true">Se connecter</x-button>
         </div>
     </form>
-
-    {{-- APRÈS le formulaire, jamais avant.
-         Le chemin par mot de passe reste le principal : c'est celui de tous
-         les comptes existants, et le placer en second sur son propre écran
-         donnerait l'impression qu'il est déprécié. --}}
-    <x-google-button />
 
     <p class="f__hint text-center mt-4 mb-0">
         Pas encore de compte&nbsp;?
