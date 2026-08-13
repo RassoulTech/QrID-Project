@@ -158,12 +158,60 @@ class CardPresentationTest extends TestCase
      */
     public function test_a_longer_name_gets_a_smaller_size(): void
     {
-        $court = NomSurCarte::taille('AWA NDIAYE', 92, 100);
-        $moyen = NomSurCarte::taille('MOUHAMED DIONE', 92, 100);
-        $long = NomSurCarte::taille('ABDOULAYE MOUHAMADOU NDIAYE', 92, 100);
+        $court = NomSurCarte::taille('AWA NDIAYE', 93, 100);
+        $moyen = NomSurCarte::taille('MOUHAMED DIONE', 93, 100);
+        $long = NomSurCarte::taille('ABDOULAYE MOUHAMADOU NDIAYE', 93, 100);
 
         $this->assertGreaterThan($moyen, $court);
         $this->assertGreaterThan($long, $moyen);
+    }
+
+    /**
+     * LA LARGEUR EST MESURÉE LETTRE PAR LETTRE, PAS EN MOYENNE.
+     *
+     * C'est le correctif qui a fait tenir « MOUHAMED DIONE » sur une ligne.
+     * Une moyenne unique sous-estimait ce nom de 6 % — il porte deux M, parmi
+     * les plus larges lettres qui soient — et le faisait déborder.
+     *
+     * Deux noms de MÊME longueur mais de lettres différentes doivent donc
+     * recevoir des tailles différentes. Si ce test tombe, c'est qu'on est
+     * revenu à une moyenne.
+     */
+    public function test_two_names_of_equal_length_are_measured_differently(): void
+    {
+        // Dix caractères chacun, mais l'un n'est fait que de lettres larges.
+        $large = NomSurCarte::largeurEnEm('MMMMMMMMMM');
+        $etroit = NomSurCarte::largeurEnEm('IIIIIIIIII');
+
+        $this->assertGreaterThan(
+            $etroit * 2,
+            $large,
+            'Les largeurs de lettres ne sont plus distinguées : le calcul est redevenu une moyenne.'
+        );
+    }
+
+    /**
+     * LE NOM REMPLIT VRAIMENT LA LARGEUR.
+     *
+     * C'est la demande née de la carte de référence : le nom doit courir
+     * presque bord à bord. Un calcul trop prudent le laisserait flotter au
+     * milieu — techniquement correct, visuellement raté.
+     *
+     * On exige donc au moins 92 % de la largeur utile pour tout nom de
+     * longueur ordinaire.
+     */
+    public function test_an_ordinary_name_reaches_the_edges(): void
+    {
+        foreach (['AWA NDIAYE', 'MOUHAMED DIONE', 'KHADIM RASSOUL DIENE'] as $nom) {
+            $taille = NomSurCarte::taille($nom, 93, 100);
+            $occupe = NomSurCarte::largeurEnEm($nom) * $taille;
+
+            $this->assertGreaterThanOrEqual(
+                93 * 0.92,
+                $occupe,
+                "« {$nom} » n'atteint pas les bords : il flotte au milieu de la carte."
+            );
+        }
     }
 
     /**
@@ -193,7 +241,7 @@ class CardPresentationTest extends TestCase
         $surUneLigne = 0;
 
         foreach ($noms as $nom) {
-            $taille = NomSurCarte::taille($nom, 92, 100);
+            $taille = NomSurCarte::taille($nom, 93, 100);
 
             if (! NomSurCarte::surUneLigne($taille, 100)) {
                 continue;   // il s'enroule : la garantie ne le concerne pas
@@ -201,11 +249,12 @@ class CardPresentationTest extends TestCase
 
             $surUneLigne++;
 
-            // Avance réelle mesurée ≈ 0,58 em ; le calcul retient 0,63.
-            $largeurOccupee = mb_strlen($nom) * 0.58 * $taille;
+            // La largeur réellement occupée, lettre par lettre — c'est la
+            // mesure que le calcul cherche à borner.
+            $largeurOccupee = NomSurCarte::largeurEnEm($nom) * $taille;
 
             $this->assertLessThanOrEqual(
-                92,
+                93,
                 $largeurOccupee,
                 "« {$nom} » est rendu sur une ligne et déborde de la carte."
             );
@@ -223,7 +272,7 @@ class CardPresentationTest extends TestCase
     /** Un nom très court ne devient pas plus haut que le QR Code. */
     public function test_a_very_short_name_is_capped(): void
     {
-        $this->assertSame(15.0, NomSurCarte::taille('AWA', 92, 100));
+        $this->assertSame(15.0, NomSurCarte::taille('AWA', 93, 100));
     }
 
     /**
@@ -237,7 +286,7 @@ class CardPresentationTest extends TestCase
     {
         $demesure = str_repeat('A', 60);
 
-        $taille = NomSurCarte::taille($demesure, 92, 100);
+        $taille = NomSurCarte::taille($demesure, 93, 100);
 
         $this->assertSame(5.5, $taille);
         $this->assertFalse(NomSurCarte::surUneLigne($taille, 100));
@@ -278,9 +327,12 @@ class CardPresentationTest extends TestCase
         $this->assertStringContainsString('NomSurCarte::taille', $recto);
         $this->assertStringContainsString('NomSurCarte::taille', $service);
 
-        // Et le coefficient n'existe qu'à un seul endroit.
-        $this->assertStringNotContainsString('0.63', $recto);
-        $this->assertStringNotContainsString('0.63', $service);
+        // La table de largeurs n'existe qu'à un seul endroit : ni la vue ni le
+        // service ne redéfinissent d'avance typographique.
+        foreach ([$recto, $service] as $fichier) {
+            $this->assertStringNotContainsString('AVANCE', $fichier);
+            $this->assertStringNotContainsString('mb_str_split', $fichier);
+        }
     }
 
     // =======================================================================

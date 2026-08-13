@@ -60,17 +60,20 @@
   align-items:center;
 
   /*
-   | MARGES À 4 % DE LA LARGEUR, sur les quatre côtés et à l'identique.
+   | MARGES À 3,5 % DE LA LARGEUR, sur les quatre côtés et à l'identique.
    |
    | Elles valaient 6 % en haut et sur les côtés, 5 % en bas : trois valeurs
    | différentes, donc une bordure irrégulière que l'œil perçoit sans savoir
    | la nommer. Une marge régulière est le premier signe d'un objet soigné.
    |
-   | 4cqw sur une carte ID-1 valent 3,4 mm — au-delà des 3 mm de zone de
-   | sécurité exigés par l'impression, et le gabarit PDF reprend exactement
-   | cette valeur.
+   | 3,5 % D'UNE CARTE ID-1 VALENT EXACTEMENT 3 mm — la zone de sécurité
+   | minimale de l'impression. C'est le PLANCHER, pas un choix esthétique :
+   | en dessous, une dérive de massicot d'un demi-millimètre entamerait le
+   | texte. On s'y tient donc, et on ne descend pas plus bas.
+   |
+   | Le gabarit PDF reprend la même largeur utile, au millimètre.
    */
-  padding:4cqw;
+  padding:3.5cqw;
 
   // Dégradé diagonal, construit À PARTIR du fond de la variante : plus clair
   // en haut à gauche, plus dense en bas à droite. Surface mate — aucun éclat,
@@ -287,9 +290,9 @@
 // -----------------------------------------------------------------------------
 .pvc__v-texte{
   position:absolute;
-  top:4cqw; left:4cqw;
+  top:3.5cqw; left:3.5cqw;
   z-index:2;
-  width:52cqw;
+  width:53cqw;
   display:flex;
   flex-direction:column;
   align-items:flex-start;
@@ -389,7 +392,7 @@
 // -----------------------------------------------------------------------------
 .pvc__v-qr{
   position:absolute;
-  right:4cqw; top:4cqw;
+  right:3.5cqw; top:3.5cqw;
   z-index:2;
   display:flex;
   flex-direction:column;
@@ -437,7 +440,7 @@
 // régularité de la bordure qui fait qu'une carte paraît soignée.
 .pvc__v-pied{
   position:absolute;
-  left:4cqw; right:4cqw; bottom:4cqw;
+  left:3.5cqw; right:3.5cqw; bottom:3.5cqw;
   z-index:2;
   display:flex;
   align-items:baseline;
@@ -596,7 +599,7 @@
 // Les tailles reviennent au pixel, calibrées sur la largeur médiane.
 // -----------------------------------------------------------------------------
 @supports not (container-type: inline-size){
-  .pvc__face{padding:13px}
+  .pvc__face{padding:11px}
 
   // La taille du nom est posée en style EN LIGNE, en cqw : sans unités de
   // conteneur elle ne vaut rien, et c'est cette règle qui doit la remplacer.
@@ -607,16 +610,16 @@
   .pvc__fonction{font-size:12px}
   .pvc__qr{width:107px}
 
-  .pvc__v-texte{top:13px;left:13px;width:174px;gap:10px}
+  .pvc__v-texte{top:11px;left:11px;width:177px;gap:10px}
   .pvc__v-marque{gap:9px}
   .pvc__v-logo .brand__mark{width:40px;height:40px;font-size:17px;border-radius:9px}
   .pvc__v-nom{font-size:37px}
   .pvc__v-accroche{font-size:12px;max-width:154px}
-  .pvc__v-qr{right:13px;top:13px}
+  .pvc__v-qr{right:11px;top:11px}
   .pvc__v-qr-cadre{padding:4px}
   .pvc__v-qr-cadre svg{width:87px;height:87px}
   .pvc__v-qr-mention{font-size:9px}
-  .pvc__v-pied{left:13px;right:13px;bottom:13px}
+  .pvc__v-pied{left:11px;right:11px;bottom:11px}
   .pvc__v-nature,.pvc__v-site{font-size:8px}
 }
 

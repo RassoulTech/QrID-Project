@@ -28,9 +28,9 @@
      | même coefficient divergeraient, et la divergence se verrait sur des
      | cartes déjà tirées.
      |
-     | Ici l'unité est le cqw : largeur utile = 100 − 2 × 4cqw de marge.
+     | Ici l'unité est le cqw : largeur utile = 100 − 2 × 3,5cqw de marge.
      */
-    $tailleNom = \App\Support\NomSurCarte::taille($nom, 92, 100);
+    $tailleNom = \App\Support\NomSurCarte::taille($nom, 93, 100);
     $surUneLigne = \App\Support\NomSurCarte::surUneLigne($tailleNom, 100);
 @endphp
 

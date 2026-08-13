@@ -35,11 +35,30 @@ class PrintableCardService
      * destiné à l'imprimeur, ce silence est inacceptable — les octets voyagent
      * donc avec le document.
      */
-    /** Marge intérieure, en millimètres depuis le BORD DE PAGE. */
-    private const MARGE_MM = 6.4;
+    /**
+     * Marge intérieure, en millimètres depuis le BORD DE PAGE.
+     *
+     * 6 mm = 3 mm de fonds perdus + 3 mm de zone de sécurité. Le texte
+     * commence donc à exactement 3 mm du trait de coupe, soit 3,5 % de la
+     * largeur de la carte — la même valeur qu'à l'écran.
+     *
+     * C'est un PLANCHER imposé par l'impression, pas un choix esthétique : en
+     * dessous, une dérive de massicot d'un demi-millimètre entame le texte.
+     */
+    private const MARGE_MM = 6.0;
 
     /** Largeur de page, fonds perdus compris. */
     private const PAGE_L = 91.6;
+
+    /**
+     * Largeur de la carte APRÈS COUPE — ISO/IEC 7810 ID-1.
+     *
+     * C'est elle, et non la page, qui donne l'échelle des bornes de taille du
+     * nom : l'écran montre la carte coupée, et les deux doivent aboutir à la
+     * même proportion. Passer la largeur de page ici rendait le plafond et le
+     * plancher 7 % trop généreux.
+     */
+    private const CARTE_L = 85.6;
 
     public function render(Profile $profile): string
     {
@@ -56,7 +75,7 @@ class PrintableCardService
          | une divergence entre l'aperçu et le tirage.
          */
         $utile = self::PAGE_L - 2 * self::MARGE_MM;
-        $tailleMm = NomSurCarte::taille($nom, $utile, self::PAGE_L);
+        $tailleMm = NomSurCarte::taille($nom, $utile, self::CARTE_L);
 
         return Pdf::loadView('profile.printable', [
             'profile' => $profile,
@@ -65,7 +84,7 @@ class PrintableCardService
             'marge' => self::MARGE_MM,
             'utile' => $utile,
             'tailleNom' => round($tailleMm * 2.8346, 1),   // mm → points
-            'surUneLigne' => NomSurCarte::surUneLigne($tailleMm, self::PAGE_L),
+            'surUneLigne' => NomSurCarte::surUneLigne($tailleMm, self::CARTE_L),
 
             // RECTO — le QR du porteur, aux couleurs de la variante. Le fond
             // est CUIT dans l'image plutôt que laissé transparent, la
