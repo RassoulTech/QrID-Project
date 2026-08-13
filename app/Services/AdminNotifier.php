@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Enums\MotifAlerte;
 use App\Mail\AdminAlertMail;
-use App\Models\User;
 use App\Support\Courrier;
+use App\Support\DestinatairesEquipe;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -74,21 +74,17 @@ class AdminNotifier
     }
 
     /**
-     * La liste explicite l'emporte ; à défaut, les comptes admin en base.
+     * Résolue par DestinatairesEquipe, et non ici.
+     *
+     * Cette méthode et son homologue du formulaire de contact appliquaient la
+     * même règle avec deux ordres de priorité différents. Deux implémentations
+     * d'une même règle finissent toujours par diverger — et ici, la divergence
+     * se serait constatée sur un message qui n'arrive pas.
      *
      * @return array<int, string>
      */
     private function destinataires(): array
     {
-        $explicites = (array) config('notifications.admin_recipients', []);
-
-        if ($explicites !== []) {
-            return $explicites;
-        }
-
-        return User::admins()
-            ->whereNotNull('email')
-            ->pluck('email')
-            ->all();
+        return DestinatairesEquipe::alertes();
     }
 }

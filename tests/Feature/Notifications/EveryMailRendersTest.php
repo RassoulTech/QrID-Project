@@ -5,6 +5,7 @@ namespace Tests\Feature\Notifications;
 use App\Enums\MotifAlerte;
 use App\Mail\AdminAlertMail;
 use App\Mail\BaseMailable;
+use App\Mail\ContactMail;
 use App\Mail\PasswordChangedMail;
 use App\Mail\PaymentFailedMail;
 use App\Mail\PaymentSucceededMail;
@@ -13,6 +14,7 @@ use App\Mail\ProfileReminderMail;
 use App\Mail\SubscriptionExpiredMail;
 use App\Mail\SubscriptionExpiringMail;
 use App\Mail\WelcomeMail;
+use App\Models\ContactMessage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -157,7 +159,87 @@ class EveryMailRendersTest extends TestCase
                 lignes: ['File' => 'mail', 'Erreur' => 'délai dépassé'],
                 url: null,
             )],
+
         ];
+    }
+
+    /*
+     |--------------------------------------------------------------------------
+     | LE MESSAGE DE CONTACT EST TRAITÉ À PART, ET IL LE FAUT
+     |--------------------------------------------------------------------------
+     | Un fournisseur de données PHPUnit est STATIQUE : il s'exécute avant que
+     | l'application ne démarre. Ni `now()`, ni un modèle Eloquent n'y sont
+     | disponibles — les y placer fait échouer la collecte des tests, et PHPUnit
+     | annonce alors « aucun test trouvé », ce qui masque tout le fichier.
+     |
+     | Les autres messages n'ont que des chaînes en paramètre : eux passent.
+     */
+
+    /**
+     * LE MESSAGE DE CONTACT SE FABRIQUE — défaut RÉEL, corrigé le 13 août.
+     *
+     * Son gabarit appelait `$motif` en comptant sur la méthode motif(). Laravel
+     * ne transmet à la vue que les PROPRIÉTÉS publiques d'un Mailable, jamais
+     * ses méthodes : la variable n'existait pas, le rendu levait « Undefined
+     * variable $motif », et AUCUN message de contact ne partait.
+     *
+     * Le défaut a traversé toute la suite parce que Mail::fake() intercepte
+     * AVANT le rendu. Il n'est apparu qu'à l'envoi réel — c'est-à-dire chez le
+     * client, sur un message dont personne ne remarque l'absence.
+     */
+    public function test_the_contact_mail_builds_both_bodies(): void
+    {
+        config(['mail.default' => 'array']);
+
+        $contact = new ContactMessage([
+            'name' => 'Awa Ndiaye',
+            'email' => 'awa@exemple.sn',
+            'phone' => '+221 77 383 13 64',
+            'subject' => 'commande',
+            'message' => "Bonjour,\nJe souhaite commander cinquante cartes.",
+        ]);
+        $contact->created_at = now();
+
+        Mail::to('equipe@qrid.sn')->send(new ContactMail($contact));
+
+        $corps = Mail::mailer('array')->getSymfonyTransport()->messages()[0]->getOriginalMessage();
+
+        $html = (string) $corps->getHtmlBody();
+        $texte = (string) $corps->getTextBody();
+
+        $this->assertNotEmpty($html);
+        $this->assertNotEmpty($texte);
+
+        // Le motif est bien résolu — c'est exactement ce qui manquait.
+        $this->assertStringContainsString('cartes imprimées', $html);
+        $this->assertStringContainsString('cartes imprimées', $texte);
+
+        // Et le message du client y figure, retours à la ligne conservés.
+        $this->assertStringContainsString('cinquante cartes', $html);
+
+        // L'adresse de réponse est celle du client : c'est tout l'intérêt.
+        $this->assertNotEmpty($corps->getReplyTo());
+        $this->assertSame('awa@exemple.sn', $corps->getReplyTo()[0]->getAddress());
+    }
+
+    /** Sans téléphone ni compte, deux lignes disparaissent — et rien ne casse. */
+    public function test_a_minimal_contact_mail_still_builds(): void
+    {
+        config(['mail.default' => 'array']);
+
+        $contact = new ContactMessage([
+            'name' => 'Awa Ndiaye',
+            'email' => 'awa@exemple.sn',
+            'subject' => 'information',
+            'message' => 'Bonjour, une question.',
+        ]);
+
+        Mail::to('equipe@qrid.sn')->send(new ContactMail($contact));
+
+        $corps = Mail::mailer('array')->getSymfonyTransport()->messages()[0]->getOriginalMessage();
+
+        $this->assertNotEmpty($corps->getHtmlBody());
+        $this->assertNotEmpty($corps->getTextBody());
     }
 
     #[DataProvider('messages')]

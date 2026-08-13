@@ -51,9 +51,23 @@ class ContactMail extends BaseMailable
 
     public function content(): Content
     {
+        /*
+         | LE MOTIF EST PASSÉ EXPLICITEMENT PAR `with`.
+         |
+         | Laravel ne transmet à la vue que les PROPRIÉTÉS PUBLIQUES du
+         | Mailable, jamais ses méthodes. Le gabarit appelait `$motif` en
+         | comptant sur motif() : la variable n'existait pas, le rendu levait
+         | « Undefined variable $motif », et le message de contact n'est jamais
+         | parti.
+         |
+         | Le défaut était INVISIBLE aux tests : Mail::fake() intercepte avant
+         | le rendu. Il n'apparaissait qu'à l'envoi réel — c'est-à-dire chez le
+         | client, sur un message qu'on ne voit pas manquer.
+         */
         return new Content(
             view: 'emails.admin.contact',
             text: 'emails.admin.contact_text',
+            with: ['motif' => $this->motif()],
         );
     }
 }

@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ContactRequest;
 use App\Mail\ContactMail;
 use App\Models\ContactMessage;
-use App\Models\User;
 use App\Support\Courrier;
+use App\Support\DestinatairesEquipe;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -89,22 +89,17 @@ class ContactController extends Controller
     }
 
     /**
-     * L'adresse de support si elle est renseignée, sinon les administrateurs.
+     * Résolue par DestinatairesEquipe, et non ici.
      *
-     * Le repli sur la base n'est pas une commodité : une liste figée dans une
-     * variable d'environnement se périme au premier changement d'équipe, et
-     * les messages partiraient vers une boîte que plus personne ne relève.
+     * Cette méthode dupliquait la règle d'AdminNotifier avec un ordre de
+     * priorité différent, et surtout SANS écarter les adresses de
+     * démonstration — ce qui faisait rejeter le message entier par le
+     * fournisseur dès qu'un compte fictif figurait parmi les administrateurs.
      *
      * @return array<int, string>
      */
     private function destinataires(): array
     {
-        $support = trim((string) config('landing.support.email'));
-
-        if ($support !== '') {
-            return [$support];
-        }
-
-        return User::admins()->whereNotNull('email')->pluck('email')->all();
+        return DestinatairesEquipe::contact();
     }
 }

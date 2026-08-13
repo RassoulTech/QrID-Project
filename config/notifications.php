@@ -32,6 +32,38 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | DOMAINES ÉCARTÉS DES ENVOIS
+    |--------------------------------------------------------------------------
+    |
+    | CE RÉGLAGE EST UN CORRECTIF, PAS UNE COMMODITÉ.
+    |
+    | AdminDemoSeeder crée deux administrateurs sur un domaine fictif, pour que
+    | le journal d'audit de l'espace admin distingue plusieurs auteurs. Ces
+    | comptes sont utiles à l'écran et nuisibles au courrier :
+    |
+    |   · leur domaine n'existe pas, donc chaque envoi rebondit ;
+    |   · les rebonds abîment la réputation de l'expéditeur — celle dont
+    |     dépendent les liens de réinitialisation de mot de passe ;
+    |   · et surtout, chez la plupart des fournisseurs, UN SEUL destinataire
+    |     invalide fait rejeter TOUT LE MESSAGE.
+    |
+    | Deux adresses fictives empêchaient donc l'unique adresse réelle de
+    | recevoir quoi que ce soit. C'était la cause exacte des messages de
+    | contact qui ne partaient pas.
+    |
+    | Ces domaines ne concernent QUE les envois d'équipe. Un client qui
+    | s'inscrirait avec une telle adresse recevrait son courrier normalement :
+    | ce n'est pas une liste noire, c'est le nettoyage d'un jeu de démonstration.
+    |
+    */
+
+    'excluded_domains' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('MAIL_EXCLUDED_DOMAINS', 'qrid-demo.sn'))
+    ))),
+
+    /*
+    |--------------------------------------------------------------------------
     | Ce qui déclenche une alerte d'équipe
     |--------------------------------------------------------------------------
     |
