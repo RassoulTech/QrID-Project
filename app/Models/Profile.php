@@ -54,6 +54,7 @@ class Profile extends Model
             'is_active' => 'boolean',
             'slug_changed_at' => 'datetime',
             'deactivated_at' => 'datetime',
+            'reminder_sent_at' => 'datetime',
         ];
     }
 

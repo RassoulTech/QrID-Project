@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\PasswordChanged;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
@@ -37,9 +38,6 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
@@ -49,6 +47,20 @@ class NewPasswordController extends Controller
                 ])->save();
 
                 event(new PasswordReset($user));
+
+                /*
+                 | Notre propre événement, en plus de celui du framework.
+                 |
+                 | PasswordReset est émis par Laravel et sert à ses propres
+                 | mécanismes ; s'y accrocher lierait une alerte de sécurité du
+                 | produit au cycle de vie d'une classe du framework. Le nôtre
+                 | couvre en outre le second chemin — le changement depuis les
+                 | paramètres du compte — que PasswordReset ignore.
+                 |
+                 | L'envoi ne peut pas faire échouer la réinitialisation :
+                 | Courrier absorbe toute panne d'expédition.
+                 */
+                event(new PasswordChanged($user, $request->ip()));
             }
         );
 

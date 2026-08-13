@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Events\ProfilePublished;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,7 +34,21 @@ class ProfileActivationController extends Controller
             return redirect()->route('abonnement.paiement');
         }
 
+        /*
+         | ÉTAIT-ELLE DÉJÀ EN LIGNE ? La question décide de l'e-mail.
+         |
+         | Rien n'empêche de reposter ce formulaire — bouton recliqué, retour
+         | arrière, double soumission. Sans cette lecture préalable, le client
+         | recevrait « votre carte est en ligne » à chaque fois, et l'équipe
+         | autant d'alertes pour un seul fait.
+         */
+        $etaitDejaEnLigne = (bool) $profile->is_active;
+
         $profile->forceFill(['is_active' => true])->save();
+
+        if (! $etaitDejaEnLigne) {
+            event(new ProfilePublished($profile));
+        }
 
         return redirect()->route('dashboard')->with(
             'success',

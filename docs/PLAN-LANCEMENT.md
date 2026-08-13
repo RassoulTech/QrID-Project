@@ -14,8 +14,8 @@ Mesuré dans le dépôt, pas estimé.
 
 | Bloc | Avancement | Verdict |
 |---|---|---|
-| 1 — Notifications | ~25 % | **tenable, sous une condition d'infrastructure** |
-| 2 — Discord | 0 % | **tenable, sous la même condition** |
+| 1 — Notifications | **✅ livré le 13 août** | reste la vérification en boîte réelle |
+| 2 — Discord | 0 % | **tenable, sous condition d'infrastructure** |
 | 3 — Durcissement | ~40 % | ⛔ **INTENABLE en l'état** — voir le risque n° 1 |
 | 4 — Finitions | ~60 % | tenable, mais dépend de vous pour trois points |
 
@@ -89,12 +89,19 @@ Or la production tourne avec `QUEUE_CONNECTION=sync`, et **aucun processus
 n'exécute `queue:work` ni `schedule:run`**. Un service web Render ne fait que
 répondre aux requêtes HTTP.
 
-Deux tâches sont déjà déclarées et ne s'exécutent donc jamais :
+Quatre tâches sont déclarées et ne s'exécutent donc jamais :
 
 ```php
 Schedule::command('registrations:purge')->dailyAt('03:00');
 Schedule::command('queue:monitor database:mail --max=50')->everyMinute();
+Schedule::command('profiles:remind')->dailyAt('09:00');        // bloc 1
+Schedule::command('subscriptions:notify')->dailyAt('09:15');   // bloc 1
 ```
+
+**Les deux dernières sont livrées et testées depuis le 13 août.** Elles
+restent muettes tant qu'aucun processus ne lance `schedule:run`. Un Cron Job
+Render exécutant cette seule commande chaque minute les réveille toutes les
+quatre — c'est une ligne de configuration, aucun code à écrire.
 
 **Sans un service supplémentaire chez Render — payant — les blocs 1 et 2 ne
 peuvent pas fonctionner comme spécifiés.** Ce n'est pas un problème de code :
@@ -124,56 +131,89 @@ sans trace.
 
 ---
 
-## BLOC 1 — Notifications temps réel (2 jours)
+## BLOC 1 — Notifications ✅ LIVRÉ LE 13 AOÛT
 
-### Ce qui existe déjà
+### E-mails client — 11 sur 11
 
-| Élément | État |
+| E-mail | Déclencheur |
 |---|---|
-| `BaseMailable` — identité visuelle commune | ✅ |
-| Table `mail_logs` + `LogSentMail` | ✅ |
-| `GuardOutgoingMail` — garde-fou d'envoi | ✅ |
-| Événements Laravel + listeners (mécanique) | ✅ `UserRegistered` → `StartFreeTrial` |
-| `ConfirmRegistrationMail` | ✅ |
-| `AlreadyRegisteredMail` | ✅ |
-| `ResetPasswordMail` | ✅ |
+| Confirmation d'inscription | formulaire d'inscription |
+| Adresse déjà utilisée | formulaire d'inscription |
+| Réinitialisation de mot de passe | mot de passe oublié |
+| **Bienvenue** — essai ouvert, lien de création | `UserRegistered` |
+| **Rappel de publication** — 24 h puis 72 h | `profiles:remind` |
+| **Carte en ligne** — le lien à partager | `ProfilePublished` |
+| **Reçu de paiement** — QR + PDF joints | `PaymentSucceeded` |
+| **Paiement non abouti** | `PaymentFailed` |
+| **Échéance** — J-7, J-3, J-1, jour même | `subscriptions:notify` |
+| **Abonnement expiré** | `subscriptions:notify` |
+| **Mot de passe modifié** — sécurité | `PasswordChanged` |
 
-La fondation est saine : classe de base, journalisation, déclenchement par
-événements. **Il reste le volume.**
+### Alertes équipe — 6 sur 6
 
-### Ce qui manque
+Compte confirmé · Carte créée · Carte mise en ligne · Paiement encaissé ·
+Paiement en échec · Traitement en échec.
 
-**E-mails client — 3 sur 9 faits**
+**Une seule classe, `AdminAlertMail`, pour les six.** Elles ont rigoureusement
+la même forme — titre, couples libellé/valeur, lien vers l'administration — et
+ne diffèrent que par leur contenu, c'est-à-dire par un paramètre. Six classes
+auraient produit six gabarits presque identiques dont on en corrigerait cinq
+le jour d'un changement.
 
-- [ ] Compte confirmé : bienvenue + lien vers la création de profil
-- [ ] Profil créé non activé : rappel à 24 h puis 72 h
-- [ ] Paiement réussi : lien public + QR Code en pièce jointe + PDF
-- [ ] Paiement échoué : explication + lien pour réessayer
-- [ ] Carte publiée : récapitulatif + lien à partager
-- [ ] Abonnement : J-7, J-3, J-1, jour d'expiration
-- [ ] Abonnement expiré : profil indisponible + lien de réactivation
-- [ ] Mot de passe modifié : alerte de sécurité
+Ce qui les distingue vraiment — **l'urgence** — est porté par l'enum
+`MotifAlerte` et décide du sujet (`[Action]` / `[Info]`) comme du bandeau.
+Les deux motifs d'échec **ne sont pas désactivables** : un interrupteur sur
+« paiement en échec » serait actionné un jour de bruit et jamais remis.
 
-**E-mails administrateur — 0 sur 6**
+### Trois décisions structurantes prises pendant l'écriture
 
-- [ ] Compte confirmé par un nouveau client
-- [ ] Profil créé
-- [ ] Carte activée
-- [ ] Paiement réussi, avec montant et moyen
-- [ ] Paiement échoué ou en attente depuis plus d'une heure
-- [ ] Job en échec définitif
+**1. `Courrier` — l'e-mail d'information ne peut plus casser une page.**
 
-**Événements à créer** — seul `UserRegistered` existe. Il faut au minimum :
-`RegistrationConfirmed`, `ProfileCreated`, `ProfilePublished`,
-`PaymentSucceeded`, `PaymentFailed`, `SubscriptionExpiring`,
-`SubscriptionExpired`, `PasswordChanged`.
+Deux familles, deux comportements opposés :
 
-### Estimation honnête
+- le courrier qui **porte le parcours** (lien de confirmation, lien de
+  réinitialisation) échoue **bruyamment** : sans lui l'utilisateur est bloqué,
+  et un « c'est envoyé » qui ment coûte des jours ;
+- le courrier qui **informe** (reçu, bienvenue, échéance) accompagne une action
+  **déjà réussie**. Son échec est avalé pour l'utilisateur, consigné pour
+  l'exploitant.
 
-15 e-mails, 8 événements, leurs listeners, leurs gabarits HTML et texte, plus
-la vérification de chacun dans une vraie boîte. **2 jours est serré mais
-faisable si l'on ne redessine rien.** Le facteur limitant sera la
-vérification manuelle des 15 envois, pas l'écriture.
+Test à l'appui : *un paiement est encaissé, l'abonnement ouvert et la carte
+publiée même quand aucun e-mail ne peut partir.* Sans cette séparation, une
+panne SMTP pendant un retour d'opérateur aurait annulé l'encaissement —
+client débité, sans abonnement, et rien dans les données pour dire pourquoi.
+
+**2. `RegistrationConfirmed` n'a pas été créé.** `UserRegistered` est émis
+exactement au même instant. Deux événements pour un seul fait se seraient
+désynchronisés au premier refactoring.
+
+**3. Défaut sérieux trouvé et corrigé — `mail_logs.sent_at` était NOT NULL.**
+
+Un e-mail qui n'est pas parti n'a pas de date d'envoi. Toute tentative
+d'enregistrer un échec heurtait la contrainte, était rejetée, puis avalée par
+le try/catch qui protège la journalisation.
+
+**Aucune panne d'envoi n'a donc jamais été enregistrée.** L'écran « État
+système » affichait une liste sans le moindre échec — donc rassurante —
+pendant que les e-mails ne partaient pas. On a cherché la cause d'une panne
+dans un journal que le défaut lui-même empêchait de se remplir.
+
+### Ce qui reste, et qui ne dépend pas de moi
+
+- [ ] **Réception des 11 e-mails dans une vraie boîte** — bloqué par la
+      messagerie de production, non par le code
+- [ ] **Les deux commandes planifiées ne s'exécutent pas en production** —
+      risque n° 2, toujours ouvert. Elles sont écrites, testées, et
+      déclenchables à la main :
+      `php artisan profiles:remind --dry-run`
+      `php artisan subscriptions:notify --dry-run`
+
+### Couverture
+
+37 tests dédiés. Les plus importants ne vérifient pas la rédaction mais la
+**non-répétition** (deux exécutions d'une commande n'envoient qu'un message)
+et la **containment** (une messagerie morte ne coûte ni un encaissement, ni
+une inscription).
 
 ---
 
@@ -334,7 +374,8 @@ Par ordre d'urgence :
 3. **Stockage objet** pour les photos (risque n° 3)
 4. **Textes légaux** — CGU, confidentialité, mentions
 5. **Scan du QR Code** sur deux téléphones et vérification à 375px
-6. **Réception des 15 e-mails** dans une vraie boîte
+6. **Réception des 11 e-mails** dans une vraie boîte — suppose une messagerie
+   de production qui fonctionne, donc un domaine vérifié chez Resend
 
 ---
 

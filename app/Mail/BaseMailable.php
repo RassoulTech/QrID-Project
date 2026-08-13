@@ -82,7 +82,9 @@ abstract class BaseMailable extends Mailable
                 'mailer' => config('mail.default'),
                 'status' => 'failed',
                 'error' => $e->getMessage(),
-                'sent_at' => now(),
+                // Rien n'est parti : la colonne reste vide. Y écrire l'heure
+                // courante ferait croire à un envoi qui n'a pas eu lieu.
+                'sent_at' => null,
             ]);
         } catch (Throwable $inner) {
             Log::channel('mail')->warning('Journal d\'échec non enregistré', [

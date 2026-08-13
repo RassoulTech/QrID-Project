@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Profile;
 
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
+use App\Services\PrintableCardService;
 use App\Services\QrCodeService;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -18,7 +18,10 @@ use Illuminate\Http\Response;
  */
 class CardController extends Controller
 {
-    public function __construct(private QrCodeService $qr) {}
+    public function __construct(
+        private QrCodeService $qr,
+        private PrintableCardService $carte,
+    ) {}
 
     /** QR Code en PNG haute définition (984 px), pour un usage courant. */
     public function qrPng(Request $request): Response
@@ -49,10 +52,9 @@ class CardController extends Controller
     /**
      * Carte prête pour l'impression — PDF, recto et verso.
      *
-     * Format exact 85,6 × 54 mm plus 3 mm de fonds perdus sur chaque bord,
-     * soit 91,6 × 60 mm de page. Ces fonds perdus ne sont pas décoratifs :
-     * sans eux, la moindre dérive de massicot laisse un liseré blanc sur le
-     * bord d'une carte à fond vert.
+     * Le rendu vit dans PrintableCardService : la confirmation de paiement
+     * joint EXACTEMENT ce fichier, et deux générations distinctes auraient
+     * fini par diverger sur des cartes déjà imprimées.
      */
     public function printable(Request $request): Response
     {
@@ -60,15 +62,10 @@ class CardController extends Controller
 
         $this->authorize('downloadPrintable', $profile);
 
-        $pdf = Pdf::loadView('profile.printable', [
-            'profile' => $profile,
-            // Version INVERSÉE : modules blancs sur le vert de la carte, comme
-            // à l'écran. Le vert est cuit dans l'image, la transparence PNG
-            // étant l'autre faiblesse connue de DomPDF.
-            'qrPng' => 'data:image/png;base64,'.base64_encode($this->qr->invertedPng($profile)),
-        ])->setPaper([0, 0, $this->mm(91.6), $this->mm(60)]);
-
-        return $pdf->download('carte-'.$profile->slug.'.pdf');
+        return response($this->carte->render($profile), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$this->carte->filename($profile).'"',
+        ]);
     }
 
     // -----------------------------------------------------------------------
@@ -77,11 +74,5 @@ class CardController extends Controller
     private function carteDe(Request $request): Profile
     {
         return $request->user()->profile ?? abort(404);
-    }
-
-    /** Millimètres → points PostScript (1 pt = 1/72 pouce). */
-    private function mm(float $mm): float
-    {
-        return $mm * 72 / 25.4;
     }
 }

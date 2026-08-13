@@ -2,6 +2,9 @@
 
 namespace App\Services\Payment;
 
+use App\Events\PaymentFailed;
+use App\Events\PaymentSucceeded;
+use App\Events\ProfilePublished;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -74,7 +77,10 @@ class CheckoutService
             return false;
         }
 
-        DB::transaction(function () use ($payment, $plan) {
+        // Vrai si la publication a lieu MAINTENANT, du fait de ce paiement.
+        $publieMaintenant = false;
+
+        DB::transaction(function () use ($payment, $plan, &$publieMaintenant) {
             $user = $payment->user;
 
             $abonnement = $this->openOrExtend($user, $plan);
@@ -86,7 +92,12 @@ class CheckoutService
 
             // Le profil devient public. C'est l'aboutissement du parcours :
             // payer sans être publié n'aurait aucun sens pour le client.
-            $user->profile?->forceFill(['is_active' => true])->save();
+            $profile = $user->profile;
+
+            if ($profile && ! $profile->is_active) {
+                $profile->forceFill(['is_active' => true])->save();
+                $publieMaintenant = true;
+            }
         });
 
         Log::info('Paiement encaissé.', [
@@ -94,6 +105,33 @@ class CheckoutService
             'plan' => $plan->slug,
             'amount_fcfa' => $payment->amount_fcfa,
         ]);
+
+        /*
+         |----------------------------------------------------------------------
+         | LES ÉVÉNEMENTS SONT ÉMIS APRÈS LA TRANSACTION, JAMAIS DEDANS
+         |----------------------------------------------------------------------
+         | Deux raisons, et la seconde est la plus grave.
+         |
+         | 1. Un listener qui relit la base à l'intérieur de la transaction
+         |    travaillerait sur un état non encore validé.
+         |
+         | 2. Surtout : un envoi d'e-mail qui lève une exception à l'intérieur
+         |    ferait ANNULER L'ENCAISSEMENT. Le client serait débité par
+         |    l'opérateur, et sans abonnement chez nous — l'état le plus
+         |    coûteux qu'on puisse produire. L'argent reçu ne se défait pas
+         |    parce qu'un message n'est pas parti.
+         |
+         | Un renouvellement n'émet PAS ProfilePublished : la carte était déjà
+         | en ligne, et « votre carte est en ligne » à quelqu'un qui vient de
+         | renouveler ne dit rien. Le reçu de paiement, lui, part toujours.
+         */
+        $payment->refresh();
+
+        event(new PaymentSucceeded($payment));
+
+        if ($publieMaintenant && $payment->user?->profile) {
+            event(new ProfilePublished($payment->user->profile));
+        }
 
         return true;
     }
@@ -105,6 +143,11 @@ class CheckoutService
             return;
         }
 
+        // Un paiement déjà marqué en échec ne le redevient pas : sans cette
+        // garde, un retour d'opérateur rejoué renverrait une seconde fois
+        // « votre paiement n'a pas abouti » pour le même incident.
+        $etaitDejaEnEchec = $payment->status === Payment::STATUS_FAILED;
+
         $payment->forceFill([
             'status' => Payment::STATUS_FAILED,
             'payload' => array_merge($payment->payload ?? [], ['raison' => $raison]),
@@ -114,6 +157,10 @@ class CheckoutService
             'payment_id' => $payment->id,
             'raison' => $raison,
         ]);
+
+        if (! $etaitDejaEnEchec) {
+            event(new PaymentFailed($payment, $raison));
+        }
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Events\ProfileCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\WizardStepOneRequest;
 use App\Http\Requests\Profile\WizardStepThreeRequest;
@@ -161,7 +162,19 @@ class ProfileWizardController extends Controller
 
         $etaitEnEdition = $this->wizard->isEditing();
 
-        $this->wizard->persist($request->user());
+        $profile = $this->wizard->persist($request->user());
+
+        /*
+         | ÉVÉNEMENT ÉMIS À LA CRÉATION SEULEMENT, JAMAIS À L'ÉDITION.
+         |
+         | Le même parcours sert aux deux : sans cette condition, chaque
+         | correction d'une faute de frappe relancerait l'alerte « nouvelle
+         | carte créée » vers l'équipe, et remettrait le compteur des rappels
+         | à zéro pour quelqu'un qui a déjà publié.
+         */
+        if (! $etaitEnEdition) {
+            event(new ProfileCreated($profile));
+        }
 
         // L'état de session n'a plus lieu d'être : le profil existe en base.
         // clear() supprimerait la photo, or elle appartient au profil désormais.
