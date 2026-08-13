@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\ConfirmRegistrationController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -61,6 +62,30 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    /*
+     |--------------------------------------------------------------------------
+     | CONNEXION GOOGLE
+     |--------------------------------------------------------------------------
+     | Deux routes, toutes deux en GET : c'est le protocole OAuth qui l'impose,
+     | le retour étant une navigation du navigateur et non une soumission.
+     |
+     | ELLES SONT SOUS « guest », comme les autres. Quelqu'un déjà connecté qui
+     | y reviendrait — signet, bouton précédent — serait renvoyé vers son
+     | espace plutôt que de rouvrir une session par-dessus la sienne.
+     |
+     | LE DÉPART EST LIMITÉ EN CADENCE. Chaque appel ouvre une session OAuth et
+     | écrit un jeton d'état ; sans limite, une boucle de rechargement remplirait
+     | le stockage de sessions. Le RETOUR, lui, ne l'est pas : il est déclenché
+     | par Google, pas par l'utilisateur, et le brider reviendrait à casser des
+     | connexions légitimes lors d'une rafale d'inscriptions.
+     */
+    Route::get('auth/google', [GoogleController::class, 'redirect'])
+        ->middleware('throttle:20,1')
+        ->name('auth.google');
+
+    Route::get('auth/google/retour', [GoogleController::class, 'callback'])
+        ->name('auth.google.callback');
 });
 
 // Confirmation du compte : accessible connecté ou non (la logique est gérée

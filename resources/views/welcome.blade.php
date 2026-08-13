@@ -10,5 +10,11 @@
     @include('landing.sections.steps')
     @include('landing.sections.showcase')
     @include('landing.sections.plans')
+
+    {{-- Le contact vient AVANT l'appel à l'action final : il s'adresse à qui
+         hésite encore, et doit rencontrer sa question ouverte avant qu'on lui
+         redemande de créer un compte. --}}
+    @include('landing.sections.contact')
+
     @include('landing.sections.final-cta')
 </x-public-layout>

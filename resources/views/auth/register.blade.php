@@ -87,6 +87,11 @@
         </div>
     </form>
 
+    {{-- Sur CET écran, Google fait gagner davantage : il supprime le lien de
+         confirmation, donc l'attente devant une boîte de réception, donc la
+         dépendance à une messagerie qui doit fonctionner. --}}
+    <x-google-button label="S'inscrire avec Google" />
+
     <p class="f__hint text-center mt-4 mb-0">
         Déjà inscrit&nbsp;? <a href="{{ route('login') }}">Se connecter</a>
     </p>

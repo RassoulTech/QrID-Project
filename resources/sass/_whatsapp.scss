@@ -1,0 +1,109 @@
+// =============================================================================
+// BOUTON WHATSAPP FLOTTANT
+//
+// Il accompagne l'utilisateur sur toute la page d'accueil et dans tout
+// l'espace client. Au Sénégal, WhatsApp est le canal de support réellement
+// utilisé : un formulaire de contact seul laisserait la moitié des demandes
+// sans réponse.
+//
+// LE VERT EST CELUI DE WHATSAPP (#25D366), et non celui de la marque. Ce
+// bouton n'est pas un élément de notre interface : c'est la promesse d'un
+// service que tout le monde reconnaît à sa couleur. Le repeindre en vert QrID
+// lui ferait perdre exactement ce qui le rend immédiatement compréhensible.
+// =============================================================================
+
+.wa-fab{
+  position:fixed;
+  right:18px;
+  // Au-dessus du bord bas, et assez haut pour ne pas tomber sous la barre
+  // d'adresse d'un navigateur mobile qui se replie.
+  bottom:20px;
+  z-index:1030;
+
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:13px 18px;
+  border-radius:$r-full;
+
+  background:#25D366;
+  box-shadow:
+    0 4px 10px rgba(10,31,26,.20),
+    0 12px 28px rgba(10,31,26,.24);
+
+  font-size:14.5px;
+  font-weight:700;
+  line-height:1;
+
+  // La couleur est déclarée pour TOUS les états. Un bouton d'aide qui
+  // deviendrait illisible au survol serait un comble.
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
+    color:#FFFFFF;
+    text-decoration:none;
+  }
+
+  transition:transform 200ms ease, box-shadow 200ms ease;
+
+  &:hover{
+    transform:translateY(-2px);
+    box-shadow:
+      0 6px 14px rgba(10,31,26,.24),
+      0 18px 38px rgba(10,31,26,.28);
+  }
+
+  &:active{transform:translateY(0)}
+
+  &:focus-visible{
+    outline:none;
+    // Anneau BLANC puis vert : sur le vert WhatsApp, un anneau vert seul
+    // serait invisible.
+    box-shadow:0 0 0 3px #FFFFFF, 0 0 0 6px #25D366;
+  }
+}
+
+.wa-fab__icone{
+  width:22px;
+  height:22px;
+  flex:0 0 auto;
+}
+
+/*
+ | SOUS 576 px, LE BOUTON DEVIENT ROND.
+ |
+ | Le libellé est MASQUÉ, jamais supprimé : il reste lu par les lecteurs
+ | d'écran, et le bouton conserve un nom accessible. Le supprimer aurait donné
+ | un bouton sans texte, annoncé « lien » et rien d'autre.
+ |
+ | Sur un téléphone, un bouton large recouvre une part sérieuse d'un écran de
+ | 375 px et gêne la lecture — ce que le support est censé faciliter.
+ */
+@media (max-width:575.98px){
+  .wa-fab{
+    right:14px;
+    bottom:16px;
+    padding:0;
+    width:54px;
+    height:54px;
+    justify-content:center;
+  }
+
+  .wa-fab__texte{
+    position:absolute;
+    width:1px;height:1px;
+    padding:0;margin:-1px;
+    overflow:hidden;
+    clip-path:inset(50%);
+    white-space:nowrap;
+    border:0;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .wa-fab{transition:none}
+  .wa-fab:hover,.wa-fab:active{transform:none}
+}
+
+// Impression : un bouton flottant n'a aucun sens sur du papier.
+@media print{
+  .wa-fab{display:none}
+}

@@ -1,0 +1,153 @@
+// =============================================================================
+// SECTION CONTACT — page d'accueil
+//
+// Deux colonnes : à gauche l'invitation et le raccourci WhatsApp, à droite le
+// formulaire. Sous 900 px, elles s'empilent — l'invitation d'abord, car c'est
+// elle qui explique pourquoi remplir ce qui suit.
+// =============================================================================
+
+.contact{
+  padding:88px 0;
+  background:var(--surface-2, #{$gris-fond});
+  scroll-margin-top:80px;   // l'ancre #contact ne passe pas sous la navbar
+}
+
+.contact__grille{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:36px;
+  align-items:start;
+
+  @media (min-width:900px){
+    // La colonne du formulaire est la plus large : c'est elle qui porte
+    // l'action, et six champs ont besoin de place pour ne pas se tasser.
+    grid-template-columns:0.85fr 1.15fr;
+    gap:56px;
+  }
+}
+
+.contact__intro{
+  // Sur grand écran, le texte accompagne le formulaire au lieu de le
+  // surplomber : il reste à hauteur de regard pendant la saisie.
+  @media (min-width:900px){padding-top:8px}
+}
+
+// -----------------------------------------------------------------------------
+// Le raccourci WhatsApp — dans le flux, en plus du bouton flottant
+//
+// Le bouton flottant est discret par nature ; ici on NOMME le canal et l'on
+// dit quand il répond. Les deux ne font pas double emploi : l'un est une aide
+// permanente, l'autre une proposition à l'endroit où la question se pose.
+// -----------------------------------------------------------------------------
+.contact__wa{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-top:28px;
+  padding:16px 18px;
+  border-radius:$r-md;
+  background:var(--surface, #{$blanc});
+  border:1px solid var(--bordure, #{$bordure});
+  transition:border-color 160ms ease, box-shadow 160ms ease;
+
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
+    color:var(--texte, #{$texte});
+    text-decoration:none;
+  }
+
+  &:hover{
+    border-color:#25D366;
+    box-shadow:$shadow-1;
+  }
+
+  &:focus-visible{
+    outline:none;
+    box-shadow:0 0 0 3px rgba(37,211,102,.35);
+  }
+
+  svg{
+    flex:0 0 auto;
+    color:#25D366;   // la couleur du service, pas celle de la marque
+  }
+
+  span{display:flex;flex-direction:column;gap:2px}
+  strong{font-size:14.5px;font-weight:700}
+  small{font-size:12.5px;color:var(--texte-2, #{$gris-second})}
+}
+
+// -----------------------------------------------------------------------------
+// La carte du formulaire
+// -----------------------------------------------------------------------------
+.contact__carte{
+  padding:28px;
+  border-radius:$r-lg;
+  background:var(--surface, #{$blanc});
+  border:1px solid var(--bordure, #{$bordure});
+  box-shadow:$shadow-1;
+
+  @media (min-width:576px){padding:34px}
+}
+
+.contact__form{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+// Deux champs par ligne au-delà de 576 px. En dessous, ils s'empilent : deux
+// champs côte à côte sur 375 px donnent deux champs trop étroits pour être
+// remplis au doigt.
+.contact__paire{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:18px;
+
+  @media (min-width:576px){grid-template-columns:1fr 1fr}
+}
+
+.contact__legal{
+  margin:0;
+  font-size:12.5px;
+  line-height:1.5;
+  color:var(--texte-2, #{$gris-second});
+  text-align:center;
+}
+
+// -----------------------------------------------------------------------------
+// Confirmation d'envoi
+// -----------------------------------------------------------------------------
+.contact__ok{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:22px;
+  padding:14px 16px;
+  border-radius:$r-sm;
+  background:var(--accent-doux, #{$vert-clair});
+  color:var(--accent, #{$vert-fonce});
+  font-size:14px;
+  line-height:1.5;
+
+  svg{flex:0 0 auto;margin-top:2px}
+}
+
+/*
+ | PIÈGE À ROBOTS.
+ |
+ | Il n'est PAS en `display:none` : certains robots ignorent délibérément les
+ | champs ainsi masqués, précisément parce que c'est la façon la plus connue
+ | de poser un piège. Le champ est donc sorti de l'écran tout en restant
+ | rendu — plus coûteux à détecter.
+ |
+ | Il porte par ailleurs aria-hidden et tabindex="-1" dans le gabarit : ni un
+ | lecteur d'écran ni la tabulation ne peuvent l'atteindre. Un piège qui
+ | attraperait un utilisateur au clavier serait un défaut, pas une protection.
+ */
+.contact__piege{
+  position:absolute;
+  left:-9999px;
+  top:auto;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+}

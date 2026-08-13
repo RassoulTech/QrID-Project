@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignSystemController;
 use App\Http\Controllers\LandingController;
@@ -20,6 +21,21 @@ use App\Http\Controllers\ThemePreferenceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->name('home');
+
+/*
+ | FORMULAIRE DE CONTACT — public, donc limité en cadence.
+ |
+ | Cinq envois par heure et par adresse IP. Le formulaire est ouvert à
+ | n'importe qui, sans compte : sans limite, il devient un relais d'envoi vers
+ | notre propre boîte, et la réputation de l'expéditeur en pâtit — celle-là
+ | même dont dépendent les liens de réinitialisation de mot de passe.
+ |
+ | Cinq est large pour un humain, étroit pour un robot. Le piège à robots du
+ | ContactRequest arrête l'essentiel en amont ; ceci est la seconde barrière.
+ */
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:5,60')
+    ->name('contact.store');
 
 // Pages légales — obligatoires avant toute vente.
 Route::get('/conditions-generales', [LegalController::class, 'conditions'])->name('legal.conditions');

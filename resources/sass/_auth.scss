@@ -309,6 +309,93 @@
   svg{flex:0 0 auto;color:$vert-accent;margin-top:2px}
 }
 
+// =============================================================================
+// CONNEXION PAR GOOGLE
+//
+// Le bouton est volontairement SOBRE — fond de surface, bordure discrète —
+// alors que le bouton principal est vert plein. Ce n'est pas un oubli : les
+// deux chemins ne se valent pas sur cet écran. Le mot de passe est celui de
+// tous les comptes existants ; Google est une alternative, et une alternative
+// qui crie plus fort que l'action principale désoriente.
+//
+// Les règles d'identité de Google imposent par ailleurs un fond blanc ou
+// clair sous leur logo en couleurs. Le choix rejoint donc la contrainte.
+// =============================================================================
+.oauth{
+  margin-top:20px;
+}
+
+// Le séparateur « ou » : deux filets et un mot, sans image ni pseudo-élément
+// approximatif. Le mot pose son propre fond pour interrompre le trait, ce qui
+// tient quel que soit le fond de la carte — clair ou sombre.
+.oauth__ou{
+  position:relative;
+  text-align:center;
+  margin:0 0 16px;
+
+  &::before{
+    content:"";
+    position:absolute;
+    left:0;right:0;top:50%;
+    height:1px;
+    background:var(--bordure, #{$bordure});
+  }
+
+  span{
+    position:relative;
+    padding:0 12px;
+    background:var(--surface, #{$blanc});
+    font-size:12px;
+    color:var(--texte-2, #{$gris-second});
+  }
+}
+
+.oauth__btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+  padding:13px 18px;
+  border-radius:$r-sm;
+  border:1px solid var(--bordure-forte, #{$bordure-forte});
+  background:var(--surface, #{$blanc});
+  font-size:15px;
+  font-weight:600;
+  transition:border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+
+  // La couleur est déclarée pour TOUS les états : un bouton d'authentification
+  // ne doit jamais attendre un survol pour être lisible.
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
+    color:var(--texte, #{$texte});
+    text-decoration:none;
+  }
+
+  &:hover{
+    border-color:var(--texte-2, #{$gris-second});
+    box-shadow:$shadow-1;
+  }
+
+  &:active{transform:translateY(1px)}
+
+  &:focus-visible{
+    outline:none;
+    box-shadow:0 0 0 3px rgba($vert-accent,.35);
+  }
+}
+
+// Taille fixe : le logo ne doit ni grossir ni rétrécir avec le texte.
+.oauth__logo{
+  width:18px;
+  height:18px;
+  flex:0 0 auto;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .oauth__btn{transition:none}
+  .oauth__btn:active{transform:none}
+}
+
 // Compteur avant renvoi possible. Vide sans JavaScript : le bouton reste
 // utilisable, le serveur applique de toute façon son propre délai.
 .resend-note{

@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Mail;
+
+use App\Http\Requests\ContactRequest;
+use App\Models\ContactMessage;
+use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+
+/**
+ * Le message du formulaire de contact, transmis à l'équipe.
+ *
+ * ═══════════════════════════════════════════════════════════════════════
+ * L'ADRESSE DE RÉPONSE EST CELLE DU CLIENT — c'est tout l'intérêt
+ * ═══════════════════════════════════════════════════════════════════════
+ * Sans `replyTo`, répondre exigerait de recopier l'adresse à la main depuis
+ * le corps du message. Avec, il suffit d'appuyer sur « Répondre » : la
+ * réponse part au bon endroit, dans le fil, comme n'importe quel échange.
+ *
+ * L'EXPÉDITEUR RESTE LE NÔTRE, et ne devient jamais celui du client. Écrire
+ * un e-mail au nom d'une adresse qu'on ne possède pas est précisément ce que
+ * SPF et DKIM existent pour empêcher : le message finirait en indésirables,
+ * quand il ne serait pas rejeté.
+ *
+ * LE SUJET PORTE LE MOTIF, en clair. Une boîte de support se trie sur les
+ * sujets ; « Nouveau message » cinquante fois ne se trie pas.
+ */
+class ContactMail extends BaseMailable
+{
+    public function __construct(
+        public ContactMessage $contact,
+        string $recipient = '',
+    ) {
+        $this->recipient = $recipient;
+    }
+
+    /** Le libellé lisible du motif, pour le sujet comme pour le corps. */
+    public function motif(): string
+    {
+        return ContactRequest::SUJETS[$this->contact->subject] ?? 'Message';
+    }
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: '[Contact] '.$this->motif().' — '.$this->contact->name,
+            replyTo: [new Address($this->contact->email, $this->contact->name)],
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.admin.contact',
+            text: 'emails.admin.contact_text',
+        );
+    }
+}

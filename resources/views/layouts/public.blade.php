@@ -34,5 +34,10 @@
     </main>
 
     <x-footer-public />
+
+    {{-- Hors du <main> : c'est une aide permanente, pas un élément du
+         contenu. Un lecteur d'écran qui parcourt la page ne doit pas la
+         rencontrer au milieu d'un paragraphe. --}}
+    <x-whatsapp-fab message="Bonjour, j'aimerais en savoir plus sur {{ config('app.name') }}." />
 </body>
 </html>

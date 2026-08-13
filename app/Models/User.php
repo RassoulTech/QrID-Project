@@ -31,6 +31,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'password',
         'theme',
+        'google_id',
+        'google_avatar',
     ];
 
     public const ROLE_USER = 'user';
@@ -45,6 +47,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'google_id',
     ];
 
     /**
@@ -116,6 +119,24 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    /**
+     * Ce compte a-t-il un mot de passe ?
+     *
+     * Faux pour qui s'est inscrit par Google et n'en a jamais posé. La
+     * distinction compte partout où l'on propose de CHANGER le mot de passe :
+     * demander l'actuel à quelqu'un qui n'en a pas est une impasse.
+     */
+    public function hasPassword(): bool
+    {
+        return filled($this->password);
+    }
+
+    /** Le compte est-il rattaché à Google ? */
+    public function usesGoogle(): bool
+    {
+        return filled($this->google_id);
     }
 
     /** Un compte suspendu ne peut ni se connecter, ni poursuivre sa session. */

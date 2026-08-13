@@ -77,6 +77,12 @@
         </div>
     </form>
 
+    {{-- APRÈS le formulaire, jamais avant.
+         Le chemin par mot de passe reste le principal : c'est celui de tous
+         les comptes existants, et le placer en second sur son propre écran
+         donnerait l'impression qu'il est déprécié. --}}
+    <x-google-button />
+
     <p class="f__hint text-center mt-4 mb-0">
         Pas encore de compte&nbsp;?
         <a href="{{ route('register') }}">Créer un compte</a>

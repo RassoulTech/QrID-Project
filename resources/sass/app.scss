@@ -20,6 +20,8 @@
 @import "dashboard";
 @import "topbar";
 @import "admin";
+@import "whatsapp";
+@import "contact";
 
 // EN DERNIER, impérativement. Ce fichier redéclare les surfaces de tout ce qui
 // précède : il doit gagner par l'ordre de cascade, jamais par !important.

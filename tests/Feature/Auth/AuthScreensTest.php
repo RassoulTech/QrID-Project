@@ -135,30 +135,101 @@ class AuthScreensTest extends TestCase
     }
 
     /**
-     * Aucune connexion par un tiers : ni Google, ni Apple, ni Facebook.
+     * UN SEUL TIERS EST ADMIS : GOOGLE. Ni Apple, ni Facebook.
      *
-     * LES BALISES <link> SONT RETIRÉES AVANT LA RECHERCHE, et c'est une
-     * précision, pas un assouplissement. La déclaration d'icône iOS s'écrit
-     * `rel="apple-touch-icon"` — un nom imposé par le système, qu'aucune
-     * alternative ne remplace. Sans ce retrait, le test déclarait une
-     * « connexion Apple » sur les sept écrans à cause d'un favori.
+     * ═══════════════════════════════════════════════════════════════════
+     * CE TEST A ÉTÉ INVERSÉ LE 13 AOÛT — ce n'est pas un relâchement
+     * ═══════════════════════════════════════════════════════════════════
+     * Il interdisait les trois. La règle a été levée pour Google seul, sur
+     * décision explicite, et pour une raison de fond : Google supprime d'un
+     * coup les deux parcours les plus fragiles du produit — la confirmation
+     * d'inscription et la réinitialisation de mot de passe — qui dépendent
+     * l'un et l'autre d'une messagerie qui doit fonctionner. Ces deux
+     * parcours ont coûté plusieurs jours de panne.
      *
-     * Ce qu'il continue de surveiller reste entier : boutons, liens,
-     * formulaires, scripts et texte visible. Une balise <link> ne peut pas
-     * être un bouton de connexion ; tout le reste, si.
+     * Apple et Facebook restent fermés : chacun ajouterait un fournisseur à
+     * maintenir, un écran de consentement à faire valider, et une seconde
+     * façon de posséder le même compte. Un tiers suffit.
+     *
+     * LES BALISES <link> SONT RETIRÉES AVANT LA RECHERCHE. La déclaration
+     * d'icône iOS s'écrit `rel="apple-touch-icon"` — un nom imposé par le
+     * système, qu'aucune alternative ne remplace. Sans ce retrait, le test
+     * déclarait une « connexion Apple » sur les sept écrans à cause d'un
+     * favori.
      */
     #[DataProvider('ecrans')]
-    public function test_no_third_party_sign_in(string $ecran): void
+    public function test_no_third_party_sign_in_beyond_google(string $ecran): void
     {
         $html = mb_strtolower(preg_replace('/<link\b[^>]*>/i', '', $this->html($ecran)));
 
-        foreach (['google', 'apple', 'facebook'] as $tiers) {
+        foreach (['apple', 'facebook'] as $tiers) {
             $this->assertStringNotContainsString(
                 $tiers,
                 $html,
                 "L'écran « {$ecran} » propose une connexion {$tiers}."
             );
         }
+    }
+
+    /**
+     * LE BOUTON GOOGLE N'EXISTE PAS TANT QUE LES CLÉS MANQUENT.
+     *
+     * Un bouton qui mène à une page d'erreur Google est pire que pas de
+     * bouton du tout : l'utilisateur en conclut que le service est cassé, non
+     * qu'il est en cours de configuration. C'est le comportement par défaut,
+     * donc celui qu'on vérifie en premier.
+     */
+    public function test_the_google_button_stays_hidden_without_keys(): void
+    {
+        config(['services.google.client_id' => null, 'services.google.client_secret' => null]);
+
+        foreach (['login', 'register'] as $ecran) {
+            $this->assertStringNotContainsString(
+                'oauth__btn',
+                $this->html($ecran),
+                "L'écran « {$ecran} » propose Google alors qu'il n'est pas configuré."
+            );
+        }
+    }
+
+    /** Configuré, il apparaît sur la connexion ET sur l'inscription. */
+    public function test_the_google_button_appears_once_configured(): void
+    {
+        config([
+            'services.google.client_id' => 'identifiant-de-test',
+            'services.google.client_secret' => 'secret-de-test',
+        ]);
+
+        foreach (['login', 'register'] as $ecran) {
+            $html = $this->html($ecran);
+
+            $this->assertStringContainsString('oauth__btn', $html);
+            $this->assertStringContainsString(route('auth.google'), $html);
+        }
+    }
+
+    /**
+     * LE LOGO GOOGLE N'EST JAMAIS CHARGÉ DEPUIS UN SERVEUR GOOGLE.
+     *
+     * Deux raisons, et la seconde pèse plus lourd : la page ne doit dépendre
+     * d'aucun tiers pour s'afficher, et une image distante préviendrait Google
+     * de chaque visite sur l'écran de connexion — y compris sans le moindre
+     * clic, y compris de la part de qui n'a pas de compte Google.
+     */
+    public function test_the_google_logo_is_never_fetched_from_google(): void
+    {
+        config([
+            'services.google.client_id' => 'identifiant-de-test',
+            'services.google.client_secret' => 'secret-de-test',
+        ]);
+
+        $html = $this->html('login');
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/<img[^>]+src="https?:\/\/[^"]*(google|gstatic)/i',
+            $html,
+            'Le logo Google est chargé à distance : chaque affichage de la page prévient Google.'
+        );
     }
 
     // =======================================================================

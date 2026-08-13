@@ -16,10 +16,29 @@ class PasswordController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
-        $validated = $request->validateWithBag('updatePassword', [
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', Password::defaults(), 'confirmed'],
-        ]);
+        /*
+         | LE MOT DE PASSE ACTUEL N'EST EXIGÉ QUE S'IL EXISTE.
+         |
+         | Un compte créé par Google n'en a pas. Le réclamer quand même est une
+         | impasse : la règle `current_password` ne peut jamais passer sur un
+         | mot de passe nul, et l'écran refuserait indéfiniment sans expliquer
+         | pourquoi.
+         |
+         | CE N'EST PAS UN ASSOUPLISSEMENT DE SÉCURITÉ. La question posée par
+         | `current_password` est « êtes-vous bien le titulaire ? » ; sur un
+         | compte sans mot de passe, la réponse a déjà été donnée par Google,
+         | et la session en cours ne peut avoir été ouverte autrement.
+         |
+         | Le compte ne perd rien pour autant : Google continue de fonctionner,
+         | et l'alerte de sécurité part dans les deux cas.
+         */
+        $regles = ['password' => ['required', Password::defaults(), 'confirmed']];
+
+        if ($request->user()->hasPassword()) {
+            $regles['current_password'] = ['required', 'current_password'];
+        }
+
+        $validated = $request->validateWithBag('updatePassword', $regles);
 
         $request->user()->update([
             'password' => Hash::make($validated['password']),

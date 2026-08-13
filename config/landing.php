@@ -110,6 +110,34 @@ return [
         'card_source' => env('BRAND_CARD_SOURCE', 'carte'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | SUPPORT — le bouton WhatsApp flottant et le formulaire de contact
+    |--------------------------------------------------------------------------
+    |
+    | LE NUMÉRO EST EN CHIFFRES, indicatif compris, sans « + » ni espaces :
+    | wa.me n'accepte rien d'autre, et un lien mal formé s'ouvre sur une erreur
+    | WhatsApp au lieu d'une conversation. Le composant nettoie ce qu'il reçoit,
+    | mais la valeur d'origine gagne à être déjà propre.
+    |
+    | VIDE = PAS DE BOUTON. Un bouton d'aide qui mène à un numéro inexistant
+    | est pire que pas de bouton du tout : quelqu'un qui a déjà un problème en
+    | rencontre un second.
+    |
+    | Au Sénégal, WhatsApp est le canal de support réellement utilisé. Un
+    | formulaire de contact seul laisserait la moitié des demandes sans
+    | réponse — d'où les deux, et non l'un ou l'autre.
+    |
+    */
+
+    'support' => [
+        'whatsapp' => env('SUPPORT_WHATSAPP', '221773831364'),
+
+        // Destinataire des messages du formulaire de contact. Vide : ils
+        // partent vers les administrateurs, comme les autres alertes d'équipe.
+        'email' => env('SUPPORT_EMAIL'),
+    ],
+
     'mockup' => [
         'first_name' => 'Awa',
         'last_name' => 'Ndiaye',
