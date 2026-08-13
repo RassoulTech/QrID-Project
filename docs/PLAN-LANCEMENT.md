@@ -15,7 +15,7 @@ Mesuré dans le dépôt, pas estimé.
 | Bloc | Avancement | Verdict |
 |---|---|---|
 | 1 — Notifications | **✅ livré le 13 août** | reste la vérification en boîte réelle |
-| 2 — Discord | 0 % | **tenable, sous condition d'infrastructure** |
+| 2 — Discord | **✅ livré le 13 août** | reste le webhook à créer, puis un cron |
 | 3 — Durcissement | ~40 % | ⛔ **INTENABLE en l'état** — voir le risque n° 1 |
 | 4 — Finitions | ~60 % | tenable, mais dépend de vous pour trois points |
 
@@ -89,19 +89,23 @@ Or la production tourne avec `QUEUE_CONNECTION=sync`, et **aucun processus
 n'exécute `queue:work` ni `schedule:run`**. Un service web Render ne fait que
 répondre aux requêtes HTTP.
 
-Quatre tâches sont déclarées et ne s'exécutent donc jamais :
+Cinq tâches sont déclarées et ne s'exécutent donc jamais :
 
 ```php
 Schedule::command('registrations:purge')->dailyAt('03:00');
 Schedule::command('queue:monitor database:mail --max=50')->everyMinute();
 Schedule::command('profiles:remind')->dailyAt('09:00');        // bloc 1
 Schedule::command('subscriptions:notify')->dailyAt('09:15');   // bloc 1
+Schedule::command('report:daily')->dailyAt('21:00');           // bloc 2
 ```
 
-**Les deux dernières sont livrées et testées depuis le 13 août.** Elles
+**Les trois dernières sont livrées et testées depuis le 13 août.** Elles
 restent muettes tant qu'aucun processus ne lance `schedule:run`. Un Cron Job
 Render exécutant cette seule commande chaque minute les réveille toutes les
-quatre — c'est une ligne de configuration, aucun code à écrire.
+cinq — c'est une ligne de configuration, aucun code à écrire.
+
+C'est désormais **le seul obstacle** entre les blocs 1 et 2 et leur mise en
+service : tout le code existe, il attend un déclencheur.
 
 **Sans un service supplémentaire chez Render — payant — les blocs 1 et 2 ne
 peuvent pas fonctionner comme spécifiés.** Ce n'est pas un problème de code :
@@ -217,37 +221,71 @@ une inscription).
 
 ---
 
-## BLOC 2 — Récapitulatif quotidien Discord (1 jour)
+## BLOC 2 — Récapitulatif quotidien Discord ✅ LIVRÉ LE 13 AOÛT
 
-### Ce qui existe
+### Ce qui est en place
 
-Rien. Aucun `DiscordNotifier`, aucune commande `report:daily`, aucune
-configuration de webhook.
+| Élément | État |
+|---|---|
+| `config/notifications.php` + `DISCORD_WEBHOOK_URL` | ✅ |
+| `App\Services\DiscordNotifier` — embed, 3 tentatives | ✅ |
+| `App\Services\RapportQuotidien` — chiffres du jour | ✅ |
+| Commande `report:daily` + `--dry-run` | ✅ |
+| Planifiée à 21h00, fuseau **explicite** Africa/Dakar | ✅ |
+| Comparaison avec la veille sur chaque chiffre | ✅ |
+| Alertes en tête, couleur de l'embed qui change | ✅ |
+| Message court les jours vides | ✅ |
 
-### Ce qui est déjà acquis ailleurs
+### La règle qui gouverne le bloc
 
-`AdminStatsService` calcule déjà en SQL agrégé : comptes, profils,
-abonnements actifs, chiffre d'affaires, essais, paiements en attente,
-répartition par moyen. **Le récapitulatif réutilise ces requêtes** au lieu
-d'en écrire de nouvelles.
+**Le message part tous les soirs, même quand il n'y a rien à dire.**
 
-### À faire
+Un récapitulatif qui se tait les jours creux rend l'absence de message
+ambiguë : on ne distingue plus « rien ne s'est passé » de « l'automatisation
+est cassée ». Et c'est toujours la seconde qu'on découvre trop tard — on
+s'habitue au silence, puis on constate un mois plus tard que le planificateur
+ne tourne plus. Même raisonnement que le retrait du voyant rouge permanent de
+GitHub Actions.
 
-- [ ] `config/notifications.php` + `DISCORD_WEBHOOK_URL` en variable
-- [ ] `App\Services\DiscordNotifier` — message au format embed
-- [ ] Commande `report:daily`, planifiée à 21h00 heure de Dakar
-- [ ] Envoi en file, réessai, échec journalisé sans rien bloquer
-- [ ] Comparaison avec la veille sur chaque chiffre
-- [ ] Alerte en tête si paiement bloqué ou job en échec
-- [ ] Message court même si la journée est vide
+Le message d'une journée vide est donc **court** — pas de tableau de zéros —
+mais il existe, et sa seule fonction est de prouver que la chaîne fonctionne.
 
-> Le dernier point est le plus important du bloc : *l'absence de message ne
-> doit jamais être ambiguë entre « rien ne s'est passé » et
-> « l'automatisation est cassée ».* C'est exactement le raisonnement qui a
-> fait retirer le voyant rouge permanent de GitHub Actions.
+### Trois écarts assumés par rapport au plan
 
-**1 jour : réaliste**, à condition que le risque n° 2 soit tranché — sinon la
-commande existera sans jamais s'exécuter.
+**1. L'envoi n'est pas en file, il est synchrone.** Aucun worker n'exécute
+`queue:work` : un message mis en file resterait dans la table `jobs` sans
+jamais en sortir — exactement la panne qui a coûté plusieurs jours sur les
+e-mails. Trois tentatives espacées d'une seconde remplacent la file. Le délai
+est payé par une commande planifiée que personne n'attend.
+
+**2. Le seuil d'alerte sur les paiements est d'UNE heure, pas de 24.** Ce
+message part une fois par jour : à 24 h, une journée entière s'écoulerait
+avant le premier signalement.
+
+**3. `RapportQuotidien` est un service distinct d'`AdminStatsService`.**
+Celui-ci raisonne en périodes de 7 à 365 jours et compare à la période
+précédente de même durée ; le récapitulatif compare **un jour à la veille**,
+un intervalle que l'autre ne sait pas produire. Ce qui est partagé, ce sont
+les **définitions** — « un essai en cours », « un paiement réussi » — pour
+qu'un même mot ne donne pas deux chiffres différents selon l'écran.
+
+Un quatrième motif d'alerte a été ajouté au passage : **les e-mails qui ne
+sont pas partis**. Il existe à cause de la panne de cette semaine, restée
+invisible trois jours ; une ligne ici l'aurait montrée le premier soir.
+
+### Ce qui reste, et qui ne dépend pas de moi
+
+- [ ] **Créer le webhook** — Discord → Paramètres du salon → Intégrations →
+      Webhooks, puis `DISCORD_WEBHOOK_URL` dans Render
+- [ ] **Le cron** — risque n° 2, toujours ouvert. La commande est testée et
+      déclenchable à la main : `php artisan report:daily --dry-run`
+
+### Couverture
+
+20 tests. Le premier vérifie qu'une base **entièrement vide** produit quand
+même un message ; les autres couvrent la comparaison à la veille, les alertes,
+le refus de Discord, la panne réseau, et le fait que l'URL du webhook
+n'atteigne jamais un journal.
 
 ---
 

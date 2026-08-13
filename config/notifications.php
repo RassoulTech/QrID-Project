@@ -53,4 +53,38 @@ return [
         'paiement_reussi' => (bool) env('ALERT_ON_PAYMENT', true),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | RÉCAPITULATIF QUOTIDIEN DISCORD
+    |--------------------------------------------------------------------------
+    |
+    | L'URL DU WEBHOOK EST UN SECRET : quiconque la possède peut écrire dans le
+    | salon. Elle ne doit jamais être versionnée, ni apparaître dans un
+    | journal. DiscordNotifier ne consigne qu'un identifiant de salon tronqué.
+    |
+    | Discord → Paramètres du salon → Intégrations → Webhooks → Nouveau webhook.
+    |
+    | VIDE = AUCUN ENVOI. La commande s'exécute quand même et le dit dans son
+    | journal : une configuration manquante ne doit pas ressembler à une
+    | journée sans activité.
+    |
+    | L'HEURE EST CELLE DE DAKAR, et le fuseau est explicite. Le serveur tourne
+    | en UTC : sans cette précision, le récapitulatif du soir partirait à 21 h
+    | UTC, soit 21 h à Dakar en apparence — jusqu'au jour où l'hébergeur change
+    | de région et où tout le monde cherche pourquoi le message arrive à 23 h.
+    |
+    */
+
+    'discord' => [
+        'webhook' => env('DISCORD_WEBHOOK_URL'),
+
+        // Dix secondes. Discord répond en quelques centaines de millisecondes ;
+        // au-delà, c'est que quelque chose ne va pas et il vaut mieux le dire
+        // vite que de retenir une commande planifiée.
+        'timeout' => (int) env('DISCORD_TIMEOUT', 10),
+
+        'heure' => env('DISCORD_REPORT_HOUR', '21:00'),
+        'fuseau' => env('DISCORD_REPORT_TZ', 'Africa/Dakar'),
+    ],
+
 ];

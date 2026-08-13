@@ -35,3 +35,25 @@ Schedule::command('queue:monitor database:mail --max=50')->everyMinute();
 */
 Schedule::command('profiles:remind')->dailyAt('09:00')->timezone('Africa/Dakar');
 Schedule::command('subscriptions:notify')->dailyAt('09:15')->timezone('Africa/Dakar');
+
+/*
+|------------------------------------------------------------------------------
+| RÉCAPITULATIF QUOTIDIEN DISCORD — bloc 2 du plan de lancement
+|------------------------------------------------------------------------------
+| 21h00 heure de Dakar : la journée est finie, et le message est lu le soir ou
+| au réveil, dans les deux cas avant la reprise.
+|
+| LE FUSEAU EST EXPLICITE, ET CE N'EST PAS DU ZÈLE. Le serveur tourne en UTC.
+| Sans ->timezone(), le message partirait à 21 h UTC — ce qui donne 21 h à
+| Dakar aujourd'hui, puisque le Sénégal est à UTC+0, mais cesserait d'être vrai
+| au premier changement de région d'hébergement. Écrire le fuseau rend
+| l'intention indépendante de l'infrastructure.
+|
+| withoutOverlapping : si un envoi s'éternise, le suivant ne se superpose pas.
+| Deux récapitulatifs de la même journée dans le salon feraient douter de tous
+| les autres.
+*/
+Schedule::command('report:daily')
+    ->dailyAt(config('notifications.discord.heure', '21:00'))
+    ->timezone(config('notifications.discord.fuseau', 'Africa/Dakar'))
+    ->withoutOverlapping();
