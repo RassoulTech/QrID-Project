@@ -1,48 +1,58 @@
 {{--
   VERSO de la carte — la face de la PLATEFORME.
 
-  COMPOSITION, en contrepoint du recto :
-    zone visuelle (deux tiers gauche) — logo en haut, fond organique,
-      code-barres en bas avec le slug dessous ;
-    bande verticale (tiers droit)     — nom de la marque, accroche, site,
-      tournés à 90° et lus de bas en haut.
+  RIGOUREUSEMENT IDENTIQUE SUR TOUTES LES CARTES DE TOUS LES CLIENTS. Il ne
+  prend aucun paramètre et ne lit aucune donnée de profil : le seul réglage
+  qu'il reçoit est la variante, qui décide du fond et de l'encre.
 
-  UNE SEULE DONNÉE DE PROFIL y figure : le code-barres et son slug, qui
-  encodent le lien public. Tout le reste est identique sur les cartes de tous
-  les clients.
+  COMPOSITION, reprise de la maquette validée :
+    haut à gauche  — logo et nom de la marque ;
+    sous le logo   — l'accroche, sur trois lignes ;
+    droite         — le QR Code dans un cadre blanc fin, mention en dessous ;
+    bas à gauche   — la mention de nature ;
+    bas à droite   — l'adresse du site.
 
-  Le profil est donc facultatif : sans lui, le verso s'affiche sans son
-  code-barres, et rien ne casse.
+  LE QR MÈNE À LA PLATEFORME, PAS AU PORTEUR. Celui qui reçoit cette carte
+  peut ainsi découvrir le produit et créer son propre compte : chaque carte
+  distribuée devient un canal d'acquisition, sans rien coûter à son porteur.
+  Le QR du RECTO, lui, reste celui du profil du client. Deux codes, deux
+  destinations — ce n'est pas une erreur.
+
+  LE CADRE BLANC EST CONSERVÉ, et volontairement. Le QR y est en orientation
+  standard, sombre sur clair, conforme à ISO/IEC 18004 : c'est le code que
+  scannera un inconnu, une fois, peut-être mal éclairé. On ne lui fait pas
+  courir le risque d'un code inversé. Le cadre est réduit à une marge fine et
+  régulière, juste la zone de silence nécessaire.
 --}}
-@props(['profile' => null])
+@props(['variante' => \App\Enums\VarianteCarte::DEFAUT])
 
 @php
-    $barres = $profile?->slug
-        ? app(App\Services\QrCodeService::class)->barcodeSvg($profile)
-        : null;
+    $qrPlateforme = app(App\Services\QrCodeService::class)->plateformeSvg();
 @endphp
 
 <div class="pvc__face pvc__face--verso">
     <span class="pvc__visuel" aria-hidden="true"></span>
     <span class="pvc__reflet" aria-hidden="true"></span>
 
-    {{-- ================= ZONE VISUELLE, deux tiers gauche ================= --}}
-    <span class="pvc__zone">
-        <x-brand-mark class="pvc__logo" />
+    {{-- ===================== COLONNE GAUCHE ===================== --}}
+    <span class="pvc__v-texte">
+        <span class="pvc__v-marque">
+            <x-brand-mark class="pvc__v-logo" />
+            <span class="pvc__v-nom">{{ config('app.name') }}</span>
+        </span>
 
-        @if ($barres)
-            <span class="pvc__barres">
-                {!! $barres !!}
-                <span class="pvc__barres-slug">{{ $profile->slug }}</span>
-            </span>
-        @endif
+        <span class="pvc__v-accroche">{{ config('landing.brand.tagline') }}</span>
     </span>
 
-    {{-- ============ BANDE VERTICALE, tiers droit ============
-         row-reverse : le premier enfant — le nom — se place contre le bord. --}}
-    <span class="pvc__bande">
-        <span class="pvc__bande-nom">{{ mb_strtoupper(config('app.name')) }}</span>
-        <span class="pvc__bande-accroche">{{ config('landing.brand.tagline') }}</span>
-        <span class="pvc__bande-site">{{ config('landing.brand.website') }}</span>
+    {{-- ===================== QR DE LA PLATEFORME ===================== --}}
+    <span class="pvc__v-qr">
+        <span class="pvc__v-qr-cadre">{!! $qrPlateforme !!}</span>
+        <span class="pvc__v-qr-mention">{{ config('landing.brand.card_cta') }}</span>
+    </span>
+
+    {{-- ===================== PIED ===================== --}}
+    <span class="pvc__v-pied">
+        <span class="pvc__v-nature">Protocole d'identité numérique</span>
+        <span class="pvc__v-site">{{ config('landing.brand.website') }}</span>
     </span>
 </div>

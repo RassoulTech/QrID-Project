@@ -20,20 +20,47 @@ use Barryvdh\DomPDF\Facade\Pdf;
  */
 class PrintableCardService
 {
-    public function __construct(private QrCodeService $qr) {}
+    public function __construct(
+        private QrCodeService $qr,
+        private CardTextureService $texture,
+    ) {}
 
-    /** Le PDF en octets. Rendu à la demande, jamais mis en cache. */
+    /**
+     * Le PDF en octets. Rendu à la demande, jamais mis en cache.
+     *
+     * TOUT EST EMBARQUÉ EN base64. DomPDF résout les chemins de fichiers de
+     * façon imprévisible selon l'hébergement, et une image manquante ne
+     * produit pas d'erreur : elle laisse un rectangle vide. Sur un fichier
+     * destiné à l'imprimeur, ce silence est inacceptable — les octets voyagent
+     * donc avec le document.
+     */
     public function render(Profile $profile): string
     {
+        $variante = $profile->variante();
+
         return Pdf::loadView('profile.printable', [
             'profile' => $profile,
-            // Version INVERSÉE : modules blancs sur le vert de la carte, comme
-            // à l'écran. Le vert est cuit dans l'image, la transparence PNG
-            // étant l'autre faiblesse connue de DomPDF.
-            'qrPng' => 'data:image/png;base64,'.base64_encode($this->qr->invertedPng($profile)),
+            'variante' => $variante,
+
+            // RECTO — le QR du porteur, aux couleurs de la variante. Le fond
+            // est CUIT dans l'image plutôt que laissé transparent, la
+            // transparence PNG étant une faiblesse connue de DomPDF.
+            'qrRecto' => $this->enBase64($this->qr->cartePng($profile)),
+
+            // VERSO — le QR de la PLATEFORME, en orientation standard. Il est
+            // identique sur toutes les cartes : le cache est global.
+            'qrVerso' => $this->enBase64($this->qr->plateformePng()),
+
+            // Le fond organique, que DomPDF ne saurait pas peindre lui-même.
+            'fondVerso' => $this->texture->dataUri($variante),
         ])
             ->setPaper([0, 0, $this->mm(91.6), $this->mm(60)])
             ->output();
+    }
+
+    private function enBase64(string $png): string
+    {
+        return 'data:image/png;base64,'.base64_encode($png);
     }
 
     /** Nom de fichier — identique au téléchargement et à la pièce jointe. */

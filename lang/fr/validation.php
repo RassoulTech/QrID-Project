@@ -87,7 +87,7 @@ return [
         'password_confirmation' => 'confirmation du mot de passe',
         'current_password' => 'mot de passe actuel',
         'template_id' => 'modèle',
-        'primary_color' => 'couleur',
+        'primary_color' => 'variante de carte',
         'socials' => 'réseaux sociaux',
         'bio' => 'présentation',
     ],

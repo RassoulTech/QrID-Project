@@ -12,13 +12,18 @@
   LES DEUX FACES sont des partials, réutilisés tels quels par le design-system
   pour les montrer isolément : aucune duplication de balisage.
 
-  · RECTO = le PORTEUR : nom, QR Code, fonction.
-  · VERSO = la PLATEFORME, à l'identique sur toutes les cartes. Il ne prend
-    aucun paramètre et ne lit aucune donnée de profil.
+  · RECTO = le PORTEUR : nom, QR Code, fonction. Son QR mène à SA carte.
+  · VERSO = la PLATEFORME, à l'identique sur toutes les cartes. Son QR mène à
+    la plateforme, pour que celui qui reçoit la carte puisse découvrir le
+    produit. Deux codes, deux destinations — ce n'est pas une erreur.
 
-  LE QR EST INVERSÉ : modules blancs posés directement sur le vert, sans cadre,
-  comme la référence. Correction d'erreur H et zone de silence de 4 modules
-  conservées — voir QrCodeService::invertedSvg().
+  DEUX VARIANTES, ET SEULEMENT DEUX : verte (fond vert, encre blanche) et
+  blanche (fond blanc, encre verte). Le choix de couleur libre a disparu —
+  chaque carte imprimée est un support de marque. Voir App\Enums\VarianteCarte.
+
+  Le QR du recto suit la variante : sa zone de silence est transparente, c'est
+  la carte qui la remplit. Correction d'erreur H et zone de silence de 4
+  modules conservées — voir QrCodeService::carteSvg().
 
   FORMAT : ratio 1,586 (85,6 × 54 mm, ISO/IEC 7810 ID-1) porté par
   aspect-ratio, jamais par une hauteur. La typographie est en unités de
@@ -35,16 +40,23 @@
     'layout' => 'stack',
 ])
 
-<div {{ $attributes->merge(['class' => 'pvc pvc--'.$size.' pvc--'.$layout]) }}
+@php
+    // Point de passage unique vers la couleur : aucune vue ne lit
+    // primary_color directement, sans quoi une teinte héritée de l'ancien
+    // nuancier finirait par ressortir quelque part.
+    $variante = $profile->variante();
+@endphp
+
+<div {{ $attributes->merge(['class' => 'pvc pvc--'.$size.' pvc--'.$layout.' pvc--'.mb_strtolower($variante->name)]) }}
      @if ($flip) data-pvc @endif
-     style="--pvc-teinte:{{ $profile->primary_color ?: '#0B3B2E' }}">
+     style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }}">
 
     <div class="pvc__scene">
-        {{-- Le verso ne reçoit le profil QUE pour son code-barres, seul
-             élément de cette face qui dépende du porteur. Tout le reste y est
-             identique sur les cartes de tous les clients. --}}
+        {{-- Le verso ne reçoit AUCUNE donnée de profil : il est rigoureusement
+             identique sur les cartes de tous les clients, et son QR mène à la
+             plateforme, pas au porteur. --}}
         @include('components.pvc-card-face-recto', ['profile' => $profile])
-        <x-pvc-card-face-verso :profile="$profile" />
+        <x-pvc-card-face-verso :variante="$variante" />
     </div>
 
     @if ($flip)

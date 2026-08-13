@@ -105,12 +105,16 @@
                         <dt>Modèle</dt>
                         <dd>{{ $profile->template?->name ?? '—' }}</dd>
                     </div>
+                    {{-- On nomme la variante, on n'affiche plus un code
+                         hexadécimal : « #0B3B2E » ne dit rien à personne, et
+                         suggérait que la valeur se règle librement — ce qui
+                         n'est plus le cas. --}}
                     <div class="fiche__ligne">
-                        <dt>Couleur</dt>
+                        <dt>Carte</dt>
                         <dd>
                             <span class="fiche__pastille"
-                                  style="background:{{ $profile->primary_color }}" aria-hidden="true"></span>
-                            {{ $profile->primary_color }}
+                                  style="background:{{ $profile->variante()->fond() }}" aria-hidden="true"></span>
+                            {{ $profile->variante()->libelle() }}
                         </dd>
                     </div>
                 </dl>

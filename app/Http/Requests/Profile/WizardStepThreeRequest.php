@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Profile;
 
-use App\Http\Controllers\Profile\ProfileWizardController;
+use App\Enums\VarianteCarte;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,6 +12,13 @@ use Illuminate\Validation\Rule;
  * ZÉRO saisie : les deux champs sont pré-sélectionnés. L'utilisateur peut
  * cliquer « Terminer » sans rien toucher. C'est délibéré — cette étape est
  * là pour rassurer, pas pour faire travailler.
+ *
+ * `primary_color` NE PORTE PLUS UNE TEINTE LIBRE mais la couleur de fond
+ * d'une des deux variantes de carte. C'est ici que la règle est tenue en
+ * ENTRÉE : rien d'autre que ces deux valeurs ne peut être écrit en base, quoi
+ * qu'on poste. En sortie, VarianteCarte::depuis() dégrade proprement toute
+ * valeur héritée. Les deux bouts sont couverts, sans contrainte de base qui
+ * bloquerait le jour où une troisième variante existera.
  */
 class WizardStepThreeRequest extends FormRequest
 {
@@ -29,7 +36,7 @@ class WizardStepThreeRequest extends FormRequest
             ],
             'primary_color' => [
                 'required',
-                Rule::in(array_keys(ProfileWizardController::COLORS)),
+                Rule::in(array_column(VarianteCarte::cases(), 'value')),
             ],
         ];
     }
@@ -39,8 +46,8 @@ class WizardStepThreeRequest extends FormRequest
         return [
             'template_id.required' => 'Choisissez un modèle.',
             'template_id.exists' => 'Ce modèle n\'est plus disponible.',
-            'primary_color.required' => 'Choisissez une couleur.',
-            'primary_color.in' => 'Cette couleur n\'est pas proposée.',
+            'primary_color.required' => 'Choisissez une variante de carte.',
+            'primary_color.in' => 'Cette variante de carte n\'existe pas.',
         ];
     }
 }

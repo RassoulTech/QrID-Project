@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\VarianteCarte;
 use App\Models\Profile;
 use App\Models\ProfileDraft;
 use App\Models\SocialLink;
@@ -346,7 +347,9 @@ class ProfileWizardService
                 'address' => $data['address'] ?? null,
                 'photo_path' => $data['photo_path'] ?? null,
                 'template_id' => $data['template_id'] ?? null,
-                'primary_color' => $data['primary_color'] ?? '#0B3B2E',
+                // Le repli passe par l'enum : la valeur par défaut de la carte
+                // ne doit exister qu'à un seul endroit du projet.
+                'primary_color' => VarianteCarte::depuis($data['primary_color'] ?? null)->value,
             ];
 
             if ($existing) {

@@ -29,8 +29,20 @@
 @php
     $liens = $profile->relationLoaded('socialLinks') ? $profile->socialLinks : collect();
 
-    // La couleur du profil pilote l'entête et le bouton, via une variable CSS.
-    $teinte = $profile->primary_color ?: '#0B3B2E';
+    /*
+     | L'ACCENT DE LA PAGE PUBLIQUE NE SUIT PLUS LA CARTE.
+     |
+     | Il valait autrefois primary_color, c'est-à-dire la teinte libre choisie
+     | par le client. Avec les variantes, cette valeur ne signifie plus « une
+     | couleur d'accent » mais « le fond de la carte » — et la reprendre ici
+     | donnerait, pour la variante blanche, un entête blanc sur fond blanc et
+     | un bouton invisible.
+     |
+     | La page publique porte donc le vert de la marque, toujours. C'est aussi
+     | ce que demande la cohérence : cette page est vue par des inconnus, elle
+     | doit dire QrID avant de dire son porteur.
+     */
+    $teinte = \App\Enums\VarianteCarte::Verte->value;
 @endphp
 
 <div {{ $attributes->merge([

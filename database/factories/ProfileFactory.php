@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\VarianteCarte;
 use App\Models\Template;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -29,7 +30,10 @@ class ProfileFactory extends Factory
             'address' => fake()->city(),
             'photo_path' => null,
             'template_id' => Template::factory(),
-            'primary_color' => '#0B5D3B',
+            // Toujours une variante réelle : une fabrique qui produirait une
+            // teinte inexistante ferait passer des tests sur un état
+            // impossible en production.
+            'primary_color' => VarianteCarte::DEFAUT->value,
             'is_active' => false,
             'slug_changed_at' => null,
         ];

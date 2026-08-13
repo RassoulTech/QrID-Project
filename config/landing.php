@@ -92,15 +92,22 @@ return [
         'website' => env('BRAND_WEBSITE', 'qrid.sn'),
 
         /*
-         | Contenu du code-barres du verso : 'url' ou 'slug'.
-         |
-         | 'url'  — conforme à la demande, mais 453 modules. Sur ≈28 mm chaque
-         |          module ferait 0,062 mm, contre 0,19 mm de seuil de lecture
-         |          fiable : le code est alors décoratif, pas fonctionnel.
-         | 'slug' — 189 modules, soit 0,15 mm. Nettement plus lisible, mais le
-         |          scanner rend « mouhamed-dione » et non une adresse.
+         | Mention imprimée sous le QR Code du verso. Impérative et brève :
+         | elle dit à celui qui reçoit la carte ce qu'il gagne à scanner.
          */
-        'barcode_content' => env('BARCODE_CONTENT', 'url'),
+        'card_cta' => env('BRAND_CARD_CTA', 'Créez votre carte'),
+
+        /*
+         | Provenance ajoutée à l'adresse encodée dans le QR du VERSO.
+         |
+         | C'est ce paramètre, et lui seul, qui rend les cartes mesurables :
+         | sans lui, une inscription venue d'une carte est indiscernable du
+         | trafic direct, et personne ne saura jamais si l'idée fonctionne.
+         |
+         | Le QR est mis en cache sous une empreinte de l'adresse complète :
+         | changer cette valeur régénère le fichier, sans purge manuelle.
+         */
+        'card_source' => env('BRAND_CARD_SOURCE', 'carte'),
     ],
 
     'mockup' => [

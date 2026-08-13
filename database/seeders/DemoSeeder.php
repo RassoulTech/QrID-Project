@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\VarianteCarte;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Profile;
@@ -134,7 +135,7 @@ class DemoSeeder extends Seeder
                     'website' => ($company && $index % 3 === 0) ? 'https://'.Str::slug($company).'.sn' : null,
                     'address' => $address,
                     'template_id' => $templates->get($index % max($templates->count(), 1))?->id,
-                    'primary_color' => '#0B5D3B',
+                    'primary_color' => VarianteCarte::DEFAUT->value,
                     'is_active' => $isPublished,
                 ]
             );

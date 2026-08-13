@@ -2,12 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\VarianteCarte;
 use App\Models\Profile;
 use BaconQrCode\Common\ErrorCorrectionLevel;
 use BaconQrCode\Encoder\Encoder;
 use Illuminate\Support\Facades\Storage;
-use Picqer\Barcode\Renderers\SvgRenderer;
-use Picqer\Barcode\Types\TypeCode128;
 use SimpleSoftwareIO\QrCode\Generator;
 
 /**
@@ -45,10 +44,112 @@ class QrCodeService
     /** Côté du SVG affiché à l'écran et repris à l'impression. */
     private const TAILLE_SVG = 512;
 
+    /**
+     * Encre des fichiers TÉLÉCHARGEABLES — le vert de la marque, toujours.
+     *
+     * Ces fichiers-là partent chez un imprimeur ou dans une signature de
+     * courriel : ils doivent être lisibles partout, indépendamment de la
+     * variante choisie pour la carte. Les colorer avec la couleur de fond de
+     * la variante produirait, pour la variante blanche, un code blanc sur
+     * blanc — invisible, et découvert trop tard.
+     */
+    private const ENCRE_MARQUE = '#0B3B2E';
+
     /** Le QR encode TOUJOURS l'URL publique complète, jamais le slug seul. */
     public function url(Profile $profile): string
     {
         return route('profile.public', $profile->slug);
+    }
+
+    // =======================================================================
+    // QR DE LA PLATEFORME — le verso, identique sur toutes les cartes
+    // =======================================================================
+
+    /**
+     * L'adresse encodée au VERSO : la plateforme, pas le porteur.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * DEUX CODES, DEUX DESTINATIONS — ce n'est pas une erreur
+     * ═══════════════════════════════════════════════════════════════════
+     * Le RECTO mène à la carte de son porteur : c'est ce qu'il donne. Le
+     * VERSO mène à la plateforme : c'est ce que découvre celui qui reçoit la
+     * carte. Chaque carte distribuée devient ainsi un canal d'acquisition,
+     * sans rien coûter à son porteur.
+     *
+     * LE PARAMÈTRE DE PROVENANCE est ce qui rend l'opération mesurable. Sans
+     * lui, les inscriptions venues des cartes seraient indiscernables du
+     * trafic direct, et l'on ne saurait jamais si l'idée fonctionne.
+     */
+    public function urlPlateforme(): string
+    {
+        $base = rtrim((string) config('app.url'), '/');
+        $source = (string) config('landing.brand.card_source', 'carte');
+
+        return $base.'/?'.http_build_query(['src' => $source]);
+    }
+
+    /**
+     * QR de la plateforme, en SVG. MIS EN CACHE GLOBALEMENT.
+     *
+     * Il ne dépend d'aucun profil : le produire par carte serait le même
+     * calcul répété autant de fois qu'il y a de clients, pour un fichier
+     * rigoureusement identique.
+     *
+     * ORIENTATION STANDARD — modules sombres sur fond clair, conforme à
+     * ISO/IEC 18004. Ce code est celui que scannera un inconnu, une fois,
+     * peut-être dans une lumière médiocre : il n'y a aucune raison de lui
+     * faire courir le risque d'un code inversé.
+     */
+    public function plateformeSvg(): string
+    {
+        return $this->cachePlateforme('svg', fn () => (string) (new Generator)
+            ->format('svg')
+            ->errorCorrection(self::CORRECTION)
+            ->margin(self::MARGE)
+            ->size(self::TAILLE_SVG)
+            ->backgroundColor(255, 255, 255)
+            ->color(...$this->rgb(self::ENCRE_MARQUE))
+            ->generate($this->urlPlateforme())
+        );
+    }
+
+    /** QR de la plateforme, en PNG — pour le PDF de l'imprimeur. */
+    public function plateformePng(): string
+    {
+        return $this->cachePlateforme('png', fn () => $this->rasteriserUrl(
+            $this->urlPlateforme(),
+            self::ENCRE_MARQUE,
+            '#FFFFFF'
+        ));
+    }
+
+    /**
+     * Cache global, indexé par une empreinte de l'ADRESSE encodée.
+     *
+     * L'empreinte n'est pas une précaution théorique : APP_URL change au
+     * premier déploiement, et un fichier au nom fixe survivrait au
+     * changement. Des cartes partiraient à l'impression avec l'ancienne
+     * adresse — un défaut qui ne se corrige pas par un déploiement.
+     *
+     * @param  callable(): string  $produire
+     */
+    private function cachePlateforme(string $format, callable $produire): string
+    {
+        $chemin = $this->cheminPlateforme($format);
+        $disque = Storage::disk('public');
+
+        if (! $disque->exists($chemin)) {
+            $disque->put($chemin, $produire());
+        }
+
+        return (string) $disque->get($chemin);
+    }
+
+    public function cheminPlateforme(string $format): string
+    {
+        $empreinte = substr(sha1($this->urlPlateforme()), 0, 8);
+
+        return "qr/plateforme-{$empreinte}.{$format}";
     }
 
     /**
@@ -80,73 +181,62 @@ class QrCodeService
     }
 
     /**
-     * SVG INVERSÉ — modules BLANCS, fond transparent.
+     * LE QR TEL QU'IL EST IMPRIMÉ SUR LE RECTO — couleurs de la variante.
      *
-     * Destiné à la carte : le code se pose directement sur le vert, sans
-     * cadre blanc autour.
+     * Fond TRANSPARENT : c'est la carte elle-même qui remplit la zone de
+     * silence, et donc elle qui assure le contraste. Poser un fond opaque
+     * dessinerait un rectangle visible au milieu de la carte.
      *
-     * AVERTISSEMENT TECHNIQUE. La norme ISO/IEC 18004 décrit un code SOMBRE
-     * sur fond CLAIR. Un code inversé sort de cette description : les lecteurs
-     * modernes (appareil photo iOS, Google Lens) le gèrent, d'autres non, et
-     * l'échec est silencieux — l'utilisateur croit que la carte est mauvaise.
+     * ═══════════════════════════════════════════════════════════════════
+     * AVERTISSEMENT — LA VARIANTE VERTE PRODUIT UN CODE INVERSÉ
+     * ═══════════════════════════════════════════════════════════════════
+     * ISO/IEC 18004 décrit un code SOMBRE sur fond CLAIR. La variante blanche
+     * s'y conforme ; la verte l'inverse. Les lecteurs modernes gèrent
+     * l'inversion, d'autres non, et leur échec est SILENCIEUX — le porteur
+     * croit simplement que sa carte est mauvaise.
      *
-     * Deux garde-fous conservés : correction d'erreur H (30 %) et zone de
-     * silence de 4 modules, ici remplie par le vert de la carte. Le fichier
-     * TÉLÉCHARGEABLE, lui, reste au format standard : c'est celui qu'on
-     * confie à un imprimeur ou qu'on partage, et il doit fonctionner partout.
+     * Deux garde-fous demeurent dans les deux cas : correction d'erreur H
+     * (30 %) et zone de silence de 4 modules. Et le fichier TÉLÉCHARGEABLE,
+     * lui, reste toujours au format standard : c'est celui qu'on confie à un
+     * imprimeur ou qu'on partage, il doit fonctionner partout.
      */
-    public function invertedSvg(Profile $profile): string
+    public function carteSvg(Profile $profile): string
     {
-        return $this->cache($profile, 'inverse.svg', function () use ($profile) {
+        $variante = $profile->variante();
+
+        return $this->cache($profile, 'carte-'.$variante->name.'.svg', function () use ($profile, $variante) {
             $svg = (string) (new Generator)
                 ->format('svg')
                 ->errorCorrection(self::CORRECTION)
                 ->margin(self::MARGE)
                 ->size(self::TAILLE_SVG)
-                ->color(255, 255, 255)
+                ->color(...$this->rgb($variante->encre()))
                 ->generate($this->url($profile));
 
             // bacon pose toujours un rectangle de fond opaque. On le retire :
-            // c'est le vert de la carte qui doit apparaître à travers.
+            // c'est la carte qui doit apparaître à travers.
             return preg_replace('#<rect\b[^>]*/>#', '', $svg, 1) ?? $svg;
         });
     }
 
     /**
-     * CODE-BARRES Code 128 — repli linéaire du QR Code.
+     * Le même, en PNG — réservé au PDF de l'imprimeur.
      *
-     * AVERTISSEMENT DE FABRICATION, mesuré et non supposé.
-     *
-     * Un Code 128 encodant l'URL complète produit 453 modules. Sur la moitié
-     * de la zone visuelle d'une carte ID-1, soit ≈28 mm, chaque module ferait
-     * 0,062 mm — pour un seuil de lecture fiable situé autour de 0,19 mm.
-     * Il faudrait 86 mm de large, davantage que la carte entière.
-     *
-     * Le contenu est donc réglable : BARCODE_CONTENT=slug ramène le code à
-     * 189 modules (0,15 mm), déjà bien plus proche du lisible. Par défaut on
-     * encode l'URL, conformément à la demande — mais à cette taille le code
-     * est décoratif, pas fonctionnel.
-     *
-     * SVG : vectoriel, donc net à l'impression et sans dépendance d'image.
+     * DomPDF ne rend qu'imparfaitement le SVG, et une carte partie à
+     * l'impression avec un code approximatif ne se corrige pas par un
+     * déploiement. Le fond de la variante est CUIT dans l'image plutôt que
+     * laissé transparent, la transparence PNG étant l'autre faiblesse connue
+     * de ce moteur.
      */
-    public function barcodeSvg(Profile $profile): string
+    public function cartePng(Profile $profile): string
     {
-        return $this->cache($profile, 'code128.svg', function () use ($profile) {
-            $contenu = config('landing.brand.barcode_content') === 'slug'
-                ? $profile->slug
-                : $this->url($profile);
+        $variante = $profile->variante();
 
-            $barres = (new TypeCode128)->getBarcode($contenu);
-
-            // Barres BLANCHES, fond transparent : le code se pose sur le vert
-            // de la carte, comme le QR du recto. Le SVG est rendu en ligne,
-            // sans en-tête XML, pour être intégré directement dans la page.
-            return (new SvgRenderer)
-                ->setForegroundColor([255, 255, 255])
-                ->setBackgroundColor(null)
-                ->setSvgType(SvgRenderer::TYPE_SVG_INLINE)
-                ->render($barres, $barres->getWidth() * 2, 90);
-        });
+        return $this->cache(
+            $profile,
+            'carte-'.$variante->name.'.png',
+            fn () => $this->rasteriserUrl($this->url($profile), $variante->encre(), $variante->fond())
+        );
     }
 
     /** Chemins relatifs des fichiers, sur le disque public. */
@@ -162,9 +252,9 @@ class QrCodeService
     }
 
     /**
-     * Régénère les deux formats. Appelé à la création du profil et à chaque
-     * changement de slug ou de couleur — c'est-à-dire aux deux seuls moments
-     * où le contenu ou l'apparence du QR change réellement.
+     * Régénère tous les fichiers du profil. Appelé à la création et à chaque
+     * changement de slug ou de variante — les deux seuls moments où le
+     * contenu ou l'apparence du QR change réellement.
      */
     public function refresh(Profile $profile): void
     {
@@ -172,30 +262,35 @@ class QrCodeService
 
         $this->svg($profile);
         $this->png($profile);
-        $this->invertedSvg($profile);
-        $this->invertedPng($profile);
-        $this->barcodeSvg($profile);
-    }
-
-    public function forget(Profile $profile): void
-    {
-        foreach (['svg', 'png', 'inverse.svg', 'inverse.png', 'code128.svg'] as $format) {
-            Storage::disk('public')->delete($this->path($profile, $format));
-        }
+        $this->carteSvg($profile);
+        $this->cartePng($profile);
     }
 
     /**
-     * PNG INVERSÉ — modules blancs sur le vert de la carte.
+     * Efface les fichiers du profil, POUR LES DEUX VARIANTES.
      *
-     * Réservé au PDF de l'imprimeur : DomPDF ne rend qu'imparfaitement le SVG,
-     * et une carte partie à l'impression avec un code approximatif ne se
-     * corrige pas par un déploiement. Le vert est cuit dans l'image plutôt que
-     * laissé transparent, la transparence PNG étant l'autre faiblesse connue
-     * de ce moteur.
+     * On ne se contente pas de la variante courante : cette méthode est
+     * appelée quand elle vient de changer, et le fichier à supprimer est
+     * justement celui de l'ancienne. Ne nettoyer que la nouvelle laisserait
+     * l'ancienne s'accumuler à chaque bascule.
      */
-    public function invertedPng(Profile $profile): string
+    public function forget(Profile $profile): void
     {
-        return $this->cache($profile, 'inverse.png', fn () => $this->rasteriser($profile, true));
+        $formats = ['svg', 'png'];
+
+        foreach (VarianteCarte::cases() as $variante) {
+            $formats[] = 'carte-'.$variante->name.'.svg';
+            $formats[] = 'carte-'.$variante->name.'.png';
+        }
+
+        // Fichiers de l'ancienne nomenclature, antérieure aux variantes.
+        $formats[] = 'inverse.svg';
+        $formats[] = 'inverse.png';
+        $formats[] = 'code128.svg';
+
+        foreach ($formats as $format) {
+            Storage::disk('public')->delete($this->path($profile, $format));
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -219,17 +314,23 @@ class QrCodeService
         return (string) $disque->get($chemin);
     }
 
+    /**
+     * Le générateur des fichiers TÉLÉCHARGEABLES — toujours standard.
+     *
+     * Encre de marque sur fond blanc, quelle que soit la variante de la
+     * carte. Ces fichiers partent chez un imprimeur ou dans une signature de
+     * courriel ; les colorer selon la variante donnerait, pour la blanche,
+     * un code blanc sur blanc.
+     */
     private function generator(Profile $profile): Generator
     {
-        [$r, $v, $b] = $this->rgb($profile->primary_color ?: '#0B3B2E');
-
         return (new Generator)
             ->errorCorrection(self::CORRECTION)
             ->margin(self::MARGE)
             // Fond blanc explicite : un QR sur fond transparent devient
-            // illisible dès qu'on le pose sur une carte colorée.
+            // illisible dès qu'on le pose sur un support coloré.
             ->backgroundColor(255, 255, 255)
-            ->color($r, $v, $b);
+            ->color(...$this->rgb(self::ENCRE_MARQUE));
     }
 
     /**
@@ -250,9 +351,22 @@ class QrCodeService
      * pixels, sans interpolation. Un module à 12,4 px produirait des bords
      * flous, et un bord flou est un scan qui échoue une fois sur trois.
      */
-    private function rasteriser(Profile $profile, bool $inverse = false): string
+    private function rasteriser(Profile $profile): string
     {
-        $qr = Encoder::encode($this->url($profile), ErrorCorrectionLevel::H(), 'ISO-8859-1');
+        return $this->rasteriserUrl($this->url($profile), self::ENCRE_MARQUE, '#FFFFFF');
+    }
+
+    /**
+     * Le même rendu, pour une adresse quelconque et un couple de couleurs.
+     *
+     * Extrait de rasteriser() le 13 août pour servir aussi le QR de la
+     * PLATEFORME, qui n'appartient à aucun profil. Une seconde
+     * implémentation aurait fini par diverger sur un paramètre — et une
+     * divergence de rendu QR ne se constate que sur des cartes imprimées.
+     */
+    private function rasteriserUrl(string $url, string $encreHex, string $fondHex): string
+    {
+        $qr = Encoder::encode($url, ErrorCorrectionLevel::H(), 'ISO-8859-1');
 
         $matrice = $qr->getMatrix();
         $modules = $matrice->getWidth();
@@ -263,18 +377,11 @@ class QrCodeService
 
         $image = imagecreatetruecolor($cote, $cote);
 
-        [$r, $v, $b] = $this->rgb($profile->primary_color ?: '#0B3B2E');
-
         // La zone de silence prend la couleur du FOND : c'est elle qui permet
         // au lecteur de délimiter le code, elle doit donc contraster avec les
         // modules, pas avec la page.
-        if ($inverse) {
-            imagefill($image, 0, 0, imagecolorallocate($image, $r, $v, $b));
-            $encre = imagecolorallocate($image, 255, 255, 255);
-        } else {
-            imagefill($image, 0, 0, imagecolorallocate($image, 255, 255, 255));
-            $encre = imagecolorallocate($image, $r, $v, $b);
-        }
+        imagefill($image, 0, 0, imagecolorallocate($image, ...$this->rgb($fondHex)));
+        $encre = imagecolorallocate($image, ...$this->rgb($encreHex));
 
         for ($y = 0; $y < $modules; $y++) {
             for ($x = 0; $x < $modules; $x++) {

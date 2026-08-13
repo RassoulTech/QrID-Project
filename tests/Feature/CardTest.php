@@ -201,19 +201,21 @@ class CardTest extends TestCase
         $this->assertStringContainsString('<svg', $recto[0]);
 
         // VERSO : la marque, l'accroche, l'adresse du site. Et rien d'autre.
-        $this->assertStringContainsString(mb_strtoupper(config('app.name')), $verso[0]);
+        $this->assertStringContainsString(config('app.name'), $verso[0]);
         $this->assertStringContainsString(config('landing.brand.tagline'), $verso[0]);
         $this->assertStringContainsString(config('landing.brand.website'), $verso[0]);
 
         /*
-         | UNE SEULE donnée de profil est admise au verso : le slug, sous le
-         | code-barres qui encode le lien public. Tout le reste — nom,
-         | entreprise, téléphone, e-mail — appartient au recto ou au scan.
+         | PLUS AUCUNE DONNÉE DE PROFIL AU VERSO — pas même le slug.
+         |
+         | Le code-barres qui le portait a été retiré : mesuré, il ne pouvait
+         | pas être scanné à la taille d'une carte (0,062 mm par module contre
+         | 0,19 mm nécessaires). Le verso appartient désormais entièrement à la
+         | plateforme, et son QR mène à elle.
          */
-        $this->assertStringContainsString('awa-ndiaye', $verso[0], 'Code-barres absent.');
-
         foreach ([
             $this->profile->full_name,
+            'awa-ndiaye',
             'Atelier Teranga',
             '+221 77 383 13 64',
             'awa@exemple.sn',
@@ -227,29 +229,64 @@ class CardTest extends TestCase
     }
 
     /**
-     * Le verso reste affichable SANS profil.
+     * Le verso s'affiche SANS le moindre profil.
      *
-     * C'est ce qui prouve qu'il ne dépend du porteur que pour son code-barres :
-     * privé de profil, il perd ce seul élément et rien d'autre.
+     * Ce n'est pas une commodité de test : c'est la preuve structurelle qu'il
+     * ne dépend d'aucun porteur. Le composant ne reçoit plus que la variante,
+     * et il n'existe donc aucun chemin par lequel une donnée client pourrait
+     * y aboutir.
      */
     public function test_the_back_renders_without_any_profile(): void
     {
-        $rendu = view('components.pvc-card-face-verso', ['profile' => null])->render();
+        $rendu = view('components.pvc-card-face-verso')->render();
 
-        $this->assertStringContainsString(mb_strtoupper(config('app.name')), $rendu);
+        $this->assertStringContainsString(config('app.name'), $rendu);
         $this->assertStringContainsString(config('landing.brand.tagline'), $rendu);
+        $this->assertStringContainsString(config('landing.brand.card_cta'), $rendu);
         $this->assertStringNotContainsString('awa', mb_strtolower($rendu));
     }
 
-    /** Le code-barres encode le même lien que le QR du recto. */
-    public function test_the_barcode_encodes_the_public_link(): void
+    /**
+     * LE QR DU VERSO MÈNE À LA PLATEFORME, PAS AU PORTEUR.
+     *
+     * Deux codes, deux destinations, et ce n'est pas une erreur : le recto
+     * donne la carte de son porteur, le verso fait découvrir le produit à qui
+     * la reçoit. Chaque carte distribuée devient un canal d'acquisition.
+     *
+     * Ce test est le garde-fou de cette distinction. L'inverser — un verso
+     * qui pointerait vers le profil — ne casserait rien de visible, et se
+     * découvrirait sur des cartes déjà imprimées.
+     */
+    public function test_the_back_qr_leads_to_the_platform_and_not_to_the_holder(): void
     {
-        $svg = app(QrCodeService::class)->barcodeSvg($this->profile);
+        $qr = app(QrCodeService::class);
+
+        $adresse = $qr->urlPlateforme();
+
+        $this->assertStringContainsString('src=', $adresse, 'La provenance manque : les cartes seraient immesurables.');
+        $this->assertStringNotContainsString('awa-ndiaye', $adresse);
+
+        $svg = $qr->plateformeSvg();
 
         $this->assertStringContainsString('<svg', $svg);
-        $this->assertStringContainsString(route('profile.public', 'awa-ndiaye'), $svg);
+        Storage::disk('public')->assertExists($qr->cheminPlateforme('svg'));
+    }
 
-        Storage::disk('public')->assertExists('qr/awa-ndiaye.code128.svg');
+    /**
+     * Le cache du QR de plateforme est indexé sur l'ADRESSE, pas sur un nom
+     * fixe. APP_URL change au premier déploiement : un fichier au nom figé
+     * survivrait au changement, et des cartes partiraient à l'impression avec
+     * l'ancienne adresse.
+     */
+    public function test_changing_the_platform_address_produces_a_new_qr(): void
+    {
+        $qr = app(QrCodeService::class);
+
+        $avant = $qr->cheminPlateforme('svg');
+
+        config(['app.url' => 'https://autre-domaine.test']);
+
+        $this->assertNotSame($avant, $qr->cheminPlateforme('svg'));
     }
 
     /**

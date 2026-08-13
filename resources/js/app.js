@@ -26,7 +26,6 @@ import confirmAction from './modules/confirm-action';
 import charCounter from './modules/char-counter';
 import photoPreview from './modules/photo-preview';
 import socialRepeater from './modules/social-repeater';
-import colorPreview from './modules/color-preview';
 
 const modules = [
     scrollReveal,
@@ -40,7 +39,6 @@ const modules = [
     charCounter,
     photoPreview,
     socialRepeater,
-    colorPreview,
 ];
 
 // Chaque module renvoie tôt s'il n'a rien à faire sur la page courante.

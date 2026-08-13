@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Enums\VarianteCarte;
 use App\Events\ProfileCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\WizardStepOneRequest;
@@ -24,17 +25,20 @@ use Illuminate\View\View;
  */
 class ProfileWizardController extends Controller
 {
-    /**
-     * Couleurs proposées. Liste fermée, dérivée de la palette : l'utilisateur
-     * ne peut pas produire un profil illisible avec une couleur libre.
+    /*
+     |--------------------------------------------------------------------------
+     | LE NUANCIER A DISPARU — voir App\Enums\VarianteCarte
+     |--------------------------------------------------------------------------
+     | Cinq teintes au choix produisaient cinq marques : celui qui reçoit une
+     | carte ambre et une carte grenat ne voit pas deux clients d'un même
+     | service, il voit deux services. Chaque carte imprimée est un support de
+     | communication pour la plateforme, et cette cohérence-là ne se délègue
+     | pas au client.
+     |
+     | Restent DEUX variantes, présentées comme deux cartes et non comme des
+     | pastilles. La différence de formulation compte : un nuancier invite à
+     | composer, deux aperçus invitent à choisir.
      */
-    public const COLORS = [
-        '#0B3B2E' => 'Vert',
-        '#0F172A' => 'Nuit',
-        '#7A3E12' => 'Ambre',
-        '#0E5F73' => 'Océan',
-        '#8C1D18' => 'Grenat',
-    ];
 
     public function __construct(private ProfileWizardService $wizard) {}
 
@@ -152,7 +156,7 @@ class ProfileWizardController extends Controller
             'step' => 3,
             'wizard' => $this->wizard,
             'templates' => Template::active()->orderBy('id')->take(3)->get(),
-            'colors' => self::COLORS,
+            'variantes' => VarianteCarte::toutes(),
         ]);
     }
 

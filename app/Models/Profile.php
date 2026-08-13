@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\FormatsSenegalPhone;
+use App\Enums\VarianteCarte;
 use App\Observers\ProfileObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -56,6 +57,21 @@ class Profile extends Model
             'deactivated_at' => 'datetime',
             'reminder_sent_at' => 'datetime',
         ];
+    }
+
+    /**
+     * La variante de carte du profil — verte ou blanche, jamais autre chose.
+     *
+     * Point de passage UNIQUE vers primary_color. Aucune vue, aucun service ne
+     * doit lire la colonne directement : c'est ainsi qu'une teinte héritée de
+     * l'ancien nuancier finirait par ressortir quelque part.
+     *
+     * La résolution est tolérante — une valeur inattendue retombe sur la
+     * variante par défaut plutôt que de lever sur la page publique d'un client.
+     */
+    public function variante(): VarianteCarte
+    {
+        return VarianteCarte::depuis($this->primary_color);
     }
 
     // -----------------------------------------------------------------------

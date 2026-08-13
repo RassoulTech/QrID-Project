@@ -366,27 +366,132 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 
 // -----------------------------------------------------------------------------
-// COULEURS — pastilles rondes de 40px
+// VARIANTE DE CARTE — deux cartes, jamais un nuancier
+//
+// Les anciennes pastilles rondes ont disparu avec le choix de couleur libre.
+// Le remplacement n'est pas une pastille plus grande : c'est un APERÇU DE
+// CARTE. Une pastille dit « choisissez une couleur » et invite à composer ;
+// une carte dit « choisissez votre carte » et invite à trancher entre deux
+// objets finis. Chaque exemplaire imprimé étant un support de marque, c'est
+// la seconde question qu'il faut poser.
+//
+// De vrais boutons radio, habillés : clavier et absence de JavaScript
+// fonctionnent sans traitement particulier.
 // -----------------------------------------------------------------------------
-.swatches{display:flex;flex-wrap:wrap;gap:14px}
+.varcard-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
 
-.swatch{position:relative;cursor:pointer;line-height:0}
+  @media (min-width:576px){grid-template-columns:repeat(2,1fr)}
+}
 
-.swatch__input{
+.varcard{
+  position:relative;
+  display:block;
+  cursor:pointer;
+
+  &:hover .varcard__box{border-color:$texte}
+}
+
+.varcard__input{
   position:absolute;opacity:0;width:1px;height:1px;
 
-  &:focus-visible + .swatch__dot{box-shadow:0 0 0 3px rgba($vert-accent,.4)}
-  &:checked + .swatch__dot{box-shadow:0 0 0 3px $blanc, 0 0 0 5px $vert-accent}
+  &:focus-visible + .varcard__box{box-shadow:0 0 0 3px rgba($vert-accent,.35)}
+  &:checked + .varcard__box{
+    border-color:$vert-fonce;
+    .varcard__check{opacity:1;transform:scale(1)}
+  }
 }
 
-.swatch__dot{
+.varcard__box{
   display:block;
-  width:40px;height:40px;
-  border-radius:$r-full;
-  border:1px solid rgba($texte,.10);
-  transition:box-shadow 160ms ease, transform 160ms ease;
+  position:relative;
+  border:2px solid $bordure-champ;
+  border-radius:$r-md;
+  padding:12px;
+  background:$blanc;
+  transition:border-color 160ms ease, box-shadow 160ms ease;
 }
-.swatch:hover .swatch__dot{transform:scale(1.06)}
+
+/*
+ | APERÇU — proportions exactes d'une carte ID-1 (ratio 1,586).
+ |
+ | Il ne s'agit pas d'un décor : c'est ce que le client va tenir. Le fausser,
+ | même un peu, ferait mentir l'écran de choix. Le carré central figure le QR
+ | sans le générer — à cette étape, le profil n'a pas encore de slug.
+ |
+ | RAYON ZÉRO, comme la vraie carte : l'arrondi d'une carte physique vient de
+ | la découpe, et l'aperçu n'a pas à en promettre un autre.
+ */
+.varcard__apercu{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+  aspect-ratio:1.586;
+  padding:9% 8%;
+  border-radius:0;
+  background:var(--v-fond);
+  color:var(--v-encre);
+  // La carte blanche a besoin d'un contour, sans quoi elle se dissout dans le
+  // fond blanc de la boîte qui la contient.
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--v-encre) 14%, transparent);
+  overflow:hidden;
+}
+
+.varcard__nom{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:-.01em;
+  line-height:1;
+}
+
+// Le QR figuré : un carré plein, à l'échelle qu'occupe le vrai code.
+.varcard__qr{
+  width:28%;
+  aspect-ratio:1;
+  background:var(--v-encre);
+}
+
+.varcard__fonction{
+  font-size:6px;
+  font-weight:600;
+  letter-spacing:.22em;
+  opacity:.88;
+}
+
+.varcard__texte{
+  display:block;
+  margin-top:10px;
+}
+
+.varcard__titre{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  color:var(--texte);
+}
+
+.varcard__desc{
+  display:block;
+  font-size:12px;
+  line-height:1.4;
+  // Jeton de thème, et non une teinte figée : cet écran existe aussi en
+  // thème sombre, où un gris compilé en dur passerait sous le seuil.
+  color:var(--texte-2);
+  margin-top:2px;
+}
+
+.varcard__check{
+  position:absolute;top:-8px;right:-8px;
+  width:24px;height:24px;border-radius:$r-full;
+  background:$vert-fonce;color:$blanc;
+  display:grid;place-items:center;
+  opacity:0;transform:scale(.6);
+  transition:opacity 160ms ease, transform 160ms ease;
+  box-shadow:$shadow-1;
+}
 
 // -----------------------------------------------------------------------------
 // APERÇU FINAL — la page la plus importante du produit

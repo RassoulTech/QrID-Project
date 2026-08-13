@@ -28,38 +28,70 @@
                 </div>
             </div>
 
-            {{-- Les deux faces CÔTE À CÔTE, même taille, pour juger
-                 l'équilibre : recto centré et symétrique, verso aligné à
-                 gauche et asymétrique. --}}
+            {{-- ================= LES QUATRE FACES =================
+
+                 Deux variantes × deux faces. C'est la planche de référence :
+                 tout ce qui peut partir à l'impression est ici, et rien
+                 d'autre n'existe.
+
+                 On les montre à la MÊME ÉCHELLE et côte à côte, car c'est le
+                 seul moyen de juger ce qui compte réellement — le contraste
+                 du QR Code sur chaque fond, et l'équilibre entre un recto
+                 centré et un verso asymétrique.
+
+                 La carte de gauche est celle du profil réel, avec son QR ;
+                 celle de droite force l'autre variante sur le même profil. --}}
             <div style="margin-top:64px">
-                <p class="section-sub" style="margin-bottom:24px">
-                    Les deux faces à la même échelle.
+                <p class="section-sub" style="margin-bottom:8px">
+                    Les quatre faces — deux variantes, recto et verso.
+                </p>
+                <p class="section-sub" style="margin-bottom:24px;max-width:60ch">
+                    La variante <strong>blanche</strong> est conforme à ISO/IEC 18004
+                    (code sombre sur fond clair). La <strong>verte</strong> l'inverse :
+                    les lecteurs modernes la gèrent, d'autres non, et leur échec est
+                    silencieux. À qualité d'impression égale, la blanche scanne plus sûrement.
                 </p>
 
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;align-items:start">
-                    <div>
-                        <div class="pvc pvc--md" style="--pvc-teinte:#0B3B2E;max-width:none">
-                            <div class="pvc__scene">
-                                @include('components.pvc-card-face-recto', ['profile' => $profile])
-                            </div>
-                        </div>
-                        <p class="section-sub" style="margin-top:16px">
-                            <strong>Recto</strong> — centré, symétrique, dominé par le QR Code.
-                        </p>
-                    </div>
+                @foreach (\App\Enums\VarianteCarte::toutes() as $variante)
+                    @php
+                        // On clone le profil pour lui imposer la variante sans
+                        // toucher à la base : cette page ne doit rien écrire.
+                        $exemplaire = clone $profile;
+                        $exemplaire->primary_color = $variante->value;
+                    @endphp
 
-                    <div>
-                        <div class="pvc pvc--md" style="--pvc-teinte:#0B3B2E;max-width:none">
-                            <div class="pvc__scene">
-                                <x-pvc-card-face-verso :profile="$profile" />
+                    <p class="section-sub" style="margin:32px 0 16px">
+                        <strong>Variante {{ $variante->libelle() }}</strong> — {{ $variante->description() }}
+                    </p>
+
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;align-items:start">
+                        <div>
+                            <div class="pvc pvc--md"
+                                 style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }};max-width:none">
+                                <div class="pvc__scene">
+                                    @include('components.pvc-card-face-recto', ['profile' => $exemplaire])
+                                </div>
                             </div>
+                            <p class="section-sub" style="margin-top:16px">
+                                <strong>Recto</strong> — centré, symétrique. Son QR mène
+                                à la carte du porteur.
+                            </p>
                         </div>
-                        <p class="section-sub" style="margin-top:16px">
-                            <strong>Verso</strong> — aligné à gauche, asymétrique,
-                            dominé par la marque. Aucun paramètre.
-                        </p>
+
+                        <div>
+                            <div class="pvc pvc--md"
+                                 style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }};max-width:none">
+                                <div class="pvc__scene">
+                                    <x-pvc-card-face-verso :variante="$variante" />
+                                </div>
+                            </div>
+                            <p class="section-sub" style="margin-top:16px">
+                                <strong>Verso</strong> — asymétrique, identique sur toutes
+                                les cartes. Son QR mène à la <em>plateforme</em>.
+                            </p>
+                        </div>
                     </div>
-                </div>
+                @endforeach
             </div>
 
             <div style="margin-top:64px">
