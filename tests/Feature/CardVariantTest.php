@@ -216,11 +216,11 @@ class CardVariantTest extends TestCase
 
         // Un fichier produit sous une ancienne adresse, dont on ne sait plus
         // reconstruire le nom.
-        $disque->put('qr/awa-ndiaye.viEilLe1.svg', 'ancien');
+        $disque->put('qr/awa-ndiaye/viEilLe1.svg', 'ancien');
 
         $qr->forget($this->profile);
 
-        $disque->assertMissing('qr/awa-ndiaye.viEilLe1.svg');
+        $disque->assertMissing('qr/awa-ndiaye/viEilLe1.svg');
         $disque->assertMissing($qr->path($this->profile, 'svg'));
     }
 
@@ -230,11 +230,41 @@ class CardVariantTest extends TestCase
         $qr = app(QrCodeService::class);
         $disque = Storage::disk('public');
 
-        $disque->put('qr/awa-ndiaye-2.abcdef12.svg', 'voisin');
+        $disque->put('qr/awa-ndiaye-2/abcdef12.svg', 'voisin');
 
         $qr->forget($this->profile);
 
-        $disque->assertExists('qr/awa-ndiaye-2.abcdef12.svg');
+        $disque->assertExists('qr/awa-ndiaye-2/abcdef12.svg');
+    }
+
+    /**
+     * LA SUPPRESSION NE DOIT PAS COÛTER PLUS CHER QUAND LA BASE GROSSIT.
+     *
+     * `forget()` listait tout le dossier « qr/ » pour filtrer sur un préfixe.
+     * Le coût est passé inaperçu sur une base neuve et a explosé ensuite : le
+     * dossier local contenait 20 508 fichiers, et cette méthode est appelée à
+     * CHAQUE création de profil par l'observateur. La suite de tests est
+     * passée de 250 à 588 secondes.
+     *
+     * Ce test ne mesure pas une durée — un test de vitesse est instable sur
+     * une machine partagée. Il constate la PROPRIÉTÉ qui garantit la
+     * durée : rien, dans forget(), ne parcourt le dossier commun.
+     */
+    public function test_forgetting_never_scans_the_shared_directory(): void
+    {
+        $source = (string) file_get_contents(app_path('Services/QrCodeService.php'));
+
+        preg_match('/public function forget\(Profile \$profile\): void\s*\{(.*?)\n    \}/s', $source, $corps);
+
+        $this->assertNotEmpty($corps, 'La méthode forget() est introuvable.');
+
+        foreach (["files('qr')", 'files("qr")', 'allFiles'] as $parcours) {
+            $this->assertStringNotContainsString(
+                $parcours,
+                $corps[1],
+                'forget() parcourt à nouveau le dossier commun : le coût redevient quadratique.'
+            );
+        }
     }
 
     // =======================================================================

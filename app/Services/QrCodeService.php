@@ -264,7 +264,31 @@ class QrCodeService
      */
     public function path(Profile $profile, string $format): string
     {
-        return "qr/{$profile->slug}.{$this->empreinteAdresse()}.{$format}";
+        return $this->dossier($profile)."/{$this->empreinteAdresse()}.{$format}";
+    }
+
+    /**
+     * UN DOSSIER PAR PROFIL — et ce n'est pas du rangement.
+     *
+     * Les fichiers vivaient à plat dans « qr/ ». Pour supprimer ceux d'un
+     * profil sans connaître leur empreinte d'adresse, il fallait LISTER TOUT
+     * LE DOSSIER puis filtrer sur le préfixe.
+     *
+     * Le coût est passé inaperçu sur une base neuve et a explosé ensuite : le
+     * dossier local contenait 20 508 fichiers, et `forget()` est appelé à
+     * CHAQUE création de profil par l'observateur. Créer soixante profils
+     * revenait donc à parcourir un million de noms de fichiers. La suite de
+     * tests est passée de 250 à 588 secondes — un comportement quadratique
+     * introduit par une ligne qui semblait anodine.
+     *
+     * Avec un dossier par profil, la suppression est UNE opération, quel que
+     * soit le nombre de clients. Le collage entre slugs disparaît par la même
+     * occasion : « awa » et « awa-2 » sont deux dossiers, plus deux préfixes
+     * qu'il fallait distinguer à la main.
+     */
+    private function dossier(Profile $profile): string
+    {
+        return 'qr/'.$profile->slug;
     }
 
     /**
@@ -308,29 +332,22 @@ class QrCodeService
      * justement celui de l'ancienne. Ne nettoyer que la nouvelle laisserait
      * l'ancienne s'accumuler à chaque bascule.
      */
+    /**
+     * Efface TOUS les fichiers du profil, quelle que soit leur empreinte
+     * d'adresse ou leur variante — en une seule opération.
+     *
+     * Énumérer les formats connus ne suffirait pas : depuis que le nom porte
+     * une empreinte de APP_URL, les fichiers produits sous une ancienne
+     * adresse ont un nom qu'on ne sait pas reconstruire, et resteraient
+     * indéfiniment sur le disque.
+     *
+     * Lister le dossier pour filtrer sur un préfixe ne convenait pas non plus :
+     * voir dossier(), c'est ce qui a fait passer la suite de tests de 250 à
+     * 588 secondes.
+     */
     public function forget(Profile $profile): void
     {
-        $disque = Storage::disk('public');
-
-        /*
-         | ON SUPPRIME TOUT CE QUI PORTE CE SLUG, quelle que soit l'empreinte
-         | d'adresse ou la variante.
-         |
-         | Énumérer les formats connus ne suffit plus : depuis que le nom porte
-         | une empreinte de APP_URL, les fichiers produits sous une ancienne
-         | adresse ont un nom qu'on ne sait pas reconstruire. Ils resteraient
-         | indéfiniment sur le disque.
-         |
-         | Le préfixe exige le POINT — « awa. » et non « awa » — sans quoi le
-         | nettoyage du profil « awa » emporterait aussi « awa-2 ».
-         */
-        $prefixe = $profile->slug.'.';
-
-        foreach ($disque->files('qr') as $fichier) {
-            if (str_starts_with(basename($fichier), $prefixe)) {
-                $disque->delete($fichier);
-            }
-        }
+        Storage::disk('public')->deleteDirectory($this->dossier($profile));
     }
 
     // -----------------------------------------------------------------------

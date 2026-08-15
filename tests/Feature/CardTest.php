@@ -133,11 +133,13 @@ class CardTest extends TestCase
     /** Un champ sans effet sur le QR ne déclenche aucune régénération. */
     public function test_an_unrelated_change_leaves_the_qr_alone(): void
     {
-        $avant = Storage::disk('public')->get('qr/awa-ndiaye.svg');
+        $chemin = app(QrCodeService::class)->path($this->profile, 'svg');
+
+        $avant = Storage::disk('public')->get($chemin);
 
         $this->profile->forceFill(['job_title' => 'Urbaniste'])->save();
 
-        $this->assertSame($avant, Storage::disk('public')->get('qr/awa-ndiaye.svg'));
+        $this->assertSame($avant, Storage::disk('public')->get($chemin));
     }
 
     /** Le PNG est carré, en haute définition, et exploitable à l'impression. */

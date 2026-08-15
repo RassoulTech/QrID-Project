@@ -54,13 +54,43 @@ Route::middleware('guest')->group(function () {
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
+    /*
+     |--------------------------------------------------------------------------
+     | DEMANDE DE RÉINITIALISATION — LIMITÉE, et ce n'était pas le cas
+     |--------------------------------------------------------------------------
+     | Cette route ENVOIE UN E-MAIL à une adresse fournie par l'appelant, sans
+     | authentification. Sans limite, elle devient trois choses à la fois :
+     |
+     |   · un outil pour inonder la boîte de n'importe qui, à raison d'un
+     |     message par requête ;
+     |   · un moyen d'épuiser le quota quotidien du fournisseur — après quoi
+     |     PLUS AUCUN e-mail du produit ne part, confirmations d'inscription
+     |     comprises ;
+     |   · une charge inutile sur une opération synchrone, puisque l'envoi se
+     |     fait dans la requête faute de worker.
+     |
+     | Le framework applique déjà un délai de soixante secondes PAR ADRESSE.
+     | Il ne protège de rien ici : il suffit de changer d'adresse à chaque
+     | appel. La limite ci-dessous porte sur l'IP, et c'est elle qui manquait.
+     |
+     | Cinq par heure : très large pour quelqu'un qui a réellement oublié son
+     | mot de passe, étroit pour un envoi automatisé.
+     */
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->middleware('throttle:5,60')
         ->name('password.email');
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
 
+    /*
+     | Le jeton fait 64 caractères : le deviner est hors de portée. La limite
+     | ne protège donc pas d'une attaque par force brute — elle empêche qu'un
+     | script mal réglé n'écrive en boucle sur un compte, et borne le coût de
+     | l'appel de hachage qui suit chaque tentative.
+     */
     Route::post('reset-password', [NewPasswordController::class, 'store'])
+        ->middleware('throttle:10,60')
         ->name('password.store');
 
     /*
