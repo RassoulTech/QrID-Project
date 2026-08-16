@@ -31,6 +31,22 @@ class TeamRecipientsTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        /*
+         | Contexte fixé, jamais lu dans .env : un test qui dépend de la
+         | configuration locale de celui qui le lance ne dit plus si le
+         | produit fonctionne. Voir ContactAndSupportTest, où l'oubli a fait
+         | échouer un test le jour où SUPPORT_EMAIL a été renseigné.
+         */
+        config([
+            'landing.support.email' => null,
+            'notifications.admin_recipients' => [],
+        ]);
+    }
+
     /**
      * LE TEST CENTRAL. Deux adresses de démonstration ne doivent plus
      * empêcher l'adresse réelle de recevoir.

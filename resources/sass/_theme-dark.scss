@@ -256,6 +256,61 @@
   }
   .brand--dark .brand__mark{background:var(--accent);color:var(--sur-accent)}
 
+  /*
+   |---------------------------------------------------------------------------
+   | BOUTON GOOGLE — il DISPARAISSAIT en thème sombre
+   |---------------------------------------------------------------------------
+   | Deux défauts se cumulaient, et chacun suffisait à le rendre invisible :
+   |
+   |   · son fond valait var(--surface), c'est-à-dire EXACTEMENT le fond de la
+   |     carte d'authentification (#16211D) ;
+   |   · sa bordure retombait sur $bordure-forte, un rgba tiré du texte
+   |     presque noir — invisible sur une surface sombre. Le repli s'appliquait
+   |     toujours, --bordure-forte n'existant pas comme jeton CSS.
+   |
+   | Il ne restait qu'un logo et un mot flottant au milieu du vide.
+   |
+   | LES VALEURS CI-DESSOUS SONT CELLES DE GOOGLE, pas les nôtres. Leur charte
+   | publie deux boutons — un clair et un sombre — et impose leurs couleurs.
+   | Le bouton sombre officiel est #131314 sur bordure #8E918F, texte #E3E3E3.
+   |
+   | Les reprendre telles quelles sert deux fins d'un coup : la charte est
+   | respectée, et le bouton reste reconnaissable d'un site à l'autre — ce qui
+   | est précisément ce qui le rend rassurant. Un bouton Google repeint aux
+   | couleurs de la marque hôte perd cette reconnaissance.
+   |
+   | CONTRASTES : texte 15,3:1 sur le fond du bouton, bordure 5,6:1 — très
+   | au-delà des 3:1 exigés pour un élément d'interface.
+   */
+  .oauth__btn{
+    background:#131314;
+    border-color:#8E918F;
+
+    &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
+      color:#E3E3E3;
+    }
+
+    // Au survol, la bordure s'éclaircit — c'est le seul retour possible sur un
+    // bouton dont le fond ne doit pas changer.
+    &:hover{
+      border-color:#E3E3E3;
+      box-shadow:none;
+    }
+
+    &:focus-visible{box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+  }
+
+  /*
+   | Le séparateur « ou » souffrait du même repli : son filet valait
+   | $bordure — rgba(10,31,26,.08) — donc rien du tout sur fond sombre.
+   | Le mot, lui, pose le fond de la carte pour interrompre le trait ; ce
+   | jeton-là est bien redéfini et fonctionnait déjà.
+   */
+  .oauth__ou{
+    &::before{background:rgba(255,255,255,.14)}
+    span{background:var(--surface);color:var(--texte-2)}
+  }
+
   .auth-tabs{background:var(--surface-3)}
   .auth-tabs__item{
     &,&:link,&:visited,&:hover,&:focus,&:focus-visible{color:var(--texte-2)}

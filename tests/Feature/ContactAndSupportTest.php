@@ -33,6 +33,29 @@ class ContactAndSupportTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        /*
+         | LE CONTEXTE EST FIXÉ ICI, PAS LU DANS .env — et c'est un correctif.
+         |
+         | Ces tests lisaient SUPPORT_EMAIL depuis le fichier .env du poste de
+         | développement. Le jour où il a été renseigné, un test qui vérifiait
+         | l'envoi vers les comptes administrateurs s'est mis à échouer — sans
+         | qu'une seule ligne de code applicatif ait changé.
+         |
+         | Un test qui dépend de la configuration locale de celui qui le lance
+         | n'est pas un test : il ne dit plus si le produit fonctionne, il dit
+         | à quoi ressemble un fichier qui n'est même pas versionné.
+         |
+         | Chaque test qui s'intéresse à l'adresse de support la déclare donc
+         | explicitement ; les autres partent d'une valeur vide, qui exerce le
+         | repli sur les comptes en base.
+         */
+        config(['landing.support.email' => null]);
+    }
+
     /** @return array<string, string> */
     private function messageValide(array $remplace = []): array
     {

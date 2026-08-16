@@ -259,6 +259,36 @@ class AuthScreensTest extends TestCase
     }
 
     /**
+     * LE BOUTON GOOGLE RESTE VISIBLE EN THÈME SOMBRE.
+     *
+     * Il y disparaissait : son fond valait var(--surface), c'est-à-dire
+     * exactement le fond de la carte d'authentification, et sa bordure
+     * retombait sur un rgba tiré du texte presque noir — invisible sur une
+     * surface sombre. Il ne restait qu'un logo et un mot flottant dans le vide.
+     *
+     * Le thème sombre doit donc lui donner ses PROPRES couleurs, celles que
+     * publie la charte de Google pour son bouton sombre. Sans cette
+     * redéclaration, le repli reprend la main et le bouton s'efface à nouveau.
+     */
+    public function test_the_google_button_stays_visible_in_dark_theme(): void
+    {
+        $css = (string) file_get_contents(resource_path('sass/_theme-dark.scss'));
+
+        $this->assertStringContainsString(
+            '.oauth__btn{',
+            $css,
+            'Le thème sombre ne redéclare plus le bouton Google : il reprendra le fond de la carte et disparaîtra.'
+        );
+
+        // Les couleurs officielles du bouton sombre de Google.
+        $this->assertStringContainsString('background:#131314', $css);
+        $this->assertStringContainsString('border-color:#8E918F', $css);
+
+        // Et le filet du séparateur, qui souffrait du même repli.
+        $this->assertStringContainsString('.oauth__ou{', $css);
+    }
+
+    /**
      * LE REPÈRE DE DÉVELOPPEMENT N'ATTEINT JAMAIS UN CLIENT.
      *
      * En local, l'absence du bouton est expliquée à l'écran — un bouton
