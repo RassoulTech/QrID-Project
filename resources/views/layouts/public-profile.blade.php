@@ -8,6 +8,15 @@
   <x-public-profile-layout :title="$profil->nom" :description="$profil->accroche">
       ...
   </x-public-profile-layout>
+
+  LES PARAMÈTRES SONT DÉCLARÉS DANS LA CLASSE, pas ici : ce gabarit est servi
+  par App\View\Components\PublicProfileLayout. Une valeur passée depuis la vue
+  sans figurer dans SON CONSTRUCTEUR n'atteint jamais cette page — elle est
+  rangée dans $attributes, sans erreur ni avertissement. C'est ainsi que
+  l'image de partage a manqué en silence.
+
+  @props n'y changerait rien : c'est une syntaxe de composant ANONYME, ignorée
+  dès qu'une classe existe.
 --}}
 <!DOCTYPE html>
 @include('layouts.partials.html-open')
@@ -20,17 +29,50 @@
 
     <title>{{ $title ?? config('app.name') }}</title>
 
-    @isset($description)
+    @if ($description)
         <meta name="description" content="{{ $description }}">
-    @endisset
+    @endif
 
-    {{-- Partage sur les réseaux et messageries (WhatsApp notamment) --}}
+    {{--
+      PARTAGE SUR LES MESSAGERIES — c'est le geste central du produit.
+
+      Le client colle ce lien dans WhatsApp. Sans og:image, WhatsApp rend un
+      aperçu minuscule : une ligne de titre grise et rien d'autre. Avec, il
+      rend une grande vignette qu'on remarque dans une conversation.
+
+      L'écart n'est pas cosmétique : c'est la différence entre un lien qu'on
+      ouvre et un lien qu'on fait défiler.
+
+      L'ADRESSE DE L'IMAGE EST ABSOLUE, obligatoirement. Les robots des
+      messageries ne résolvent aucun chemin relatif : une URL relative donne
+      exactement le même résultat qu'une balise absente, sans que rien ne le
+      signale.
+
+      LES DIMENSIONS SONT DÉCLARÉES pour que l'aperçu s'affiche dès le premier
+      partage. Sans elles, WhatsApp doit télécharger l'image avant de savoir
+      quelle place lui réserver — et affiche souvent le lien sans vignette en
+      attendant.
+    --}}
     <meta property="og:type" content="profile">
     <meta property="og:title" content="{{ $title ?? config('app.name') }}">
-    @isset($description)
+    @if ($description)
         <meta property="og:description" content="{{ $description }}">
-    @endisset
+    @endif
     <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta property="og:locale" content="fr_SN">
+
+    @if ($apercuUrl)
+        <meta property="og:image" content="{{ $apercuUrl }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="{{ $title ?? config('app.name') }}">
+
+        {{-- « summary_large_image » et non « summary » : le second rend une
+             vignette carrée de la taille d'un timbre. --}}
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:image" content="{{ $apercuUrl }}">
+    @endif
 
     @vite(['resources/sass/app.scss'])
     {{-- Pas de JavaScript ici : rien sur cette page n'en a besoin. --}}

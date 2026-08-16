@@ -367,7 +367,33 @@ bouger.
 | États vides explicites | ✅ `x-empty-state` partout |
 | Messages en français | ✅ vérifié par `VocabularyTest` |
 | **Pages légales** | ⛔ **gabarit vide** |
-| Aperçu de partage WhatsApp | ⚠️ balises `og:` présentes, jamais vérifiées |
+| Aperçu de partage WhatsApp | ✅ **image générée, livré le 16 août** |
+
+### Aperçu de partage — ce qui manquait vraiment
+
+Le plan disait « balises `og:` présentes, jamais vérifiées ». La vérification a
+montré pire que prévu : **il n'y avait aucun `og:image`.**
+
+Sans lui, WhatsApp rend un aperçu minuscule — une ligne de titre grise et rien
+d'autre. Avec, il rend une grande vignette qu'on remarque dans une
+conversation. L'écart n'est pas cosmétique : c'est la différence entre un lien
+qu'on ouvre et un lien qu'on fait défiler, sur le geste central du produit.
+
+`SharePreviewService` peint une image 1200 × 630 par profil : nom, fonction,
+entreprise, photo quand elle existe, aux couleurs de la marque. Elle existe
+**toujours**, y compris pour les cartes sans photo — c'est la raison pour
+laquelle on ne se contente pas de la photo du profil, qui est carrée,
+facultative, et ne porte ni le nom ni la marque.
+
+**Trois défauts silencieux trouvés en chemin**, chacun rendant la balise
+invisible sans lever la moindre erreur :
+
+1. `PublicProfileLayout` est un composant **de classe** : tout paramètre
+   absent de son constructeur est rangé dans `$attributes` et ignoré ;
+2. `Storage::disk()->url()` lève dès qu'on remplace le disque — l'exception
+   était avalée par le garde-fou de la page publique ;
+3. les halos peints en pleine résolution laissaient des **anneaux
+   concentriques** visibles.
 
 **Les pages légales sont un gabarit sans contenu.** Le fichier porte
 lui-même la mention :

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Profile;
+use App\Services\SharePreviewService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class PublicProfileController extends Controller
@@ -26,7 +28,45 @@ class PublicProfileController extends Controller
 
         abort_unless($profile->isPubliclyVisible(), 404);
 
-        return view('public.profile', ['profile' => $profile]);
+        return view('public.profile', [
+            'profile' => $profile,
+
+            /*
+             | L'IMAGE DE PARTAGE. C'est elle qui rend le lien visible dans une
+             | conversation WhatsApp — sans elle, l'aperçu se réduit à une
+             | ligne de titre grise que personne ne remarque.
+             |
+             | L'ADRESSE EST ABSOLUE : les robots des messageries ne résolvent
+             | aucun chemin relatif, et une URL relative donne exactement le
+             | même résultat qu'une balise absente, sans rien signaler.
+             |
+             | LA GÉNÉRATION NE PEUT PAS CASSER CETTE PAGE. C'est la page qui
+             | prend tout le trafic du produit : un défaut de GD, un disque
+             | plein ou une photo illisible doivent coûter une vignette, jamais
+             | la carte elle-même. En cas d'échec, la balise disparaît et le
+             | partage retombe simplement sur son ancien comportement.
+             */
+            'apercuUrl' => $this->apercu($profile),
+        ]);
+    }
+
+    /** L'URL absolue de l'image de partage, ou null si elle n'a pu être produite. */
+    private function apercu(Profile $profile): ?string
+    {
+        try {
+            $service = app(SharePreviewService::class);
+
+            $service->png($profile);   // écrite une fois, relue ensuite
+
+            return $service->url($profile);
+        } catch (\Throwable $e) {
+            Log::warning('Aperçu de partage non produit', [
+                'slug' => $profile->slug,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     /**

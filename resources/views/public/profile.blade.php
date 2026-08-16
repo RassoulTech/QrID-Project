@@ -5,9 +5,13 @@
      tout en HTML et CSS.
 
      Props : $profile (chargé avec socialLinks et user.subscriptions) --}}
+{{-- $apercuUrl : l'image qui s'affichera dans WhatsApp. Elle est ABSOLUE —
+     les robots des messageries ne résolvent aucun chemin relatif, et une URL
+     relative donne le même résultat qu'une balise absente. --}}
 <x-public-profile-layout
     :title="$profile->full_name"
     :description="$profile->job_title.($profile->company ? ' · '.$profile->company : '')"
+    :apercu-url="$apercuUrl ?? null"
 >
     <div class="pub">
         <x-phone :profile="$profile" size="lg" :animate="false" />
