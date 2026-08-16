@@ -68,7 +68,13 @@
                                class="pay-option__input"
                                @checked(old('method', $loop->first ? $cle : null) === $cle)
                                required>
+                        {{-- La marque de l'opérateur AVANT son nom : sur un
+                             écran de paiement, on reconnaît une couleur avant
+                             de lire un mot. Voir x-operator-mark pour ce qui
+                             s'affiche tant que les logos officiels ne sont pas
+                             déposés. --}}
                         <span class="pay-option__box">
+                            <x-operator-mark :methode="$cle" />
                             <span class="pay-option__name">{{ $libelle }}</span>
                         </span>
                     </label>

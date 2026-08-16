@@ -168,10 +168,12 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   // annonçable par un lecteur d'écran.
 }
 
+// align-items:center et non baseline : une pastille de 40px alignée sur la
+// ligne de base d'un texte de 15px pendrait sous la boîte.
 .pay-option__box{
   display:flex;
-  align-items:baseline;
-  gap:10px;
+  align-items:center;
+  gap:12px;
   flex-wrap:wrap;
   padding:14px 16px;
   border:1px solid $bordure-champ;
@@ -184,6 +186,39 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 .pay-option__input:checked + .pay-option__box{
   border-color:$vert-fonce;
   background:$vert-clair;
+}
+
+/*
+ | LA MARQUE DE L'OPÉRATEUR — logo officiel s'il est déposé, pastille sinon.
+ |
+ | Sur un écran de paiement, on reconnaît une COULEUR avant de lire un mot :
+ | le bleu de Wave, l'orange d'Orange Money, le rouge de Free Money. C'est ce
+ | qui permet de choisir sans hésiter, et ce qui manquait — les trois options
+ | ne différaient que par leur libellé.
+ |
+ | Taille FIXE : un logo qui grossirait avec le texte déséquilibrerait les
+ | trois options entre elles.
+ */
+.pay-option__logo{
+  width:40px;
+  height:40px;
+  flex:0 0 auto;
+  object-fit:contain;
+  border-radius:8px;
+}
+
+.pay-option__pastille{
+  width:40px;
+  height:40px;
+  flex:0 0 auto;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.02em;
+  // Les couleurs viennent de la charte de chaque opérateur et sont posées en
+  // ligne par le composant : elles n'appartiennent pas à notre palette.
 }
 
 // L'état de focus est porté par la boîte, le champ étant hors écran.
