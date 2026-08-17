@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Automation\ScheduleRunController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignSystemController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Profile\StatisticsController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ThemePreferenceController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->name('home');
@@ -36,6 +38,29 @@ Route::get('/', [LandingController::class, 'index'])->name('home');
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:5,60')
     ->name('contact.store');
+
+/*
+|--------------------------------------------------------------------------
+| DÉCLENCHEUR DES TÂCHES PLANIFIÉES — appelé par Make, chaque minute
+|--------------------------------------------------------------------------
+| Cinq tâches sont programmées dans routes/console.php et aucune ne
+| s'exécute : un service web ne regarde jamais l'heure. Cette route donne à
+| un appelant extérieur le moyen de lancer `schedule:run`.
+|
+| ELLE EST HORS DU GROUPE « web », et c'est délibéré : un appel de machine à
+| machine n'a ni session, ni cookie, ni jeton CSRF à présenter. La placer
+| dans « web » l'aurait fait rejeter en 419 à chaque appel.
+|
+| LA LIMITE DE CADENCE EST BASSE. L'usage légitime est d'UN appel par minute ;
+| dix laissent la place à un rattrapage ou à un test, et arrêtent net qui
+| voudrait marteler l'adresse pour multiplier les envois.
+|
+| Le jeton, lui, est vérifié dans le contrôleur — et son absence rend 404.
+*/
+Route::match(['get', 'post'], '/automation/schedule', ScheduleRunController::class)
+    ->middleware(['throttle:10,1'])
+    ->withoutMiddleware([VerifyCsrfToken::class])
+    ->name('automation.schedule');
 
 // Pages légales — obligatoires avant toute vente.
 Route::get('/conditions-generales', [LegalController::class, 'conditions'])->name('legal.conditions');

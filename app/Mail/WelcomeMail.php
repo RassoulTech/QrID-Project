@@ -21,6 +21,16 @@ class WelcomeMail extends BaseMailable
         public string $createUrl,
         public int $trialDays,
         public ?string $trialEndsAt = null,
+
+        /**
+         * Lien du groupe WhatsApp réservé aux clients.
+         *
+         * Null quand il n'est pas configuré : le paragraphe disparaît alors
+         * entièrement, plutôt que de proposer un lien mort. Un client qui
+         * clique sur une invitation périmée conclut que le groupe n'existe
+         * pas, ou pire, qu'il n'y a pas été accepté.
+         */
+        public ?string $groupeUrl = null,
         string $recipient = '',
     ) {
         $this->recipient = $recipient;

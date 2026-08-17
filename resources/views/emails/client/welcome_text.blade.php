@@ -10,6 +10,11 @@ Il reste une étape : créer votre carte. Comptez cinq minutes — nom, fonction
 
 Créer ma carte :
 {{ $createUrl }}
+@if ($groupeUrl)
+
+Un groupe WhatsApp est réservé à nos clients — entraide, questions, et réponses rapides de notre équipe :
+{{ $groupeUrl }}
+@endif
 
 Pendant l'essai, votre carte est publiable et consultable sans aucun paiement. Aucun moyen de paiement ne vous est demandé.
 

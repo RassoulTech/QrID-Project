@@ -46,6 +46,11 @@ class WelcomeNewClient
             createUrl: route('profile.create.step1'),
             trialDays: (int) $duree,
             trialEndsAt: $abonnement?->ends_at?->translatedFormat('j F Y'),
+
+            // Le lien du groupe n'est proposé QU'ICI et sur le tableau de
+            // bord : il donne accès à un espace réservé aux clients, et une
+            // page publique le rendrait ouvert à tous.
+            groupeUrl: config('automation.whatsapp_groupe'),
             recipient: $user->email,
         ));
 

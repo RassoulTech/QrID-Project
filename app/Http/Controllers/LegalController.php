@@ -173,9 +173,18 @@ class LegalController extends Controller
 
                 ['heading' => 'Sous-traitants et hébergement',
                     'text' => 'Le service est hébergé par '.config('legal.hebergeur.nom').'. L\'envoi des e-mails est '
-                        .'assuré par un prestataire technique. Ces intervenants agissent sur nos instructions et '
-                        .'n\'utilisent vos données pour aucune finalité propre. Certains d\'entre eux étant situés '
-                        .'hors du Sénégal, vos données peuvent être hébergées à l\'étranger.'],
+                        .'assuré par un prestataire technique. À la confirmation de votre compte, votre nom, votre '
+                        .'adresse e-mail et votre numéro de téléphone sont transmis à notre outil d\'automatisation, '
+                        .'aux seules fins de vous inviter au groupe d\'entraide réservé aux clients et d\'assurer '
+                        .'votre suivi. Ces intervenants agissent sur nos instructions et n\'utilisent vos données '
+                        .'pour aucune finalité propre. Certains d\'entre eux étant situés hors du Sénégal, vos '
+                        .'données peuvent être hébergées à l\'étranger.'],
+
+                ['heading' => 'Groupe d\'entraide',
+                    'text' => 'L\'adhésion au groupe WhatsApp réservé aux clients est entièrement facultative et '
+                        .'ne conditionne aucun accès au service. Si vous le rejoignez, votre numéro devient visible '
+                        .'des autres membres — c\'est le fonctionnement propre de WhatsApp, sur lequel nous n\'avons '
+                        .'aucune prise. Vous pouvez le quitter à tout moment.'],
 
                 ['heading' => 'Durée de conservation',
                     'text' => 'Vos données de compte et de carte sont conservées tant que votre compte existe. Les '
