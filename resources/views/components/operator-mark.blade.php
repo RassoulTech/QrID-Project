@@ -27,9 +27,13 @@
       public/images/operateurs/orange_money.svg
       public/images/operateurs/free_money.svg
 
-  Les .png fonctionnent aussi. Ces fichiers se récupèrent auprès de chaque
-  opérateur, dans son dossier de presse ou son kit partenaire — c'est-à-dire
-  auprès de la seule source qui fasse foi.
+  Wave et Orange Money sont déposés depuis le 17 août ; Free Money garde sa
+  pastille tant que son logo manque. Ces fichiers se récupèrent auprès de
+  chaque opérateur, dans son dossier de presse ou son kit partenaire —
+  c'est-à-dire auprès de la seule source qui fasse foi.
+
+  Le nom du fichier est celui de la MÉTHODE, tel qu'il est stocké en base :
+  orange_money, avec un souligné. « orange money.jpeg » ne s'affiche pas.
 --}}
 @props(['methode'])
 
@@ -47,9 +51,17 @@
 
     $marque = $marques[$methode] ?? ['fond' => '#0B3B2E', 'encre' => '#FFFFFF', 'court' => '?'];
 
-    // Le premier fichier trouvé l'emporte. public_path() et non asset() : on
-    // teste une PRÉSENCE sur le disque, pas une adresse.
-    $fichier = collect(['svg', 'png', 'webp'])
+    /*
+     | Le premier fichier trouvé l'emporte. public_path() et non asset() : on
+     | teste une PRÉSENCE sur le disque, pas une adresse.
+     |
+     | .jpg et .jpeg viennent EN DERNIER : ce format ignore la transparence et
+     | traîne toujours un rectangle opaque derrière le logo. Ils sont malgré
+     | tout acceptés, parce qu'un logo déposé qui ne s'affiche pas — sans
+     | erreur, sans trace — coûte plus cher qu'un logo sur fond blanc. C'est
+     | exactement ce qui est arrivé aux deux premiers fichiers reçus.
+     */
+    $fichier = collect(['svg', 'png', 'webp', 'jpg', 'jpeg'])
         ->map(fn (string $ext) => 'images/operateurs/'.$methode.'.'.$ext)
         ->first(fn (string $chemin) => is_file(public_path($chemin)));
 @endphp

@@ -8,7 +8,7 @@
 
 ---
 
-## ÉTAT DES LIEUX — au 12 août
+## ÉTAT DES LIEUX — au 17 août
 
 Mesuré dans le dépôt, pas estimé.
 
@@ -17,7 +17,12 @@ Mesuré dans le dépôt, pas estimé.
 | 1 — Notifications | **✅ livré le 13 août** | reste la vérification en boîte réelle |
 | 2 — Discord | **✅ livré le 13 août** | reste le webhook à créer, puis un cron |
 | 3 — Durcissement | ~40 % | ⛔ **INTENABLE en l'état** — voir le risque n° 1 |
-| 4 — Finitions | ~60 % | tenable, mais dépend de vous pour trois points |
+| 4 — Finitions | ~85 % | **le code est fait** ; ne restent que les points qui demandent un œil et un téléphone |
+
+**Trois jours restants.** Ce qui manque au bloc 4 ne s'écrit plus, cela se
+constate : un QR scanné, un rendu regardé à 375 px, onze e-mails reçus. Le seul
+obstacle qui demande encore du code est le risque n° 1, et il attend une
+décision, pas des heures de travail.
 
 ---
 
@@ -352,6 +357,12 @@ assertions de moins, donc un test qui s'interrompt en cours.
 consécutives : à refaire en fin de parcours, quand le code aura cessé de
 bouger.
 
+**Au 17 août : suite entière au vert** — 43 fichiers, 551 tests, 2071
+assertions, 140 secondes. Une exécution, pas dix. Le compte de 1011 cité
+ci-dessus ne correspond à rien de mesurable aujourd'hui et aucun fichier de
+test n'a jamais été supprimé du dépôt : c'était vraisemblablement un total
+d'assertions, pas de tests.
+
 ---
 
 ## BLOC 4 — Finitions et recette (3 jours)
@@ -366,8 +377,9 @@ bouger.
 | Aucun lien mort | ✅ vérifié par test |
 | États vides explicites | ✅ `x-empty-state` partout |
 | Messages en français | ✅ vérifié par `VocabularyTest` |
-| **Pages légales** | ⛔ **gabarit vide** |
+| **Pages légales** | ✅ **rédigées, livrées le 16 août** — 17 tests |
 | Aperçu de partage WhatsApp | ✅ **image générée, livré le 16 août** |
+| Marques des opérateurs | ✅ **Wave et Orange Money le 17 août** ; Free Money en pastille |
 
 ### Aperçu de partage — ce qui manquait vraiment
 
@@ -395,15 +407,38 @@ invisible sans lever la moindre erreur :
 3. les halos peints en pleine résolution laissaient des **anneaux
    concentriques** visibles.
 
-**Les pages légales sont un gabarit sans contenu.** Le fichier porte
-lui-même la mention :
+### Pages légales — écrites le 16 août
 
-> *Contenu à compléter avec un juriste avant l'ouverture commerciale : ces
-> mentions sont obligatoires pour un service payant.*
+CGU, confidentialité et mentions légales portaient jusque-là une trame à trous
+et, **en clair sous les yeux des clients**, la mention « contenu à compléter ».
+Les trois pages sont désormais rédigées : ce qui est vendu, à quel prix, par
+quels opérateurs, quelles données sont conservées, et le droit applicable.
 
-CGU, confidentialité et mentions légales sont **obligatoires** pour vendre.
-Ce n'est pas du développement : il faut un texte. **À produire de votre
-côté.**
+`LegalPagesTest` — 17 tests — interdit qu'elles redeviennent une trame : il
+refuse tout aveu d'inachèvement dans le rendu et exige que chaque page porte
+une date.
+
+**Ce qui reste de votre côté : une relecture par un juriste.** Le texte est
+complet et cohérent, mais je ne suis pas votre conseil ; les montants, la
+raison sociale et les délais de rétractation engagent votre entreprise.
+
+### Marques des opérateurs — 17 août
+
+Les logos officiels de **Wave** et **Orange Money** sont déposés et servis sur
+l'écran de paiement. Free Money garde sa pastille aux couleurs de sa charte
+tant que son logo manque — c'est le repli prévu, pas un défaut.
+
+Les deux fichiers reçus étaient au bon endroit et **tous les deux invisibles** :
+`orange money.jpeg` portait une espace au lieu d'un souligné, et l'extension
+`.jpeg` n'était pas reconnue. Aucune erreur, aucune trace, un écran de paiement
+identique à la veille. Le format est maintenant accepté, et `OperatorMarkTest`
+fait échouer la suite quand un fichier du dossier ne peut pas s'afficher.
+
+Ils demandaient aussi un recadrage : le `wave.jpeg` reçu était une bannière
+1200 × 630 dont l'icône n'occupait que le tiers central, et le fichier Orange
+Money un verrouillage « symbole + nom » dont le nom, à 40 px, aurait fait quatre
+pixels de haut — alors que le composant l'écrit déjà en toutes lettres à côté.
+Seuls les symboles ont été gardés.
 
 ### Carte
 
@@ -436,10 +471,14 @@ Par ordre d'urgence :
 2. **Budget Render** pour un cron et/ou un worker (risque n° 2) — bloque les
    blocs 1 et 2
 3. **Stockage objet** pour les photos (risque n° 3)
-4. **Textes légaux** — CGU, confidentialité, mentions
-5. **Scan du QR Code** sur deux téléphones et vérification à 375px
-6. **Réception des 11 e-mails** dans une vraie boîte — suppose une messagerie
+4. **Scan du QR Code** sur deux téléphones et vérification à 375px
+5. **Réception des 11 e-mails** dans une vraie boîte — suppose une messagerie
    de production qui fonctionne, donc un domaine vérifié chez Resend
+6. **Relecture juriste** des trois pages légales — elles sont écrites depuis le
+   16 août ; ce sont vos montants et votre raison sociale qui y sont engagés
+7. **Logo officiel de Free Money**, si vous l'obtenez — sans lui, sa pastille
+   reste, et c'est acceptable. Le déposer dans
+   `public/images/operateurs/free_money.svg` suffit, aucun code à toucher
 
 ---
 
