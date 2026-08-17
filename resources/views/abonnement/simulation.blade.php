@@ -24,10 +24,17 @@
             <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
             </svg>
-            <span>
-                <strong>{{ $payment->method_label }}</strong> ·
-                {{ $payment->formattedAmount() }} ·
-                référence {{ $payment->provider_ref }}
+            {{-- La marque de l'opérateur ici aussi : c'est le dernier écran
+                 avant la confirmation, celui où l'on vérifie qu'on paie bien
+                 par le moyen qu'on a choisi. Un libellé seul obligeait à
+                 relire ; une couleur se reconnaît. --}}
+            <span class="pay-inline pay-mark--sm">
+                <x-operator-mark :methode="$payment->method" />
+                <span>
+                    <strong>{{ $payment->method_label }}</strong> ·
+                    {{ $payment->formattedAmount() }} ·
+                    référence {{ $payment->provider_ref }}
+                </span>
             </span>
         </div>
 

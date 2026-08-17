@@ -364,15 +364,47 @@
   // ---------------------------------------------------------------------------
   // Paiement
   // ---------------------------------------------------------------------------
-  .pay-option__box{border-color:var(--bord-fort)}
-  .pay-option:hover .pay-option__box{background:var(--surface-3)}
-  .pay-option__input:checked + .pay-option__box{
+  // -------------------------------------------------------------------------
+  // Paiement — formules et moyens
+  // -------------------------------------------------------------------------
+  .checkout__title{color:var(--texte)}
+  .checkout__sub{color:var(--texte-2)}
+  .checkout__kicker{color:var(--accent)}
+  .checkout__legend{color:var(--texte)}
+  .checkout__step{background:var(--accent);color:var(--sur-accent)}
+
+  .plan-card__box,
+  .pay-method__box{background:var(--surface-2);border-color:var(--bord-fort)}
+  .plan-card:hover .plan-card__box,
+  .pay-method:hover .pay-method__box{border-color:var(--accent)}
+
+  .plan-card__input:checked + .plan-card__box,
+  .pay-method__input:checked + .pay-method__box{
     border-color:var(--accent);
     background:var(--accent-doux);
   }
-  .pay-option__name{color:var(--texte)}
-  .pay-option__price{color:var(--accent)}
-  .pay-option__meta,.pay-note{color:var(--texte-2)}
+
+  .plan-card__name,.pay-method__name{color:var(--texte)}
+  .plan-card__price{color:var(--accent)}
+  .plan-card__meta,.plan-card__feature{color:var(--texte-2)}
+  .plan-card__features{border-top-color:var(--bord)}
+  .plan-card__badge{background:var(--accent);color:var(--sur-accent)}
+
+  .plan-card__tick,.pay-method__tick{
+    background:var(--surface-3);border-color:var(--bord-fort);
+  }
+  .plan-card__input:checked + .plan-card__box .plan-card__tick,
+  .pay-method__input:checked + .pay-method__box .pay-method__tick{
+    background:var(--accent);border-color:var(--accent);color:var(--sur-accent);
+  }
+
+  .checkout__panel{background:var(--surface-2);border-color:var(--bord)}
+  .checkout__panel-title{color:var(--texte)}
+  .trust__item{color:var(--texte-2);strong{color:var(--texte)}}
+  .trust__icon{background:var(--accent-doux);color:var(--accent)}
+  .checkout__later{color:var(--texte-2)}
+
+  .pay-note{color:var(--texte-2)}
 
   // ---------------------------------------------------------------------------
   // Pages d'erreur

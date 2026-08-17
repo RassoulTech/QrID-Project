@@ -1,98 +1,259 @@
 {{--
-  Paiement sécurisé — choix de la formule et du moyen de paiement.
-
-  STRUCTURE PROVISOIRE : les textes et la mise en page définitive viennent de
-  la maquette « Paiement sécurisé », que je ne peux pas encore lire. Cet écran
-  est complet côté logique (formules réelles, montants en base, trois moyens,
-  Payment créé en « pending ») et sera réhabillé.
+  Paiement — choix de la formule et du moyen de paiement.
 
   ACTION PRINCIPALE : payer et publier sa carte.
+
+  ═══════════════════════════════════════════════════════════════════════
+  AUCUN JAVASCRIPT
+  ═══════════════════════════════════════════════════════════════════════
+  Les états de sélection sont portés par `:checked` et le sélecteur de frère
+  adjacent. Un récapitulatif qui recalculerait un total en direct exigerait du
+  script pour une information DÉJÀ écrite sur chaque carte de formule : le prix.
+  Le panneau de droite ne porte donc que ce qui ne dépend pas du choix.
+
+  C'est aussi ce qui rend l'écran utilisable si le script ne charge pas — règle
+  permanente du système de design.
 --}}
-<x-app-layout title="Paiement sécurisé">
+@php
+    /*
+     | L'ÉCONOMIE DE LA FORMULE LONGUE, CALCULÉE ET NON ÉCRITE À LA MAIN.
+     |
+     | La référence est la formule de 30 jours. Le jour où un prix bouge en
+     | base, le pourcentage suit — un « -17 % » codé en dur deviendrait faux
+     | sans que personne ne le voie.
+     */
+    $reference = $plans->firstWhere('duration_days', 30);
 
-    <div class="step-card">
-        <p class="step-card__kicker">Abonnement</p>
+    $equivalentMensuel = function ($plan) {
+        if ($plan->duration_days < 60 || $plan->isFree()) {
+            return null;
+        }
 
-        <h1 class="step-card__title">
-            {{ $renewal ? 'Renouveler mon abonnement' : 'Choisir ma formule' }}
-        </h1>
+        return (int) round($plan->price_fcfa / ($plan->duration_days / 30));
+    };
 
-        <p class="step-card__sub">
-            @if ($renewal)
-                Votre abonnement court jusqu'au
-                {{ $subscription->ends_at?->translatedFormat('j F Y') }}.
-                Un renouvellement s'ajoute à ce qui reste dû, il ne le remplace pas.
-            @else
-                Votre carte est prête. Choisissez la formule qui vous convient
-                pour la mettre en ligne.
-            @endif
-        </p>
+    $economie = function ($plan) use ($reference, $equivalentMensuel) {
+        $mensuel = $equivalentMensuel($plan);
 
-        <form method="POST" action="{{ route('abonnement.paiement.store') }}" novalidate>
-            @csrf
+        if (! $reference || ! $mensuel || $reference->price_fcfa <= 0) {
+            return null;
+        }
 
-            {{-- ---------------------------------------------------------------
-                 FORMULE — le prix vient de la base, jamais du formulaire.
-            ---------------------------------------------------------------- --}}
-            <fieldset class="step-fields">
-                <legend class="f__label">Formule</legend>
+        $ecart = (int) round(100 - ($mensuel * 100 / $reference->price_fcfa));
 
-                @foreach ($plans as $plan)
-                    <label class="pay-option">
-                        <input type="radio" name="plan" value="{{ $plan->slug }}"
-                               class="pay-option__input"
-                               @checked(old('plan', $loop->first ? $plan->slug : null) === $plan->slug)
-                               required>
-                        <span class="pay-option__box">
-                            <span class="pay-option__name">{{ $plan->name }}</span>
-                            <span class="pay-option__price">{{ $plan->formattedPrice() }}</span>
-                            <span class="pay-option__meta">{{ $plan->duration_days }} jours</span>
-                        </span>
-                    </label>
-                @endforeach
+        return $ecart > 0 ? $ecart : null;
+    };
+@endphp
+
+<x-app-layout title="Paiement">
+
+    <form method="POST" action="{{ route('abonnement.paiement.store') }}"
+          class="checkout" novalidate>
+        @csrf
+
+        {{-- ═══════════════ COLONNE PRINCIPALE ═══════════════ --}}
+        <div class="checkout__main">
+            <header class="checkout__head">
+                <p class="checkout__kicker">Abonnement</p>
+
+                <h1 class="checkout__title">
+                    {{ $renewal ? 'Renouveler mon abonnement' : 'Choisir ma formule' }}
+                </h1>
+
+                <p class="checkout__sub">
+                    @if ($renewal)
+                        Votre abonnement court jusqu'au
+                        {{ $subscription->ends_at?->translatedFormat('j F Y') }}.
+                        Un renouvellement s'ajoute à ce qui reste dû, il ne le
+                        remplace pas.
+                    @else
+                        Votre carte est prête. Choisissez la formule qui vous
+                        convient pour la mettre en ligne.
+                    @endif
+                </p>
+            </header>
+
+            {{-- ─────────────── FORMULE ───────────────
+                 Le prix vient de la base, jamais du formulaire. --}}
+            <fieldset class="checkout__group">
+                <legend class="checkout__legend">
+                    <span class="checkout__step" aria-hidden="true">1</span>
+                    Votre formule
+                </legend>
+
+                <div class="plan-grid">
+                    @foreach ($plans as $plan)
+                        @php($remise = $economie($plan))
+                        @php($parMois = $equivalentMensuel($plan))
+
+                        <label class="plan-card">
+                            <input type="radio" name="plan" value="{{ $plan->slug }}"
+                                   class="plan-card__input"
+                                   @checked(old('plan', $loop->first ? $plan->slug : null) === $plan->slug)
+                                   required>
+
+                            <span class="plan-card__box">
+                                <span class="plan-card__top">
+                                    <span class="plan-card__name">{{ $plan->name }}</span>
+
+                                    @if ($remise)
+                                        <span class="plan-card__badge">Économisez {{ $remise }} %</span>
+                                    @endif
+                                </span>
+
+                                <span class="plan-card__price">{{ $plan->formattedPrice() }}</span>
+
+                                <span class="plan-card__meta">
+                                    {{ $plan->periodicite() }} · {{ $plan->duration_days }} jours
+                                    @if ($parMois)
+                                        <br>soit {{ number_format($parMois, 0, ',', ' ') }} FCFA par mois
+                                    @endif
+                                </span>
+
+                                @if (! empty($plan->features))
+                                    <span class="plan-card__features">
+                                        @foreach ($plan->features as $atout)
+                                            <span class="plan-card__feature">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                     stroke="currentColor" stroke-width="3"
+                                                     stroke-linecap="round" stroke-linejoin="round"
+                                                     aria-hidden="true">
+                                                    <polyline points="20 6 9 17 4 12"/>
+                                                </svg>
+                                                {{ $atout }}
+                                            </span>
+                                        @endforeach
+                                    </span>
+                                @endif
+
+                                {{-- La coche de sélection. aria-hidden : l'état
+                                     réel est porté par le bouton radio, qu'un
+                                     lecteur d'écran annonce déjà. --}}
+                                <span class="plan-card__tick" aria-hidden="true">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="3.5"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                </span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
 
                 @error('plan')
                     <span class="f__error">{{ $message }}</span>
                 @enderror
             </fieldset>
 
-            {{-- ---------------------------------------------------------------
-                 MOYEN DE PAIEMENT
-            ---------------------------------------------------------------- --}}
-            <fieldset class="step-fields mt-4">
-                <legend class="f__label">Moyen de paiement</legend>
+            {{-- ─────────────── MOYEN DE PAIEMENT ───────────────
+                 La marque de l'opérateur AVANT son nom : sur un écran de
+                 paiement, on reconnaît une couleur avant de lire un mot. --}}
+            <fieldset class="checkout__group">
+                <legend class="checkout__legend">
+                    <span class="checkout__step" aria-hidden="true">2</span>
+                    Comment payer
+                </legend>
 
-                @foreach ($methods as $cle => $libelle)
-                    <label class="pay-option">
-                        <input type="radio" name="method" value="{{ $cle }}"
-                               class="pay-option__input"
-                               @checked(old('method', $loop->first ? $cle : null) === $cle)
-                               required>
-                        {{-- La marque de l'opérateur AVANT son nom : sur un
-                             écran de paiement, on reconnaît une couleur avant
-                             de lire un mot. Voir x-operator-mark pour ce qui
-                             s'affiche tant que les logos officiels ne sont pas
-                             déposés. --}}
-                        <span class="pay-option__box">
-                            <x-operator-mark :methode="$cle" />
-                            <span class="pay-option__name">{{ $libelle }}</span>
-                        </span>
-                    </label>
-                @endforeach
+                <div class="method-grid">
+                    @foreach ($methods as $cle => $libelle)
+                        <label class="pay-method">
+                            <input type="radio" name="method" value="{{ $cle }}"
+                                   class="pay-method__input"
+                                   @checked(old('method', $loop->first ? $cle : null) === $cle)
+                                   required>
+
+                            <span class="pay-method__box">
+                                <x-operator-mark :methode="$cle" />
+                                <span class="pay-method__name">{{ $libelle }}</span>
+
+                                <span class="pay-method__tick" aria-hidden="true">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="3.5"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                </span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
 
                 @error('method')
                     <span class="f__error">{{ $message }}</span>
                 @enderror
             </fieldset>
+        </div>
 
-            <div class="step-card__foot">
-                <a href="{{ route('dashboard') }}" class="step-back">Plus tard</a>
-                <x-button>{{ $renewal ? 'Renouveler' : 'Payer et publier ma carte' }}</x-button>
+        {{-- ═══════════════ PANNEAU DE CONFIANCE ═══════════════
+             Il ne porte QUE ce qui ne dépend pas de la formule choisie : sans
+             cela il faudrait du script pour le tenir à jour, et il mentirait
+             le jour où le script ne charge pas.
+
+             Collant sur grand écran, il suit le regard jusqu'au bouton ; sur
+             téléphone il se place naturellement après les choix. --}}
+        <aside class="checkout__aside">
+            <div class="checkout__panel">
+                <h2 class="checkout__panel-title">Avant de payer</h2>
+
+                <ul class="trust">
+                    <li class="trust__item">
+                        <span class="trust__icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="10" width="16" height="11" rx="2"/>
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+                            </svg>
+                        </span>
+                        <span>
+                            <strong>Aucun débit immédiat.</strong>
+                            La somme n'est prélevée qu'après votre confirmation
+                            chez l'opérateur.
+                        </span>
+                    </li>
+
+                    <li class="trust__item">
+                        <span class="trust__icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4v6h6"/>
+                                <path d="M20 20v-6h-6"/>
+                                <path d="M20 9a8 8 0 0 0-14-3L4 8"/>
+                                <path d="M4 15a8 8 0 0 0 14 3l2-2"/>
+                            </svg>
+                        </span>
+                        <span>
+                            <strong>Votre lien et votre QR Code ne changent
+                            jamais.</strong>
+                            Les cartes déjà distribuées continueront de
+                            fonctionner.
+                        </span>
+                    </li>
+
+                    <li class="trust__item">
+                        <span class="trust__icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                            </svg>
+                        </span>
+                        <span>
+                            <strong>En ligne aussitôt.</strong>
+                            Votre carte devient publique dès le paiement
+                            confirmé.
+                        </span>
+                    </li>
+                </ul>
+
+                <x-button :block="true">
+                    {{ $renewal ? 'Renouveler mon abonnement' : 'Payer et publier ma carte' }}
+                </x-button>
+
+                <a href="{{ route('dashboard') }}" class="checkout__later">Plus tard</a>
             </div>
-        </form>
-    </div>
-
-    <p class="pay-note">
-        Aucune somme n'est débitée tant que vous n'avez pas confirmé chez votre opérateur.
-    </p>
+        </aside>
+    </form>
 </x-app-layout>

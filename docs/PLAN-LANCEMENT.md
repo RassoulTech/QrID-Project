@@ -314,6 +314,12 @@ côté admin (déjà en `throttle:30,1`).
 
 ### Paiement — le point critique
 
+**Parcours FakeGateway validé de bout en bout le 17 août**, sur le compte réel
+`dionemhd1@gmail.com` monté en local : formulaire → écran de simulation →
+retour opérateur → paiement `success` 2 500 FCFA par Wave → abonnement
+`active` (Mensuel, échéance au 16/09/2026) → **carte en ligne**. La moitié du
+bloc qui ne dépend pas d'un agrégateur est donc démontrée.
+
 - [ ] ⛔ **Implémentation d'une passerelle réelle** — voir risque n° 1
 - [ ] Webhook idempotent, signature vérifiée, traitement en job
 - [ ] Job `VerifyPendingPayments` toutes les 10 minutes
@@ -383,6 +389,7 @@ d'assertions, pas de tests.
 | **Pages légales** | ✅ **rédigées, livrées le 16 août** — 17 tests |
 | Aperçu de partage WhatsApp | ✅ **image générée, livré le 16 août** |
 | Marques des opérateurs | ✅ **Wave et Orange Money le 17 août** ; Free Money en pastille |
+| **Écran de paiement refondu** | ✅ **17 août** — la mention « structure provisoire » tombe |
 | **« Enregistrer le contact »** | ✅ **livré le 17 août** — 15 tests |
 | **Carte non active : page utile au scan** | ✅ **livré le 17 août** — 8 tests |
 | Cohérence de `/exemple` | ⚠️ **page en Bootstrap brut**, voir ci-dessous |

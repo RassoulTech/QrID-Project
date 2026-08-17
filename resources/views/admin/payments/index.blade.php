@@ -137,7 +137,15 @@
                                         ?? ($paiement->payload['plan_slug'] ?? '—') }}
                                 </td>
 
-                                <td>{{ $paiement->method_label }}</td>
+                                {{-- La marque rend la colonne lisible en
+                                     diagonale : on repère un opérateur dans
+                                     une liste de cent lignes sans lire. --}}
+                                <td>
+                                    <span class="pay-inline pay-mark--sm">
+                                        <x-operator-mark :methode="$paiement->method" />
+                                        {{ $paiement->method_label }}
+                                    </span>
+                                </td>
 
                                 <td class="adm-table__principal">{{ $paiement->formattedAmount() }}</td>
 

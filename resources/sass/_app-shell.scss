@@ -158,34 +158,242 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 // Une option entière est cliquable, pas seulement le petit rond : sur mobile,
 // viser un radio de 16px est une cause d'abandon à elle seule.
 // -----------------------------------------------------------------------------
-.pay-option{display:block;cursor:pointer}
+/*
+ | LA MISE EN PAGE — deux colonnes sur grand écran, une seule sur téléphone.
+ |
+ | Le panneau de droite est COLLANT : sur un écran large, la liste des formules
+ | pousse le bouton hors de vue, et l'on se retrouve à choisir sans voir ce
+ | qu'on valide. Sur téléphone il se range simplement après les choix, ce qui
+ | est déjà l'ordre de lecture naturel.
+ */
+.checkout{
+  display:grid;
+  gap:24px;
+  align-items:start;
 
-.pay-option__input{
+  @media (min-width:992px){
+    grid-template-columns:minmax(0,1fr) 340px;
+    gap:32px;
+  }
+}
+
+.checkout__main{min-width:0}
+
+.checkout__head{margin-bottom:28px}
+
+.checkout__kicker{
+  font-size:12px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:$vert-accent;
+  margin:0 0 6px;
+}
+
+.checkout__title{
+  font-size:clamp(1.5rem, 1.25rem + 1.1vw, 2rem);
+  font-weight:700;letter-spacing:-.015em;
+  color:$texte;margin:0 0 8px;
+}
+
+.checkout__sub{
+  font-size:14.5px;color:$gris-second;margin:0;
+  max-width:56ch;line-height:1.6;
+}
+
+.checkout__group{
+  border:0;padding:0;margin:0 0 28px;
+  min-width:0;   // sans quoi un fieldset refuse de rétrécir dans une grille
+}
+
+// Le numéro d'étape porte le rythme de l'écran : on voit qu'il y a DEUX
+// décisions à prendre, et lesquelles, avant même de lire.
+.checkout__legend{
+  display:flex;align-items:center;gap:10px;
+  font-size:15px;font-weight:700;color:$texte;
+  padding:0;margin-bottom:14px;
+}
+
+.checkout__step{
+  width:24px;height:24px;flex:0 0 auto;
+  display:grid;place-items:center;
+  border-radius:$r-full;
+  background:$vert-fonce;color:$blanc;
+  font-size:12.5px;font-weight:700;
+}
+
+// -----------------------------------------------------------------------------
+// LES FORMULES
+// -----------------------------------------------------------------------------
+.plan-grid{display:grid;gap:12px}
+
+.plan-card{display:block;cursor:pointer;position:relative}
+
+// Jamais display:none : le champ doit rester atteignable au clavier et
+// annonçable par un lecteur d'écran.
+.plan-card__input,
+.pay-method__input{
   position:absolute;
   width:1px;height:1px;
   opacity:0;
-  // Jamais display:none : le champ doit rester atteignable au clavier et
-  // annonçable par un lecteur d'écran.
 }
+
+.plan-card__box{
+  display:block;position:relative;
+  padding:18px 46px 18px 20px;   // à droite, la place de la coche
+  border:1.5px solid $bordure-champ;
+  border-radius:$r-md;
+  background:$blanc;
+  transition:border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.plan-card:hover .plan-card__box{border-color:$bordure-forte}
+
+.plan-card__input:checked + .plan-card__box{
+  border-color:$vert-fonce;
+  background:$vert-clair;
+  box-shadow:$shadow-1;
+}
+
+.plan-card__input:focus-visible + .plan-card__box{
+  outline:3px solid $vert-accent;
+  outline-offset:2px;
+}
+
+.plan-card__top{
+  display:flex;align-items:center;gap:10px;
+  flex-wrap:wrap;margin-bottom:2px;
+}
+
+.plan-card__name{font-size:15px;font-weight:700;color:$texte}
+
+// L'économie est CALCULÉE depuis les prix en base : voir la vue.
+.plan-card__badge{
+  font-size:11px;font-weight:700;
+  letter-spacing:.02em;
+  padding:3px 9px;border-radius:$r-full;
+  background:$vert-fonce;color:$blanc;
+}
+
+.plan-card__price{
+  display:block;
+  font-size:24px;font-weight:700;
+  letter-spacing:-.02em;color:$vert-fonce;
+  line-height:1.2;margin:4px 0 2px;
+}
+
+.plan-card__meta{
+  display:block;
+  font-size:12.5px;color:$gris-second;line-height:1.5;
+}
+
+.plan-card__features{
+  display:flex;flex-direction:column;gap:5px;
+  margin-top:12px;padding-top:12px;
+  border-top:1px solid $bordure;
+}
+
+.plan-card__feature{
+  display:flex;align-items:flex-start;gap:7px;
+  font-size:12.5px;color:$gris-second;line-height:1.45;
+
+  svg{flex:0 0 auto;margin-top:2px;color:$vert-accent}
+}
+
+// La coche : invisible au repos, jamais absente du flux — sans quoi la boîte
+// se décalerait d'un pixel à la sélection.
+.plan-card__tick,
+.pay-method__tick{
+  position:absolute;top:18px;right:16px;
+  width:22px;height:22px;
+  display:grid;place-items:center;
+  border-radius:$r-full;
+  border:1.5px solid $bordure-champ;
+  background:$blanc;color:transparent;
+  transition:background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.plan-card__input:checked + .plan-card__box .plan-card__tick,
+.pay-method__input:checked + .pay-method__box .pay-method__tick{
+  background:$vert-fonce;border-color:$vert-fonce;color:$blanc;
+}
+
+// -----------------------------------------------------------------------------
+// LES MOYENS DE PAIEMENT
+//
+// Une option entière est cliquable, pas seulement le petit rond : sur mobile,
+// viser un radio de 16px est une cause d'abandon à elle seule.
+// -----------------------------------------------------------------------------
+.method-grid{display:grid;gap:10px}
+
+.pay-method{display:block;cursor:pointer}
 
 // align-items:center et non baseline : une pastille de 40px alignée sur la
 // ligne de base d'un texte de 15px pendrait sous la boîte.
-.pay-option__box{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-  padding:14px 16px;
-  border:1px solid $bordure-champ;
-  border-radius:$r-sm;
+.pay-method__box{
+  display:flex;align-items:center;gap:14px;
+  position:relative;
+  padding:12px 46px 12px 14px;
+  border:1.5px solid $bordure-champ;
+  border-radius:$r-md;
+  background:$blanc;
   transition:border-color 160ms ease, background 160ms ease;
 }
 
-.pay-option:hover .pay-option__box{background:$gris-fond}
+.pay-method:hover .pay-method__box{border-color:$bordure-forte}
 
-.pay-option__input:checked + .pay-option__box{
+.pay-method__input:checked + .pay-method__box{
   border-color:$vert-fonce;
   background:$vert-clair;
+}
+
+.pay-method__input:focus-visible + .pay-method__box{
+  outline:3px solid $vert-accent;
+  outline-offset:2px;
+}
+
+.pay-method__name{font-size:14.5px;font-weight:600;color:$texte}
+
+.pay-method__tick{top:50%;transform:translateY(-50%)}
+
+// -----------------------------------------------------------------------------
+// LE PANNEAU DE CONFIANCE
+// -----------------------------------------------------------------------------
+.checkout__aside{min-width:0}
+
+.checkout__panel{
+  padding:22px 20px;
+  border:1px solid $bordure;
+  border-radius:$r-md;
+  background:$gris-fond;
+
+  @media (min-width:992px){position:sticky;top:24px}
+}
+
+.checkout__panel-title{
+  font-size:14px;font-weight:700;color:$texte;
+  margin:0 0 14px;
+}
+
+.trust{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:13px}
+
+.trust__item{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:12.5px;color:$gris-second;line-height:1.5;
+
+  strong{color:$texte;font-weight:600}
+}
+
+.trust__icon{
+  flex:0 0 auto;
+  width:28px;height:28px;
+  display:grid;place-items:center;
+  border-radius:$r-full;
+  background:$vert-clair;color:$vert-fonce;
+}
+
+.checkout__later{
+  display:block;text-align:center;
+  margin-top:12px;
+  font-size:13px;font-weight:600;color:$gris-second;
 }
 
 /*
@@ -221,15 +429,16 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   // ligne par le composant : elles n'appartiennent pas à notre palette.
 }
 
-// L'état de focus est porté par la boîte, le champ étant hors écran.
-.pay-option__input:focus-visible + .pay-option__box{
-  outline:3px solid $vert-accent;
-  outline-offset:2px;
+// La marque sert AUSSI hors du choix de paiement : récapitulatif de
+// simulation, journal des paiements côté administration. Elle y est plus
+// petite — un logo de 40px dans une cellule de tableau écraserait la ligne.
+.pay-mark--sm{
+  .pay-option__logo,
+  .pay-option__pastille{width:26px;height:26px;border-radius:6px;font-size:10px}
 }
 
-.pay-option__name{font-size:14.5px;font-weight:600;color:$texte}
-.pay-option__price{font-size:14.5px;font-weight:700;color:$vert-fonce;margin-left:auto}
-.pay-option__meta{font-size:12px;color:$gris-second;width:100%}
+// Marque et libellé sur une seule ligne, pour un tableau ou un récapitulatif.
+.pay-inline{display:inline-flex;align-items:center;gap:8px}
 
 // -----------------------------------------------------------------------------
 // PHOTO — zone de dépôt
