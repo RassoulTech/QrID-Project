@@ -389,4 +389,11 @@
   .public-profile > .container > p{color:var(--texte-2) !important}
   .pub__social{background:var(--accent-doux);color:var(--accent)}
   .pub__foot{color:var(--texte-2);a{color:var(--accent)}}
+
+  // Carte non active. Le texte secondaire doit rester lisible : c'est lui qui
+  // porte le « rien n'est cassé », la seule information qui compte ici.
+  .carte-off__marque{background:var(--accent-doux);color:var(--accent)}
+  .carte-off__titre{color:var(--texte)}
+  .carte-off__texte{color:var(--texte-2);strong{color:var(--texte)}}
+  .carte-off__pied a{color:var(--accent)}
 }

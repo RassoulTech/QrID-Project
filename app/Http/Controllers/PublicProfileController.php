@@ -18,7 +18,7 @@ class PublicProfileController extends Controller
      * l'abonnement nécessaire. Une 404 plutôt qu'un 403, pour ne rien
      * révéler de l'existence du profil.
      */
-    public function show(string $slug): View
+    public function show(string $slug): View|Response
     {
         // isPubliclyVisible() consulte l'abonnement du propriétaire : sans ces
         // deux relations chargées d'avance, la page part en N+1 dès le premier
@@ -28,7 +28,9 @@ class PublicProfileController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        abort_unless($profile->isPubliclyVisible(), 404);
+        if (! $profile->isPubliclyVisible()) {
+            return $this->carteInactive($profile);
+        }
 
         return view('public.profile', [
             'profile' => $profile,
@@ -50,6 +52,53 @@ class PublicProfileController extends Controller
              */
             'apercuUrl' => $this->apercu($profile),
         ]);
+    }
+
+    /**
+     * La carte existe mais n'est pas en ligne.
+     *
+     * ═══════════════════════════════════════════════════════════════════════
+     * POURQUOI CETTE PAGE, ET POURQUOI ELLE RÉPOND QUAND MÊME 404
+     * ═══════════════════════════════════════════════════════════════════════
+     * Le premier geste d'un client qui vient de créer sa carte est de scanner
+     * son propre QR pour voir si « ça marche ». Il tombait sur une page
+     * d'erreur nue. Il n'avait aucun moyen de savoir que rien n'était cassé et
+     * qu'il lui restait une seule chose à faire — activer.
+     *
+     * LE STATUT RESTE 404, ET C'EST VOULU. Renvoyer un 200 ici distinguerait
+     * une carte inactive d'un slug inexistant : on pourrait énumérer les
+     * comptes en essayant des adresses. Le corps de la réponse est utile, le
+     * code ne dit rien de plus qu'avant.
+     *
+     * LA PAGE NE SUPPOSE AUCUNE SESSION. Le scan se fait au téléphone, souvent
+     * sur un navigateur où l'on n'est pas connecté : une page réservée au
+     * propriétaire authentifié n'aurait servi que dans le cas le plus rare. Le
+     * nom du profil n'est donc affiché QUE si le visiteur est bien son
+     * propriétaire — sinon la page ne révèle rien de qui que ce soit.
+     */
+    private function carteInactive(Profile $profile): Response
+    {
+        /*
+         | L'ORDRE DES CAS EST LA LOGIQUE MÉTIER ELLE-MÊME.
+         |
+         | Une suspension passe avant tout : dire « payez » à un compte suspendu
+         | par l'administration l'enverrait payer pour rien.
+         |
+         | L'abonnement passe avant le brouillon : sans abonnement actif,
+         | l'activation est de toute façon impossible — c'est donc lui qui
+         | bloque, et le message doit nommer le vrai obstacle.
+         */
+        $raison = match (true) {
+            $profile->isDeactivated() => 'suspendue',
+            ! $profile->user?->hasActiveSubscription() => 'abonnement',
+            default => 'brouillon',
+        };
+
+        return response()->view('public.carte-inactive', [
+            'profile' => $profile,
+            'raison' => $raison,
+            'proprietaire' => auth()->id() !== null && auth()->id() === $profile->user_id,
+        ], 404);
     }
 
     /** L'URL absolue de l'image de partage, ou null si elle n'a pu être produite. */

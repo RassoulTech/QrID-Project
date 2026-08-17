@@ -782,6 +782,41 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   a{color:$vert-fonce;font-weight:600}
 }
 
+/*
+ | CARTE NON ACTIVE — la page servie à la place du profil.
+ |
+ | Elle répond 404 mais ne doit PAS ressembler à une erreur : le client qui
+ | scanne sa propre carte doit comprendre en un regard qu'il ne manque qu'une
+ | étape, et que son QR Code n'est pas en cause.
+ */
+.carte-off{
+  text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  padding:8px 4px;
+}
+.carte-off__marque{
+  width:60px;height:60px;
+  display:grid;place-items:center;
+  border-radius:$r-full;
+  background:$vert-clair;color:$vert-fonce;
+}
+.carte-off__titre{
+  font-size:19px;font-weight:700;color:$texte;margin:0;
+  line-height:1.3;
+}
+.carte-off__texte{
+  font-size:14px;color:$gris-second;margin:0;
+  max-width:34ch;line-height:1.55;
+  strong{color:$texte;font-weight:600}
+}
+// Une seule action, et elle prend toute la largeur : il n'y a rien d'autre à
+// faire sur cette page.
+.carte-off__action{width:100%;margin-top:4px}
+.carte-off__pied{
+  font-size:12.5px;margin:0;
+  a{color:$vert-fonce;font-weight:600}
+}
+
 @media (max-width: 575.98px){
   .pub{padding:20px 14px 36px;gap:22px}
   .pub__actions .btn-pill{flex:1 1 auto;justify-content:center;min-width:110px}

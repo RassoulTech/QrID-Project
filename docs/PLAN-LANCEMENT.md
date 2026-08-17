@@ -384,7 +384,40 @@ d'assertions, pas de tests.
 | Aperçu de partage WhatsApp | ✅ **image générée, livré le 16 août** |
 | Marques des opérateurs | ✅ **Wave et Orange Money le 17 août** ; Free Money en pastille |
 | **« Enregistrer le contact »** | ✅ **livré le 17 août** — 15 tests |
+| **Carte non active : page utile au scan** | ✅ **livré le 17 août** — 8 tests |
 | Cohérence de `/exemple` | ⚠️ **page en Bootstrap brut**, voir ci-dessous |
+
+### Scanner sa propre carte avant de l'activer
+
+Le premier geste d'un client qui vient de créer sa carte est de **scanner son
+propre QR Code pour voir si ça marche**. Il tombait sur une page d'erreur nue.
+Rien ne lui disait que son QR Code était juste, que rien n'était cassé, et
+qu'il ne restait qu'une étape.
+
+`/p/{slug}` sert désormais une page qui nomme l'obstacle et porte le bouton qui
+le lève. Trois cas, dans cet ordre — c'est la logique métier :
+
+| Cas | Message | Bouton |
+|---|---|---|
+| Suspendue par l'administration | vos informations sont intactes | contacter le support |
+| Sans abonnement actif | ni le lien ni le QR ne changeront | Activer ma carte |
+| Brouillon, abonnement actif | **votre QR Code est juste** | Mettre ma carte en ligne |
+
+**Une carte suspendue n'envoie jamais payer.** La suspension vient de
+l'administration : l'argent n'y changerait rien, et ce serait la faute la plus
+coûteuse que cette page pourrait commettre.
+
+**LE STATUT RESTE 404, ET C'EST VOULU.** Un 200 distinguerait une carte
+inactive d'un slug inexistant : on pourrait énumérer les comptes en essayant
+des adresses. Le corps devient utile, le code de réponse ne dit rien de plus
+qu'avant. Trois tests existent uniquement pour empêcher qu'on « corrige » ce
+404.
+
+**La page ne suppose aucune session.** Le scan se fait au téléphone, souvent
+sur un navigateur où l'on n'est pas connecté : une page réservée au
+propriétaire authentifié n'aurait servi que dans le cas le plus rare. Le nom
+n'est affiché **qu'au propriétaire** — vérifié par un test qui compte zéro
+occurrence du nom pour tout autre visiteur.
 
 ### « Enregistrer le contact » — le bouton qui était une image de bouton
 
