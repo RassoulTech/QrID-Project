@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Events\UserRegistered;
 use App\Mail\WelcomeMail;
 use App\Models\Plan;
+use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
@@ -321,6 +322,49 @@ class AutomationTest extends TestCase
             return ! str_contains($m->render(), 'chat.whatsapp.com')
                 && ! str_contains($m->render(), 'Rejoindre le groupe');
         });
+    }
+
+    /**
+     * L'ESPACE CLIENT PROPOSE AUSSI LE GROUPE.
+     *
+     * L'e-mail de bienvenue arrive une fois, se lit en diagonale, et se perd.
+     * Le besoin d'aide, lui, arrive plus tard — souvent des semaines après.
+     * Le doublon est donc voulu.
+     */
+    public function test_the_client_area_also_offers_the_group(): void
+    {
+        config(['automation.whatsapp_groupe' => 'https://chat.whatsapp.com/ABC123']);
+
+        $this->actingAs($this->clientAvecCarte())->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('https://chat.whatsapp.com/ABC123', false)
+            ->assertSee('Rejoindre le groupe', false);
+    }
+
+    /** Sans lien configuré, la carte disparaît de l'espace client aussi. */
+    public function test_the_client_area_shows_nothing_without_a_group(): void
+    {
+        $this->actingAs($this->clientAvecCarte())->get(route('dashboard'))
+            ->assertOk()
+            ->assertDontSee('Rejoindre le groupe', false);
+    }
+
+    /**
+     * Un compte AVEC carte — sans quoi le tableau de bord rend son état vide,
+     * qui n'a pas de colonne latérale.
+     *
+     * Ce n'est pas un contournement : quelqu'un qui n'a pas encore créé sa
+     * carte vient de recevoir l'e-mail de bienvenue, qui porte déjà
+     * l'invitation. Le rappel de l'espace client s'adresse à celui qui
+     * l'a oubliée, des semaines plus tard.
+     */
+    private function clientAvecCarte(): User
+    {
+        $user = User::factory()->create(['email_verified_at' => now()]);
+
+        Profile::factory()->for($user)->create();
+
+        return $user;
     }
 
     /**

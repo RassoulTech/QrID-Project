@@ -83,6 +83,50 @@
 .db-card__tete .db-card__titre{margin:0}
 
 // -----------------------------------------------------------------------------
+// GROUPE D'ENTRAIDE — dernière carte de la colonne, volontairement discrète
+//
+// Ce n'est pas une action du produit : c'est une porte ouverte pour qui bloque.
+// Elle ne doit donc rivaliser avec rien — d'où l'absence de fond coloré et un
+// lien plutôt qu'un bouton.
+//
+// Le vert reste celui de WHATSAPP, comme partout ailleurs dans ce produit :
+// c'est la promesse d'un service qu'on reconnaît à sa couleur, et le repeindre
+// aux couleurs de la marque lui ferait perdre exactement ce qui le rend
+// immédiatement compréhensible.
+// -----------------------------------------------------------------------------
+.db-groupe__texte{
+  font-size:13.5px;
+  line-height:1.55;
+  color:var(--texte-2);
+  margin:0 0 14px;
+}
+
+.db-groupe__lien{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size:14px;
+  font-weight:700;
+
+  // La couleur est déclarée pour TOUS les états : un lien d'aide qui
+  // deviendrait illisible au survol serait un comble.
+  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
+    color:#25D366;
+    text-decoration:none;
+  }
+
+  &:hover{text-decoration:underline}
+
+  &:focus-visible{
+    outline:2px solid #25D366;
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  svg{flex:0 0 auto}
+}
+
+// -----------------------------------------------------------------------------
 // Vue d'ensemble — grille 2×2
 // -----------------------------------------------------------------------------
 .stat-grid{

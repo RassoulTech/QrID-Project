@@ -59,4 +59,37 @@
             <p class="db-vide__texte db-vide__texte--serre">Aucune activité enregistrée.</p>
         @endforelse
     </section>
+
+    {{-- ===================== GROUPE D'ENTRAIDE =====================
+
+         EN DERNIER, et volontairement discret. Ce n'est pas une action du
+         produit : c'est une porte ouverte pour qui bloque.
+
+         L'INVITATION N'EXISTE QUE POUR UN COMPTE CONNECTÉ. Ce lien donne
+         accès à un espace réservé aux clients — quiconque l'obtient peut y
+         entrer. Il ne doit jamais apparaître sur une page publique, et un
+         test le vérifie sur l'accueil, la connexion et l'inscription.
+
+         Il double l'invitation de l'e-mail de bienvenue, à dessein : cet
+         e-mail arrive une fois, se lit en diagonale, et se perd. Le besoin
+         d'aide, lui, arrive plus tard. --}}
+    @if ($groupeUrl = config('automation.whatsapp_groupe'))
+        <section class="db-card db-groupe">
+            <h2 class="db-card__titre">Besoin d'un coup de main&nbsp;?</h2>
+
+            <p class="db-groupe__texte">
+                Un groupe WhatsApp réunit les clients {{ config('app.name') }}.
+                Questions, entraide, et réponses de notre équipe.
+            </p>
+
+            <a href="{{ $groupeUrl }}" class="db-groupe__lien"
+               target="_blank" rel="noopener noreferrer">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12.04 2a9.9 9.9 0 0 0-8.5 15.02L2 22.5l5.62-1.47A9.9 9.9 0 1 0 12.04 2m0 1.67a8.23 8.23 0 1 1-4.19 15.31l-.3-.18-3.34.87.89-3.25-.2-.31A8.23 8.23 0 0 1 12.04 3.67"/>
+                    <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.65.07a8.1 8.1 0 0 1-2.39-1.47 9 9 0 0 1-1.65-2.06c-.17-.3-.02-.46.13-.61s.3-.35.45-.52.2-.3.3-.5.05-.37-.02-.52-.67-1.61-.92-2.21c-.24-.58-.49-.5-.67-.51h-.57a1.1 1.1 0 0 0-.8.37 3.35 3.35 0 0 0-1.04 2.48 5.8 5.8 0 0 0 1.22 3.09 13.3 13.3 0 0 0 5.09 4.5c.71.3 1.27.49 1.7.63a4.1 4.1 0 0 0 1.88.12 3.07 3.07 0 0 0 2.01-1.42 2.5 2.5 0 0 0 .17-1.42c-.07-.12-.27-.2-.57-.35z"/>
+                </svg>
+                Rejoindre le groupe
+            </a>
+        </section>
+    @endif
 </aside>
