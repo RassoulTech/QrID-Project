@@ -39,4 +39,24 @@ interface PaymentGateway
 
     /** Nom affichable de la passerelle, pour la journalisation. */
     public function name(): string;
+
+    /**
+     * Cette passerelle peut-elle encaisser ICI, maintenant ?
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI CETTE QUESTION EXISTE
+     * ═══════════════════════════════════════════════════════════════════
+     * Une passerelle peut être branchée dans le code et pourtant inutilisable
+     * dans l'environnement courant — FakeGateway est interdite en production,
+     * une vraie passerelle le sera tant que ses clés manquent.
+     *
+     * Sans cette question, le produit ne l'apprend qu'en TOMBANT : le client
+     * choisit sa formule, clique « Payer », et reçoit une page 500 qui lui
+     * dit « le problème vient de nous ». C'est faux, et c'est le pire écran
+     * possible — celui qui suit le seul clic où il sortait son argent.
+     *
+     * La demander AVANT permet de le dire honnêtement, et d'éviter d'écrire
+     * un Payment « pending » que personne ne confirmera jamais.
+     */
+    public function estDisponible(): bool;
 }

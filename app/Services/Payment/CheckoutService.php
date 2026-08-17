@@ -51,6 +51,20 @@ class CheckoutService
     }
 
     /**
+     * Peut-on encaisser ici ? À demander AVANT start().
+     *
+     * Dans l'autre ordre, chaque tentative laisse un Payment « pending » que
+     * personne ne confirmera jamais — et ce sont exactement ceux-là qui
+     * déclenchent l'alerte « paiement en attente depuis plus d'une heure »
+     * du récapitulatif du soir. Une passerelle absente finirait par se
+     * signaler comme une panne d'encaissement.
+     */
+    public function estDisponible(): bool
+    {
+        return $this->gateway->estDisponible();
+    }
+
+    /**
      * Encaissement confirmé : abonnement ouvert ou prolongé, profil publié.
      *
      * TOUT tient dans une transaction. Un paiement marqué réussi sans

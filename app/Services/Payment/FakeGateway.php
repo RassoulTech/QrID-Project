@@ -70,6 +70,18 @@ class FakeGateway implements PaymentGateway
         return 'fake';
     }
 
+    /**
+     * Disponible en développement seulement — la même condition que le
+     * garde-fou ci-dessous, posée en question plutôt qu'en exception.
+     *
+     * Les deux coexistent volontairement : celle-ci permet au produit de
+     * PRÉVENIR, celle-là empêche d'encaisser si quelqu'un passe outre.
+     */
+    public function estDisponible(): bool
+    {
+        return app()->environment(['local', 'testing']);
+    }
+
     private function refuserHorsDeveloppement(): void
     {
         if (! app()->environment(['local', 'testing'])) {

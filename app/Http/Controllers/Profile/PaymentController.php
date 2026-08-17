@@ -52,6 +52,19 @@ class PaymentController extends Controller
             // Un essai gratuit en cours n'est pas un abonnement payé : celui
             // qui en dispose fait bien une PREMIÈRE souscription.
             'renewal' => $abonnement !== null && ! $abonnement->isTrial(),
+
+            /*
+             | AUCUNE PASSERELLE BRANCHÉE ? ON LE DIT AVANT, PAS APRÈS.
+             |
+             | Tant qu'aucun contrat opérateur n'est signé, l'écran affichait
+             | un formulaire complet qui menait à une page 500 — « le problème
+             | vient de nous, notre équipe en a été informée ». C'était faux
+             | deux fois : rien n'est en panne, et personne n'était informé.
+             |
+             | Le client sortait son argent et recevait une erreur serveur.
+             */
+            'paiementDisponible' => $this->checkout->estDisponible(),
+            'supportWhatsapp' => config('registration.support_whatsapp'),
         ]);
     }
 
@@ -62,6 +75,23 @@ class PaymentController extends Controller
 
         if (! $user->profile) {
             return redirect()->route('profile.create.step1');
+        }
+
+        /*
+         | LA GARDE EST ICI, AVANT start(), ET C'EST TOUT L'INTÉRÊT.
+         |
+         | start() écrit un Payment « pending » puis initiate() lève. Chaque
+         | clic laissait donc un paiement fantôme en base — et ce sont eux
+         | qui alimentent l'alerte « en attente depuis plus d'une heure » du
+         | récapitulatif du soir. L'absence de passerelle se serait signalée
+         | comme une panne d'encaissement.
+         */
+        if (! $this->checkout->estDisponible()) {
+            return back()->with(
+                'warning',
+                'Le paiement en ligne n\'est pas encore ouvert. Écrivez-nous sur WhatsApp : '
+                .'nous activons votre carte à la main, dès réception.'
+            );
         }
 
         $payment = $this->checkout->start($user, $request->plan(), $request->string('method')->value());

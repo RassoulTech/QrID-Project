@@ -148,8 +148,12 @@
 
             {{-- ─────────────── MOYEN DE PAIEMENT ───────────────
                  La marque de l'opérateur AVANT son nom : sur un écran de
-                 paiement, on reconnaît une couleur avant de lire un mot. --}}
-            <fieldset class="checkout__group">
+                 paiement, on reconnaît une couleur avant de lire un mot.
+
+                 MASQUÉ TANT QU'AUCUNE PASSERELLE N'ENCAISSE. Choisir Wave ou
+                 Orange Money quand rien ne peut aboutir, c'est promettre un
+                 paiement qui n'existe pas. --}}
+            <fieldset class="checkout__group" @unless ($paiementDisponible) hidden @endunless>
                 <legend class="checkout__legend">
                     <span class="checkout__step" aria-hidden="true">2</span>
                     Comment payer
@@ -193,6 +197,61 @@
              Collant sur grand écran, il suit le regard jusqu'au bouton ; sur
              téléphone il se place naturellement après les choix. --}}
         <aside class="checkout__aside">
+            @unless ($paiementDisponible)
+                {{-- ══════════════ AUCUNE PASSERELLE BRANCHÉE ══════════════
+                     Ce panneau remplace le bouton « Payer », qui menait à une
+                     page 500 disant « le problème vient de nous ». C'était
+                     faux : rien n'est en panne, l'encaissement en ligne n'est
+                     simplement pas encore ouvert.
+
+                     Dire la vérité et donner la marche à suivre vaut mieux
+                     qu'une erreur serveur au seul moment où le client sortait
+                     son argent. --}}
+                <div class="checkout__panel">
+                    <h2 class="checkout__panel-title">Paiement à la main, pour l'instant</h2>
+
+                    <ul class="trust">
+                        <li class="trust__item">
+                            <span class="trust__icon" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.1A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/>
+                                </svg>
+                            </span>
+                            <span>
+                                <strong>Le paiement en ligne n'est pas encore
+                                ouvert.</strong>
+                                Écrivez-nous sur WhatsApp en indiquant la
+                                formule choisie : nous activons votre carte à
+                                la main, dès réception.
+                            </span>
+                        </li>
+
+                        <li class="trust__item">
+                            <span class="trust__icon" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="4" y="10" width="16" height="11" rx="2"/>
+                                    <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+                                </svg>
+                            </span>
+                            <span>
+                                <strong>Rien ne vous est débité ici.</strong>
+                                Aucun montant ne transite par cette page.
+                            </span>
+                        </li>
+                    </ul>
+
+                    <x-button :href="$supportWhatsapp" :block="true"
+                              target="_blank" rel="noopener">
+                        Écrire sur WhatsApp
+                    </x-button>
+
+                    <a href="{{ route('dashboard') }}" class="checkout__later">Retour à mon espace</a>
+                </div>
+            @else
             <div class="checkout__panel">
                 <h2 class="checkout__panel-title">Avant de payer</h2>
 
@@ -254,6 +313,7 @@
 
                 <a href="{{ route('dashboard') }}" class="checkout__later">Plus tard</a>
             </div>
+            @endunless
         </aside>
     </form>
 </x-app-layout>

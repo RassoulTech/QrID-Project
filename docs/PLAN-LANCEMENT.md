@@ -77,6 +77,32 @@ abonnement avec motif et journalisation. Un lancement au 20 août avec
 encaissement manuel est réaliste ; un lancement avec paiement automatique ne
 dépend pas de nous.
 
+### ✅ 17 août — l'écran de paiement ne tombe plus, il explique
+
+Constaté dans les journaux de production : **deux `POST /abonnement/paiement`,
+deux erreurs 500**, le 12 puis le 17 août. Le client recevait :
+
+> *Une erreur est survenue. Le problème vient de nous, pas de vous. Notre
+> équipe en a été informée.*
+
+Trois mensonges en trois lignes. Rien n'était en panne, personne n'était
+informé, et c'était le seul écran du produit où le client sortait son argent.
+
+`PaymentGateway` porte désormais `estDisponible()`. L'écran interroge la
+passerelle **avant** d'afficher un bouton : sans encaissement possible, le
+choix du moyen disparaît et un panneau propose l'encaissement à la main par
+WhatsApp — c'est-à-dire l'issue C, rendue praticable pour le client.
+
+**Le défaut invisible derrière celui-là :** `start()` écrivait le `Payment` en
+`pending` AVANT que `initiate()` ne lève. Chaque clic laissait un paiement
+fantôme, et ce sont eux qui alimentent l'alerte « en attente depuis plus d'une
+heure » du récapitulatif du soir. L'absence de contrat opérateur se serait
+signalée, tous les soirs, comme une panne d'encaissement.
+
+La garde de `FakeGateway` n'a pas bougé : elle refuse toujours d'encaisser hors
+développement. 8 tests, dont un qui vérifie qu'aucun paiement fantôme n'est
+écrit.
+
 **Décision attendue de votre part.**
 
 ---
