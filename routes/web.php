@@ -224,5 +224,13 @@ require __DIR__.'/auth.php';
 | Cette route capture un segment libre. Déclarée plus haut, elle avalerait
 | « /dashboard », « /compte » et le reste. Sa place est ici, après tout.
 */
+/*
+ | La fiche contact AVANT la carte. « /p/{slug} » ne capture qu'un segment et
+ | ne peut donc pas l'avaler, mais l'ordre reste celui du plus précis au plus
+ | large : c'est la règle qui a déjà sauvé « /dashboard » plus haut.
+ */
+Route::get('/p/{slug}/contact.vcf', [PublicProfileController::class, 'vcard'])
+    ->name('profile.vcard');
+
 Route::get('/p/{slug}', [PublicProfileController::class, 'show'])
     ->name('profile.public');

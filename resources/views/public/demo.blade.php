@@ -26,8 +26,15 @@
             @endif
 
             <div class="d-grid gap-2 mb-3">
+                {{-- La démonstration doit montrer le geste qui TERMINE le
+                     parcours : garder le contact. L'omettre ici donnerait à
+                     voir un produit plus pauvre qu'il n'est. --}}
+                <a href="{{ route('profile.vcard', $profile->slug) }}" class="btn btn-primary">
+                    Enregistrer le contact
+                </a>
+
                 @if ($profile->phone)
-                    <a href="{{ $profile->tel_href }}" class="btn btn-primary">Appeler</a>
+                    <a href="{{ $profile->tel_href }}" class="btn btn-outline-secondary">Appeler</a>
                 @endif
                 @if ($profile->whatsapp_href)
                     <a href="{{ $profile->whatsapp_href }}" target="_blank" rel="noopener"

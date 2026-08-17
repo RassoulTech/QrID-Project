@@ -357,8 +357,11 @@ assertions de moins, donc un test qui s'interrompt en cours.
 consécutives : à refaire en fin de parcours, quand le code aura cessé de
 bouger.
 
-**Au 17 août : suite entière au vert** — 43 fichiers, 551 tests, 2071
-assertions, 140 secondes. Une exécution, pas dix. Le compte de 1011 cité
+**Au 17 août : suite entière au vert** — 566 tests, 2106 assertions, 278
+secondes. **Six exécutions consécutives au vert**, la série ayant été
+interrompue par l'arrêt du processus et non par un échec. Six ne valent pas
+dix : l'exigence reste ouverte, à reprendre quand le code aura cessé de bouger.
+Le compte de 1011 cité
 ci-dessus ne correspond à rien de mesurable aujourd'hui et aucun fichier de
 test n'a jamais été supprimé du dépôt : c'était vraisemblablement un total
 d'assertions, pas de tests.
@@ -380,6 +383,58 @@ d'assertions, pas de tests.
 | **Pages légales** | ✅ **rédigées, livrées le 16 août** — 17 tests |
 | Aperçu de partage WhatsApp | ✅ **image générée, livré le 16 août** |
 | Marques des opérateurs | ✅ **Wave et Orange Money le 17 août** ; Free Money en pastille |
+| **« Enregistrer le contact »** | ✅ **livré le 17 août** — 15 tests |
+| Cohérence de `/exemple` | ⚠️ **page en Bootstrap brut**, voir ci-dessous |
+
+### « Enregistrer le contact » — le bouton qui était une image de bouton
+
+Ce bouton **n'existait pas**. [README.md](../README.md) le promettait en
+troisième ligne, et la maquette de téléphone de la page d'accueil le dessinait
+— `phone__save`, un `<div>` au texte figé. La vraie page publique offrait
+Appeler, WhatsApp, E-mail et les réseaux, et rien pour garder le contact.
+
+C'est le geste qui **termine** le parcours : on scanne, on regarde, on garde.
+Sans lui, le visiteur devrait recopier un numéro à la main — ce que personne ne
+fait. La carte est vue, puis oubliée, et le scan n'aura servi à rien.
+
+`VCardService` produit la fiche, servie par `/p/{slug}/contact.vcf`.
+
+**Version 3.0, pas 4.0.** La 4.0 est plus propre, mais plusieurs lecteurs de
+contacts Android d'avant 2020 ignorent un `VERSION:4.0` : le téléphone ouvre le
+fichier et n'enregistre personne. Sur un geste dont l'échec est **silencieux**,
+la compatibilité passe avant l'élégance.
+
+**Trois pièges, tous muets :**
+
+1. **La virgule.** Dans un vCard, elle sépare deux valeurs. Non échappée,
+   « Cabinet Sall, Diop & Associés » s'enregistre amputé après « Sall » — sans
+   qu'aucune erreur soit levée. C'est l'objet du test le plus important du
+   fichier.
+2. **L'encodage.** « Aïssatou », « Thiès » : sans jeu de caractères annoncé,
+   la moitié des fiches sénégalaises ressortent abîmées.
+3. **L'en-tête `attachment`.** Sans elle, Android affiche le fichier comme du
+   texte brut : l'utilisateur voit `BEGIN:VCARD` et referme.
+
+La photo est **embarquée** et non liée : un contact enregistré doit survivre à
+la carte dont il vient. Son absence coûte le portrait, jamais la fiche — le cas
+est réel, `FILESYSTEM_DISK=local` les efface à chaque déploiement (risque n° 3).
+
+**La fiche applique les mêmes gardes que la page publique.** Un profil
+dépublié ne doit pas laisser fuir ses coordonnées par une seconde adresse : ce
+serait contourner l'abonnement en changeant d'URL.
+
+### `/exemple` n'est pas au niveau du reste
+
+La page ciblée par « Voir un exemple » est écrite en **Bootstrap brut** —
+`btn btn-primary`, `d-grid`, `alert alert-warning` — alors que la vraie carte
+utilise le système de design du produit. Elle montre des **initiales dans un
+rond**, pas la carte. La coque a été unifiée le 5 août ; cette page a été
+oubliée.
+
+Elle fonctionne, et le bouton d'enregistrement y a été ajouté. Mais **c'est la
+page qu'un prospect voit en premier**, et elle donne à voir un produit plus
+pauvre que celui qui existe. À reprendre — ou à ne pas montrer : une
+démonstration gagne à porter sur un vrai profil, à son adresse `/p/{slug}`.
 
 ### Aperçu de partage — ce qui manquait vraiment
 
@@ -460,6 +515,38 @@ nécessaires — il faudrait une carte de 86 mm de large).
 - [ ] Récapitulatif Discord reçu et exact
 - [ ] Abonnement expiré puis réactivé
 - [ ] Suite de tests au vert
+
+### ⛔ LA PRODUCTION N'A AUCUN PROFIL PUBLIÉ — rien à démontrer en ligne
+
+Vérifié le 17 août sur `qrid-uutz.onrender.com` : `/exemple` affiche « Aucun
+profil de démonstration ». La route prend le **premier profil publié**, et la
+base n'en contient aucun.
+
+Ce n'est pas un défaut. Les jeux de démonstration sont volontairement interdits
+hors développement (`DatabaseSeeder`) — **jamais de faux clients en
+production**, et c'est la bonne décision. Mais il en découle qu'**aucune
+démonstration n'est possible en ligne aujourd'hui.**
+
+Il faut créer et publier **un profil réel via l'interface**. C'est d'ailleurs la
+répétition de la démonstration elle-même, et cela cochera du même coup le
+parcours client chronométré ci-dessus.
+
+Chaîne vérifiée en local le 17 août, sur un profil réellement publié :
+
+| Étape | Résultat |
+|---|---|
+| `/p/{slug}` | 200 |
+| Slug inexistant | 404, pas d'erreur 500 |
+| QR généré à la publication | PNG, SVG, + variante de carte |
+| Empreinte du QR | conforme à `APP_URL` — le garde-fou opère |
+| Contenu encodé | l'URL publique complète (`CardTest`) |
+| `og:image` 1200 × 630 | 200, 42 Ko réellement servis |
+| `tel:` · WhatsApp · `mailto:` · réseaux | tous présents et bien formés |
+| `contact.vcf` | 200, `text/vcard; charset=utf-8`, en pièce jointe |
+
+**`APP_URL` est correct en production** — le serveur se sait bien sur
+`qrid-uutz.onrender.com`. Le défaut du 13 août est réglé côté Render, et les QR
+produits aujourd'hui encodent la bonne adresse.
 
 ---
 

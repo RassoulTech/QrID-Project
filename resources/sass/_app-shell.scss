@@ -761,6 +761,13 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   align-items:center;
   gap:28px;
 }
+/*
+ | « Enregistrer le contact » — la seule action en pleine largeur, parce que
+ | c'est celle qui termine le parcours. Le pouce l'atteint sans viser, ce qui
+ | compte sur la page la plus consultée du produit, toujours sur téléphone.
+ */
+.pub__save{width:100%}
+
 .pub__actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
 .pub__socials{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .pub__social{

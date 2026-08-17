@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Profile;
 use App\Services\SharePreviewService;
+use App\Services\VCardService;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
@@ -84,5 +86,39 @@ class PublicProfileController extends Controller
             ->first();
 
         return view('public.demo', ['profile' => $profile]);
+    }
+
+    /**
+     * « Enregistrer le contact » — la fiche vCard du profil.
+     *
+     * LES MÊMES GARDES QUE LA PAGE PUBLIQUE, ET POUR LA MÊME RAISON. Un profil
+     * dépublié ou sans abonnement ne doit pas laisser fuir ses coordonnées par
+     * une seconde porte : ce serait contourner l'abonnement en changeant
+     * d'adresse. Une 404, jamais un 403, pour ne rien révéler de son
+     * existence.
+     */
+    public function vcard(string $slug, VCardService $vcard): Response
+    {
+        $profile = Profile::query()
+            ->with(['socialLinks'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        abort_unless($profile->isPubliclyVisible(), 404);
+
+        /*
+         | Le jeu de caractères est ANNONCÉ. Sans lui, « Aïssatou » ou « Thiès »
+         | s'enregistrent en caractères abîmés sur plusieurs lecteurs, qui
+         | retombent alors sur un encodage local par défaut.
+         |
+         | L'en-tête « attachment » est ce qui déclenche l'ouverture par
+         | l'application Contacts du téléphone. Sans elle, Android affiche le
+         | fichier comme du texte brut — l'utilisateur voit BEGIN:VCARD et
+         | referme.
+         */
+        return response($vcard->pour($profile), 200, [
+            'Content-Type' => 'text/vcard; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="'.$vcard->nomFichier($profile).'"',
+        ]);
     }
 }

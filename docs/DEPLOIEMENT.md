@@ -222,7 +222,7 @@ flowchart LR
     B -->|"webhook automatique"| C["Render<br/>lit le Dockerfile"]
     C --> D["Render construit<br/>l'IMAGE"]
     D --> E["Render lance<br/>le CONTENEUR"]
-    E --> F["https://qrid.onrender.com"]
+    E --> F["https://qrid-uutz.onrender.com"]
     G[("Base de données<br/>MySQL<br/>hors conteneur")] <--> E
 ```
 
@@ -265,7 +265,7 @@ sequenceDiagram
     R->>R: migrations sur la base
     R->>R: bascule sur le nouveau conteneur
     R-->>V: notification « Live »
-    U->>R: https://qrid.onrender.com
+    U->>R: https://qrid-uutz.onrender.com
 ```
 
 Vous ne tapez **aucune commande de déploiement**. `git push` suffit. C'est le
@@ -718,7 +718,14 @@ petite.
 
 - [x] **Base de données** — MySQL managé. *Tranché le 6 août 2026.*
 - [ ] **Photos** : disque persistant payant, ou stockage objet ?
-- [ ] **Domaine** : `qrid.onrender.com` pour l'essai, ou un nom à vous ?
+- [ ] **Domaine** : `qrid-uutz.onrender.com` pour l'essai, ou un nom à vous ?
+      Relevé au registre le 17 août 2026 — `qrid.sn`, `qr-id.sn`,
+      `identitepro.sn`, `identite-pro.sn` et `samakart.sn` sont **tous libres**.
+      Registraires en service sur `.sn` : **NIC Sénégal** en direct,
+      **Kheweul.com** et **Sonatel Multimédia** au Sénégal, MarkMonitor et CSC
+      pour les dépôts internationaux. Rien n'indique qu'une entité sénégalaise
+      soit exigée : `orange.sn` est détenu depuis Londres, `wave.sn` depuis les
+      États-Unis.
 - [ ] **SMTP** : quel service pour l'envoi réel des e-mails ?
 
 Les trois cases restantes ne bloquent **pas** l'écriture des fichiers Docker :
@@ -780,7 +787,7 @@ programmées et **une restauration essayée au moins une fois**.
 |---|---|---|
 | Base de données | décidait de la suite entière | ✅ **MySQL managé** |
 | Photos : disque ou stockage objet ? | sans réponse, elles disparaissent à chaque déploiement | ⬜ ouvert |
-| Nom de domaine réservé ? | `APP_URL` est gravée dans les QR Codes | ⬜ ouvert |
+| Nom de domaine réservé ? | `APP_URL` est gravée dans les QR Codes, et `BRAND_WEBSITE` imprimée sur la carte | ⬜ ouvert — **les noms sont libres**, il reste à en déposer un |
 | Service SMTP retenu ? | Gmail ne convient pas en production | ⬜ ouvert |
 | Budget mensuel acceptable ? | le gratuit ne tient pas pour la production | ⬜ ouvert |
 

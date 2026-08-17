@@ -16,11 +16,21 @@
     <div class="pub">
         <x-phone :profile="$profile" size="lg" :animate="false" />
 
+        {{-- L'ACTION QUI TERMINE LE PARCOURS : on scanne, on regarde, on GARDE.
+             Sans elle, le visiteur devrait recopier un numéro à la main — ce
+             que personne ne fait, et le scan n'aura servi à rien.
+
+             Seule en pleine largeur, et seule en vert : deux boutons primaires
+             n'en font aucun. C'est ce qui fait passer « Appeler » en contour
+             juste en dessous. --}}
+        <a href="{{ route('profile.vcard', $profile->slug) }}"
+           class="btn-pill btn-dark pub__save">Enregistrer le contact</a>
+
         {{-- Actions réelles, hors du cadre : le téléphone est une mise en
              scène, ces liens-ci sont ceux qu'on touche. --}}
         <div class="pub__actions">
             @if ($profile->phone)
-                <a href="tel:{{ $profile->phone }}" class="btn-pill btn-dark">Appeler</a>
+                <a href="tel:{{ $profile->phone }}" class="btn-pill btn-outline">Appeler</a>
             @endif
 
             @if ($profile->whatsapp_href)
