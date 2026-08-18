@@ -78,16 +78,22 @@
     {{-- Pas de JavaScript ici : rien sur cette page n'en a besoin. --}}
 </head>
 <body>
-    <main class="public-profile">
-        <div class="container px-3">
-            <div class="public-profile__card">
-                {{ $slot }}
-            </div>
+    {{--
+      AUCUN HABILLAGE AUTOUR DE LA PAGE.
 
-            <p class="text-center text-secondary small mt-4 mb-0">
-                Propulsé par <a href="{{ url('/') }}">{{ config('app.name') }}</a>
-            </p>
-        </div>
-    </main>
+      Le corps enfermait le contenu dans « container px-3 » puis dans une
+      carte, et ajoutait SON PROPRE pied « Propulsé par QrID ». Trois
+      conséquences, toutes visibles au scan :
+
+        · la page ne pouvait pas occuper l'écran — un en-tête pleine largeur
+          restait prisonnier des gouttières ;
+        · le pied du gabarit doublait celui de la page ;
+        · les classes venaient de Bootstrap, alors que c'est la seule page du
+          produit qui doit rester la plus légère possible.
+
+      La page publique se met en page elle-même. Ce gabarit ne fait plus que
+      porter l'en-tête HTML — titre, description et balises de partage.
+    --}}
+    {{ $slot }}
 </body>
 </html>

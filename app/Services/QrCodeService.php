@@ -60,6 +60,50 @@ class QrCodeService
         return route('profile.public', $profile->slug);
     }
 
+    /**
+     * L'adresse QUE LE QR ENCODE — la même, marquee de sa provenance.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI ELLE EST DISTINCTE DE url()
+     * ═══════════════════════════════════════════════════════════════════
+     * Le produit doit savoir separer un SCAN d'une vue directe : ce sont deux
+     * gestes commerciaux differents, et deux colonnes distinctes dans les
+     * statistiques. Le seul moyen de les distinguer est la provenance inscrite
+     * dans l'adresse.
+     *
+     * MAIS url() sert AUSSI de lien a copier dans l'espace client. Y mettre
+     * cette marque ferait compter comme un scan chaque lien colle dans une
+     * conversation WhatsApp — et les deux chiffres redeviendraient un seul.
+     */
+    /**
+     * L'adresse QUE LE QR ENCODE, ancree sur la configuration.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * PAS UN CARACTERE DE PLUS QUE NECESSAIRE
+     * ═══════════════════════════════════════════════════════════════════
+     * On a voulu y inscrire une provenance « ?src=qr » pour separer les scans
+     * des vues directes dans les statistiques. Sept caracteres — et le QR est
+     * passe de 33 a 37 modules.
+     *
+     * A taille de carte imprimee constante, chaque module retrecit d'autant.
+     * Le produit est deja a la limite de ce qui se scanne sur une carte au
+     * format bancaire : on ne paie pas une statistique en lisibilite du geste
+     * central du produit.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI PAS route() ABSOLU
+     * ═══════════════════════════════════════════════════════════════════
+     * route() resout sa racine une seule fois par requete. L'empreinte de
+     * cache derive de cette methode : batie sur route(), elle cesserait de
+     * detecter un changement d'APP_URL — c'est-a-dire la protection posee le
+     * 13 aout contre les cartes imprimees qui mènent ailleurs.
+     */
+    public function urlEncodee(Profile $profile): string
+    {
+        return rtrim((string) config('app.url'), '/')
+            .route('profile.public', $profile->slug, absolute: false);
+    }
+
     // =======================================================================
     // QR DE LA PLATEFORME — le verso, identique sur toutes les cartes
     // =======================================================================
@@ -162,7 +206,7 @@ class QrCodeService
         return $this->cache($profile, 'svg', fn () => (string) $this->generator($profile)
             ->format('svg')
             ->size(self::TAILLE_SVG)
-            ->generate($this->url($profile))
+            ->generate($this->urlEncodee($profile))
         );
     }
 
@@ -210,7 +254,7 @@ class QrCodeService
                 ->margin(self::MARGE)
                 ->size(self::TAILLE_SVG)
                 ->color(...$this->rgb($variante->encre()))
-                ->generate($this->url($profile));
+                ->generate($this->urlEncodee($profile));
 
             // bacon pose toujours un rectangle de fond opaque. On le retire :
             // c'est la carte qui doit apparaître à travers.
@@ -234,7 +278,7 @@ class QrCodeService
         return $this->cache(
             $profile,
             'carte-'.$variante->name.'.png',
-            fn () => $this->rasteriserUrl($this->url($profile), $variante->encre(), $variante->fond())
+            fn () => $this->rasteriserUrl($this->urlEncodee($profile), $variante->encre(), $variante->fond())
         );
     }
 
@@ -264,7 +308,7 @@ class QrCodeService
      */
     public function path(Profile $profile, string $format): string
     {
-        return $this->dossier($profile)."/{$this->empreinteAdresse()}.{$format}";
+        return $this->dossier($profile)."/{$this->empreinteAdresse($profile)}.{$format}";
     }
 
     /**
@@ -298,9 +342,24 @@ class QrCodeService
      * déjà dans le nom, et deux profils du même site doivent partager la même
      * empreinte pour que le nettoyage reste lisible.
      */
-    private function empreinteAdresse(): string
+    private function empreinteAdresse(Profile $profile): string
     {
-        return substr(sha1(rtrim((string) config('app.url'), '/')), 0, 8);
+        /*
+         | L'EMPREINTE PORTE SUR L'ADRESSE REELLEMENT ENCODEE, pas seulement
+         | sur APP_URL.
+         |
+         | Elle ne couvrait que le domaine. Ajouter la provenance « ?src=qr »
+         | a l'adresse encodee n'aurait donc PAS change le nom du fichier : les
+         | QR deja en cache auraient continue d'encoder l'ancienne adresse,
+         | servis, telecharges, integres au PDF et IMPRIMES — sans que rien ne
+         | le signale.
+         |
+         | C'est exactement le defaut corrige le 13 aout, qui serait revenu par
+         | la fenetre. Hacher l'adresse complete le ferme pour de bon : toute
+         | modification de ce qui est encode produit un nom different, donc une
+         | regeneration au premier acces.
+         */
+        return substr(sha1($this->urlEncodee($profile)), 0, 8);
     }
 
     /** URL publique du fichier, pour un <img> ou un téléchargement. */
@@ -410,7 +469,7 @@ class QrCodeService
      */
     private function rasteriser(Profile $profile): string
     {
-        return $this->rasteriserUrl($this->url($profile), self::ENCRE_MARQUE, '#FFFFFF');
+        return $this->rasteriserUrl($this->urlEncodee($profile), self::ENCRE_MARQUE, '#FFFFFF');
     }
 
     /**

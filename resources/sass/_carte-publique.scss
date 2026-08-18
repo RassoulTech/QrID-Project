@@ -1,0 +1,233 @@
+// =============================================================================
+// LA CARTE PUBLIQUE — la page ouverte après un scan de QR Code
+// =============================================================================
+//
+// C'EST LA PAGE LA PLUS IMPORTANTE DU PRODUIT, et celle qui pardonne le moins.
+// Le visiteur vient de scanner, il est debout, souvent en 3G, et il décide en
+// quelques secondes s'il enregistre ce contact ou s'il referme.
+//
+// ELLE N'EST PAS DANS UN CADRE DE TÉLÉPHONE. Elle EST la page. Le cadre
+// appartient à l'aperçu du tableau de bord, où il simule ce rendu pour le
+// propriétaire — deux vues distinctes, deux usages.
+//
+// Aucune police distante, aucune librairie, aucune image décorative.
+// =============================================================================
+
+.carte{
+  min-height:100dvh;
+  background:$blanc;
+  // La barre d'action est fixée en bas : sans cette réserve, elle masquerait
+  // les dernières lignes, et le pied de page ne serait jamais lisible.
+  padding-bottom:96px;
+  overflow-x:hidden;   // aucune ligne ne peut élargir la page
+}
+
+.carte__inner{max-width:520px;margin:0 auto}
+
+// -----------------------------------------------------------------------------
+// EN-TÊTE
+// -----------------------------------------------------------------------------
+.carte__tete{
+  background:$vert-fonce;
+  color:$blanc;
+  text-align:center;
+  padding:40px 20px 56px;   // 56 en bas : la place des actions qui chevauchent
+  border-radius:0 0 $r-lg $r-lg;
+}
+
+.carte__photo,
+.carte__initiales{
+  width:112px;height:112px;
+  margin:0 auto 16px;
+  border-radius:$r-full;
+  display:block;
+  border:3px solid rgba(255,255,255,.9);
+  box-shadow:0 8px 24px rgba(0,0,0,.28);
+}
+
+.carte__photo{object-fit:cover;background:$vert-clair}
+
+// LES INITIALES, JAMAIS LE NOM COMPLET.
+// La solution de repli écrivait le nom entier dans le cercle : « Mouhamed
+// Dione » débordait de tous les côtés dès que la photo ne chargeait pas —
+// donc invisible en test, visible en 3G.
+.carte__initiales{
+  display:grid;place-items:center;
+  background:$vert-clair;color:$vert-fonce;
+  font-size:38px;font-weight:700;letter-spacing:.02em;
+}
+
+.carte__nom{
+  // La couleur est POSÉE, pas héritée : _base.scss impose « color:$texte » à
+  // tous les h1, et cette règle bat l'héritage. Sans cela, le nom s'affichait
+  // en encre sombre sur l'en-tête vert foncé — illisible, et seulement sur
+  // cette page.
+  color:$blanc;
+  font-size:22px;font-weight:700;
+  letter-spacing:-.015em;line-height:1.25;
+  margin:0 0 4px;
+  // Un nom long ne doit ni déborder ni pousser la page : il passe à la ligne.
+  overflow-wrap:anywhere;
+}
+
+.carte__role{
+  font-size:14.5px;margin:0;
+  color:rgba(255,255,255,.92);
+  overflow-wrap:anywhere;
+}
+
+.carte__entreprise{
+  font-size:13px;margin:2px 0 0;
+  color:rgba(255,255,255,.66);
+  overflow-wrap:anywhere;
+}
+
+// -----------------------------------------------------------------------------
+// ACTIONS RAPIDES — elles chevauchent le bas de l'en-tête
+// -----------------------------------------------------------------------------
+// UNE SEULE SÉRIE. La page en portait deux : une dessinée dans le cadre de
+// téléphone, une vraie en dessous. Le visiteur touchait la fausse.
+.carte__actions{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(0,1fr));
+  gap:10px;
+  padding:0 16px;
+  margin-top:-36px;   // le chevauchement
+}
+
+.carte__action{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;
+  min-width:0;                 // sans quoi une grille refuse de rétrécir
+  aspect-ratio:1;
+  background:$blanc;
+  border:1px solid $bordure;
+  border-radius:$r-sm;
+  box-shadow:$shadow-1;
+  color:$vert-fonce;
+  text-decoration:none;
+  font-size:11px;font-weight:600;
+  transition:transform 140ms ease, box-shadow 140ms ease;
+
+  &:hover,&:focus-visible{transform:translateY(-2px);box-shadow:$shadow-2}
+  span{color:$texte;line-height:1}
+}
+
+// -----------------------------------------------------------------------------
+// COORDONNÉES
+// -----------------------------------------------------------------------------
+.carte__infos{
+  list-style:none;margin:24px 0 0;padding:0 16px;
+  display:grid;gap:2px;
+}
+
+.carte__info{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 12px;
+  border-radius:$r-sm;
+  color:$texte;text-decoration:none;
+  font-size:14.5px;
+  min-width:0;
+
+  &:hover,&:focus-visible{background:$gris-fond}
+
+  // Une adresse e-mail longue coupe plutôt que d'élargir la page.
+  span{min-width:0;overflow-wrap:anywhere}
+}
+
+.carte__info-icone{
+  flex:0 0 auto;
+  width:34px;height:34px;
+  display:grid;place-items:center;
+  border-radius:$r-full;
+  background:$vert-clair;color:$vert-fonce;
+}
+
+// -----------------------------------------------------------------------------
+// RÉSEAUX SOCIAUX
+// -----------------------------------------------------------------------------
+.carte__reseaux{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:10px;
+  padding:20px 16px 0;
+}
+
+.carte__reseau{
+  display:inline-flex;align-items:center;
+  padding:8px 16px;
+  border-radius:$r-full;
+  background:$vert-clair;color:$vert-fonce;
+  font-size:12.5px;font-weight:600;
+  text-decoration:none;
+
+  &:hover,&:focus-visible{background:$vert-accent;color:$blanc}
+}
+
+// -----------------------------------------------------------------------------
+// QR CODE EN PLEIN ÉCRAN — sans une ligne de JavaScript
+// -----------------------------------------------------------------------------
+// Ouvert par :target, fermé par un lien de retour. Le JavaScript n'est pas
+// autorisé à PORTER une fonctionnalité sur ce produit ; ici il n'en faut pas.
+.carte__qr-lien{
+  display:block;text-align:center;
+  margin:22px auto 0;
+  font-size:13px;font-weight:600;
+  color:$vert-fonce;
+}
+
+.qr-plein{
+  display:none;
+  position:fixed;inset:0;z-index:60;
+  background:rgba(10,31,26,.94);
+  padding:24px;
+  text-align:center;
+  overflow-y:auto;
+
+  &:target{display:grid;place-content:center;gap:18px}
+
+  svg,img{
+    width:min(76vw,300px);height:auto;
+    background:$blanc;padding:14px;border-radius:$r-sm;
+  }
+}
+
+.qr-plein__nom{color:$blanc;font-weight:700;margin:0}
+.qr-plein__fermer{
+  color:$blanc;font-size:13px;font-weight:600;
+  text-decoration:underline;
+}
+
+// -----------------------------------------------------------------------------
+// LA BARRE D'ACTION — fixée en bas, toujours atteignable
+// -----------------------------------------------------------------------------
+// C'est l'action que la page doit provoquer. La laisser au fil du contenu la
+// rendait invisible sans défilement, donc facultative.
+.carte__barre{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(8px);
+  border-top:1px solid $bordure;
+}
+
+.carte__enregistrer{
+  display:block;width:100%;
+  max-width:520px;margin:0 auto;
+  padding:15px 20px;
+  border-radius:$r-full;
+  background:$vert-fonce;color:$blanc;
+  font-size:15px;font-weight:700;
+  text-align:center;text-decoration:none;
+
+  &:hover,&:focus-visible{background:$texte;color:$blanc}
+}
+
+// -----------------------------------------------------------------------------
+// PIED — canal d'acquisition, discret
+// -----------------------------------------------------------------------------
+.carte__pied{
+  text-align:center;
+  margin:28px 0 0;padding:0 16px;
+  font-size:12px;color:$gris-second;
+
+  a{color:$vert-fonce;font-weight:600}
+}

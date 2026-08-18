@@ -88,7 +88,7 @@ class CardTest extends TestCase
      */
     public function test_the_encoded_matrix_matches_the_public_url(): void
     {
-        $url = app(QrCodeService::class)->url($this->profile);
+        $url = app(QrCodeService::class)->urlEncodee($this->profile);
 
         $attendu = Encoder::encode($url, ErrorCorrectionLevel::H(), 'ISO-8859-1')->getMatrix();
 
