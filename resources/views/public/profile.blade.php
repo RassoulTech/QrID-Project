@@ -48,8 +48,17 @@
             {{-- ═══════════════════ EN-TÊTE ═══════════════════ --}}
             <header class="carte__tete">
                 @if ($profile->photo_path)
+                    {{-- alt VIDE, et c'est délibéré.
+                         Le nom est écrit juste en dessous : répéter la même
+                         chose ferait entendre deux fois le même mot à un
+                         lecteur d'écran. Et surtout, un texte alternatif NON
+                         vide s'affiche quand l'image ne charge pas — il
+                         débordait alors du cercle, reproduisant exactement le
+                         défaut qu'on venait de corriger. C'est le cas le plus
+                         probable ici : FILESYSTEM_DISK=local efface les photos
+                         à chaque déploiement. --}}
                     <img src="{{ Storage::url($profile->photo_path) }}"
-                         alt="{{ $profile->full_name }}"
+                         alt=""
                          class="carte__photo" width="112" height="112"
                          decoding="async">
                 @else
