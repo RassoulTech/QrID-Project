@@ -65,6 +65,22 @@ class PaymentController extends Controller
              */
             'paiementDisponible' => $this->checkout->estDisponible(),
             'supportWhatsapp' => config('registration.support_whatsapp'),
+
+            /*
+             | LE RACCOURCI DE L'EXPLOITANT.
+             |
+             | Sans passerelle, l'encaissement se fait à la main : quelqu'un
+             | écrit sur WhatsApp, un administrateur prolonge l'abonnement
+             | depuis la fiche client. Or l'administrateur qui se heurte
+             | LUI-MÊME à cet écran a déjà le pouvoir de le débloquer — il lui
+             | manquait seulement le chemin, à trois écrans de là.
+             |
+             | Ce n'est pas un pouvoir nouveau : la prolongation existe, elle
+             | exige un motif et reste journalisée. C'est un lien.
+             */
+            'ficheAdmin' => $user->isAdmin()
+                ? route('admin.clients.show', $user)
+                : null,
         ]);
     }
 

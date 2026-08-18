@@ -249,6 +249,16 @@
                         Écrire sur WhatsApp
                     </x-button>
 
+                    @if ($ficheAdmin)
+                        {{-- L'exploitant qui se heurte lui-même à cet écran a
+                             déjà le pouvoir de le débloquer. Il lui manquait
+                             le chemin — trois écrans plus loin, dans une
+                             liste où il ne pensait pas se chercher. --}}
+                        <a href="{{ $ficheAdmin }}" class="checkout__later">
+                            Vous êtes administrateur — prolonger cet abonnement
+                        </a>
+                    @endif
+
                     <a href="{{ route('dashboard') }}" class="checkout__later">Retour à mon espace</a>
                 </div>
             @else

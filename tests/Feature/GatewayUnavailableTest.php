@@ -136,6 +136,37 @@ class GatewayUnavailableTest extends TestCase
             ->assertSee('Écrire sur WhatsApp', false);
     }
 
+    /**
+     * L'EXPLOITANT COINCÉ SUR SON PROPRE ÉCRAN.
+     *
+     * Un administrateur qui bute ici a déjà le pouvoir de se débloquer : la
+     * prolongation d'abonnement, motif obligatoire et journalisée. Il lui
+     * manquait le chemin — trois écrans plus loin, dans une liste où il ne
+     * pensait pas se chercher.
+     */
+    public function test_an_admin_is_shown_the_way_to_the_extension(): void
+    {
+        $this->sansPasserelle();
+
+        $this->user->forceFill(['role' => User::ROLE_ADMIN])->save();
+
+        $this->actingAs($this->user)
+            ->get(route('abonnement.paiement'))
+            ->assertOk()
+            ->assertSee(route('admin.clients.show', $this->user), false);
+    }
+
+    /** Un client ordinaire ne voit évidemment rien de tout cela. */
+    public function test_an_ordinary_client_is_shown_no_admin_shortcut(): void
+    {
+        $this->sansPasserelle();
+
+        $this->actingAs($this->user)
+            ->get(route('abonnement.paiement'))
+            ->assertOk()
+            ->assertDontSee('prolonger cet abonnement', false);
+    }
+
     // =======================================================================
     // LA SOUMISSION
     // =======================================================================
