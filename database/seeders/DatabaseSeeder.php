@@ -32,6 +32,16 @@ class DatabaseSeeder extends Seeder
             TemplateSeeder::class,
             PlanSeeder::class,
             AdminSeeder::class,
+
+            /*
+             | APRÈS PlanSeeder — il lui faut la formule « essai-gratuit » —
+             | et en production comme ailleurs, contrairement aux deux jeux de
+             | démonstration ci-dessous.
+             |
+             | Il ne touche que les adresses déclarées dans
+             | DEMO_ACCOUNT_EMAILS. Sans cette variable, il ne fait rien.
+             */
+            ComptesVitrineSeeder::class,
         ]);
 
         if (app()->environment('local')) {
