@@ -49,7 +49,7 @@ class ClientAreaMatrixTest extends TestCase
 
         Subscription::factory()->create([
             'user_id' => $user->id,
-            'plan_id' => Plan::where('slug', 'mensuel')->value('id'),
+            'plan_id' => Plan::where('slug', 'standard')->value('id'),
             'starts_at' => now()->subDays(40),
             'ends_at' => $expire ? now()->subDay() : now()->addDays(20),
             'status' => $expire ? Subscription::STATUS_EXPIRED : Subscription::STATUS_ACTIVE,

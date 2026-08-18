@@ -84,7 +84,7 @@ class EveryMailRendersTest extends TestCase
                 reference: 'FAKE-ABC123',
                 montant: '2 500',
                 moyen: 'Wave',
-                formule: 'Mensuel',
+                formule: 'Standard',
                 date: '13 août 2026 à 10:00',
                 echeance: '12 septembre 2026',
                 publicUrl: $url,
@@ -97,7 +97,7 @@ class EveryMailRendersTest extends TestCase
                 reference: 'FAKE-ABC123',
                 montant: '2 500',
                 moyen: 'Wave',
-                formule: 'Mensuel',
+                formule: 'Standard',
                 date: '13 août 2026 à 10:00',
                 echeance: null,
                 publicUrl: null,
@@ -105,24 +105,24 @@ class EveryMailRendersTest extends TestCase
             )],
 
             'paiement échoué' => [new PaymentFailedMail(
-                name: 'Awa Ndiaye', montant: '2 500', formule: 'Mensuel', retryUrl: $url,
+                name: 'Awa Ndiaye', montant: '2 500', formule: 'Standard', retryUrl: $url,
             )],
 
             // Les quatre paliers empruntent trois branches de rédaction
             // différentes : chacune doit être compilée au moins une fois.
             'échéance J-7' => [new SubscriptionExpiringMail(
                 name: 'Awa', joursRestants: 7, echeance: '20 août 2026',
-                formule: 'Mensuel', renewUrl: $url,
+                formule: 'Standard', renewUrl: $url,
             )],
 
             'échéance J-1' => [new SubscriptionExpiringMail(
                 name: 'Awa', joursRestants: 1, echeance: '14 août 2026',
-                formule: 'Mensuel', renewUrl: $url,
+                formule: 'Standard', renewUrl: $url,
             )],
 
             'échéance jour même' => [new SubscriptionExpiringMail(
                 name: 'Awa', joursRestants: 0, echeance: '13 août 2026',
-                formule: 'Mensuel', renewUrl: $url,
+                formule: 'Standard', renewUrl: $url,
             )],
 
             'abonnement expiré' => [new SubscriptionExpiredMail(

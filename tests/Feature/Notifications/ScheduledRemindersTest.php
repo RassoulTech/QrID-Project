@@ -164,7 +164,7 @@ class ScheduledRemindersTest extends TestCase
 
     private function abonnement(int $joursAvantEcheance): Subscription
     {
-        $plan = Plan::factory()->create(['slug' => 'mensuel', 'name' => 'Mensuel', 'duration_days' => 30]);
+        $plan = Plan::factory()->create(['slug' => 'standard', 'name' => 'Standard', 'duration_days' => 30]);
 
         return Subscription::factory()->create([
             'user_id' => User::factory()->create()->id,

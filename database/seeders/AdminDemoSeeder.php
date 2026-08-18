@@ -130,8 +130,8 @@ class AdminDemoSeeder extends Seeder
     {
         return [
             'essai' => Plan::where('slug', 'essai-gratuit')->firstOrFail(),
-            'mensuel' => Plan::where('slug', 'mensuel')->firstOrFail(),
-            'annuel' => Plan::where('slug', 'annuel')->firstOrFail(),
+            'standard' => Plan::where('slug', 'standard')->firstOrFail(),
+            'standard' => Plan::where('slug', 'standard')->firstOrFail(),
         ];
     }
 
@@ -419,7 +419,7 @@ class AdminDemoSeeder extends Seeder
 
         // Abonnements actifs : moitié mensuels, moitié annuels.
         if ($i < $bornesActifs) {
-            $plan = $i % 2 === 0 ? $plans['mensuel'] : $plans['annuel'];
+            $plan = $i % 2 === 0 ? $plans['standard'] : $plans['standard'];
             $debut = $this->maintenant->subDays(random_int(5, $plan->duration_days - 2));
 
             return [$plan, Subscription::STATUS_ACTIVE, $debut, $debut->addDays($plan->duration_days)];
@@ -435,7 +435,7 @@ class AdminDemoSeeder extends Seeder
 
         // Expirés : profil toujours publié, mais hors ligne pour le public.
         if ($i < $bornesExpires) {
-            $plan = $plans['mensuel'];
+            $plan = $plans['standard'];
             $debut = $this->maintenant->subDays(random_int(45, 150));
 
             return [$plan, Subscription::STATUS_EXPIRED, $debut, $debut->addDays($plan->duration_days)];
@@ -443,7 +443,7 @@ class AdminDemoSeeder extends Seeder
 
         // Annulés : portés par des brouillons, jamais par un profil publié.
         if ($i >= self::NB_PUBLIES && $i < $bornesAnnules) {
-            $plan = $plans['mensuel'];
+            $plan = $plans['standard'];
             $debut = $this->maintenant->subDays(random_int(60, 170));
 
             return [$plan, Subscription::STATUS_CANCELLED, $debut, $debut->addDays($plan->duration_days)];
@@ -505,7 +505,7 @@ class AdminDemoSeeder extends Seeder
         // ---- 18 en attente — le gisement de l'écran « vérification manuelle »
         for ($n = 0; $n < 18; $n++) {
             $rang = $rangs[$n % count($rangs)];
-            $plan = $n % 2 === 0 ? $plans['mensuel'] : $plans['annuel'];
+            $plan = $n % 2 === 0 ? $plans['standard'] : $plans['standard'];
 
             $this->creerPaiement(
                 $comptes[$rang], null, $plan->price_fcfa,
@@ -519,7 +519,7 @@ class AdminDemoSeeder extends Seeder
         // ---- 12 échoués
         for ($n = 0; $n < 12; $n++) {
             $rang = $rangs[$n % count($rangs)];
-            $plan = $plans['mensuel'];
+            $plan = $plans['standard'];
 
             $this->creerPaiement(
                 $comptes[$rang], null, $plan->price_fcfa,

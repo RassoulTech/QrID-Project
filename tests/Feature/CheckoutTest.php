@@ -43,7 +43,7 @@ class CheckoutTest extends TestCase
         ]);
     }
 
-    private function payer(string $plan = 'mensuel', string $method = 'wave')
+    private function payer(string $plan = 'standard', string $method = 'wave')
     {
         return $this->actingAs($this->user)
             ->post(route('abonnement.paiement.store'), ['plan' => $plan, 'method' => $method]);
@@ -71,10 +71,10 @@ class CheckoutTest extends TestCase
     /** Le montant vient de la formule en base, JAMAIS du formulaire. */
     public function test_the_amount_comes_from_the_plan_not_from_the_form(): void
     {
-        $prix = Plan::where('slug', 'mensuel')->value('price_fcfa');
+        $prix = Plan::where('slug', 'standard')->value('price_fcfa');
 
         $this->actingAs($this->user)->post(route('abonnement.paiement.store'), [
-            'plan' => 'mensuel',
+            'plan' => 'standard',
             'method' => 'wave',
             'amount_fcfa' => 1,     // tentative de fixer son prix
         ]);
@@ -252,7 +252,7 @@ class CheckoutTest extends TestCase
 
         Subscription::factory()->create([
             'user_id' => $this->user->id,
-            'plan_id' => Plan::where('slug', 'mensuel')->value('id'),
+            'plan_id' => Plan::where('slug', 'standard')->value('id'),
             'starts_at' => now()->subDays(20),
             'ends_at' => $fin,
             'status' => Subscription::STATUS_ACTIVE,
@@ -267,7 +267,7 @@ class CheckoutTest extends TestCase
             'reference' => $payment->provider_ref,
         ]));
 
-        $duree = Plan::where('slug', 'mensuel')->value('duration_days');
+        $duree = Plan::where('slug', 'standard')->value('duration_days');
 
         $this->assertTrue(
             $this->user->fresh()->activeSubscription()->ends_at->greaterThan($fin->copy()->addDays($duree - 1)),
@@ -297,7 +297,7 @@ class CheckoutTest extends TestCase
 
         $abonnement = $this->user->fresh()->activeSubscription();
 
-        $this->assertSame('mensuel', $abonnement->plan->slug);
+        $this->assertSame('standard', $abonnement->plan->slug);
         $this->assertSame(
             1,
             Subscription::where('user_id', $this->user->id)->where('status', Subscription::STATUS_ACTIVE)->count(),

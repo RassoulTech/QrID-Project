@@ -42,7 +42,7 @@ class SchemaRelationsTest extends TestCase
 
         $user = User::factory()->create();
         $template = Template::first();
-        $plan = Plan::where('slug', 'mensuel')->firstOrFail();
+        $plan = Plan::where('slug', 'standard')->firstOrFail();
 
         $profile = Profile::factory()->published()->create([
             'user_id' => $user->id,
@@ -155,7 +155,7 @@ class SchemaRelationsTest extends TestCase
     public function test_profile_is_publicly_visible_only_with_active_subscription(): void
     {
         $this->seedReferenceData();
-        $plan = Plan::where('slug', 'mensuel')->firstOrFail();
+        $plan = Plan::where('slug', 'standard')->firstOrFail();
 
         // Publié + abonnement actif → visible
         $ok = User::factory()->create();
@@ -204,9 +204,9 @@ class SchemaRelationsTest extends TestCase
     {
         $this->seedReferenceData();
 
-        $plan = Plan::where('slug', 'annuel')->firstOrFail();
+        $plan = Plan::where('slug', 'standard')->firstOrFail();
         $this->assertIsInt($plan->price_fcfa);
-        $this->assertSame(25000, $plan->price_fcfa);
+        $this->assertSame(3500, $plan->price_fcfa);
 
         $payment = Payment::factory()->successful()->create(['amount_fcfa' => 2500]);
         $this->assertIsInt($payment->fresh()->amount_fcfa);

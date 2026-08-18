@@ -48,7 +48,7 @@ class DashboardTest extends TestCase
 
         Subscription::factory()->create([
             'user_id' => $this->user->id,
-            'plan_id' => Plan::where('slug', 'mensuel')->value('id'),
+            'plan_id' => Plan::where('slug', 'standard')->value('id'),
             'starts_at' => now(),
             'ends_at' => now()->addDays(20),
             'status' => Subscription::STATUS_ACTIVE,

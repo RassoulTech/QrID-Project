@@ -70,7 +70,7 @@ class AdminFiltersTest extends TestCase
 
     private function paiements(): void
     {
-        $plan = Plan::factory()->create(['slug' => 'mensuel', 'price_fcfa' => 2500]);
+        $plan = Plan::factory()->create(['slug' => 'standard', 'price_fcfa' => 2500]);
         $client = $this->client('Awa Ndiaye', 'awa@exemple.sn');
 
         foreach ([
@@ -199,23 +199,25 @@ class AdminFiltersTest extends TestCase
 
     public function test_the_subscription_plan_filter_returns_only_that_plan(): void
     {
-        $mensuel = Plan::factory()->create(['slug' => 'mensuel', 'name' => 'Mensuel']);
-        $annuel = Plan::factory()->create(['slug' => 'annuel', 'name' => 'Annuel']);
+        // Deux formules DISTINCTES : tout l'objet du test est de verifier que
+        // le filtre rend l'une sans l'autre.
+        $standard = Plan::factory()->create(['slug' => 'standard', 'name' => 'Standard']);
+        $ancienne = Plan::factory()->create(['slug' => 'annuel', 'name' => 'Annuel']);
 
         $unClient = $this->client('Awa Ndiaye', 'awa@exemple.sn');
         $autre = $this->client('Moussa Diop', 'moussa@exemple.sn');
 
         Subscription::factory()->create([
-            'user_id' => $unClient->id, 'plan_id' => $mensuel->id,
+            'user_id' => $unClient->id, 'plan_id' => $standard->id,
             'status' => Subscription::STATUS_ACTIVE, 'ends_at' => now()->addDays(20),
         ]);
         Subscription::factory()->create([
-            'user_id' => $autre->id, 'plan_id' => $annuel->id,
+            'user_id' => $autre->id, 'plan_id' => $ancienne->id,
             'status' => Subscription::STATUS_ACTIVE, 'ends_at' => now()->addDays(300),
         ]);
 
         $this->actingAs($this->admin)
-            ->get(route('admin.subscriptions.index', ['plan' => 'mensuel']))
+            ->get(route('admin.subscriptions.index', ['plan' => 'standard']))
             ->assertOk()
             ->assertSee('awa@exemple.sn')
             ->assertDontSee('moussa@exemple.sn');

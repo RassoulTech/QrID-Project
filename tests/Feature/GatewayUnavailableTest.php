@@ -177,7 +177,7 @@ class GatewayUnavailableTest extends TestCase
         $this->sansPasserelle();
 
         $this->actingAs($this->user)
-            ->post(route('abonnement.paiement.store'), ['plan' => 'mensuel', 'method' => 'wave'])
+            ->post(route('abonnement.paiement.store'), ['plan' => 'standard', 'method' => 'wave'])
             ->assertRedirect()
             ->assertSessionHas('warning');
     }
@@ -194,7 +194,7 @@ class GatewayUnavailableTest extends TestCase
         $this->sansPasserelle();
 
         $this->actingAs($this->user)
-            ->post(route('abonnement.paiement.store'), ['plan' => 'mensuel', 'method' => 'wave']);
+            ->post(route('abonnement.paiement.store'), ['plan' => 'standard', 'method' => 'wave']);
 
         $this->assertSame(0, Payment::count());
     }
@@ -205,7 +205,7 @@ class GatewayUnavailableTest extends TestCase
         $this->sansPasserelle();
 
         $this->actingAs($this->user)
-            ->post(route('abonnement.paiement.store'), ['plan' => 'mensuel', 'method' => 'wave']);
+            ->post(route('abonnement.paiement.store'), ['plan' => 'standard', 'method' => 'wave']);
 
         $this->assertFalse($this->user->fresh()->hasActiveSubscription());
         $this->assertFalse((bool) $this->user->fresh()->profile->is_active);
@@ -219,7 +219,7 @@ class GatewayUnavailableTest extends TestCase
     public function test_an_available_gateway_still_opens_a_payment(): void
     {
         $this->actingAs($this->user)
-            ->post(route('abonnement.paiement.store'), ['plan' => 'mensuel', 'method' => 'wave'])
+            ->post(route('abonnement.paiement.store'), ['plan' => 'standard', 'method' => 'wave'])
             ->assertRedirect();
 
         $this->assertSame(1, Payment::count());

@@ -28,8 +28,8 @@ class DemoSeeder extends Seeder
     {
         $templates = Template::all();
         $trial = Plan::where('slug', 'essai-gratuit')->firstOrFail();
-        $monthly = Plan::where('slug', 'mensuel')->firstOrFail();
-        $yearly = Plan::where('slug', 'annuel')->firstOrFail();
+        $monthly = Plan::where('slug', 'standard')->firstOrFail();
+        $yearly = Plan::where('slug', 'standard')->firstOrFail();
 
         $people = [
             // Les deux premiers alimentent la landing (hero et section sombre).

@@ -40,7 +40,7 @@ class InactiveCardTest extends TestCase
     {
         parent::setUp();
 
-        Plan::factory()->create(['slug' => 'mensuel', 'price_fcfa' => 2500, 'duration_days' => 30]);
+        Plan::factory()->create(['slug' => 'standard', 'price_fcfa' => 2500, 'duration_days' => 30]);
 
         $this->user = User::factory()->create();
 

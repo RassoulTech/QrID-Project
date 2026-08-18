@@ -104,6 +104,32 @@ class CheckoutService
                 'status' => Payment::STATUS_SUCCESS,
             ])->save();
 
+            /*
+             |------------------------------------------------------------------
+             | LA CARTE PVC EST OFFERTE UNE SEULE FOIS
+             |------------------------------------------------------------------
+             | Trois conditions, et chacune protège d'une facture réelle :
+             |
+             | · price_fcfa > 0 — un essai gratuit ne donne AUCUNE carte. Sans
+             |   ce test, chaque inscription commanderait une carte physique à
+             |   imprimer et à expédier, pour un client qui n'a rien payé.
+             |
+             | · granted_at null — un renouvellement ne déclenche pas de seconde
+             |   carte. Le client garde la même : c'est un abonnement au
+             |   service, pas un achat de support.
+             |
+             | · dans la transaction — la carte n'est accordée que si
+             |   l'encaissement et l'abonnement le sont aussi. Un droit posé en
+             |   dehors survivrait à un paiement finalement annulé.
+             |
+             | On POSE le fait, on ne le recalcule pas : le déduire en comptant
+             | les paiements serait faux au premier remboursement, et l'erreur
+             | coûterait une carte imprimée et expédiée.
+             */
+            if ($plan->price_fcfa > 0 && $user->physical_card_granted_at === null) {
+                $user->forceFill(['physical_card_granted_at' => now()])->save();
+            }
+
             // Le profil devient public. C'est l'aboutissement du parcours :
             // payer sans être publié n'aurait aucun sens pour le client.
             $profile = $user->profile;

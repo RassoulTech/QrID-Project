@@ -34,8 +34,8 @@ class PaymentMailFlowTest extends TestCase
         parent::setUp();
 
         $this->formule = Plan::factory()->create([
-            'slug' => 'mensuel',
-            'name' => 'Mensuel',
+            'slug' => 'standard',
+            'name' => 'Standard',
             'duration_days' => 30,
             'price_fcfa' => 2500,
             'is_active' => true,

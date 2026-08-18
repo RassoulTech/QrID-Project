@@ -59,6 +59,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'physical_card_granted_at' => 'datetime',
             'password' => 'hashed',
             'is_blocked' => 'boolean',
             'blocked_at' => 'datetime',
@@ -115,6 +116,18 @@ class User extends Authenticatable implements MustVerifyEmail
     // -----------------------------------------------------------------------
     // Rôle
     // -----------------------------------------------------------------------
+
+    /**
+     * La carte PVC lui a-t-elle deja ete offerte ?
+     *
+     * Le fait est POSE au premier paiement encaisse, jamais recalcule : le
+     * deduire en comptant les paiements serait faux des le premier
+     * remboursement, et l'erreur coute une carte imprimee et expediee.
+     */
+    public function hasPhysicalCard(): bool
+    {
+        return $this->physical_card_granted_at !== null;
+    }
 
     public function isAdmin(): bool
     {

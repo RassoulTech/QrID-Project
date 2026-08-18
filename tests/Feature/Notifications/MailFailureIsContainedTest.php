@@ -114,8 +114,8 @@ class MailFailureIsContainedTest extends TestCase
     public function test_a_payment_is_still_cashed_when_no_email_can_leave(): void
     {
         $formule = Plan::factory()->create([
-            'slug' => 'mensuel',
-            'name' => 'Mensuel',
+            'slug' => 'standard',
+            'name' => 'Standard',
             'duration_days' => 30,
             'price_fcfa' => 2500,
             'is_active' => true,

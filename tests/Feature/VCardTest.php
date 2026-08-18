@@ -43,7 +43,7 @@ class VCardTest extends TestCase
 
         Storage::fake('public');
 
-        $plan = Plan::factory()->create(['slug' => 'mensuel', 'price_fcfa' => 2500, 'duration_days' => 30]);
+        $plan = Plan::factory()->create(['slug' => 'standard', 'price_fcfa' => 2500, 'duration_days' => 30]);
         $user = User::factory()->create();
 
         Subscription::factory()->create([
