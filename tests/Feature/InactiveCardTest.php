@@ -130,6 +130,52 @@ class InactiveCardTest extends TestCase
     }
 
     /**
+     * L'EXPLOITANT VA DROIT À LA PROLONGATION.
+     *
+     * Tant qu'aucune passerelle n'encaisse, « Activer ma carte » menait au
+     * paiement, qui ne menait nulle part. Le propriétaire administrateur
+     * tournait entre les deux écrans sans jamais atteindre la seule voie
+     * ouverte — dont il a pourtant les droits.
+     */
+    public function test_an_owner_who_is_admin_goes_straight_to_the_extension(): void
+    {
+        $this->profile->update(['is_active' => true]);
+        $this->user->forceFill(['role' => User::ROLE_ADMIN])->save();
+
+        Subscription::factory()->create([
+            'user_id' => $this->user->id,
+            'plan_id' => Plan::first()->id,
+            'status' => Subscription::STATUS_ACTIVE,
+            'ends_at' => now()->subDay(),
+        ]);
+
+        $reponse = $this->actingAs($this->user)
+            ->get(route('profile.public', 'awa-ndiaye'))
+            ->assertNotFound();
+
+        $reponse->assertSee(route('admin.clients.show', $this->user), false);
+        $reponse->assertSee('Prolonger mon abonnement', false);
+    }
+
+    /** Un propriétaire ordinaire garde le chemin normal, vers le paiement. */
+    public function test_an_ordinary_owner_still_goes_to_the_payment_screen(): void
+    {
+        $this->profile->update(['is_active' => true]);
+
+        Subscription::factory()->create([
+            'user_id' => $this->user->id,
+            'plan_id' => Plan::first()->id,
+            'status' => Subscription::STATUS_ACTIVE,
+            'ends_at' => now()->subDay(),
+        ]);
+
+        $this->actingAs($this->user)
+            ->get(route('profile.public', 'awa-ndiaye'))
+            ->assertSee(route('abonnement.paiement'), false)
+            ->assertSee('Activer ma carte', false);
+    }
+
+    /**
      * UNE CARTE SUSPENDUE N'ENVOIE PAS PAYER.
      *
      * La suspension vient de l'administration : l'argent n'y changerait rien.

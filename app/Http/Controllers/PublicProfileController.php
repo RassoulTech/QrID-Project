@@ -94,10 +94,30 @@ class PublicProfileController extends Controller
             default => 'brouillon',
         };
 
+        $proprietaire = auth()->id() !== null && auth()->id() === $profile->user_id;
+
         return response()->view('public.carte-inactive', [
             'profile' => $profile,
             'raison' => $raison,
-            'proprietaire' => auth()->id() !== null && auth()->id() === $profile->user_id,
+            'proprietaire' => $proprietaire,
+
+            /*
+             | LE DERNIER SAUT, SUPPRIMÉ.
+             |
+             | Tant qu'aucune passerelle n'encaisse, « Activer ma carte »
+             | menait au paiement, qui ne menait nulle part. L'exploitant
+             | tournait entre les deux écrans sans jamais atteindre la
+             | prolongation — qui est pourtant la seule voie ouverte, et dont
+             | il a déjà les droits.
+             |
+             | Quand celui qui regarde est à la fois le PROPRIÉTAIRE de la
+             | carte et un ADMINISTRATEUR, le bouton va donc droit à sa fiche.
+             | Aucun pouvoir nouveau : la prolongation exige un motif et reste
+             | journalisée. Un raccourci, pas une porte dérobée.
+             */
+            'ficheAdmin' => $proprietaire && auth()->user()?->isAdmin()
+                ? route('admin.clients.show', $profile->user_id)
+                : null,
         ], 404);
     }
 

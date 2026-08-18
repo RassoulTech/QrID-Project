@@ -55,8 +55,14 @@
                         ceux que vous avez déjà partagés continueront de mener
                         ici.
                     </p>
-                    <a href="{{ route('abonnement.paiement') }}"
-                       class="btn-pill btn-dark carte-off__action">Activer ma carte</a>
+                    {{-- Pour un administrateur, le bouton saute l'écran de
+                         paiement — qui ne mène nulle part tant qu'aucune
+                         passerelle n'encaisse — et va droit à la prolongation,
+                         la seule voie réellement ouverte. --}}
+                    <a href="{{ $ficheAdmin ?? route('abonnement.paiement') }}"
+                       class="btn-pill btn-dark carte-off__action">
+                        {{ $ficheAdmin ? 'Prolonger mon abonnement' : 'Activer ma carte' }}
+                    </a>
 
                 @else
                     <h1 class="carte-off__titre">Votre carte n'est pas encore en ligne</h1>
