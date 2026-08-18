@@ -92,14 +92,14 @@ class PublicProfileController extends Controller
      * d'empêcher une carte de s'afficher : c'est la page qui prend tout le
      * trafic du produit, et un compteur ne vaut pas une visite perdue.
      */
-    private function enregistrerVisite(Request $request, Profile $profile): void
+    private function enregistrerVisite(Request $request, Profile $profile, ?string $type = null): void
     {
         try {
             ProfileEvent::create([
                 'profile_id' => $profile->id,
-                'type' => $request->query('src') === 'qr'
+                'type' => $type ?? ($request->query('src') === 'qr'
                     ? ProfileEvent::TYPE_SCAN
-                    : ProfileEvent::TYPE_VIEW,
+                    : ProfileEvent::TYPE_VIEW),
 
                 // L'adresse IP n'est jamais stockée en clair : on ne garde
                 // qu'une empreinte, suffisante pour dédoublonner, inutilisable
@@ -244,7 +244,7 @@ class PublicProfileController extends Controller
      * d'adresse. Une 404, jamais un 403, pour ne rien révéler de son
      * existence.
      */
-    public function vcard(string $slug, VCardService $vcard): Response
+    public function vcard(Request $request, string $slug, VCardService $vcard): Response
     {
         $profile = Profile::query()
             ->with(['socialLinks'])
@@ -263,6 +263,18 @@ class PublicProfileController extends Controller
          | fichier comme du texte brut — l'utilisateur voit BEGIN:VCARD et
          | referme.
          */
+        /*
+         | L'ENREGISTREMENT DU CONTACT EST L'ABOUTISSEMENT DU SCAN.
+         |
+         | C'est le seul geste qui transforme une visite en relation, et il
+         | n'etait compte nulle part : le tableau de bord affichait « 0 contact
+         | enregistre » quel que soit le nombre reel de telechargements.
+         |
+         | Comme la vue, l'echec est avale : une statistique n'a pas le droit
+         | d'empecher un contact de s'enregistrer.
+         */
+        $this->enregistrerVisite($request, $profile, ProfileEvent::TYPE_SAVE);
+
         return response($vcard->pour($profile), 200, [
             'Content-Type' => 'text/vcard; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="'.$vcard->nomFichier($profile).'"',

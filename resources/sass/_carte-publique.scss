@@ -2,232 +2,271 @@
 // LA CARTE PUBLIQUE — la page ouverte après un scan de QR Code
 // =============================================================================
 //
-// C'EST LA PAGE LA PLUS IMPORTANTE DU PRODUIT, et celle qui pardonne le moins.
-// Le visiteur vient de scanner, il est debout, souvent en 3G, et il décide en
-// quelques secondes s'il enregistre ce contact ou s'il referme.
+// C'EST LA VITRINE DU PRODUIT. Chaque prospect passe par elle, debout, souvent
+// en 3G, et décide en quelques secondes s'il enregistre ce contact.
 //
 // ELLE N'EST PAS DANS UN CADRE DE TÉLÉPHONE. Elle EST la page. Le cadre
-// appartient à l'aperçu du tableau de bord, où il simule ce rendu pour le
-// propriétaire — deux vues distinctes, deux usages.
+// appartient à l'aperçu du tableau de bord (profile/preview.blade.php), où il
+// simule ce rendu pour le propriétaire.
 //
-// Aucune police distante, aucune librairie, aucune image décorative.
+// AUCUNE COULEUR EN DUR. Tout passe par les jetons --surface / --texte /
+// --accent, ce qui fait basculer les deux thèmes sans un second jeu de règles.
+// Les seules valeurs littérales sont les couleurs OFFICIELLES des plateformes,
+// posées par x-social-icon : elles n'appartiennent pas à notre palette.
 // =============================================================================
 
-.carte{
+.pubc{
   min-height:100dvh;
-  background:$blanc;
-  // La barre d'action est fixée en bas : sans cette réserve, elle masquerait
-  // les dernières lignes, et le pied de page ne serait jamais lisible.
-  padding-bottom:96px;
-  overflow-x:hidden;   // aucune ligne ne peut élargir la page
+  padding:20px 14px 40px;
+  background:var(--surface-2);
+  // Aucune ligne ne peut élargir la page, quelle que soit la longueur
+  // d'une adresse e-mail sans espace.
+  overflow-x:hidden;
 }
 
-.carte__inner{max-width:520px;margin:0 auto}
-
-// -----------------------------------------------------------------------------
-// EN-TÊTE
-// -----------------------------------------------------------------------------
-.carte__tete{
-  background:$vert-fonce;
-  color:$blanc;
-  text-align:center;
-  padding:40px 20px 56px;   // 56 en bas : la place des actions qui chevauchent
-  border-radius:0 0 $r-lg $r-lg;
+// La carte ne s'étire jamais : au-delà de 420px elle se centre, comme sur la
+// maquette. Un bandeau photo de 1400px de large n'est pas une carte de visite.
+.pubc__carte{
+  max-width:420px;
+  margin:0 auto;
+  background:var(--surface);
+  border:1px solid var(--bord);
+  border-radius:$r-md;
+  box-shadow:var(--ombre-2);
+  overflow:hidden;
 }
 
-.carte__photo,
-.carte__initiales{
-  width:112px;height:112px;
-  margin:0 auto 16px;
-  border-radius:$r-full;
+// -----------------------------------------------------------------------------
+// BANDEAU
+// -----------------------------------------------------------------------------
+.pubc__bandeau{
+  position:relative;
+  height:180px;
+  background:var(--accent-doux);
+}
+
+// width et height sont déclarés dans le HTML : sans eux, la page saute au
+// chargement de l'image et le visiteur clique à côté.
+.pubc__photo{
+  width:100%;height:100%;
+  object-fit:cover;
   display:block;
-  border:3px solid rgba(255,255,255,.9);
-  box-shadow:0 8px 24px rgba(0,0,0,.28);
 }
 
-.carte__photo{object-fit:cover;background:$vert-clair}
-
-// LES INITIALES, JAMAIS LE NOM COMPLET.
-// La solution de repli écrivait le nom entier dans le cercle : « Mouhamed
-// Dione » débordait de tous les côtés dès que la photo ne chargeait pas —
-// donc invisible en test, visible en 3G.
-.carte__initiales{
+// LES INITIALES, JAMAIS LE NOM COMPLET — voir la vue.
+.pubc__initiales{
   display:grid;place-items:center;
-  background:$vert-clair;color:$vert-fonce;
-  font-size:38px;font-weight:700;letter-spacing:.02em;
+  width:100%;height:100%;
+  background:linear-gradient(135deg, var(--accent) 0%, var(--accent-vif) 100%);
+  color:var(--sur-accent);
+  font-size:56px;font-weight:700;letter-spacing:.03em;
 }
 
-.carte__nom{
-  // La couleur est POSÉE, pas héritée : _base.scss impose « color:$texte » à
-  // tous les h1, et cette règle bat l'héritage. Sans cela, le nom s'affichait
-  // en encre sombre sur l'en-tête vert foncé — illisible, et seulement sur
-  // cette page.
-  color:$blanc;
-  font-size:22px;font-weight:700;
+// Bouton flottant, en bas à droite du bandeau. 44px : la cible tactile
+// minimale, sous laquelle on rate le bouton un doigt sur trois.
+.pubc__qr-bouton{
+  position:absolute;right:14px;bottom:-22px;
+  width:44px;height:44px;
+  display:grid;place-items:center;
+  border-radius:$r-full;
+  background:var(--surface);
+  border:1px solid var(--bord);
+  box-shadow:var(--ombre-1);
+  color:var(--accent);
+  z-index:2;
+
+  &:hover,&:focus-visible{background:var(--accent);color:var(--sur-accent)}
+}
+
+// -----------------------------------------------------------------------------
+// IDENTITÉ
+// -----------------------------------------------------------------------------
+.pubc__identite{padding:22px 20px 0}
+
+.pubc__nom{
+  font-size:20px;font-weight:700;
   letter-spacing:-.015em;line-height:1.25;
-  margin:0 0 4px;
-  // Un nom long ne doit ni déborder ni pousser la page : il passe à la ligne.
+  color:var(--accent);
+  margin:0 0 3px;
+  // Un nom long passe à la ligne plutôt que d'élargir la carte.
   overflow-wrap:anywhere;
 }
 
-.carte__role{
-  font-size:14.5px;margin:0;
-  color:rgba(255,255,255,.92);
-  overflow-wrap:anywhere;
+.pubc__role{
+  font-size:13.5px;color:var(--texte-2);
+  margin:0;overflow-wrap:anywhere;
 }
 
-.carte__entreprise{
-  font-size:13px;margin:2px 0 0;
-  color:rgba(255,255,255,.66);
-  overflow-wrap:anywhere;
+.pubc__entreprise{
+  font-size:13px;font-weight:600;color:var(--accent);
+  margin:2px 0 0;overflow-wrap:anywhere;
 }
 
 // -----------------------------------------------------------------------------
-// ACTIONS RAPIDES — elles chevauchent le bas de l'en-tête
+// RÉSEAUX
 // -----------------------------------------------------------------------------
-// UNE SEULE SÉRIE. La page en portait deux : une dessinée dans le cadre de
-// téléphone, une vraie en dessous. Le visiteur touchait la fausse.
-.carte__actions{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(0,1fr));
-  gap:10px;
-  padding:0 16px;
-  margin-top:-36px;   // le chevauchement
+// AU REPOS, ILS SONT GRIS. Une rangée multicolore ferait concurrence au nom du
+// porteur, qui est le sujet de la page. La couleur officielle apparaît au
+// survol, portée par --marque que pose x-social-icon.
+.pubc__reseaux{
+  display:flex;flex-wrap:wrap;gap:14px;
+  padding:16px 20px 4px;
 }
 
-.carte__action{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:5px;
-  min-width:0;                 // sans quoi une grille refuse de rétrécir
-  aspect-ratio:1;
-  background:$blanc;
-  border:1px solid $bordure;
-  border-radius:$r-sm;
-  box-shadow:$shadow-1;
-  color:$vert-fonce;
-  text-decoration:none;
-  font-size:11px;font-weight:600;
-  transition:transform 140ms ease, box-shadow 140ms ease;
+.pubc__reseau{
+  display:grid;place-items:center;
+  width:32px;height:32px;
+  color:var(--texte-2);
+  transition:color 140ms ease, transform 140ms ease;
 
-  &:hover,&:focus-visible{transform:translateY(-2px);box-shadow:$shadow-2}
-  span{color:$texte;line-height:1}
+  &:hover,&:focus-visible{
+    color:var(--marque, var(--accent));
+    transform:translateY(-1px);
+  }
+
+  .social-svg{--marque:inherit}
 }
+
+// La couleur officielle vit sur le SVG lui-même : on la remonte au survol.
+.pubc__reseau:hover .social-svg,
+.pubc__reseau:focus-visible .social-svg{color:var(--marque)}
 
 // -----------------------------------------------------------------------------
 // COORDONNÉES
 // -----------------------------------------------------------------------------
-.carte__infos{
-  list-style:none;margin:24px 0 0;padding:0 16px;
-  display:grid;gap:2px;
-}
+.pubc__infos{list-style:none;margin:12px 0 0;padding:0}
 
-.carte__info{
-  display:flex;align-items:center;gap:12px;
-  padding:13px 12px;
-  border-radius:$r-sm;
-  color:$texte;text-decoration:none;
-  font-size:14.5px;
+// Un filet fin entre les lignes, jamais après la dernière : une carte qui se
+// termine par un trait a l'air coupée.
+.pubc__info + .pubc__info{border-top:1px solid var(--bord)}
+
+.pubc__info-lien{
+  display:flex;align-items:center;gap:13px;
+  padding:12px 20px;
+  min-height:44px;              // cible tactile
+  text-decoration:none;
   min-width:0;
 
-  &:hover,&:focus-visible{background:$gris-fond}
+  &:hover,&:focus-visible{background:var(--surface-3)}
+}
 
-  // Une adresse e-mail longue coupe plutôt que d'élargir la page.
+.pubc__info-icone{
+  flex:0 0 auto;
+  width:32px;height:32px;
+  display:grid;place-items:center;
+  border-radius:$r-full;
+  background:var(--accent-doux);
+  color:var(--accent);
+}
+
+.pubc__info-texte{display:grid;gap:1px;min-width:0}
+
+.pubc__info-valeur{
+  font-size:13.5px;font-weight:600;
+  color:var(--accent);
+  overflow-wrap:anywhere;
+}
+
+// PETITES CAPITALES GRISES — et c'est le couple le plus fragile de la page en
+// contraste. --texte-2 est choisi pour tenir 4,5:1 sur --surface dans les DEUX
+// thèmes ; ne pas le remplacer par une teinte plus pâle « pour faire discret ».
+.pubc__info-etiquette{
+  font-size:10px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--texte-2);
+}
+
+// -----------------------------------------------------------------------------
+// ENGAGER LA CONVERSATION
+// -----------------------------------------------------------------------------
+.pubc__appels{
+  display:grid;gap:2px;
+  padding:10px 12px 0;
+}
+
+.pubc__appel{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 8px;
+  min-height:44px;
+  border-radius:$r-sm;
+  font-size:13px;font-weight:600;
+  color:var(--texte);
+  text-decoration:none;
+
+  &:hover,&:focus-visible{background:var(--surface-3)}
+  .social-svg{color:var(--marque);flex:0 0 auto}
   span{min-width:0;overflow-wrap:anywhere}
 }
 
-.carte__info-icone{
-  flex:0 0 auto;
-  width:34px;height:34px;
-  display:grid;place-items:center;
+// -----------------------------------------------------------------------------
+// L'ACTION PRINCIPALE
+// -----------------------------------------------------------------------------
+.pubc__enregistrer{
+  display:block;
+  margin:18px 20px 0;
+  padding:15px 20px;
   border-radius:$r-full;
-  background:$vert-clair;color:$vert-fonce;
+  background:var(--accent);
+  color:var(--sur-accent);
+  font-size:14.5px;font-weight:700;
+  text-align:center;text-decoration:none;
+
+  &:hover,&:focus-visible{background:var(--accent-vif);color:var(--sur-accent)}
+}
+
+.pubc__pied{
+  text-align:center;
+  margin:16px 0 0;padding:0 20px 20px;
+  font-size:11.5px;color:var(--texte-2);
+
+  a{color:var(--accent);font-weight:600}
 }
 
 // -----------------------------------------------------------------------------
-// RÉSEAUX SOCIAUX
+// QR EN PLEIN ÉCRAN — sans une ligne de JavaScript
 // -----------------------------------------------------------------------------
-.carte__reseaux{
-  display:flex;flex-wrap:wrap;justify-content:center;gap:10px;
-  padding:20px 16px 0;
-}
-
-.carte__reseau{
-  display:inline-flex;align-items:center;
-  padding:8px 16px;
-  border-radius:$r-full;
-  background:$vert-clair;color:$vert-fonce;
-  font-size:12.5px;font-weight:600;
-  text-decoration:none;
-
-  &:hover,&:focus-visible{background:$vert-accent;color:$blanc}
-}
-
-// -----------------------------------------------------------------------------
-// QR CODE EN PLEIN ÉCRAN — sans une ligne de JavaScript
-// -----------------------------------------------------------------------------
-// Ouvert par :target, fermé par un lien de retour. Le JavaScript n'est pas
-// autorisé à PORTER une fonctionnalité sur ce produit ; ici il n'en faut pas.
-.carte__qr-lien{
-  display:block;text-align:center;
-  margin:22px auto 0;
-  font-size:13px;font-weight:600;
-  color:$vert-fonce;
-}
-
-.qr-plein{
+.pubc__qr-plein{
   display:none;
   position:fixed;inset:0;z-index:60;
-  background:rgba(10,31,26,.94);
-  padding:24px;
-  text-align:center;
-  overflow-y:auto;
+  background:rgba(6,20,16,.94);
+  padding:24px;text-align:center;
 
-  &:target{display:grid;place-content:center;gap:18px}
+  &:target{display:grid;place-content:center;gap:16px}
 
   svg,img{
-    width:min(76vw,300px);height:auto;
-    background:$blanc;padding:14px;border-radius:$r-sm;
+    width:min(74vw,290px);height:auto;
+    background:#FFF;padding:14px;border-radius:$r-sm;
   }
 }
 
-.qr-plein__nom{color:$blanc;font-weight:700;margin:0}
-.qr-plein__fermer{
-  color:$blanc;font-size:13px;font-weight:600;
-  text-decoration:underline;
+.pubc__qr-nom{color:#FFF;font-weight:700;margin:0}
+.pubc__qr-fermer{color:#FFF;font-size:13px;font-weight:600;text-decoration:underline}
+
+// -----------------------------------------------------------------------------
+// TRÈS PETITS ÉCRANS — 320px
+// -----------------------------------------------------------------------------
+// Le format le plus étroit encore en service. Tout tient déjà ; seules les
+// marges se resserrent pour ne pas manger la moitié de la largeur.
+@media (max-width:359px){
+  .pubc{padding:12px 8px 30px}
+  .pubc__identite{padding:20px 14px 0}
+  .pubc__info-lien{padding:12px 14px;gap:10px}
+  .pubc__reseaux{padding:14px 14px 4px;gap:10px}
+  .pubc__enregistrer{margin:16px 14px 0}
+  .pubc__nom{font-size:18px}
 }
 
 // -----------------------------------------------------------------------------
-// LA BARRE D'ACTION — fixée en bas, toujours atteignable
+// THÈME SOMBRE — ce qui ne se déduit pas des jetons
 // -----------------------------------------------------------------------------
-// C'est l'action que la page doit provoquer. La laisser au fil du contenu la
-// rendait invisible sans défilement, donc facultative.
-.carte__barre{
-  position:fixed;left:0;right:0;bottom:0;z-index:40;
-  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
-  background:rgba(255,255,255,.94);
-  backdrop-filter:blur(8px);
-  border-top:1px solid $bordure;
-}
-
-.carte__enregistrer{
-  display:block;width:100%;
-  max-width:520px;margin:0 auto;
-  padding:15px 20px;
-  border-radius:$r-full;
-  background:$vert-fonce;color:$blanc;
-  font-size:15px;font-weight:700;
-  text-align:center;text-decoration:none;
-
-  &:hover,&:focus-visible{background:$texte;color:$blanc}
-}
-
-// -----------------------------------------------------------------------------
-// PIED — canal d'acquisition, discret
-// -----------------------------------------------------------------------------
-.carte__pied{
-  text-align:center;
-  margin:28px 0 0;padding:0 16px;
-  font-size:12px;color:$gris-second;
-
-  a{color:$vert-fonce;font-weight:600}
-}
+// LE NOM EN BLANC, ET C'EST DÉLIBÉRÉ.
+//
+// En thème clair, le nom porte le vert de la marque. En sombre, ce vert vif
+// sur la surface de la carte descend sous le confort de lecture d'un titre —
+// et _theme-dark.scss impose de toute façon var(--texte) à TOUS les h1, règle
+// qui bat celle-ci par spécificité.
+//
+// Le rendu était donc déjà blanc, mais par accident. On l'écrit : un style
+// obtenu sans l'avoir voulu est un style que la prochaine refonte cassera
+// sans le savoir.
+.theme-dark .pubc__nom{color:var(--texte)}
