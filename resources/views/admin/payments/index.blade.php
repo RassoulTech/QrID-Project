@@ -86,11 +86,16 @@
 
     {{-- ==================== TABLEAU ==================== --}}
     <div class="adm-bloc">
-        @if ($paiements->isEmpty())
-            <x-empty-state icon="payment"
-                title="Aucune transaction"
-                message="Aucun paiement ne correspond à ces critères." />
-        @else
+        {{-- Compteur et etat vide : un seul composant pour les deux, voir
+             x-liste-resultats. --}}
+        <x-liste-resultats :total="$paiements->total()"
+                           :filtre="(bool) ($statut || $moyen || $periode)"
+                           :reset="route('admin.payments.index')"
+                           nom="paiement" icon="payment"
+                           vide="Les paiements apparaîtront ici dès le premier encaissement." />
+
+        @if (! $paiements->isEmpty())
+
             <div class="table-scroll">
                 <table class="adm-table">
                     <thead>

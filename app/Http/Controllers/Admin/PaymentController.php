@@ -39,7 +39,7 @@ class PaymentController extends Controller
         return view('admin.payments.index', [
             'paiements' => $paiements,
             'compteurs' => $this->compteurs(),
-            'total' => (int) $this->requete($request, sansStatut: false)
+            'total' => (int) $this->requete($request, avecStatut: false)
                 ->clone()->where('payments.status', Payment::STATUS_SUCCESS)->sum('amount_fcfa'),
             'statut' => $request->query('statut'),
             'moyen' => $request->query('moyen'),
@@ -93,11 +93,34 @@ class PaymentController extends Controller
         ];
     }
 
-    private function requete(Request $request, bool $sansStatut = true): Builder
+    /**
+     * @param  bool  $avecStatut  Applique le filtre de statut. Le parametre
+     *                            s'appelait « sansStatut » tout en valant true
+     *                            quand le statut DEVAIT etre applique : un nom
+     *                            qui dit l'inverse de son effet est ce qui a
+     *                            permis au defaut ci-dessous de passer les
+     *                            relectures.
+     */
+    private function requete(Request $request, bool $avecStatut = true): Builder
     {
         return Payment::query()
             ->with(['user:id,name,email', 'subscription.plan:id,name'])
-            ->when($sansStatut && $request->query('statut'), fn (Builder $q, string $s) => $q->where('payments.status', $s))
+            /*
+             | LA CONDITION ET LA VALEUR SONT DEUX CHOSES DIFFERENTES.
+             |
+             | Cette ligne passait « $avecStatut && $request->query('statut') »
+             | comme condition. Or when() transmet au callback LA VALEUR DE SA
+             | CONDITION : le callback recevait donc « true », que le typage
+             | string convertissait en « "1" ». La requete cherchait
+             | status = "1" et ne renvoyait jamais rien.
+             |
+             | L'ecran proposait pourtant lui-meme le lien ?statut=success,
+             | sur une base contenant neuf paiements reussis.
+             */
+            ->when(
+                $avecStatut ? $request->query('statut') : null,
+                fn (Builder $q, string $statut) => $q->where('payments.status', $statut)
+            )
             ->when($request->query('moyen'), fn (Builder $q, string $m) => $q->where('method', $m))
             ->tap(fn (Builder $q) => FiltrePeriode::appliquer(
                 $q, $request->query('periode'), 'payments.created_at'

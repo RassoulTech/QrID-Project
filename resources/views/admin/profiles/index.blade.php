@@ -63,11 +63,16 @@
     </form>
 
     <div class="adm-bloc">
-        @if ($profils->isEmpty())
-            <x-empty-state icon="profile"
-                title="Aucun profil"
-                message="Aucune carte ne correspond à ces critères." />
-        @else
+        {{-- Compteur et etat vide : un seul composant pour les deux, voir
+             x-liste-resultats. --}}
+        <x-liste-resultats :total="$profils->total()"
+                           :filtre="(bool) ($recherche || $etat || $modele)"
+                           :reset="route('admin.profiles.index')"
+                           nom="profil" icon="profile"
+                           vide="Les cartes créées par vos clients apparaîtront ici." />
+
+        @if (! $profils->isEmpty())
+
             <div class="table-scroll">
                 <table class="adm-table">
                     <thead>

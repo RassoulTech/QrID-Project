@@ -71,11 +71,16 @@
     </form>
 
     <div class="adm-bloc">
-        @if ($entrees->isEmpty())
-            <x-empty-state icon="document"
-                title="Aucune action enregistrée"
-                message="Les blocages, désactivations, prolongations et vérifications apparaîtront ici, avec leur auteur et leur motif." />
-        @else
+        {{-- Compteur et etat vide : un seul composant pour les deux, voir
+             x-liste-resultats. --}}
+        <x-liste-resultats :total="$entrees->total()"
+                           :filtre="(bool) ($recherche || $type || $admin || $periode)"
+                           :reset="route('admin.audit.index')"
+                           nom="entrée" icon="document"
+                           vide="Les actions d'administration seront consignées ici." />
+
+        @if (! $entrees->isEmpty())
+
             <div class="table-scroll">
                 <table class="adm-table">
                     <thead>

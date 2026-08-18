@@ -1614,3 +1614,24 @@ $adm-controle-h: 38px;
   // pas d'identification.
   .adm-top__user > span:not(.adm-avatar) { display: none; }
 }
+
+// -----------------------------------------------------------------------------
+// COMPTEUR DE RÉSULTATS — voir x-liste-resultats
+// -----------------------------------------------------------------------------
+// Une liste paginée n'annonçait nulle part combien d'éléments elle contient.
+// On filtrait, on obtenait quinze lignes, et rien ne disait s'il s'agissait de
+// quinze résultats ou de la première page de deux cents.
+.liste-compteur{
+  display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;
+  margin:0 0 14px;
+  font-size:13.5px;color:$gris-second;
+
+  strong{font-size:15px;color:$texte}
+}
+
+.liste-compteur__filtre{font-size:12.5px}
+
+.liste-compteur__reset{
+  font-size:12.5px;font-weight:600;color:$vert-fonce;
+  text-decoration:underline;
+}

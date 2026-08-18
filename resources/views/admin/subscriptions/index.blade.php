@@ -78,11 +78,16 @@
     </form>
 
     <div class="adm-bloc">
-        @if ($abonnements->isEmpty())
-            <x-empty-state icon="payment"
-                title="Aucun abonnement"
-                message="Aucune souscription ne correspond à ces critères." />
-        @else
+        {{-- Compteur et etat vide : un seul composant pour les deux, voir
+             x-liste-resultats. --}}
+        <x-liste-resultats :total="$abonnements->total()"
+                           :filtre="(bool) ($statut || $plan || $echeance)"
+                           :reset="route('admin.subscriptions.index')"
+                           nom="abonnement" icon="payment"
+                           vide="Les abonnements apparaîtront ici dès la première souscription." />
+
+        @if (! $abonnements->isEmpty())
+
             <div class="table-scroll">
                 <table class="adm-table">
                     <thead>

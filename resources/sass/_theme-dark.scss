@@ -222,6 +222,17 @@
   .step__num{border-color:var(--bord-fort);color:var(--texte-2)}
 
   .plan__list li{color:var(--texte-2)}
+  // ---------------------------------------------------------------------------
+  // Compteur de résultats — voir x-liste-resultats
+  // ---------------------------------------------------------------------------
+  // Le NOMBRE était posé en $texte, l'encre du thème clair : noir sur fond
+  // noir. On lisait « paiements » sans jamais voir combien. Un compteur
+  // invisible est pire qu'un compteur absent — il occupe la place de
+  // l'information qu'il devait donner.
+  .liste-compteur{color:var(--texte-2)}
+  .liste-compteur strong{color:var(--texte)}
+  .liste-compteur__reset{color:var(--accent)}
+
   .pay-note{color:var(--texte-2)}
 
   // Pastille « recommandé » : le vert foncé sur une carte sombre ne se
@@ -403,6 +414,17 @@
   .trust__item{color:var(--texte-2);strong{color:var(--texte)}}
   .trust__icon{background:var(--accent-doux);color:var(--accent)}
   .checkout__later{color:var(--texte-2)}
+
+  // ---------------------------------------------------------------------------
+  // Compteur de résultats — voir x-liste-resultats
+  // ---------------------------------------------------------------------------
+  // Le NOMBRE était posé en $texte, l'encre du thème clair : noir sur fond
+  // noir. On lisait « paiements » sans jamais voir combien. Un compteur
+  // invisible est pire qu'un compteur absent — il occupe la place de
+  // l'information qu'il devait donner.
+  .liste-compteur{color:var(--texte-2)}
+  .liste-compteur strong{color:var(--texte)}
+  .liste-compteur__reset{color:var(--accent)}
 
   .pay-note{color:var(--texte-2)}
 

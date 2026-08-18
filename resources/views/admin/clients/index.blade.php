@@ -69,13 +69,16 @@
 
     {{-- ==================== TABLEAU ==================== --}}
     <div class="adm-bloc">
-        @if ($clients->isEmpty())
-            <x-empty-state icon="profile"
-                title="Aucun client ne correspond"
-                message="{{ $recherche || $statut || $periode
-                    ? 'Aucun compte ne correspond à ces critères. Élargissez la recherche ou réinitialisez les filtres.'
-                    : 'Les comptes clients apparaîtront ici dès la première inscription.' }}" />
-        @else
+        {{-- Compteur et etat vide : un seul composant pour les deux, voir
+             x-liste-resultats. --}}
+        <x-liste-resultats :total="$clients->total()"
+                           :filtre="(bool) ($recherche || $statut || $periode)"
+                           :reset="route('admin.clients.index')"
+                           nom="client" icon="profile"
+                           vide="Les comptes clients apparaîtront ici dès la première inscription." />
+
+        @if (! $clients->isEmpty())
+
             <div class="table-scroll">
                 <table class="adm-table">
                     <thead>
