@@ -44,7 +44,7 @@
         @endforeach
     </nav>
 
-    <form method="GET" action="{{ route('admin.subscriptions.index') }}" class="adm-filtres">
+    <form method="GET" action="{{ route('admin.subscriptions.index') }}" class="adm-filtres" data-auto-filtre>
         <input type="hidden" name="statut" value="{{ $statut }}">
 
         <div class="adm-filtre">
@@ -69,7 +69,7 @@
             </select>
         </div>
 
-        <button type="submit" class="adm-btn adm-btn--vert">Filtrer</button>
+        <button type="submit" class="adm-btn adm-btn--vert" data-auto-filtre-bouton>Filtrer</button>
 
         @if ($plan || $echeance)
             <a href="{{ route('admin.subscriptions.index', ['statut' => $statut]) }}"

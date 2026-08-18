@@ -390,26 +390,13 @@ $adm-nuit: #0A2A21;
   &:hover { background: var(--survol); }
 }
 
-.adm-select {
-  height: 35px;
-  padding: 0 30px 0 12px;
-  border: 1px solid var(--bord-fort);
-  border-radius: $r-full;
-  background: var(--surface);
-  color: var(--texte);
-  font-size: 12.5px;
-  font-weight: 600;
-  cursor: pointer;
-
-  // La flèche native disparaît sur certains navigateurs quand on retire
-  // l'apparence : on la redessine, en SVG intégré (aucune requête).
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16' fill='%235C6B66'%3E%3Cpath d='M8 11 3 6h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 11px center;
-
-  &:focus { outline: 2px solid var(--accent-vif); outline-offset: -1px; }
-}
+/*
+ | .adm-select EST DÉCLARÉ PLUS BAS, UNE SEULE FOIS.
+ |
+ | Un premier bloc vivait ici et un second en fin de fichier : le second
+ | gagnait par ordre de cascade, et toute retouche faite sur celui-ci n'avait
+ | aucun effet visible. On corrigeait un style qui n'était jamais appliqué.
+ */
 
 .adm-lien {
   font-size: 12px;
@@ -1001,6 +988,35 @@ $adm-controle-h: 38px;
 // En thème sombre, un chevron gris foncé sur fond sombre est invisible.
 .theme-dark .adm-select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7' fill='none' stroke='%239BB0A8' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4.5 4.5L10 1'/%3E%3C/svg%3E");
+}
+
+// -----------------------------------------------------------------------------
+// LA LISTE DÉROULANTE ELLE-MÊME
+// -----------------------------------------------------------------------------
+// CE QUI EST STYLABLE, ET CE QUI NE L'EST PAS.
+//
+// Le panneau qui s'ouvre au clic d'un <select> est dessiné par le SYSTÈME,
+// pas par la page : sa couleur de surlignage est celle du bureau, et aucune
+// règle CSS ne l'atteint. C'est ce bleu vif qui jure avec le vert de la
+// marque sur les captures.
+//
+// Ce qu'on peut faire, et qui suffit dans la plupart des cas :
+//   · color-scheme (déjà posé dans _theme.scss) rend le panneau sombre au
+//     lieu de blanc éblouissant en thème sombre ;
+//   · accent-color oriente ce que le navigateur accepte de teinter ;
+//   · le fond et l'encre des <option>, honorés par Chrome sous Windows.
+//
+// Un menu entièrement aux couleurs de la marque suppose de remplacer le
+// <select> natif par une liste pilotée en JavaScript — donc de perdre le
+// clavier, le lecteur d'écran et le sélecteur natif du téléphone, qui est
+// bien meilleur que tout ce qu'on redessinerait. Ce n'est pas un bon échange.
+.adm-select {
+  accent-color: var(--accent);
+
+  option {
+    background: var(--surface);
+    color: var(--texte);
+  }
 }
 
 // Les boutons de la barre s'alignent sur la même hauteur que les contrôles.

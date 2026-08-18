@@ -24,7 +24,7 @@
         </a>
     </x-slot:actions>
 
-    <form method="GET" action="{{ route('admin.profiles.index') }}" class="adm-filtres">
+    <form method="GET" action="{{ route('admin.profiles.index') }}" class="adm-filtres" data-auto-filtre>
         <div class="adm-filtre adm-filtre--large adm-filtres__recherche">
             <label for="q">Recherche</label>
             <svg class="adm-filtres__loupe" width="14" height="14" viewBox="0 0 16 16"
@@ -55,7 +55,7 @@
             </select>
         </div>
 
-        <button type="submit" class="adm-btn adm-btn--vert">Filtrer</button>
+        <button type="submit" class="adm-btn adm-btn--vert" data-auto-filtre-bouton>Filtrer</button>
 
         @if ($recherche || $etat || $modele)
             <a href="{{ route('admin.profiles.index') }}" class="adm-btn adm-btn--clair">Réinitialiser</a>

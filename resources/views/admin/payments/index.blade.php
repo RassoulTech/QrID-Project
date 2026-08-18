@@ -48,7 +48,7 @@
     </nav>
 
     {{-- ==================== FILTRES ==================== --}}
-    <form method="GET" action="{{ route('admin.payments.index') }}" class="adm-filtres">
+    <form method="GET" action="{{ route('admin.payments.index') }}" class="adm-filtres" data-auto-filtre>
         {{-- L'onglet actif survit au filtrage : sans ce champ, filtrer par
              moyen de paiement ramènerait silencieusement sur « Tous ». --}}
         <input type="hidden" name="statut" value="{{ $statut }}">
@@ -76,7 +76,7 @@
             </select>
         </div>
 
-        <button type="submit" class="adm-btn adm-btn--vert">Filtrer</button>
+        <button type="submit" class="adm-btn adm-btn--vert" data-auto-filtre-bouton>Filtrer</button>
 
         @if ($moyen || $periode)
             <a href="{{ route('admin.payments.index', ['statut' => $statut]) }}"

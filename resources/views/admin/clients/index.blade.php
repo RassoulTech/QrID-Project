@@ -23,7 +23,7 @@
     </x-slot:actions>
 
     {{-- ==================== FILTRES ==================== --}}
-    <form method="GET" action="{{ route('admin.clients.index') }}" class="adm-filtres">
+    <form method="GET" action="{{ route('admin.clients.index') }}" class="adm-filtres" data-auto-filtre>
         <div class="adm-filtre adm-filtre--large adm-filtres__recherche">
             <label for="q">Recherche</label>
             <svg class="adm-filtres__loupe" width="14" height="14" viewBox="0 0 16 16"
@@ -58,7 +58,7 @@
             </select>
         </div>
 
-        <button type="submit" class="adm-btn adm-btn--vert">Filtrer</button>
+        <button type="submit" class="adm-btn adm-btn--vert" data-auto-filtre-bouton>Filtrer</button>
 
         {{-- N'apparaît que s'il y a quelque chose à effacer : un bouton
              « Réinitialiser » sur une liste vierge n'a aucun sens. --}}
