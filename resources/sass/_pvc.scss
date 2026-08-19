@@ -26,8 +26,9 @@
 //   --pvc-fond  : le fond de la carte
 //   --pvc-encre : le texte ET les modules du QR Code
 .pvc{
-  --pvc-fond: #{$vert-fonce};
-  --pvc-encre: #FFFFFF;
+  // Le BLANC domine, le vert signe. Voir VarianteCarte::DEFAUT.
+  --pvc-fond: #FFFFFF;
+  --pvc-encre: #{$vert-fonce};
   width:100%;
   max-width:420px;
 }
@@ -726,3 +727,44 @@
   gap:10px;
   margin-top:20px;
 }
+
+
+// -----------------------------------------------------------------------------
+// LE LISERÉ — la signature de marque sur une carte devenue blanche
+// -----------------------------------------------------------------------------
+// UNE CARTE BLANCHE SANS REPÈRE EST UN BRISTOL. Le vert ne recouvre plus la
+// surface : il lui faut donc un point d'ancrage, sinon la carte perd toute
+// identité et ressemble à n'importe quelle carte imprimée en boutique.
+//
+// UN SEUL BORD, ET LE GAUCHE. Un cadre complet enfermerait la composition et
+// rognerait la zone de sécurité sur les quatre côtés ; deux bords opposés
+// feraient une bannière. Le bord gauche est celui que l'œil rencontre en
+// premier en lecture latine, et celui que le pouce couvre le moins quand on
+// tend la carte.
+//
+// 4 % DE LA LARGEUR — soit 3,4 mm sur une carte ID-1. Assez pour se voir à
+// bout de bras, assez fin pour ne pas devenir un aplat.
+//
+// IL EST POSÉ SOUS LE CONTENU, jamais par-dessus : la marge de sécurité de
+// 3,5 % reste intacte, et aucun texte ne peut tomber dessus.
+.pvc__face::before{
+  content:"";
+  position:absolute;
+  top:0;bottom:0;left:0;
+  width:4cqw;
+  background:var(--pvc-encre);
+  z-index:0;
+}
+
+// Sur la carte verte, l'encre est blanche : un liseré blanc sur fond vert
+// serait un trait lumineux sans rapport avec la marque. On le neutralise.
+// La variante est déjà une classe du conteneur, posée par x-pvc-card.
+.pvc--verte .pvc__face::before{display:none}
+.pvc--verte .pvc__face--recto{padding-left:3.5cqw}
+
+// Le contenu passe au-dessus du liseré et se décale de sa largeur : sans ce
+// décalage, le nom commencerait sur le trait.
+.pvc__face--recto > *,
+.pvc__face--verso > *{position:relative;z-index:1}
+
+.pvc__face--recto{padding-left:calc(3.5cqw + 4cqw)}

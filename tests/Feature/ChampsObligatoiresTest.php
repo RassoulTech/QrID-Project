@@ -39,6 +39,7 @@ class ChampsObligatoiresTest extends TestCase
         'field.blade.php',
         'auth-field.blade.php',
         'auth-password.blade.php',
+        'phone-field.blade.php',
         'form-legende.blade.php',
     ];
 

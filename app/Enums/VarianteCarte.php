@@ -44,8 +44,25 @@ enum VarianteCarte: string
     case Verte = '#0B3B2E';
     case Blanche = '#FFFFFF';
 
-    /** La variante servie à qui n'a rien choisi. */
-    public const DEFAUT = self::Verte;
+    /**
+     * La variante servie à qui n'a rien choisi.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * LE BLANC DOMINE DÉSORMAIS, ET CE N'EST PAS UN GOÛT
+     * ═══════════════════════════════════════════════════════════════════
+     * Une carte à aplat vert plein consomme énormément d'encre à
+     * l'impression, marque le moindre défaut de massicot sur ses bords, et
+     * garde les traces de doigts. Le blanc pardonne les trois.
+     *
+     * Surtout : le QR Code y devient VERT FONCÉ SUR BLANC, c'est-à-dire
+     * sombre sur clair — le sens que tous les lecteurs attendent. La carte
+     * verte impose l'inverse, qui sort de la norme ISO/IEC 18004 et échoue
+     * sur certains lecteurs anciens.
+     *
+     * Le vert ne disparaît pas : il passe en accent — le nom, le QR, le
+     * liseré. Il signe la carte au lieu de la recouvrir.
+     */
+    public const DEFAUT = self::Blanche;
 
     public function libelle(): string
     {

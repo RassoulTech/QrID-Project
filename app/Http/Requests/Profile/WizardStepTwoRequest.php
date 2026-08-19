@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Profile;
 
-use App\Rules\SenegalPhone;
+use App\Rules\TelephoneInternational;
 use App\Services\ProfileWizardService;
+use App\Support\IndicatifsPays;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -49,8 +50,10 @@ class WizardStepTwoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'phone' => ['required', 'string', 'max:32', new SenegalPhone],
-            'whatsapp' => ['nullable', 'string', 'max:32', new SenegalPhone],
+            'phone_pays' => ['nullable', 'string', 'size:2'],
+            'phone' => ['required', 'string', 'max:32', new TelephoneInternational],
+            'whatsapp_pays' => ['nullable', 'string', 'size:2'],
+            'whatsapp' => ['nullable', 'string', 'max:32', new TelephoneInternational('whatsapp_pays')],
             'public_email' => ['nullable', 'email:rfc', 'max:255'],
             'website' => ['nullable', 'url:http,https', 'max:255'],
             'address' => ['nullable', 'string', 'max:160'],
@@ -92,9 +95,9 @@ class WizardStepTwoRequest extends FormRequest
     public function canonicalPhones(): array
     {
         return [
-            'phone' => SenegalPhone::normalize($this->input('phone')),
+            'phone' => IndicatifsPays::normaliser($this->input('phone_pays'), $this->input('phone')),
             'whatsapp' => $this->filled('whatsapp')
-                ? SenegalPhone::normalize($this->input('whatsapp'))
+                ? IndicatifsPays::normaliser($this->input('whatsapp_pays') ?: $this->input('phone_pays'), $this->input('whatsapp'))
                 : null,
         ];
     }

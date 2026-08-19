@@ -2,7 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Rules\SenegalPhone;
+use App\Rules\TelephoneInternational;
+use App\Support\IndicatifsPays;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules;
 
@@ -31,7 +32,8 @@ class RegisterRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email:rfc', 'max:255'],
-            'phone' => ['required', 'string', 'max:32', new SenegalPhone],
+            'phone_pays' => ['nullable', 'string', 'size:2'],
+            'phone' => ['required', 'string', 'max:32', new TelephoneInternational],
 
             // « confirmed » exige un champ password_confirmation. Le formulaire
             // le porte à nouveau (maquette d'inscription) : une faute de frappe
@@ -58,6 +60,6 @@ class RegisterRequest extends FormRequest
      */
     public function canonicalPhone(): string
     {
-        return SenegalPhone::normalize($this->input('phone'));
+        return IndicatifsPays::normaliser($this->input('phone_pays'), $this->input('phone'));
     }
 }

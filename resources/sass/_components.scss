@@ -440,3 +440,49 @@
   font-size:12.5px;
   color:var(--texte-2, #{$gris-second});
 }
+
+// -----------------------------------------------------------------------------
+// TÉLÉPHONE AVEC INDICATIF — voir x-phone-field
+// -----------------------------------------------------------------------------
+// Le sélecteur et le champ forment UN SEUL objet visuel : deux contrôles
+// séparés se liraient comme deux questions, alors qu'il n'y en a qu'une.
+//
+// Le sélecteur ne prend que la place de son contenu, le numéro occupe le
+// reste : c'est le numéro qu'on saisit, pas le pays qu'on change.
+.tel{
+  display:flex;
+  gap:8px;
+  align-items:stretch;
+}
+
+.tel__pays{
+  flex:0 0 auto;
+  max-width:46%;
+  // Même hauteur, même rayon, même bordure que tous les champs : ils héritent
+  // de .f__control. Seule la flèche est ajoutée.
+  appearance:none;
+  padding-right:30px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7' fill='none' stroke='%235C6B66' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4.5 4.5L10 1'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+
+  // Les options natives suivent le thème du document : voir color-scheme
+  // dans _theme.scss. On teinte ce qui l'est réellement.
+  accent-color:var(--accent);
+
+  option{background:var(--surface);color:var(--texte)}
+}
+
+// En thème sombre, un chevron gris foncé sur fond sombre est invisible.
+.theme-dark .tel__pays{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7' fill='none' stroke='%239BB0A8' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4.5 4.5L10 1'/%3E%3C/svg%3E");
+}
+
+.tel__numero{flex:1 1 auto;min-width:0}
+
+// Sous 360px, le pays passe au-dessus : côte à côte, le numéro n'aurait plus
+// que six caractères visibles.
+@media (max-width:359px){
+  .tel{flex-direction:column}
+  .tel__pays{max-width:100%}
+}

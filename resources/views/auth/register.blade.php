@@ -66,17 +66,11 @@
                 :value="$prefillEmail ?? null"
             />
 
-            {{-- Toute saisie raisonnable est acceptée puis normalisée côté
-                 serveur au format +221XXXXXXXXX. --}}
-            <x-auth-field
-                name="phone"
-                type="tel"
-                label="Téléphone"
-                placeholder="77 383 13 64"
-                autocomplete="tel"
-                inputmode="tel"
-                maxlength="32"
-            />
+            {{-- L'INDICATIF EST CHOISI, PLUS SUPPOSÉ. Le préfixe « +221 » figé
+                 rendait l'inscription impossible à un client ivoirien ou à un
+                 Sénégalais de la diaspora. Toute saisie raisonnable est
+                 acceptée puis normalisée au format international complet. --}}
+            <x-phone-field name="phone" label="Téléphone" :value="old('phone')" />
 
             <x-auth-password
                 name="password"

@@ -17,14 +17,13 @@
         :action="route('profile.store.step2')"
         :back="route('profile.create.step1')"
     >
-        <x-field name="phone" label="Téléphone" type="tel" inputmode="tel"
-                 placeholder="77 123 45 67" autocomplete="tel"
-                 hint="Format sénégalais. Enregistré en +221 77 123 45 67."
-                 :value="$wizard->field('phone')" autofocus />
+        {{-- L'indicatif suit le pays choisi : le numéro est enregistré au
+             format international complet, quel qu'il soit. --}}
+        <x-phone-field name="phone" label="Téléphone"
+                       :value="$wizard->field('phone')" />
 
-        <x-field name="whatsapp" label="WhatsApp" type="tel" inputmode="tel" optional
-                 placeholder="Si différent du téléphone"
-                 :value="$wizard->field('whatsapp')" />
+        <x-phone-field name="whatsapp" label="WhatsApp" optional
+                       :value="$wizard->field('whatsapp')" />
 
         <x-field name="public_email" label="E-mail public" type="email" optional
                  placeholder="contact@exemple.sn" autocomplete="email"
