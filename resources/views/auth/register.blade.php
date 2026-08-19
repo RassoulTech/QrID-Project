@@ -41,6 +41,8 @@
     <form method="POST" action="{{ route('register.store') }}" novalidate>
         @csrf
 
+        <x-form-legende />
+
         {{-- Idempotence : une seconde soumission ne recrée rien. --}}
         <input type="hidden" name="_idem" value="{{ $idempotencyToken }}">
 

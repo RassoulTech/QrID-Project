@@ -1,6 +1,8 @@
 <section>
     <form method="post" action="{{ route('compte.update') }}" novalidate>
         @csrf
+
+    <x-form-legende />
         @method('patch')
 
         <x-input

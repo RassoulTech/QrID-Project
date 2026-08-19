@@ -27,6 +27,7 @@ import charCounter from './modules/char-counter';
 import photoPreview from './modules/photo-preview';
 import socialRepeater from './modules/social-repeater';
 import autoFiltre from './modules/auto-filtre';
+import flashAuto from './modules/flash-auto';
 
 const modules = [
     scrollReveal,
@@ -41,6 +42,7 @@ const modules = [
     photoPreview,
     socialRepeater,
     autoFiltre,
+    flashAuto,
 ];
 
 // Chaque module renvoie tôt s'il n'a rien à faire sur la page courante.

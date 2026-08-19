@@ -29,6 +29,7 @@
   --accent:         #{$vert-fonce};
   --accent-doux:    #{$vert-clair};
   --accent-vif:     #{$vert-accent};
+  --danger:         #{$rouge-erreur};   // asterisque et erreurs de champ
 
   /*
    | TEXTE POSÉ SUR --accent. Le jeton qui manquait, et son absence a produit
@@ -71,6 +72,7 @@
   --sur-accent:     #06231B;          // 7,11:1 sur ce vert vif
   --accent-doux:    rgba(47, 191, 146, .16);
   --accent-vif:     #3FD3A4;
+  --danger:         #FF9A8F;          // le rouge fonce serait illisible ici
   --ombre-1:        0 1px 2px rgba(0, 0, 0, .40);
   --ombre-2:        0 12px 32px rgba(0, 0, 0, .45);
 

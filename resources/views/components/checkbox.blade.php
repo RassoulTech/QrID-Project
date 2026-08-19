@@ -42,6 +42,7 @@
             @checked($isChecked)
             @if ($hasError) aria-invalid="true" aria-describedby="{{ $fieldId }}-error" @endif
             @required($required)
+        @if ($required) aria-required="true" @endif
             {{ $attributes->merge(['class' => 'form-check-input' . ($hasError ? ' is-invalid' : '')]) }}
         >
 

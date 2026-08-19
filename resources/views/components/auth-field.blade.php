@@ -36,9 +36,11 @@
 <div class="f">
     <label class="f__label" for="{{ $fieldId }}">
         {{ $label }}
-        @unless ($required)
+        @if ($required)
+            <span class="f__requis" aria-hidden="true">*</span>
+        @else
             <span class="f__opt">optionnel</span>
-        @endunless
+        @endif
     </label>
 
     <span class="f__wrap">
@@ -55,6 +57,7 @@
             @if ($decritPar) aria-describedby="{{ $decritPar }}" @endif
             @if ($enErreur) aria-invalid="true" @endif
             @required($required)
+            @if ($required) aria-required="true" @endif
             {{ $attributes }}
         >
 

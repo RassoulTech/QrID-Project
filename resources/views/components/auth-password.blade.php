@@ -43,7 +43,12 @@
 @endphp
 
 <div class="f">
-    <label class="f__label" for="{{ $fieldId }}">{{ $label }}</label>
+    <label class="f__label" for="{{ $fieldId }}">
+        {{ $label }}
+        @if ($required)
+            <span class="f__requis" aria-hidden="true">*</span>
+        @endif
+    </label>
 
     <span class="f__wrap">
         <input
@@ -57,6 +62,7 @@
             @if ($enErreur) aria-invalid="true" @endif
             @if ($meter) data-pw-meter-input @endif
             @required($required)
+            @if ($required) aria-required="true" @endif
             {{ $attributes }}
         >
 

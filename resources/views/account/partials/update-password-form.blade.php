@@ -31,6 +31,8 @@
 
     <form method="post" action="{{ route('password.update') }}" novalidate>
         @csrf
+
+    <x-form-legende />
         @method('put')
 
         @if ($aUnMotDePasse)

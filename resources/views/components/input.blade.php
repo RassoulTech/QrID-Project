@@ -48,6 +48,7 @@
         @if ($describedBy) aria-describedby="{{ $describedBy }}" @endif
         @if ($hasError) aria-invalid="true" @endif
         @required($required)
+        @if ($required) aria-required="true" @endif
         {{ $attributes->merge(['class' => 'form-control' . ($hasError ? ' is-invalid' : '')]) }}
     >
 

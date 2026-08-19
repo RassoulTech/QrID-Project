@@ -34,6 +34,7 @@
             @if ($placeholder) placeholder="{{ $placeholder }}" @endif
             autocomplete="{{ $autocomplete }}"
             @required($required)
+        @if ($required) aria-required="true" @endif
             {{ $attributes->merge(['class' => 'form-control' . ($hasError ? ' is-invalid' : '')]) }}
         >
 

@@ -23,10 +23,16 @@
 @php $id = 'f-'.str_replace(['[', ']', '.'], '-', $name); @endphp
 
 <div class="f">
+    {{-- L'ASTERISQUE EST DEDUIT, JAMAIS ECRIT A LA MAIN.
+         Ce champ est requis SAUF s'il est declare optionnel : la marque suit
+         donc exactement l'attribut required pose plus bas, et les deux ne
+         peuvent pas se contredire. --}}
     <label class="f__label" for="{{ $id }}">
         {{ $label }}
         @if ($optional)
             <span class="f__opt">optionnel</span>
+        @else
+            <span class="f__requis" aria-hidden="true">*</span>
         @endif
     </label>
 
@@ -40,7 +46,7 @@
         @if ($autocomplete) autocomplete="{{ $autocomplete }}" @endif
         @if ($inputmode) inputmode="{{ $inputmode }}" @endif
         @if ($maxlength) maxlength="{{ $maxlength }}" @endif
-        @if (! $optional) required @endif
+        @if (! $optional) required aria-required="true" @endif
         @if ($errors->has($name)) aria-invalid="true" aria-describedby="{{ $id }}-err" @endif
         {{ $attributes }}
     >

@@ -22,6 +22,10 @@
       novalidate>
     @csrf
 
+    {{-- UNE SEULE LEGENDE POUR LES TROIS ETAPES. La poser dans chaque vue
+         d'etape aurait garanti qu'elle finisse par diverger de l'une d'elles. --}}
+    <x-form-legende />
+
     {{-- La touche Entrée déclenche le PREMIER bouton submit du formulaire.
          Sans ce leurre, ce serait « Ajouter un réseau » à l'étape 2.
          Ici, Entrée vaut toujours « Continuer ». --}}

@@ -12,6 +12,9 @@
 
 @foreach ($flashMap as $key => $type)
     @if (session()->has($key))
-        <x-alert :type="$type">{{ session($key) }}</x-alert>
+        {{-- data-flash-auto : SEULS ces messages s'effacent au bout de 30 s.
+             Les erreurs de validation de champ restent, elles designent une
+             correction a faire. --}}
+        <x-alert :type="$type" data-flash-auto>{{ session($key) }}</x-alert>
     @endif
 @endforeach

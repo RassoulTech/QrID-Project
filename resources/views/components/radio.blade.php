@@ -43,6 +43,7 @@
                 value="{{ $optionValue }}"
                 @checked((string) $current === (string) $optionValue)
                 @required($required)
+        @if ($required) aria-required="true" @endif
                 class="form-check-input {{ $hasError ? 'is-invalid' : '' }}"
             >
             <label class="form-check-label" for="{{ $optionId }}">{{ $optionLabel }}</label>
