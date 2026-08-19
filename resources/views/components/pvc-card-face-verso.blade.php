@@ -66,4 +66,20 @@
         <span class="pvc__v-nature">Protocole d'identité numérique</span>
         <span class="pvc__v-site">{{ config('landing.brand.website') }}</span>
     </span>
+
+    {{-- LA BANDE DE MARQUE — en bas, pleine largeur, sur les DEUX faces.
+         Elle ferme la carte et porte le logo sans concurrencer le QR. Le
+         liseré latéral qu'elle remplace tirait tout le regard vers la gauche
+         alors que le nom et le QR sont centrés. --}}
+    <span class="pvc__bande" aria-hidden="true">
+        <span class="pvc__bande-logo">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+            {{ config('app.name') }}
+        </span>
+    </span>
 </div>

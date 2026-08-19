@@ -9,19 +9,20 @@
     <div class="plans">
       @foreach ($plans as $plan)
         @php
-            $featured = $plan->slug === 'annuel';
+            /*
+             | LA MISE EN AVANT SUIT LE PRIX, PAS UN SLUG.
+             |
+             | Elle visait « annuel », une formule retirée du catalogue : plus
+             | aucune carte n'était mise en avant, et le Standard tombait dans
+             | le cas par défaut — d'où le « Par mois » affiché sur un
+             | abonnement de 90 jours.
+             */
+            $featured = ! $plan->isFree();
 
-            $period = match (true) {
-                $plan->isFree() => 'Pendant '.$plan->duration_days.' jours',
-                $featured => 'Par an (2 mois offerts)',
-                default => 'Par mois',
-            };
+            // La phrase vient du MODÈLE : un seul endroit la décide.
+            $period = $plan->periodeFacturation();
 
-            $cta = match (true) {
-                $plan->isFree() => 'Essayer gratuitement',
-                $featured => "Choisir l'Annuel",
-                default => "S'abonner",
-            };
+            $cta = $plan->isFree() ? 'Essayer gratuitement' : "S'abonner";
         @endphp
 
         <div class="plan{{ $featured ? ' plan--featured' : '' }}" data-reveal>

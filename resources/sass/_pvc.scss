@@ -76,13 +76,18 @@
    */
   padding:3.5cqw;
 
-  // Dégradé diagonal, construit À PARTIR du fond de la variante : plus clair
-  // en haut à gauche, plus dense en bas à droite. Surface mate — aucun éclat,
-  // seulement le reflet oblique.
-  background:linear-gradient(135deg,
-    color-mix(in srgb, var(--pvc-fond) 92%, var(--pvc-encre)) 0%,
-    var(--pvc-fond) 44%,
-    color-mix(in srgb, var(--pvc-fond) 88%, #000) 100%);
+  /*
+   | FOND UNI, ET C'EST UN CHOIX D'IMPRESSION AUTANT QUE DE GOÛT.
+   |
+   | Un dégradé diagonal habillait la carte verte. Reporté sur la carte
+   | blanche, il produisait un gris sale dans le coin inférieur droit — l'œil
+   | y lit une salissure, pas une nuance. Et à l'impression, un dégradé sur
+   | fond clair fait apparaître le tramage du procédé.
+   |
+   | Le blanc est donc PLEIN. Le relief vient des ombres et du reflet, pas de
+   | la surface.
+   */
+  background:var(--pvc-fond);
 
   /*
    | DEUX OMBRES, PAS UNE — et c'est ce qui fait la différence entre un objet
@@ -730,41 +735,67 @@
 
 
 // -----------------------------------------------------------------------------
-// LE LISERÉ — la signature de marque sur une carte devenue blanche
+// LA BANDE DE MARQUE — en bas, sur toute la largeur
 // -----------------------------------------------------------------------------
-// UNE CARTE BLANCHE SANS REPÈRE EST UN BRISTOL. Le vert ne recouvre plus la
-// surface : il lui faut donc un point d'ancrage, sinon la carte perd toute
-// identité et ressemble à n'importe quelle carte imprimée en boutique.
+// LE LISERÉ LATÉRAL ÉTAIT UNE ERREUR. Collé au bord gauche, il déséquilibrait
+// la composition : le nom et le QR sont centrés, et un trait vertical d'un seul
+// côté tire tout le regard vers la gauche.
 //
-// UN SEUL BORD, ET LE GAUCHE. Un cadre complet enfermerait la composition et
-// rognerait la zone de sécurité sur les quatre côtés ; deux bords opposés
-// feraient une bannière. Le bord gauche est celui que l'œil rencontre en
-// premier en lecture latine, et celui que le pouce couvre le moins quand on
-// tend la carte.
+// UNE BANDE BASSE, PLEINE LARGEUR, tient le contraire : elle ferme la carte,
+// elle est symétrique, et elle porte le logo sans concurrencer le QR. C'est la
+// composition des cartes bancaires et des badges — un socle, pas une bordure.
 //
-// 4 % DE LA LARGEUR — soit 3,4 mm sur une carte ID-1. Assez pour se voir à
-// bout de bras, assez fin pour ne pas devenir un aplat.
+// 8 % DE LA HAUTEUR, soit 4,3 mm sur une carte ID-1 : assez pour porter un
+// logo lisible, assez peu pour ne pas manger la zone utile.
 //
-// IL EST POSÉ SOUS LE CONTENU, jamais par-dessus : la marge de sécurité de
-// 3,5 % reste intacte, et aucun texte ne peut tomber dessus.
-.pvc__face::before{
-  content:"";
+// EXPRIMÉE EN cqw, ET C'EST OBLIGATOIRE. Le conteneur est en
+// « container-type: inline-size » : il ne connaît que sa LARGEUR, et l'unité
+// cqh y est invalide — la hauteur retombait alors sur auto, la bande se
+// réduisait à son texte et ne se remplissait pas.
+// Ratio ID-1 = 1,586 : 8 % de la hauteur valent 8 / 1,586 ≈ 5 % de la largeur.
+.pvc__bande{
   position:absolute;
-  top:0;bottom:0;left:0;
-  width:4cqw;
+  left:0;right:0;bottom:0;
+  height:5.05cqw;
   background:var(--pvc-encre);
-  z-index:0;
+  display:flex;align-items:center;justify-content:center;
+  gap:1.5cqw;
+  z-index:1;
 }
 
-// Sur la carte verte, l'encre est blanche : un liseré blanc sur fond vert
-// serait un trait lumineux sans rapport avec la marque. On le neutralise.
-// La variante est déjà une classe du conteneur, posée par x-pvc-card.
-.pvc--verte .pvc__face::before{display:none}
-.pvc--verte .pvc__face--recto{padding-left:3.5cqw}
+.pvc__bande-logo{
+  // Le logo est posé en couleur de FOND : sur la bande verte il devient blanc,
+  // sur une bande blanche il deviendrait vert. Aucune valeur en dur.
+  color:var(--pvc-fond);
+  display:flex;align-items:center;gap:1cqw;
+  font-size:3cqw;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;
+}
 
-// Le contenu passe au-dessus du liseré et se décale de sa largeur : sans ce
-// décalage, le nom commencerait sur le trait.
-.pvc__face--recto > *,
-.pvc__face--verso > *{position:relative;z-index:1}
+// Le contenu se tient AU-DESSUS de la bande : sans cette réserve, la fonction
+// tomberait dessus et deviendrait illisible.
+.pvc__face--recto,
+.pvc__face--verso{padding-bottom:calc(6cqw + 5.05cqw)}
 
-.pvc__face--recto{padding-left:calc(3.5cqw + 4cqw)}
+// -----------------------------------------------------------------------------
+// ANCIEN LISERÉ — retiré
+// -----------------------------------------------------------------------------
+// Le contenu passe au-dessus de la bande.
+//
+// LA BANDE EST EXCLUE, ET C'EST LE POINT. Écrite « > * », cette règle imposait
+// position:relative à TOUS les enfants directs — donc aussi à la bande, dont
+// le position:absolute était annulé. Elle se réduisait alors à son texte au fil
+// du contenu, sans jamais se remplir. Le défaut ne se voyait que sur la face
+// dont le contenu ne poussait pas la bande hors cadre.
+.pvc__face--recto > *:not(.pvc__bande):not(.pvc__reflet),
+.pvc__face--verso > *:not(.pvc__bande):not(.pvc__reflet){position:relative;z-index:2}
+
+// UNE FINE BORDURE détache la carte blanche du fond, en thème clair comme en
+// thème sombre. Sans elle, une carte blanche posée sur une surface claire
+// flotte sans contour et paraît découpée au ciseau.
+.pvc__face{border:1px solid color-mix(in srgb, var(--pvc-encre) 14%, transparent)}
+
+// Marges portées à 6 % : la densité demandée, sans descendre sous les 3 mm de
+// zone de sécurité d'impression.
+.pvc__face{padding:6cqw}
+
