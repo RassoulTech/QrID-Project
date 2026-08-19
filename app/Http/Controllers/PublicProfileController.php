@@ -10,6 +10,7 @@ use App\Services\VCardService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PublicProfileController extends Controller
@@ -69,6 +70,24 @@ class PublicProfileController extends Controller
              | page. En cas d'échec, le lien disparaît, la carte reste.
              */
             'qrSvg' => $this->qr($profile),
+
+            /*
+             | LA PHOTO — VÉRIFIÉE SUR LE DISQUE, PAS EN BASE.
+             |
+             | photo_path renseigné ne veut pas dire fichier présent. Sur un
+             | stockage éphémère — FILESYSTEM_DISK=local dans un conteneur
+             | Render — chaque déploiement efface les photos téléversées : la
+             | colonne reste, le fichier disparaît.
+             |
+             | La page affichait alors une balise <img> vers un 404, donc un
+             | bandeau vide avec une icône d'image cassée. Constaté en
+             | production le 18 août : la photo ET l'aperçu de partage
+             | répondaient 404 quelques heures après avoir répondu 200.
+             |
+             | On vérifie donc l'EXISTENCE du fichier. En son absence, les
+             | initiales prennent le relais — jamais un vide.
+             */
+            'photoUrl' => $this->photo($profile),
         ]);
     }
 
@@ -114,6 +133,33 @@ class PublicProfileController extends Controller
                 'slug' => $profile->slug,
                 'error' => $e->getMessage(),
             ]);
+        }
+    }
+
+    /**
+     * L'adresse de la photo, ou null si le fichier n'est pas là.
+     *
+     * La vérification coûte un accès disque par affichage. C'est le prix d'un
+     * repli fiable : sans elle, la page promet une image qu'elle ne peut pas
+     * servir, et le visiteur voit un cadre brisé au lieu d'un visage.
+     */
+    private function photo(Profile $profile): ?string
+    {
+        if (blank($profile->photo_path)) {
+            return null;
+        }
+
+        try {
+            return Storage::disk(config('filesystems.default'))->exists($profile->photo_path)
+                ? Storage::url($profile->photo_path)
+                : null;
+        } catch (\Throwable $e) {
+            Log::warning('Photo de profil illisible', [
+                'slug' => $profile->slug,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
         }
     }
 

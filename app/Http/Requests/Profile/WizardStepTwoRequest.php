@@ -50,6 +50,15 @@ class WizardStepTwoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            /*
+             | LE LIEN DE LOCALISATION — facultatif, et validé comme une URL.
+             |
+             | « Thiès, Sénégal » lancé dans une recherche cartographique tombe
+             | au centre d'une ville de 300 000 habitants. Pour un commerce,
+             | c'est inutilisable : le visiteur voulait la boutique, il obtient
+             | un quartier. Ce champ permet de coller le lien exact.
+             */
+            'maps_url' => ['nullable', 'url', 'max:500'],
             'phone_pays' => ['nullable', 'string', 'size:2'],
             'phone' => ['required', 'string', 'max:32', new TelephoneInternational],
             'whatsapp_pays' => ['nullable', 'string', 'size:2'],
@@ -95,6 +104,7 @@ class WizardStepTwoRequest extends FormRequest
     public function canonicalPhones(): array
     {
         return [
+            'maps_url' => $this->input('maps_url') ?: null,
             'phone' => IndicatifsPays::normaliser($this->input('phone_pays'), $this->input('phone')),
             'whatsapp' => $this->filled('whatsapp')
                 ? IndicatifsPays::normaliser($this->input('whatsapp_pays') ?: $this->input('phone_pays'), $this->input('whatsapp'))

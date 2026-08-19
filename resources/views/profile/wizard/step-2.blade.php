@@ -25,6 +25,13 @@
         <x-phone-field name="whatsapp" label="WhatsApp" optional
                        :value="$wizard->field('whatsapp')" />
 
+        {{-- Le lien exact plutôt qu'une recherche devinée : « Sacré-Cœur 3 »
+             tombe dans un quartier, pas devant la boutique. --}}
+        <x-field name="maps_url" label="Lien de localisation" type="url" optional
+                 placeholder="https://maps.app.goo.gl/..."
+                 hint="Collez le lien de votre fiche Google Maps pour un repérage exact."
+                 :value="$wizard->field('maps_url')" />
+
         <x-field name="public_email" label="E-mail public" type="email" optional
                  placeholder="contact@exemple.sn" autocomplete="email"
                  hint="Affiché sur votre profil. Différent de votre e-mail de connexion."

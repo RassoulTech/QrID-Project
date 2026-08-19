@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 #[ObservedBy(ProfileObserver::class)]
 class Profile extends Model
@@ -31,6 +32,7 @@ class Profile extends Model
         'public_email',
         'website',
         'address',
+        'maps_url',
         'photo_path',
         'template_id',
         'primary_color',
@@ -183,6 +185,70 @@ class Profile extends Model
      * Un profil désactivé a `is_active` à false : la coupure administrative
      * passe donc déjà par ce test, sans condition supplémentaire.
      */
+    /**
+     * LA PHOTO EXISTE-T-ELLE VRAIMENT SUR LE DISQUE ?
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * TESTER LA COLONNE NE SUFFIT PAS
+     * ═══════════════════════════════════════════════════════════════════
+     * La vue publique testait `photo_path`, c'est-à-dire la BASE. Elle rendait
+     * donc une balise <img> cassée chaque fois que le fichier avait disparu du
+     * disque — et le repli par initiales, écrit juste à côté, ne se
+     * déclenchait jamais. C'est ainsi qu'on obtient un bandeau vide.
+     *
+     * Or le disque de Render est ÉPHÉMÈRE : les photos téléversées sont
+     * effacées à chaque déploiement. Vérifié en production — dans le même
+     * dossier /storage/, l'aperçu de partage répond 200 et la photo 404, parce
+     * que l'application REGÉNÈRE l'un et pas l'autre.
+     *
+     * Ce test est donc la seule chose qui distingue « pas de photo » de
+     * « photo perdue » — et pour le visiteur, les deux doivent produire le
+     * même repli propre.
+     */
+    public function aUnePhoto(): bool
+    {
+        if (blank($this->photo_path)) {
+            return false;
+        }
+
+        try {
+            return Storage::disk('public')->exists($this->photo_path);
+        } catch (\Throwable) {
+            // Un disque injoignable ne doit pas casser la page : on retombe
+            // simplement sur les initiales.
+            return false;
+        }
+    }
+
+    /** Les initiales du porteur, pour le repli. */
+    public function initiales(): string
+    {
+        $initiales = mb_strtoupper(
+            mb_substr((string) $this->first_name, 0, 1).mb_substr((string) $this->last_name, 0, 1)
+        );
+
+        return $initiales !== '' ? $initiales : mb_strtoupper(mb_substr($this->full_name, 0, 1));
+    }
+
+    /**
+     * OÙ OUVRIR LA POSITION DU PORTEUR.
+     *
+     * Le lien exact qu'il a collé, s'il en a un. Sinon une recherche
+     * cartographique sur l'adresse saisie — qui tombe à peu près juste sur
+     * « Sacré-Cœur 3, Dakar », et nulle part sur « en face de la pharmacie ».
+     * D'où le champ dédié.
+     */
+    public function lienCarte(): ?string
+    {
+        if (filled($this->maps_url)) {
+            return $this->maps_url;
+        }
+
+        return filled($this->address)
+            ? 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($this->address)
+            : null;
+    }
+
     public function isPubliclyVisible(): bool
     {
         return $this->is_active && $this->user?->hasActiveSubscription();

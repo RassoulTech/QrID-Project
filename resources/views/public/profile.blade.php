@@ -7,16 +7,15 @@
          page publique  →  resources/views/public/profile.blade.php   (ici)
          aperçu client  →  resources/views/profile/preview.blade.php
 
-     Deux vues distinctes, aucune mutualisation. L'aperçu affiche
-     volontairement un cadre de smartphone pour simuler le rendu au
-     propriétaire ; cette page-ci EST le rendu. Elle a un jour appelé
-     <x-phone>, le composant de maquette : le visiteur voyait alors un
-     téléphone dessiné dans son téléphone, avec les boutons en double.
+     Deux vues distinctes, aucune mutualisation. L'aperçu affiche volontairement
+     un cadre de smartphone pour simuler le rendu au propriétaire ; cette
+     page-ci EST le rendu, et occupe tout l'écran.
 
-     RIEN NE DÉBORDE : ni un nom long, ni une adresse sans espace.
-     AUCUN JAVASCRIPT : le QR plein écran s'ouvre par :target.
+     TOUS LES RÉSEAUX SONT DANS LA GRILLE. Aucune icône isolée ailleurs : la
+     page en portait une sous l'identité et un lien WhatsApp séparé plus bas,
+     ce qui obligeait à chercher à deux endroits ce qui est une seule chose.
 
-     Props : $profile (avec socialLinks), $apercuUrl, $qrSvg
+     Props : $profile (avec socialLinks), $apercuUrl, $qrSvg, $photoUrl
 ============================================================================ --}}
 <x-public-profile-layout
     :title="$profile->full_name"
@@ -24,13 +23,6 @@
     :apercu-url="$apercuUrl ?? null"
 >
     @php
-        /*
-         | LES INITIALES, ET JAMAIS LE NOM COMPLET.
-         |
-         | La solution de repli écrivait le nom entier : dès que la photo ne
-         | chargeait pas, « Mouhamed Dione » débordait du cercle. Invisible en
-         | test — la photo est en cache — et bien visible en 3G.
-         */
         $initiales = mb_strtoupper(
             mb_substr((string) $profile->first_name, 0, 1).mb_substr((string) $profile->last_name, 0, 1)
         );
@@ -39,40 +31,64 @@
             ? $initiales
             : mb_strtoupper(mb_substr($profile->full_name, 0, 1));
 
-        // Les réseaux mis en avant en bas de carte : ceux sur lesquels on
-        // ENGAGE une conversation, pas ceux qu'on consulte.
-        $conversation = $profile->socialLinks->whereIn('platform', ['linkedin', 'facebook']);
+        /*
+         | LA GRILLE D'ACTIONS — réseaux ET moyens de contact, ensemble.
+         |
+         | Le visiteur ne distingue pas « un réseau social » d'« un numéro de
+         | téléphone » : il cherche par quel moyen joindre cette personne. Les
+         | séparer en deux zones l'oblige à balayer la page deux fois.
+         |
+         | Seules les entrées renseignées entrent : un bouton mort est une
+         | déception à retardement.
+         */
+        $actions = [];
+
+        if ($profile->whatsapp_href) {
+            $actions[] = ['whatsapp', $profile->whatsapp_href, 'WhatsApp', true];
+        }
+
+        if ($profile->phone) {
+            $actions[] = ['telephone', $profile->tel_href, 'Appeler', false];
+        }
+
+        if ($lienCarte = $profile->lienCarte()) {
+            $actions[] = ['localisation', $lienCarte, 'Localisation', true];
+        }
+
+        foreach ($profile->socialLinks as $lien) {
+            $actions[] = [$lien->platform, $lien->url, $lien->platform_label, true];
+        }
     @endphp
 
     <main class="pubc">
+        {{-- La bascule de thème flotte hors de la carte : elle appartient au
+             confort du visiteur, pas à l'identité du porteur. --}}
+        <div class="pubc__theme"><x-theme-toggle /></div>
+
         <article class="pubc__carte">
 
-            {{-- ═══════════════ BANDEAU ═══════════════ --}}
-            <header class="pubc__bandeau">
-                @if ($profile->photo_path)
-                    {{-- alt VIDE : le nom est écrit juste dessous. Un texte
-                         alternatif non vide s'AFFICHE quand l'image ne charge
-                         pas, et débordait alors du bandeau. --}}
-                    <img src="{{ Storage::url($profile->photo_path) }}" alt=""
-                         class="pubc__photo" width="420" height="180"
-                         decoding="async" fetchpriority="high">
-                @else
-                    <span class="pubc__initiales" aria-hidden="true">{{ $initiales }}</span>
-                @endif
+            {{-- ═══════════════ COUVERTURE ═══════════════ --}}
+            <header class="pubc__couverture">
+                {{-- Aucune image de couverture définie : un dégradé de marque
+                     plutôt qu'un vide. Un bandeau gris ferait croire à un
+                     chargement qui n'aboutit pas. --}}
+                <span class="pubc__couverture-fond" aria-hidden="true"></span>
 
-                @if (! empty($qrSvg))
-                    {{-- Pour montrer sa carte à une TROISIÈME personne sans
-                         lui faire recopier une adresse. --}}
-                    <a href="#qr" class="pubc__qr-bouton" aria-label="Afficher le QR Code">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <rect x="3" y="3" width="7" height="7" rx="1"/>
-                            <rect x="14" y="3" width="7" height="7" rx="1"/>
-                            <rect x="3" y="14" width="7" height="7" rx="1"/>
-                            <path d="M14 14h3v3h-3zM19 19h2v2h-2z"/>
-                        </svg>
-                    </a>
-                @endif
+                {{-- ═══════════════ MÉDAILLON ═══════════════
+                     LA VÉRIFICATION PORTE SUR LE FICHIER, PAS SUR LE CHAMP.
+                     photo_path renseigné ne veut pas dire fichier présent :
+                     sur un disque éphémère, chaque déploiement efface les
+                     photos et laissait un bandeau vide avec une icône
+                     d'image cassée. Voir PublicProfileController::photo(). --}}
+                <div class="pubc__medaillon">
+                    @if ($photoUrl)
+                        <img src="{{ $photoUrl }}" alt=""
+                             class="pubc__photo" width="120" height="120"
+                             decoding="async" fetchpriority="high">
+                    @else
+                        <span class="pubc__initiales" aria-hidden="true">{{ $initiales }}</span>
+                    @endif
+                </div>
             </header>
 
             {{-- ═══════════════ IDENTITÉ ═══════════════ --}}
@@ -88,124 +104,114 @@
                 @endif
             </div>
 
-            {{-- ═══════════════ RÉSEAUX ═══════════════
-                 On reconnaît un logo avant de lire un mot : c'est le seul
-                 rythme compatible avec les quelques secondes dont dispose la
-                 page. Seules les plateformes renseignées apparaissent. --}}
-            @if ($profile->socialLinks->isNotEmpty())
-                <nav class="pubc__reseaux" aria-label="Réseaux sociaux">
-                    @foreach ($profile->socialLinks as $lien)
-                        <a href="{{ $lien->url }}" class="pubc__reseau"
-                           target="_blank" rel="noopener"
-                           aria-label="{{ $lien->platform_label }}">
-                            <x-social-icon :plateforme="$lien->platform" />
+            {{-- ═══════════════ COORDONNÉES ═══════════════
+                 Encadrées et teintées : elles forment un bloc qu'on lit d'un
+                 seul regard, distinct des actions qu'on touche. --}}
+            @if ($profile->public_email || $profile->website || $profile->address)
+                <ul class="pubc__infos">
+                    @if ($profile->public_email)
+                        <li>
+                            <a href="mailto:{{ $profile->public_email }}" class="pubc__info">
+                                <span class="pubc__info-icone" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>
+                                    </svg>
+                                </span>
+                                <span class="pubc__info-texte">
+                                    <span class="pubc__info-valeur">{{ $profile->public_email }}</span>
+                                    <span class="pubc__info-etiquette">E-mail</span>
+                                </span>
+                            </a>
+                        </li>
+                    @endif
+
+                    @if ($profile->website)
+                        <li>
+                            <a href="{{ $profile->website }}" class="pubc__info" target="_blank" rel="noopener">
+                                <span class="pubc__info-icone" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>
+                                    </svg>
+                                </span>
+                                <span class="pubc__info-texte">
+                                    <span class="pubc__info-valeur">{{ preg_replace('#^https?://(www\.)?#', '', $profile->website) }}</span>
+                                    <span class="pubc__info-etiquette">Site web</span>
+                                </span>
+                            </a>
+                        </li>
+                    @endif
+
+                    @if ($profile->address)
+                        <li>
+                            {{-- CLIQUABLE : elle ouvre la position réelle, le
+                                 lien exact du porteur s'il en a collé un, une
+                                 recherche cartographique sinon. --}}
+                            <a href="{{ $profile->lienCarte() }}" class="pubc__info"
+                               target="_blank" rel="noopener">
+                                <span class="pubc__info-icone" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                </span>
+                                <span class="pubc__info-texte">
+                                    <span class="pubc__info-valeur">{{ $profile->address }}</span>
+                                    <span class="pubc__info-etiquette">Localisation</span>
+                                </span>
+                            </a>
+                        </li>
+                    @endif
+                </ul>
+            @endif
+
+            {{-- ═══════════════ LA GRILLE — l'élément central ═══════════════
+                 Trois par rangée. Elle se réorganise seule s'il y a moins de
+                 six entrées : une grille à trous se lirait comme un défaut. --}}
+            @if (! empty($actions))
+                <nav class="pubc__grille" aria-label="Contacter et suivre">
+                    @foreach ($actions as [$plateforme, $url, $libelle, $externe])
+                        <a href="{{ $url }}" class="pubc__tuile"
+                           @if ($externe) target="_blank" rel="noopener" @endif
+                           aria-label="{{ $libelle }}">
+                            <x-social-icon :plateforme="$plateforme" :taille="22" />
+                            <span class="pubc__tuile-nom">{{ $libelle }}</span>
                         </a>
                     @endforeach
                 </nav>
             @endif
 
-            {{-- ═══════════════ COORDONNÉES ═══════════════ --}}
-            <ul class="pubc__infos">
-                @if ($profile->public_email)
-                    <li class="pubc__info">
-                        <a href="mailto:{{ $profile->public_email }}" class="pubc__info-lien">
-                            <span class="pubc__info-icone" aria-hidden="true">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>
-                                </svg>
-                            </span>
-                            <span class="pubc__info-texte">
-                                <span class="pubc__info-valeur">{{ $profile->public_email }}</span>
-                                <span class="pubc__info-etiquette">E-mail</span>
-                            </span>
-                        </a>
-                    </li>
+            {{-- ═══════════════ BARRE D'ACTIONS ═══════════════
+                 PARTAGER ouvre le QR en plein écran, sans JavaScript, par
+                 :target. ENREGISTRER est un LIEN DIRECT vers la route de
+                 téléchargement — jamais un appel JavaScript, c'est ce qui
+                 casse sur iOS où Safari refuse d'ouvrir Contacts depuis un
+                 blob. --}}
+            <div class="pubc__barre">
+                @if (! empty($qrSvg))
+                    <a href="#qr" class="pubc__action pubc__action--clair">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                            <path d="M14 14h3v3h-3zM19 19h2v2h-2z"/>
+                        </svg>
+                        Partager
+                    </a>
                 @endif
 
-                @if ($profile->phone)
-                    <li class="pubc__info">
-                        <a href="{{ $profile->tel_href }}" class="pubc__info-lien">
-                            <span class="pubc__info-icone" aria-hidden="true">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.8.6a2 2 0 0 1 1.7 2z"/>
-                                </svg>
-                            </span>
-                            <span class="pubc__info-texte">
-                                <span class="pubc__info-valeur">{{ $profile->formatted_phone }}</span>
-                                <span class="pubc__info-etiquette">Mobile</span>
-                            </span>
-                        </a>
-                    </li>
-                @endif
-
-                @if ($profile->website)
-                    <li class="pubc__info">
-                        <a href="{{ $profile->website }}" class="pubc__info-lien"
-                           target="_blank" rel="noopener">
-                            <span class="pubc__info-icone" aria-hidden="true">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="9"/>
-                                    <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>
-                                </svg>
-                            </span>
-                            <span class="pubc__info-texte">
-                                <span class="pubc__info-valeur">{{ preg_replace('#^https?://#', '', $profile->website) }}</span>
-                                <span class="pubc__info-etiquette">Site web</span>
-                            </span>
-                        </a>
-                    </li>
-                @endif
-
-                @if ($profile->address)
-                    <li class="pubc__info">
-                        <span class="pubc__info-lien">
-                            <span class="pubc__info-icone" aria-hidden="true">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>
-                                </svg>
-                            </span>
-                            <span class="pubc__info-texte">
-                                <span class="pubc__info-valeur">{{ $profile->address }}</span>
-                                <span class="pubc__info-etiquette">Localisation</span>
-                            </span>
-                        </span>
-                    </li>
-                @endif
-            </ul>
-
-            {{-- ═══════════════ ENGAGER LA CONVERSATION ═══════════════
-                 Les réseaux ci-dessus se consultent ; ces deux lignes-ci
-                 s'ouvrent sur un échange. D'où le libellé explicite. --}}
-            @if ($profile->whatsapp_href || $conversation->isNotEmpty())
-                <div class="pubc__appels">
-                    @foreach ($conversation as $lien)
-                        <a href="{{ $lien->url }}" class="pubc__appel"
-                           target="_blank" rel="noopener">
-                            <x-social-icon :plateforme="$lien->platform" :taille="17" />
-                            <span>Me contacter sur {{ $lien->platform_label }}</span>
-                        </a>
-                    @endforeach
-
-                    @if ($profile->whatsapp_href)
-                        <a href="{{ $profile->whatsapp_href }}" class="pubc__appel"
-                           target="_blank" rel="noopener">
-                            <x-social-icon plateforme="whatsapp" :taille="17" />
-                            <span>M'écrire sur WhatsApp</span>
-                        </a>
-                    @endif
-                </div>
-            @endif
-
-            {{-- ═══════════════ L'ACTION QUI COMPTE ═══════════════
-                 Un LIEN DIRECT vers la route de téléchargement, jamais un
-                 appel JavaScript : c'est ce qui casse le plus souvent sur
-                 iOS, où Safari refuse d'ouvrir Contacts depuis un blob. --}}
-            <a href="{{ route('profile.vcard', $profile->slug) }}"
-               class="pubc__enregistrer">Enregistrer le contact</a>
+                <a href="{{ route('profile.vcard', $profile->slug) }}" class="pubc__action pubc__action--plein">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>
+                    </svg>
+                    Enregistrer
+                </a>
+            </div>
 
             <p class="pubc__pied">
                 Carte créée avec <a href="{{ route('home') }}">{{ config('app.name') }}</a>

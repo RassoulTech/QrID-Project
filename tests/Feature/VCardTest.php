@@ -271,8 +271,20 @@ class VCardTest extends TestCase
     {
         $html = $this->get(route('profile.public', 'awa-ndiaye'))->assertOk()->getContent();
 
-        $this->assertStringContainsString(route('profile.vcard', 'awa-ndiaye'), $html);
-        $this->assertStringContainsString('Enregistrer le contact', $html);
+        /*
+         | ON VISE LE LIEN, PAS LA FORMULATION.
+         |
+         | Le libellé a changé de « Enregistrer le contact » à « Enregistrer »
+         | en suivant la maquette, et ce test tombait — alors que le bouton
+         | fonctionnait. Un test qui casse à chaque retouche de vocabulaire
+         | finit par être neutralisé, et c'est alors le vrai défaut qui passe.
+         |
+         | Ce qui compte est qu'un LIEN DIRECT existe vers la route de
+         | téléchargement : c'est lui qui casse sur iOS quand on le remplace
+         | par un appel JavaScript.
+         */
+        $this->assertStringContainsString('href="'.route('profile.vcard', 'awa-ndiaye').'"', $html);
+        $this->assertStringContainsString('Enregistrer', $html);
     }
 
     /** Les réseaux du profil voyagent avec la fiche. */

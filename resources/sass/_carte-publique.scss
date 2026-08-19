@@ -6,26 +6,34 @@
 // en 3G, et décide en quelques secondes s'il enregistre ce contact.
 //
 // ELLE N'EST PAS DANS UN CADRE DE TÉLÉPHONE. Elle EST la page. Le cadre
-// appartient à l'aperçu du tableau de bord (profile/preview.blade.php), où il
-// simule ce rendu pour le propriétaire.
+// appartient à l'aperçu du tableau de bord (profile/preview.blade.php).
 //
 // AUCUNE COULEUR EN DUR. Tout passe par les jetons --surface / --texte /
-// --accent, ce qui fait basculer les deux thèmes sans un second jeu de règles.
-// Les seules valeurs littérales sont les couleurs OFFICIELLES des plateformes,
-// posées par x-social-icon : elles n'appartiennent pas à notre palette.
+// --accent : les deux thèmes basculent sans second jeu de règles. Les seules
+// valeurs littérales sont les couleurs OFFICIELLES des plateformes, posées par
+// x-social-icon — elles n'appartiennent pas à notre palette.
 // =============================================================================
 
 .pubc{
+  position:relative;
   min-height:100dvh;
-  padding:20px 14px 40px;
+  padding:16px 14px 40px;
   background:var(--surface-2);
-  // Aucune ligne ne peut élargir la page, quelle que soit la longueur
-  // d'une adresse e-mail sans espace.
+  // Aucune ligne ne peut élargir la page, quelle que soit la longueur d'une
+  // adresse e-mail sans espace.
   overflow-x:hidden;
 }
 
-// La carte ne s'étire jamais : au-delà de 420px elle se centre, comme sur la
-// maquette. Un bandeau photo de 1400px de large n'est pas une carte de visite.
+// La bascule de thème appartient au confort du VISITEUR, pas à l'identité du
+// porteur : elle flotte donc hors de la carte.
+.pubc__theme{
+  max-width:420px;
+  margin:0 auto 10px;
+  display:flex;justify-content:flex-end;
+}
+
+// La carte ne s'étire jamais : au-delà de 420px elle se centre. Un bandeau de
+// 1400px de large n'est pas une carte de visite.
 .pubc__carte{
   max-width:420px;
   margin:0 auto;
@@ -37,122 +45,96 @@
 }
 
 // -----------------------------------------------------------------------------
-// BANDEAU
+// COUVERTURE ET MÉDAILLON
 // -----------------------------------------------------------------------------
-.pubc__bandeau{
+.pubc__couverture{
   position:relative;
-  height:180px;
+  height:150px;
+  // La marge du bas laisse la place au médaillon qui déborde.
+  margin-bottom:64px;
+}
+
+.pubc__couverture-fond{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg, var(--accent) 0%, var(--accent-vif) 100%);
+}
+
+// LE MÉDAILLON DÉBORDE SUR LA COUVERTURE, comme sur la maquette : c'est ce
+// chevauchement qui fait lire la photo et le nom comme un seul bloc.
+.pubc__medaillon{
+  position:absolute;
+  left:20px;bottom:-56px;
+  width:112px;height:112px;
+  border-radius:$r-md;
+  // Cadre épais : il détache le visage du dégradé, quelle que soit la photo.
+  border:4px solid var(--surface);
+  box-shadow:var(--ombre-1);
+  overflow:hidden;
   background:var(--accent-doux);
 }
 
 // width et height sont déclarés dans le HTML : sans eux, la page saute au
 // chargement de l'image et le visiteur clique à côté.
-.pubc__photo{
-  width:100%;height:100%;
-  object-fit:cover;
-  display:block;
-}
+.pubc__photo{width:100%;height:100%;object-fit:cover;display:block}
 
-// LES INITIALES, JAMAIS LE NOM COMPLET — voir la vue.
+// LES INITIALES, JAMAIS LE NOM COMPLET — et jamais un vide. Le contrôleur
+// vérifie l'EXISTENCE du fichier, pas seulement la colonne : sur un stockage
+// éphémère, la colonne survit au déploiement, le fichier non.
 .pubc__initiales{
   display:grid;place-items:center;
   width:100%;height:100%;
   background:linear-gradient(135deg, var(--accent) 0%, var(--accent-vif) 100%);
   color:var(--sur-accent);
-  font-size:56px;font-weight:700;letter-spacing:.03em;
-}
-
-// Bouton flottant, en bas à droite du bandeau. 44px : la cible tactile
-// minimale, sous laquelle on rate le bouton un doigt sur trois.
-.pubc__qr-bouton{
-  position:absolute;right:14px;bottom:-22px;
-  width:44px;height:44px;
-  display:grid;place-items:center;
-  border-radius:$r-full;
-  background:var(--surface);
-  border:1px solid var(--bord);
-  box-shadow:var(--ombre-1);
-  color:var(--accent);
-  z-index:2;
-
-  &:hover,&:focus-visible{background:var(--accent);color:var(--sur-accent)}
+  font-size:42px;font-weight:700;letter-spacing:.02em;
 }
 
 // -----------------------------------------------------------------------------
 // IDENTITÉ
 // -----------------------------------------------------------------------------
-.pubc__identite{padding:22px 20px 0}
+.pubc__identite{padding:0 20px}
 
 .pubc__nom{
-  font-size:20px;font-weight:700;
-  letter-spacing:-.015em;line-height:1.25;
-  color:var(--accent);
-  margin:0 0 3px;
-  // Un nom long passe à la ligne plutôt que d'élargir la carte.
-  overflow-wrap:anywhere;
+  font-size:23px;font-weight:700;
+  letter-spacing:-.02em;line-height:1.2;
+  color:var(--texte);
+  margin:0 0 4px;
+  overflow-wrap:anywhere;   // un nom long passe à la ligne
 }
 
 .pubc__role{
-  font-size:13.5px;color:var(--texte-2);
+  font-size:14px;color:var(--texte-2);
   margin:0;overflow-wrap:anywhere;
 }
 
 .pubc__entreprise{
   font-size:13px;font-weight:600;color:var(--accent);
-  margin:2px 0 0;overflow-wrap:anywhere;
+  margin:3px 0 0;overflow-wrap:anywhere;
 }
 
 // -----------------------------------------------------------------------------
-// RÉSEAUX
+// COORDONNÉES — un bloc teinté, lu d'un seul regard
 // -----------------------------------------------------------------------------
-// AU REPOS, ILS SONT GRIS. Une rangée multicolore ferait concurrence au nom du
-// porteur, qui est le sujet de la page. La couleur officielle apparaît au
-// survol, portée par --marque que pose x-social-icon.
-.pubc__reseaux{
-  display:flex;flex-wrap:wrap;gap:14px;
-  padding:16px 20px 4px;
+.pubc__infos{
+  list-style:none;
+  margin:18px 16px 0;padding:4px 0;
+  background:var(--surface-3);
+  border:1px solid var(--bord);
+  border-radius:$r-sm;
 }
 
-.pubc__reseau{
-  display:grid;place-items:center;
-  width:32px;height:32px;
-  color:var(--texte-2);
-  transition:color 140ms ease, transform 140ms ease;
-
-  &:hover,&:focus-visible{
-    color:var(--marque, var(--accent));
-    transform:translateY(-1px);
-  }
-
-  .social-svg{--marque:inherit}
-}
-
-// La couleur officielle vit sur le SVG lui-même : on la remonte au survol.
-.pubc__reseau:hover .social-svg,
-.pubc__reseau:focus-visible .social-svg{color:var(--marque)}
-
-// -----------------------------------------------------------------------------
-// COORDONNÉES
-// -----------------------------------------------------------------------------
-.pubc__infos{list-style:none;margin:12px 0 0;padding:0}
-
-// Un filet fin entre les lignes, jamais après la dernière : une carte qui se
-// termine par un trait a l'air coupée.
-.pubc__info + .pubc__info{border-top:1px solid var(--bord)}
-
-.pubc__info-lien{
-  display:flex;align-items:center;gap:13px;
-  padding:12px 20px;
-  min-height:44px;              // cible tactile
+.pubc__info{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;
+  min-height:44px;          // cible tactile
   text-decoration:none;
   min-width:0;
 
-  &:hover,&:focus-visible{background:var(--surface-3)}
+  &:hover,&:focus-visible{background:var(--accent-doux)}
 }
 
 .pubc__info-icone{
   flex:0 0 auto;
-  width:32px;height:32px;
+  width:30px;height:30px;
   display:grid;place-items:center;
   border-radius:$r-full;
   background:var(--accent-doux);
@@ -167,56 +149,108 @@
   overflow-wrap:anywhere;
 }
 
-// PETITES CAPITALES GRISES — et c'est le couple le plus fragile de la page en
-// contraste. --texte-2 est choisi pour tenir 4,5:1 sur --surface dans les DEUX
-// thèmes ; ne pas le remplacer par une teinte plus pâle « pour faire discret ».
+// PETITES CAPITALES GRISES — le couple le plus fragile de la page en contraste.
+// --texte-2 tient 4,5:1 sur --surface-3 dans les DEUX thèmes ; ne pas le
+// remplacer par une teinte plus pâle « pour faire discret ».
 .pubc__info-etiquette{
-  font-size:10px;font-weight:600;
-  letter-spacing:.08em;text-transform:uppercase;
+  font-size:9.5px;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;
   color:var(--texte-2);
 }
 
 // -----------------------------------------------------------------------------
-// ENGAGER LA CONVERSATION
+// LA GRILLE — réseaux ET moyens de contact, ensemble
 // -----------------------------------------------------------------------------
-.pubc__appels{
-  display:grid;gap:2px;
-  padding:10px 12px 0;
+// LE VISITEUR NE DISTINGUE PAS « un réseau social » d'« un numéro » : il
+// cherche par quel moyen joindre cette personne. Les séparer en deux zones
+// l'oblige à balayer la page deux fois.
+//
+// auto-fit plutôt qu'un nombre fixe de colonnes : avec quatre entrées, une
+// grille à six emplacements laisserait deux trous qui se lisent comme un
+// défaut d'affichage.
+.pubc__grille{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:10px;
+  padding:18px 16px 0;
 }
 
-.pubc__appel{
-  display:flex;align-items:center;gap:11px;
-  padding:11px 8px;
-  min-height:44px;
+.pubc__tuile{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;
+  aspect-ratio:1;
+  min-width:0;
+  padding:8px 4px;
   border-radius:$r-sm;
-  font-size:13px;font-weight:600;
-  color:var(--texte);
+  background:var(--surface-3);
+  border:1px solid var(--bord);
+  color:var(--texte-2);
   text-decoration:none;
+  transition:transform 140ms ease, border-color 140ms ease, color 140ms ease;
 
-  &:hover,&:focus-visible{background:var(--surface-3)}
-  .social-svg{color:var(--marque);flex:0 0 auto}
-  span{min-width:0;overflow-wrap:anywhere}
+  // La couleur officielle n'apparaît qu'au survol : une grille multicolore au
+  // repos ferait concurrence au nom du porteur, qui est le sujet de la page.
+  &:hover,&:focus-visible{
+    transform:translateY(-2px);
+    border-color:var(--marque, var(--accent));
+    color:var(--marque, var(--accent));
+  }
+
+  .social-svg{color:inherit;flex:0 0 auto}
+  &:hover .social-svg,&:focus-visible .social-svg{color:var(--marque)}
+}
+
+.pubc__tuile-nom{
+  font-size:10.5px;font-weight:600;
+  text-align:center;line-height:1.15;
+  color:var(--texte);
+  overflow-wrap:anywhere;
 }
 
 // -----------------------------------------------------------------------------
-// L'ACTION PRINCIPALE
+// BARRE D'ACTIONS
 // -----------------------------------------------------------------------------
-.pubc__enregistrer{
-  display:block;
-  margin:18px 20px 0;
-  padding:15px 20px;
+.pubc__barre{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:20px 16px 0;
+}
+
+// Une seule action est PLEINE. Deux boutons primaires n'en font aucun : c'est
+// « Enregistrer » qui termine le parcours, « Partager » n'est qu'un service.
+.pubc__action{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  min-height:46px;
+  padding:12px 14px;
   border-radius:$r-full;
+  font-size:13px;font-weight:700;
+  letter-spacing:.02em;
+  text-decoration:none;
+  text-align:center;
+}
+
+.pubc__action--plein{
   background:var(--accent);
   color:var(--sur-accent);
-  font-size:14.5px;font-weight:700;
-  text-align:center;text-decoration:none;
 
   &:hover,&:focus-visible{background:var(--accent-vif);color:var(--sur-accent)}
 }
 
+.pubc__action--clair{
+  background:var(--surface-3);
+  border:1px solid var(--bord-fort);
+  color:var(--texte);
+
+  &:hover,&:focus-visible{border-color:var(--accent);color:var(--accent)}
+}
+
+// Une seule action : elle prend toute la largeur plutôt que la moitié.
+.pubc__barre > .pubc__action:only-child{grid-column:1 / -1}
+
 .pubc__pied{
   text-align:center;
-  margin:16px 0 0;padding:0 20px 20px;
+  margin:18px 0 0;padding:0 20px 20px;
   font-size:11.5px;color:var(--texte-2);
 
   a{color:var(--accent);font-weight:600}
@@ -235,6 +269,8 @@
 
   svg,img{
     width:min(74vw,290px);height:auto;
+    // Le QR reste sur fond BLANC quel que soit le thème : un module clair sur
+    // fond sombre sort de la norme et échoue sur certains lecteurs.
     background:#FFF;padding:14px;border-radius:$r-sm;
   }
 }
@@ -249,24 +285,11 @@
 // marges se resserrent pour ne pas manger la moitié de la largeur.
 @media (max-width:359px){
   .pubc{padding:12px 8px 30px}
-  .pubc__identite{padding:20px 14px 0}
-  .pubc__info-lien{padding:12px 14px;gap:10px}
-  .pubc__reseaux{padding:14px 14px 4px;gap:10px}
-  .pubc__enregistrer{margin:16px 14px 0}
-  .pubc__nom{font-size:18px}
+  .pubc__identite{padding:0 14px}
+  .pubc__infos{margin:16px 10px 0}
+  .pubc__grille,.pubc__barre{padding-left:10px;padding-right:10px;gap:8px}
+  .pubc__medaillon{left:14px;width:96px;height:96px;bottom:-48px}
+  .pubc__couverture{margin-bottom:56px}
+  .pubc__nom{font-size:20px}
+  .pubc__tuile-nom{font-size:9.5px}
 }
-
-// -----------------------------------------------------------------------------
-// THÈME SOMBRE — ce qui ne se déduit pas des jetons
-// -----------------------------------------------------------------------------
-// LE NOM EN BLANC, ET C'EST DÉLIBÉRÉ.
-//
-// En thème clair, le nom porte le vert de la marque. En sombre, ce vert vif
-// sur la surface de la carte descend sous le confort de lecture d'un titre —
-// et _theme-dark.scss impose de toute façon var(--texte) à TOUS les h1, règle
-// qui bat celle-ci par spécificité.
-//
-// Le rendu était donc déjà blanc, mais par accident. On l'écrit : un style
-// obtenu sans l'avoir voulu est un style que la prochaine refonte cassera
-// sans le savoir.
-.theme-dark .pubc__nom{color:var(--texte)}
