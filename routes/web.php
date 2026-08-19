@@ -6,6 +6,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignSystemController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\LanguePreferenceController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Profile\CardController;
@@ -87,6 +88,16 @@ Route::get('/design-system', DesignSystemController::class)->name('design.system
 */
 Route::post('/preferences/theme', [ThemePreferenceController::class, 'update'])
     ->name('preferences.theme');
+
+/*
+| LANGUE — même mécanique, même raison.
+|
+| POST et non GET : changer de langue modifie un état. Un GET serait suivi par
+| les robots d'indexation et les préchargeurs, qui basculeraient la langue de
+| visiteurs n'ayant rien demandé.
+*/
+Route::post('/preferences/langue', [LanguePreferenceController::class, 'update'])
+    ->name('preferences.langue');
 
 /*
 |--------------------------------------------------------------------------

@@ -26,6 +26,7 @@
                  pouvoir passer en sombre AVANT même d'avoir un compte. --}}
             <div class="auth__entete">
                 <x-brand size="sm" />
+                <x-language-toggle />
                 <x-theme-toggle />
             </div>
 

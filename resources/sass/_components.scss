@@ -486,3 +486,40 @@
   .tel{flex-direction:column}
   .tel__pays{max-width:100%}
 }
+
+// -----------------------------------------------------------------------------
+// BASCULE DE LANGUE — voir x-language-toggle
+// -----------------------------------------------------------------------------
+// Elle voisine la bascule de thème : deux préférences d'affichage, un seul
+// endroit où les chercher. Même hauteur, même rayon, même comportement de
+// focus — sinon la barre paraît bricolée.
+.langue-form{display:inline-flex}
+
+.langue-toggle{
+  display:inline-flex;align-items:center;gap:6px;
+  height:34px;padding:0 11px;
+  border:1px solid var(--bord-fort, #{$bordure-forte});
+  border-radius:$r-full;
+  background:transparent;
+  color:var(--texte-2, #{$gris-second});
+  font-size:12px;font-weight:700;
+  letter-spacing:.04em;
+  cursor:pointer;
+  transition:color 140ms ease, border-color 140ms ease, background 140ms ease;
+
+  &:hover,&:focus-visible{
+    color:var(--accent, #{$vert-fonce});
+    border-color:var(--accent, #{$vert-fonce});
+  }
+
+  &:focus-visible{outline:2px solid var(--accent-vif, #{$vert-accent});outline-offset:2px}
+}
+
+.langue-toggle__code{line-height:1}
+
+// Sous 380px, la barre supérieure est déjà pleine : le code suffit, le globe
+// devient décoratif et disparaît plutôt que de pousser le reste.
+@media (max-width:379px){
+  .langue-toggle svg{display:none}
+  .langue-toggle{padding:0 9px}
+}

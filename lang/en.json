@@ -1,0 +1,16 @@
+{
+    "Passer en :langue": "Switch to :langue",
+    "Les champs marqués d'un astérisque sont obligatoires.": "Fields marked with an asterisk are required.",
+    "Numéro de téléphone sénégalais invalide. Exemple : 77 383 13 64.": "Invalid Senegalese phone number. Example: 77 383 13 64.",
+    "Choisissez un pays dans la liste.": "Please choose a country from the list.",
+    "Numéro invalide pour :pays. Attendu : :n chiffres après :indicatif.": "Invalid number for :pays. Expected :n digits after :indicatif.",
+    "Enregistrer le contact": "Save contact",
+    "Cette carte n'est pas active": "This card is not active",
+    "Appeler": "Call",
+    "E-mail": "E-mail",
+    "Site web": "Website",
+    "Mobile": "Mobile",
+    "Localisation": "Location",
+    "Français": "French",
+    "English": "English"
+}

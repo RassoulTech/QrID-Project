@@ -13,7 +13,8 @@
     </div>
 
     <div class="site-nav__right">
-      <x-theme-toggle />
+      <x-language-toggle />
+                <x-theme-toggle />
 
       @auth
         <x-button variant="dark" size="sm" :href="route('dashboard')">Mon espace</x-button>

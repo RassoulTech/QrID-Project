@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\EnsureUserIsNotBlocked;
 use App\Http\Middleware\EnsureWizardStepIsAvailable;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\SetLocale;
 use App\Support\Theme;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -87,6 +88,16 @@ return Application::configure(basePath: dirname(__DIR__))
         // Un compte suspendu est éjecté dès la requête suivante, sans attendre
         // l'expiration de sa session. Placé sur le groupe web : il doit
         // s'appliquer à TOUTE page, y compris celles ajoutées plus tard.
+        /*
+         |---------------------------------------------------------------------
+         | LANGUE — posée AVANT le premier rendu
+         |---------------------------------------------------------------------
+         | Une bascule faite en JavaScript après affichage laisse voir la page
+         | dans l'ancienne langue puis la retraduit sous les yeux — une seconde
+         | entière sur une 3G. Le HTML servi est donc déjà dans la bonne.
+         */
+        $middleware->appendToGroup('web', SetLocale::class);
+
         $middleware->appendToGroup('web', EnsureUserIsNotBlocked::class);
 
         // Un invité intercepté sur une page protégée arrive sur la connexion,

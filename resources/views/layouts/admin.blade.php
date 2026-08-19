@@ -66,6 +66,7 @@
             <div class="adm-top__actions">
                 @include('layouts.partials.notifications-menu')
 
+                <x-language-toggle />
                 <x-theme-toggle />
 
                 @php
