@@ -22,6 +22,7 @@
             ['Profils',        'admin.profiles.index',  'admin.profiles.*',    'admin.profiles.index'],
             ['Paiements',      'admin.payments.index',  'admin.payments.*',    'admin.payments.index'],
             ['Abonnements',    'admin.subscriptions',   'admin.subscriptions', 'admin.subscriptions'],
+            ['Cartes',         'admin.cards.index',     'admin.cards.*',       'admin.cards.index'],
         ],
         'Configuration' => [
             ['Modèles',        'admin.templates.index', 'admin.templates.*',   'admin.templates.index'],

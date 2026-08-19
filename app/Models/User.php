@@ -124,6 +124,12 @@ class User extends Authenticatable implements MustVerifyEmail
      * deduire en comptant les paiements serait faux des le premier
      * remboursement, et l'erreur coute une carte imprimee et expediee.
      */
+    /** Les commandes de cartes physiques de ce compte. */
+    public function cardOrders(): HasMany
+    {
+        return $this->hasMany(CardOrder::class);
+    }
+
     public function hasPhysicalCard(): bool
     {
         return $this->physical_card_granted_at !== null;

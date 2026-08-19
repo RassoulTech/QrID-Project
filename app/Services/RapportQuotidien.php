@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CardOrder;
 use App\Models\ContactMessage;
 use App\Models\MailLog;
 use App\Models\Payment;
@@ -187,6 +188,34 @@ class RapportQuotidien
         if ($mailsRates > 0) {
             $alertes[] = $mailsRates.' e-mail'.($mailsRates > 1 ? 's ne sont' : ' n\'est')
                 .' pas parti'.($mailsRates > 1 ? 's' : '');
+        }
+
+        /*
+         | CARTES PHYSIQUES EN ATTENTE DE PRODUCTION.
+         |
+         | DEUX CHIFFRES, ET LE SECOND COMPTE PLUS QUE LE PREMIER. Vingt
+         | commandes reçues hier ne posent aucun problème ; une seule qui
+         | attend depuis six semaines en pose un, et c'est celle-là qui fera
+         | écrire un client.
+         |
+         | Le seuil de lot déclenche l'alerte parce qu'au-delà, on paie un
+         | envoi chez l'imprimeur qu'on aurait pu mutualiser.
+         */
+        $cartes = CardOrder::enAttente()->count();
+
+        if ($cartes >= (int) config('cartes.seuil_lot')) {
+            $alertes[] = $cartes.' carte'.($cartes > 1 ? 's attendent' : ' attend')
+                .' une production — le seuil de lot est atteint';
+        }
+
+        $plusAncienne = CardOrder::enAttente()->min('created_at');
+
+        if ($plusAncienne) {
+            $jours = (int) CarbonImmutable::now()->diffInDays($plusAncienne);
+
+            if ($jours > (int) config('cartes.delai_jours')) {
+                $alertes[] = 'une carte attend depuis '.$jours.' jours — le délai annoncé est dépassé';
+            }
         }
 
         // Traitements en échec définitif. La table peut ne pas exister sur une

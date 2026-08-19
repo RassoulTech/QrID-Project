@@ -5,6 +5,7 @@ namespace App\Services\Payment;
 use App\Events\PaymentFailed;
 use App\Events\PaymentSucceeded;
 use App\Events\ProfilePublished;
+use App\Models\CardOrder;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -128,6 +129,26 @@ class CheckoutService
              */
             if ($plan->price_fcfa > 0 && $user->physical_card_granted_at === null) {
                 $user->forceFill(['physical_card_granted_at' => now()])->save();
+
+                /*
+                 | LA COMMANDE NAÎT AVEC LE DROIT, ET SANS ADRESSE.
+                 |
+                 | Elle est créée VIDE et attend que le client renseigne sa
+                 | livraison. L'inverse — attendre l'adresse pour créer la
+                 | commande — perdrait la trace de tous ceux qui paient puis
+                 | ferment l'onglet : ils auraient payé une carte que rien
+                 | n'aurait réclamée, et personne ne le saurait.
+                 |
+                 | L'écran d'administration montre justement ces commandes
+                 | sans adresse : ce sont elles qu'il faut relancer.
+                 */
+                CardOrder::create([
+                    'user_id' => $user->id,
+                    'profile_id' => $user->profile?->id,
+                    'status' => CardOrder::STATUS_PENDING,
+                    'recipient_name' => $user->name,
+                    'phone' => $user->phone,
+                ]);
             }
 
             // Le profil devient public. C'est l'aboutissement du parcours :

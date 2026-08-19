@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminHomeController;
 use App\Http\Controllers\Admin\AuditController;
+use App\Http\Controllers\Admin\CardOrderController;
 use App\Http\Controllers\Admin\ClientBlockController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\OverviewController;
@@ -122,6 +123,19 @@ Route::middleware(['auth', 'verified', 'admin'])
          | naissent d'un encaissement. La seule écriture possible est la
          | prolongation, portée par la fiche client, avec motif et journal.
          */
+        /*
+         |---------------------------------------------------------------------
+         | CARTES À PRODUIRE
+         |---------------------------------------------------------------------
+         | On n'envoie pas une carte à l'imprimeur, on envoie un LOT : le coût
+         | unitaire de vingt cartes commandées ensemble est sans commune mesure
+         | avec celui de vingt commandes séparées.
+         */
+        Route::get('/cartes', [CardOrderController::class, 'index'])->name('cards.index');
+        Route::get('/cartes/export', [CardOrderController::class, 'export'])->name('cards.export');
+        Route::post('/cartes/lot', [CardOrderController::class, 'batch'])->name('cards.batch');
+        Route::post('/cartes/lot/avancer', [CardOrderController::class, 'avancer'])->name('cards.advance');
+
         Route::get('/abonnements', [SubscriptionController::class, 'index'])->name('subscriptions.index');
         Route::get('/abonnements/export', [SubscriptionController::class, 'export'])->name('subscriptions.export');
 

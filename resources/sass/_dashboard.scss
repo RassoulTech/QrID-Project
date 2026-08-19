@@ -474,3 +474,14 @@
   .stat-grid{grid-template-columns:1fr}
   .db-card{padding:16px}
 }
+
+// Texte courant d'une carte du tableau de bord — le bloc « Ma carte physique »
+// en avait besoin, et rien n'existait : chaque bloc écrivait sa propre taille.
+.db-card__texte{
+  font-size:13.5px;
+  color:var(--texte-2, #{$gris-second});
+  line-height:1.55;
+  margin:10px 0 14px;
+
+  strong{color:var(--texte, #{$texte});font-weight:600}
+}

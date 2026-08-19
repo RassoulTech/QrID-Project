@@ -1030,3 +1030,30 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   .pub{padding:20px 14px 36px;gap:22px}
   .pub__actions .btn-pill{flex:1 1 auto;justify-content:center;min-width:110px}
 }
+
+// -----------------------------------------------------------------------------
+// MA CARTE PHYSIQUE — état de la commande
+// -----------------------------------------------------------------------------
+// Le client vient d'abord pour SAVOIR OÙ EN EST SA CARTE, pas pour saisir
+// quelque chose. L'état passe donc avant le formulaire.
+.carte-etat{
+  display:flex;align-items:center;flex-wrap:wrap;gap:10px;
+  margin:0 0 20px;
+}
+
+.carte-etat__pastille{
+  padding:6px 14px;
+  border-radius:$r-full;
+  background:$vert-clair;color:$vert-fonce;
+  font-size:12.5px;font-weight:700;
+}
+
+.carte-etat__date{font-size:12.5px;color:$gris-second}
+
+.carte-recap{
+  display:grid;grid-template-columns:auto 1fr;gap:6px 16px;
+  margin:18px 0 0;font-size:13.5px;
+
+  dt{color:$gris-second}
+  dd{margin:0;color:$texte;font-weight:600}
+}

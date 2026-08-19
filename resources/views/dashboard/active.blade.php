@@ -42,6 +42,7 @@
         <div class="db-principal">
             @include('dashboard.partials.stats')
             @include('dashboard.partials.card-block')
+            @include('dashboard.partials.carte-physique')
             @include('dashboard.partials.activity-chart')
         </div>
 

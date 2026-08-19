@@ -9,6 +9,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Profile\CardController;
+use App\Http\Controllers\Profile\CardOrderController;
 use App\Http\Controllers\Profile\PaymentController;
 use App\Http\Controllers\Profile\ProfileActivationController;
 use App\Http\Controllers\Profile\ProfilePageController;
@@ -210,6 +211,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
      | À ne pas confondre avec le PROFIL professionnel (profiles), géré par
      | les routes profile.create.* ci-dessus.
      */
+    /*
+     |-------------------------------------------------------------------------
+     | MA CARTE PHYSIQUE — l'adresse de livraison
+     |-------------------------------------------------------------------------
+     | Elle n'est demandée qu'APRÈS le premier paiement encaissé : demander une
+     | adresse de livraison avant d'avoir encaissé, c'est faire remplir un
+     | formulaire pour un objet qui n'existera peut-etre jamais.
+     */
+    Route::get('/carte-physique', [CardOrderController::class, 'edit'])->name('carte.physique');
+    Route::patch('/carte-physique', [CardOrderController::class, 'update'])->name('carte.physique.update');
+
     Route::get('/compte', [AccountController::class, 'edit'])->name('compte.edit');
     Route::patch('/compte', [AccountController::class, 'update'])->name('compte.update');
     Route::delete('/compte', [AccountController::class, 'destroy'])->name('compte.destroy');

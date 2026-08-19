@@ -1651,3 +1651,63 @@ $adm-controle-h: 38px;
   font-size:12.5px;font-weight:600;color:$vert-fonce;
   text-decoration:underline;
 }
+
+// -----------------------------------------------------------------------------
+// CARTES À PRODUIRE — les jauges qui décident de lancer un lot
+// -----------------------------------------------------------------------------
+// LE NOMBRE EN ATTENTE NE SUFFIT PAS. Vingt commandes d'hier ne posent aucun
+// problème ; une seule qui attend depuis six semaines en pose un. Les deux
+// premières jauges disent donc « combien » ET « depuis quand ».
+.adm-cartes-tete{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.adm-cartes-jauge{
+  padding:16px 18px;
+  border:1px solid var(--bord);
+  border-radius:$r-sm;
+  background:var(--surface);
+}
+
+.adm-cartes-jauge__n{
+  font-size:26px;font-weight:700;letter-spacing:-.02em;
+  color:var(--texte);margin:0;line-height:1.1;
+
+  span{font-size:14px;font-weight:600;color:var(--texte-2)}
+}
+
+.adm-cartes-jauge__l{
+  font-size:12.5px;color:var(--texte-2);margin:4px 0 0;
+}
+
+.adm-cartes-jauge__note{
+  display:block;margin-top:6px;
+  font-size:11.5px;color:var(--texte-2);
+}
+
+.adm-cartes-jauge__pret,
+.adm-cartes-jauge__retard{
+  display:inline-block;margin-top:8px;
+  padding:3px 9px;border-radius:$r-full;
+  font-size:11px;font-weight:700;
+}
+
+.adm-cartes-jauge__pret{background:var(--accent-doux);color:var(--accent)}
+.adm-cartes-jauge__retard{background:rgba(180,35,24,.12);color:var(--danger)}
+
+.adm-cartes-actions{
+  display:flex;align-items:center;flex-wrap:wrap;gap:12px;
+  padding:14px 0 4px;
+}
+
+.adm-cartes-actions__note{font-size:12px;color:var(--texte-2)}
+
+.adm-cartes-lot{
+  display:flex;align-items:center;flex-wrap:wrap;gap:10px;
+  margin-top:18px;padding-top:16px;
+  border-top:1px solid var(--bord);
+  font-size:13px;
+}

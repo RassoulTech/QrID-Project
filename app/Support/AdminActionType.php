@@ -43,6 +43,15 @@ final class AdminActionType
     public const PLAN_MODIFIE = 'update_plan';
 
     /**
+     * Mise en lot ou changement d'état d'un lot de cartes physiques.
+     *
+     * Une seule entrée pour les deux gestes : ce qu'on veut retrouver dans le
+     * journal, c'est « qui a envoyé ce lot en production, et quand » — pas la
+     * distinction entre créer un lot et le faire avancer.
+     */
+    public const LOT_CARTES = 'card_batch';
+
+    /**
      * Libellés affichés dans le journal.
      *
      * @return array<string, string>
@@ -61,6 +70,7 @@ final class AdminActionType
             self::MODELE_PAR_DEFAUT => 'Modèle défini par défaut',
             self::PLAN_CREE => 'Plan créé',
             self::PLAN_MODIFIE => 'Plan modifié',
+            self::LOT_CARTES => 'Lot de cartes',
         ];
     }
 
