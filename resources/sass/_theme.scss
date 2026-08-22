@@ -29,6 +29,19 @@
   --accent:         #{$vert-fonce};
   --accent-doux:    #{$vert-clair};
   --accent-vif:     #{$vert-accent};
+
+  /*
+   | LE FOND DE SURVOL D'UN BOUTON PLEIN — et pourquoi ce n'est pas --accent-vif.
+   |
+   | --accent-vif est un vert MOYEN : très bien pour un trait, un liseré ou une
+   | icône, illisible sous du blanc. Le bouton « Enregistrer » de la page
+   | publique s'en servait au survol et tombait à 3,37:1 — le seul moment où
+   | le visiteur regarde ce bouton étant précisément celui où il le survole.
+   |
+   | En thème clair le survol FONCE, en thème sombre il ÉCLAIRCIT : dans les
+   | deux cas il s'écarte du fond de page, et --sur-accent reste lisible.
+   */
+  --accent-survol:  #0F5240;          // 9,29:1 sous du blanc
   --danger:         #{$rouge-erreur};   // asterisque et erreurs de champ
 
   /*
@@ -72,6 +85,7 @@
   --sur-accent:     #06231B;          // 7,11:1 sur ce vert vif
   --accent-doux:    rgba(47, 191, 146, .16);
   --accent-vif:     #3FD3A4;
+  --accent-survol:  #3FD3A4;          // 9,04:1 sous l'encre sombre
   --danger:         #FF9A8F;          // le rouge fonce serait illisible ici
   --ombre-1:        0 1px 2px rgba(0, 0, 0, .40);
   --ombre-2:        0 12px 32px rgba(0, 0, 0, .45);

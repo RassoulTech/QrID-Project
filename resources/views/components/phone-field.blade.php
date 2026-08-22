@@ -12,11 +12,21 @@
   chaque écran l'écrivait à sa façon.
 
   ═══════════════════════════════════════════════════════════════════════
-  SELECT NATIF, AUCUN JAVASCRIPT
+  SELECT NATIF, AUCUN JAVASCRIPT OBLIGATOIRE
   ═══════════════════════════════════════════════════════════════════════
   Sur téléphone, le sélecteur natif est un panneau plein écran ou une roue —
   bien meilleurs que toute liste redessinée, et utilisables au clavier comme
-  au lecteur d'écran. Le composant fonctionne donc sans une ligne de script.
+  au lecteur d'écran. Le champ fonctionne donc sans une ligne de script :
+  le drapeau, la longueur maximale et l'aide sont déjà justes au rendu
+  serveur. Le module telephone.js ne fait que les SUIVRE quand on change de
+  pays, et espacer les chiffres pendant la frappe.
+
+  ═══════════════════════════════════════════════════════════════════════
+  MOBILE FIRST
+  ═══════════════════════════════════════════════════════════════════════
+  En dessous de 640px, le pays passe AU-DESSUS du numéro plutôt qu'à côté :
+  à 320px, deux contrôles côte à côte laissaient au numéro moins de la
+  moitié de l'écran, soit quatre chiffres visibles sur neuf.
 
   Props : name, label, value, pays, required, optional, help
 --}}
@@ -33,7 +43,13 @@
 @php
     $champPays = $name.'_pays';
     $codePays = old($champPays, $pays ?: \App\Support\IndicatifsPays::DEFAUT);
+
+    if (! \App\Support\IndicatifsPays::existe($codePays)) {
+        $codePays = \App\Support\IndicatifsPays::DEFAUT;
+    }
+
     $erreur = $errors->has($name) || $errors->has($champPays);
+    $gabarit = \App\Support\IndicatifsPays::gabarit($codePays);
 
     /*
      | LE NUMÉRO EST RÉAFFICHÉ SANS SON INDICATIF.
@@ -51,6 +67,10 @@
             $national = mb_substr((string) $national, mb_strlen($indicatif));
         }
     }
+
+    // L'aide du gabarit ne remplace jamais celle qu'un écran a écrite : elle
+    // la complète, et ne s'affiche seule que s'il n'y en a pas.
+    $aide = $help ?: $gabarit['aide'];
 @endphp
 
 <div class="f">
@@ -63,29 +83,56 @@
         @endif
     </label>
 
-    <div class="tel">
-        <select id="{{ $champPays }}" name="{{ $champPays }}"
-                class="f__control tel__pays" aria-label="Indicatif du pays">
-            @foreach (\App\Support\IndicatifsPays::options() as $code => $libelle)
-                <option value="{{ $code }}" @selected($codePays === $code)>{{ $libelle }}</option>
-            @endforeach
-        </select>
+    <div class="tel" data-tel data-gabarits="{{ \App\Support\IndicatifsPays::gabaritsJson() }}">
+        {{-- Le drapeau est un SVG posé PAR-DESSUS le sélecteur : un <option>
+             ne peut contenir que du texte, et l'émoji drapeau se dégrade en
+             deux lettres grises sur Windows. --}}
+        <div class="tel__pays-boite">
+            <span class="tel__drapeau" data-tel-drapeau>
+                <x-drapeau :code="$codePays" :taille="22" />
+            </span>
 
+            <select id="{{ $champPays }}" name="{{ $champPays }}"
+                    class="f__control tel__pays" data-tel-pays
+                    aria-label="Indicatif du pays">
+                @foreach (\App\Support\IndicatifsPays::options() as $code => $libelle)
+                    <option value="{{ $code }}" @selected($codePays === $code)>{{ $libelle }}</option>
+                @endforeach
+            </select>
+
+            <span class="tel__chevron" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </span>
+        </div>
+
+        {{-- inputmode="numeric" et non "tel" : le clavier « tel » ouvre le
+             pavé d'appel avec *, # et +, dont aucun n'a sa place ici puisque
+             l'indicatif est déjà choisi à côté. --}}
         <input type="tel"
                id="{{ $name }}"
                name="{{ $name }}"
                value="{{ old($name, $national) }}"
                @class(['f__control', 'tel__numero', 'is-invalid' => $erreur])
-               inputmode="tel"
+               data-tel-numero
+               inputmode="numeric"
                autocomplete="tel-national"
-               placeholder="77 383 13 64"
+               maxlength="{{ $gabarit['max'] + count($gabarit['groupes']) - 1 }}"
+               placeholder="{{ $gabarit['exemple'] }}"
                @if ($required && ! $optional) required aria-required="true" @endif
-               @if ($erreur) aria-invalid="true" aria-describedby="{{ $name }}-err" @endif>
+               aria-describedby="{{ $name }}-aide{{ $erreur ? ' '.$name.'-err' : '' }}"
+               @if ($erreur) aria-invalid="true" @endif>
     </div>
 
-    @if ($help)
-        <p class="f__help">{{ $help }}</p>
-    @endif
+    {{-- L'aide annonce le format AVANT la faute, pas après : « 9 chiffres
+         après +221 » évite l'aller-retour d'un formulaire refusé. --}}
+    {{-- « fige » : une aide écrite par un écran (« pour la livraison »)
+         reste la sienne. Seule l'aide générée par le gabarit se met à jour
+         quand on change de pays. --}}
+    <p class="f__help" id="{{ $name }}-aide"
+       data-tel-aide="{{ $help ? 'fige' : 'auto' }}">{{ $aide }}</p>
 
     @error($name)
         <p class="f__error" id="{{ $name }}-err">{{ $message }}</p>

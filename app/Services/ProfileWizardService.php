@@ -256,17 +256,27 @@ class ProfileWizardService
      * disque public et on ne garde que le chemin. L'ancienne version est
      * supprimée dans la foulée pour ne pas accumuler d'orphelins.
      */
-    public function storePhoto(UploadedFile $file): string
+    /**
+     * @return array{path:string, octets:string} le chemin ET les octets
+     *
+     * LES OCTETS SORTENT AVEC LE CHEMIN, et ce n'est pas une commodité.
+     * Le disque de Render est éphémère : la photo téléversée aujourd'hui
+     * disparaît au prochain déploiement, et le profil garde un chemin qui ne
+     * mène nulle part. La base devient donc la source durable — mais le profil
+     * n'existe pas encore à cette étape, d'où le passage par l'appelant.
+     */
+    public function storePhoto(UploadedFile $file): array
     {
         if ($old = $this->get('data.photo_path')) {
             Storage::disk('public')->delete($old);
         }
 
         $path = 'profils/'.Str::uuid()->toString().'.jpg';
+        $octets = $this->toSquareJpeg($file);
 
-        Storage::disk('public')->put($path, $this->toSquareJpeg($file));
+        Storage::disk('public')->put($path, $octets);
 
-        return $path;
+        return ['path' => $path, 'octets' => $octets];
     }
 
     /**
@@ -346,6 +356,15 @@ class ProfileWizardService
                 'website' => $data['website'] ?? null,
                 'address' => $data['address'] ?? null,
                 'photo_path' => $data['photo_path'] ?? null,
+
+                /*
+                 | LA PHOTO EST ÉCRITE EN BASE, pas seulement sur le disque.
+                 | Sans cela, elle disparaît au premier déploiement et le
+                 | profil affiche ses initiales sans que rien ne le signale.
+                 */
+                'photo_data' => isset($data['photo_data'])
+                    ? base64_decode((string) $data['photo_data'])
+                    : ($existing?->photo_data),
                 'template_id' => $data['template_id'] ?? null,
                 // Le repli passe par l'enum : la valeur par défaut de la carte
                 // ne doit exister qu'à un seul endroit du projet.

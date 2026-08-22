@@ -108,6 +108,30 @@
 // Le carré prend le VERT ACCENT et non le blanc. Un carré blanc sur fond vert
 // foncé est un trou de lumière : il attire l'œil avant le nom et casse le
 // bloc. En vert accent, il reste lisible tout en appartenant à la surface.
+// LA VARIANTE POSÉE SUR FOND SOMBRE.
+//
+// ═══════════════════════════════════════════════════════════════════════
+// MESURÉ À 3,37:1, ET CONSERVÉ TEL QUEL
+// ═══════════════════════════════════════════════════════════════════════
+// Le monogramme est blanc sur $vert-accent. L'audit de contraste le relève,
+// et il a raison de le relever : c'est bien sous les 4,5:1.
+//
+// Il n'est pourtant pas corrigé, pour deux raisons qui vont ensemble.
+//
+// D'abord, WCAG 1.4.3 exempte explicitement les logotypes : « un texte qui
+// fait partie d'un logo ou d'un nom de marque n'a pas d'exigence de
+// contraste minimal ». Cette pastille EST le logo.
+//
+// Ensuite, les corrections possibles coûtent plus qu'elles ne rapportent.
+// Assombrir le carré jusqu'à porter du blanc (#157A5E donne 5,28:1) le fait
+// tomber à 2,37:1 contre la section sombre où il est posé : le carré cesse
+// de se détacher, et on a déplacé le problème. L'inverser — carré pâle,
+// lettre verte — donne 10,84:1 mais crée un SECOND logo : blanc sur vert
+// ici, vert sur blanc là. Une marque qui se dessine de deux façons n'est
+// plus une marque, et un test le vérifie explicitement.
+//
+// C'est donc une exception assumée, écrite ici pour qu'elle ne soit pas
+// « redécouverte » et corrigée par erreur au prochain audit.
 .brand--light{
   &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{color:$blanc}
   .brand__mark{background:$vert-accent;color:$blanc}

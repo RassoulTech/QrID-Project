@@ -150,7 +150,13 @@ class PublicProfileController extends Controller
         }
 
         try {
-            return Storage::disk(config('filesystems.default'))->exists($profile->photo_path)
+            /*
+             | photoBinaire() lit la BASE quand le disque est vide — et remet
+             | le fichier en place au passage. On ne teste donc plus l'existence
+             | du fichier : on demande les octets, et l'URL n'est rendue que
+             | s'ils existent réellement quelque part.
+             */
+            return $profile->photoBinaire() !== null
                 ? Storage::url($profile->photo_path)
                 : null;
         } catch (\Throwable $e) {

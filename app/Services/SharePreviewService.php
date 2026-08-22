@@ -223,14 +223,15 @@ class SharePreviewService
     /** La photo, en rond, à droite. Rend false s'il n'y en a pas. */
     private function photo(\GdImage $image, Profile $profile): bool
     {
-        if (! $profile->photo_path || ! Storage::disk('public')->exists($profile->photo_path)) {
+        // photoBinaire() : le disque s'il l'a, la base sinon. Voir Profile.
+        $octets = $profile->photoBinaire();
+
+        if ($octets === null) {
             return false;
         }
 
         try {
-            $source = @imagecreatefromstring(
-                (string) Storage::disk('public')->get($profile->photo_path)
-            );
+            $source = @imagecreatefromstring($octets);
         } catch (Throwable) {
             return false;
         }

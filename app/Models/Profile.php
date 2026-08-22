@@ -34,6 +34,7 @@ class Profile extends Model
         'address',
         'maps_url',
         'photo_path',
+        'photo_data',
         'template_id',
         'primary_color',
         'is_active',
@@ -207,17 +208,52 @@ class Profile extends Model
      */
     public function aUnePhoto(): bool
     {
-        if (blank($this->photo_path)) {
-            return false;
+        return $this->photoBinaire() !== null;
+    }
+
+    /**
+     * LES OCTETS DE LA PHOTO — la base d'abord, le disque ensuite.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * LA BASE EST LA SOURCE, LE DISQUE EST UN CACHE
+     * ═══════════════════════════════════════════════════════════════════
+     * Le disque de Render est éphémère : chaque déploiement le remet à zéro.
+     * La colonne photo_path survivait, le fichier non — et le visiteur voyait
+     * les initiales d'un profil qui avait bel et bien une photo.
+     *
+     * On lit donc le disque en premier, parce que c'est le chemin rapide, mais
+     * on retombe sur la base dès qu'il est vide. Et l'on REMET le fichier en
+     * place au passage : le déploiement suivant repart d'un cache chaud sans
+     * qu'aucune tâche n'ait à y penser.
+     */
+    public function photoBinaire(): ?string
+    {
+        if (filled($this->photo_path)) {
+            try {
+                if (Storage::disk('public')->exists($this->photo_path)) {
+                    return Storage::disk('public')->get($this->photo_path);
+                }
+            } catch (\Throwable) {
+                // Un disque injoignable ne doit pas casser la page.
+            }
         }
 
-        try {
-            return Storage::disk('public')->exists($this->photo_path);
-        } catch (\Throwable) {
-            // Un disque injoignable ne doit pas casser la page : on retombe
-            // simplement sur les initiales.
-            return false;
+        $octets = $this->photo_data;
+
+        if (blank($octets)) {
+            return null;
         }
+
+        // Le cache se reconstitue tout seul, sans bloquer l'affichage si le
+        // disque refuse l'écriture.
+        if (filled($this->photo_path)) {
+            try {
+                Storage::disk('public')->put($this->photo_path, $octets);
+            } catch (\Throwable) {
+            }
+        }
+
+        return $octets;
     }
 
     /** Les initiales du porteur, pour le repli. */

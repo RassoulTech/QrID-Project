@@ -77,16 +77,97 @@ class IndicatifsPays
         ];
     }
 
-    /** Libellés prêts pour un <select> : « 🇸🇳 Sénégal (+221) ». */
+    /**
+     * Libellés prêts pour un <select> : « Sénégal (+221) ».
+     *
+     * AUCUN ÉMOJI DANS LES LIBELLÉS. Un <option> ne prend que du texte, et
+     * l'émoji drapeau se dégrade en « SN » gris sur Windows. Le vrai drapeau
+     * est dessiné À CÔTÉ du sélecteur, en SVG — voir App\Support\Drapeaux.
+     */
     public static function options(): array
     {
         $options = [];
 
-        foreach (self::catalogue() as $code => [$nom, $indicatif, $drapeau]) {
-            $options[$code] = "{$drapeau} {$nom} ({$indicatif})";
+        foreach (self::catalogue() as $code => [$nom, $indicatif]) {
+            $options[$code] = "{$nom} ({$indicatif})";
         }
 
         return $options;
+    }
+
+    /**
+     * LE GABARIT DE SAISIE D'UN PAYS.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI UN GABARIT PLUTÔT QU'UN CHAMP LIBRE
+     * ═══════════════════════════════════════════════════════════════════
+     * Un champ libre laisse taper quinze chiffres et ne le dit qu'à l'envoi
+     * du formulaire, une fois le reste rempli. Le gabarit borne la saisie
+     * (maxlength), l'espace pendant la frappe et annonce à l'avance ce qui
+     * est attendu — « 9 chiffres après +221 ».
+     *
+     * @return array{longueurs:list<int>, max:int, groupes:list<int>, exemple:string, aide:string}
+     */
+    public static function gabarit(string $code): array
+    {
+        $code = mb_strtoupper($code);
+        $longueurs = self::longueurs($code) ?: [9];
+        $max = max($longueurs);
+        $groupes = self::groupes(min($longueurs));
+        $indicatif = self::indicatif($code) ?? '';
+
+        // L'exemple est construit sur le gabarit lui-même : impossible qu'il
+        // annonce un format que la validation refuserait ensuite.
+        $exemple = trim(implode(' ', array_map(
+            fn (int $n) => str_repeat('0', $n),
+            $groupes
+        )));
+
+        $aide = count($longueurs) === 1
+            ? sprintf('%d chiffres après %s', $max, $indicatif)
+            : sprintf('%s ou %d chiffres après %s',
+                implode(', ', array_slice($longueurs, 0, -1)), $max, $indicatif);
+
+        return compact('longueurs', 'max', 'groupes', 'exemple', 'aide');
+    }
+
+    /**
+     * Le découpage visuel d'un numéro, par longueur.
+     *
+     * Les groupes ne sont pas décoratifs : « 773831364 » se relit chiffre à
+     * chiffre, « 77 383 13 64 » se relit d'un coup d'œil. C'est ainsi que
+     * les numéros s'écrivent sur les cartes et se dictent au téléphone.
+     *
+     * @return list<int>
+     */
+    private static function groupes(int $longueur): array
+    {
+        return match ($longueur) {
+            7 => [3, 2, 2],
+            8 => [2, 2, 2, 2],
+            9 => [2, 3, 2, 2],
+            10 => [2, 2, 2, 2, 2],
+            11 => [3, 4, 4],
+            default => [$longueur],
+        };
+    }
+
+    /**
+     * Tous les gabarits, prêts pour le navigateur.
+     *
+     * Un seul objet JSON dans la page plutôt qu'un attribut par option :
+     * le script d'accompagnement lit le pays choisi et applique le gabarit
+     * sans aller rechercher quoi que ce soit sur le serveur.
+     */
+    public static function gabaritsJson(): string
+    {
+        $gabarits = [];
+
+        foreach (array_keys(self::catalogue()) as $code) {
+            $gabarits[$code] = self::gabarit($code);
+        }
+
+        return json_encode($gabarits, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 
     public static function existe(?string $code): bool

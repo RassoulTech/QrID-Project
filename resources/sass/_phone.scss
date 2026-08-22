@@ -336,7 +336,10 @@ $ease: cubic-bezier(.2,.8,.2,1);
 }
 .float--qr .icon{
   width:32px;height:32px;border-radius:9px;
-  background:$vert-clair;color:$vert-accent;
+  // $vert-accent sur $vert-clair ne faisait que 2,92:1 — sous les 3:1 que
+  // WCAG 1.4.11 demande à un élément graphique porteur de sens. $vert-fonce
+  // monte à 10,84:1 sans rien changer à la composition.
+  background:$vert-clair;color:$vert-fonce;
   display:grid;place-items:center;flex:0 0 auto;
 }
 .float--qr .label{font-size:12px;font-weight:600;color:$texte;white-space:nowrap}

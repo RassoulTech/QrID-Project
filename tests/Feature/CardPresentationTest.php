@@ -417,31 +417,78 @@ class CardPresentationTest extends TestCase
     }
 
     /**
-     * LE QR DU VERSO EST ALIGNÉ SUR LE HAUT DU BLOC DE TEXTE.
+     * LE VERSO EST ASYMÉTRIQUE — deux tiers, un tiers.
      *
-     * Deux blocs qui partent de la même ligne se lisent comme une composition ;
-     * l'un centré et l'autre en haut se lisent comme deux éléments posés au
-     * hasard. C'est ce que corrigeait la demande « QR remonté, aligné sur le
-     * haut du bloc de texte ».
+     * Une composition centrée donne une carte d'organisme public. C'est le
+     * déséquilibre qui fait lire l'objet comme un objet dessiné.
+     *
+     * Ce test remplace celui qui vérifiait que le QR et le bloc de texte
+     * partaient du même « top ». Cette règle appartenait à une composition
+     * en positionnement absolu qui n'existe plus : les deux blocs sont
+     * désormais les deux extrémités d'une colonne en space-between, ce qui
+     * les aligne par construction plutôt que par une valeur recopiée.
      */
-    public function test_the_back_qr_is_aligned_with_the_text_block(): void
+    public function test_the_back_is_an_asymmetric_two_thirds_layout(): void
     {
         $css = $this->pvc();
 
-        preg_match('/\.pvc__v-texte\{.*?top:([\d.]+)cqw/s', $css, $texte);
-        preg_match('/\.pvc__v-qr\{.*?top:([\d.]+)cqw/s', $css, $qr);
+        preg_match('/\.pvc__face--verso\{.*?grid-template-columns:1fr ([\d.]+)%/s', $css, $colonnes);
 
-        $this->assertNotEmpty($texte);
-        $this->assertNotEmpty($qr);
+        $this->assertNotEmpty($colonnes, 'La face verso n\'est plus une grille à deux zones.');
 
-        $this->assertSame(
-            $texte[1],
-            $qr[1],
-            'Le QR du verso n\'est plus aligné sur le haut du bloc de texte.'
+        $part = (float) $colonnes[1];
+
+        // Sous 25 % la colonne ne porte plus une ligne pivotée lisible ;
+        // au-delà de 40 % elle cesse d'être une colonne et devient une moitié.
+        $this->assertGreaterThanOrEqual(25, $part);
+        $this->assertLessThanOrEqual(40, $part);
+
+        // La zone gauche descend jusqu'au bas : c'est ce qui supprime la
+        // plage vide que laissait le bloc flottant en haut de la face.
+        $this->assertMatchesRegularExpression(
+            '/\.pvc__v-zone\{.*?justify-content:space-between/s',
+            $css,
+            'La zone gauche ne pousse plus le code jusqu\'au bas de la carte.'
         );
+    }
 
-        // Et il n'est surtout plus centré verticalement.
-        $this->assertStringNotContainsString('.pvc__v-qr{'."\n".'  position:absolute;'."\n".'  right:6cqw; top:50%', $css);
+    /**
+     * LE TEXTE DE LA COLONNE SE LIT DE BAS EN HAUT.
+     *
+     * writing-mode:vertical-rl seul le ferait lire de HAUT en bas, ce qui
+     * oblige à pencher la tête vers la gauche — le geste inverse de celui
+     * qu'on fait spontanément devant une tranche. La rotation de 180° remet
+     * le sens de lecture à l'endroit, et son absence ne se voit pas sur une
+     * capture : elle se découvre la carte en main.
+     */
+    public function test_the_vertical_band_reads_bottom_to_top(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.pvc__v-colonne-texte\{[^}]*writing-mode:vertical-rl;[^}]*transform:rotate\(180deg\)/s',
+            $this->pvc(),
+            'Le texte de la colonne se lirait de haut en bas.'
+        );
+    }
+
+    /**
+     * LE QR DU VERSO OCCUPE ENVIRON 45 % DE LA HAUTEUR.
+     *
+     * Ce n'est pas une proportion décorative : sur une carte ID-1, 45 % de la
+     * hauteur font environ 24 mm de côté, la limite basse pour un scan fiable
+     * à bout de bras avec un téléphone d'entrée de gamme.
+     */
+    public function test_the_back_qr_fills_its_share_of_the_height(): void
+    {
+        preg_match('/\.pvc__v-qr-cadre\{.*?svg\{\s*width:([\d.]+)cqw/s', $this->pvc(), $trouve);
+
+        $this->assertNotEmpty($trouve, 'La largeur du QR du verso est introuvable.');
+
+        // cqw mesure la LARGEUR : le rapport ID-1 (1,586) la convertit en
+        // part de hauteur.
+        $partHauteur = ((float) $trouve[1]) * 1.586;
+
+        $this->assertGreaterThanOrEqual(38, $partHauteur);
+        $this->assertLessThanOrEqual(52, $partHauteur);
     }
 
     // =======================================================================

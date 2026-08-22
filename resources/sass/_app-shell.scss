@@ -117,7 +117,20 @@ $bordure-champ: rgba($texte, .48);   // 3,16:1 sur blanc · 3,07:1 sur gris fond
   width:100%;
   padding:12px 14px;
   font-family:inherit;
-  font-size:15px;
+
+  // MOBILE FIRST — 16px, et ce n'est pas une question de goût.
+  //
+  // Sous 16px, Safari iOS ZOOME la page au moment où le champ prend le focus,
+  // puis ne la dézoome pas. Le client se retrouve à remplir un formulaire
+  // agrandi qu'il doit faire défiler latéralement pour voir ses propres
+  // boutons. Le texte redescend à 15px seulement là où il n'y a pas de
+  // clavier virtuel — c'est-à-dire à partir de la tablette.
+  font-size:16px;
+
+  // 48px : la cible tactile recommandée. Le remplissage seul donnait 46px,
+  // et deux pixels manquants se paient en frappes à côté.
+  min-height:48px;
+
   color:$texte;
   background:$blanc;
   border:1px solid $bordure-champ;
@@ -132,6 +145,10 @@ $bordure-champ: rgba($texte, .48);   // 3,16:1 sur blanc · 3,07:1 sur gris fond
     box-shadow:0 0 0 3px rgba($vert-accent,.18);
   }
   &.is-invalid{border-color:$rouge-erreur;box-shadow:0 0 0 3px rgba($rouge-erreur,.12)}
+}
+
+@media (min-width:640px){
+  .f__control{font-size:15px}
 }
 
 textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
@@ -501,20 +518,36 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   background:$blanc;
   color:$gris-second;
   cursor:pointer;
-  &:hover{border-color:$rouge-erreur;color:$rouge-erreur;background:rgba($rouge-erreur,.04)}
+  // $rouge-erreur écrit en dur ne faisait que 2,73:1 sur le fond sombre.
+  // --danger vaut #B42318 en clair et #FF9A8F en sombre : le même geste,
+  // lisible dans les deux thèmes.
+  &:hover{border-color:var(--danger);color:var(--danger);background:var(--survol)}
 }
 
+// MESURÉ À 1,03:1 EN THÈME SOMBRE — soit un bouton invisible.
+//
+// La règle posait $vert-fonce sur $vert-clair, un couple de thème CLAIR écrit
+// en dur. Le thème sombre ne reprenait que la couleur du texte (--texte, un
+// blanc cassé) et laissait le fond vert pâle : blanc sur blanc-vert, 1,03:1.
+// Le bouton existait, se cliquait, et ne se voyait pas.
+//
+// Les jetons corrigent les DEUX thèmes d'un coup, et interdisent que le
+// prochain thème reparte avec un fond figé :
+//   clair  — #0B3B2E sur #E4F2EC ........ 10,84:1
+//   sombre — #2FBF92 sur --accent-doux ... au-dessus de 4,5:1
 .social-add{
   align-self:flex-start;
   display:inline-flex;align-items:center;gap:7px;
-  padding:9px 14px;
+  // 44px : la cible tactile minimale. Le remplissage seul donnait 36px.
+  min-height:44px;
+  padding:11px 16px;
   font-size:13.5px;font-weight:600;
-  color:$vert-fonce;
-  background:$vert-clair;
-  border:0;
+  color:var(--accent);
+  background:var(--accent-doux);
+  border:1px solid transparent;
   border-radius:$r-full;
   cursor:pointer;
-  &:hover{background:darken($vert-clair,4%)}
+  &:hover,&:focus-visible{border-color:var(--accent)}
 }
 
 // -----------------------------------------------------------------------------

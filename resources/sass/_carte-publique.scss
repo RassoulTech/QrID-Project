@@ -54,9 +54,35 @@
   margin-bottom:64px;
 }
 
+// LE FOND DE COUVERTURE — composé, jamais un aplat.
+//
+// « L'ensemble doit se sentir sans se voir » : trois couches superposées, tout
+// en CSS, aucune image à télécharger sur une 3G.
+//
+//   1. le dégradé de marque, en base ;
+//   2. deux halos radiaux très diffus, qui cassent la platitude d'un aplat
+//      sans dessiner de forme reconnaissable ;
+//   3. une trame de modules carrés — l'écho du QR Code — à 5 % d'opacité.
+//
+// La trame est produite par un dégradé répété plutôt que par un SVG : aucune
+// requête, aucun octet de plus, et elle s'adapte à toute largeur.
 .pubc__couverture-fond{
   position:absolute;inset:0;
-  background:linear-gradient(135deg, var(--accent) 0%, var(--accent-vif) 100%);
+  background:
+    // 3. la trame de modules, la plus haute et la plus discrète
+    //
+    // Un trait de 2px tous les 10 couvrait un cinquième de la surface : à
+    // l'œil, la bannière prenait l'aspect d'une moustiquaire. Un trait de
+    // 1px tous les 14, à 3,5 %, redonne la texture sans le tissu.
+    repeating-linear-gradient(0deg,
+      rgba(255,255,255,.035) 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(90deg,
+      rgba(255,255,255,.035) 0 1px, transparent 1px 14px),
+    // 2. les halos organiques
+    radial-gradient(120% 90% at 12% 18%, rgba(255,255,255,.18) 0%, transparent 55%),
+    radial-gradient(90% 80% at 88% 92%, rgba(0,0,0,.20) 0%, transparent 60%),
+    // 1. le dégradé de marque
+    linear-gradient(135deg, var(--accent) 0%, var(--accent-vif) 100%);
 }
 
 // LE MÉDAILLON DÉBORDE SUR LA COUVERTURE, comme sur la maquette : c'est ce
@@ -234,7 +260,9 @@
   background:var(--accent);
   color:var(--sur-accent);
 
-  &:hover,&:focus-visible{background:var(--accent-vif);color:var(--sur-accent)}
+  // --accent-survol et non --accent-vif : mesuré, ce dernier ne donnait que
+  // 3,37:1 sous du blanc en thème clair. Voir _theme.scss.
+  &:hover,&:focus-visible{background:var(--accent-survol);color:var(--sur-accent)}
 }
 
 .pubc__action--clair{

@@ -105,7 +105,12 @@ class ProfileWizardController extends Controller
         $data = $request->safe()->except('photo');
 
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $this->wizard->storePhoto($request->file('photo'));
+            // Le chemin ET les octets : le disque est un cache, la base est la
+            // source durable. Voir ProfileWizardService::storePhoto().
+            ['path' => $chemin, 'octets' => $octets] = $this->wizard->storePhoto($request->file('photo'));
+
+            $data['photo_path'] = $chemin;
+            $data['photo_data'] = base64_encode($octets);
         }
 
         $this->wizard->saveStep(1, $data);

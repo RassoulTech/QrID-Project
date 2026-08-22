@@ -149,19 +149,17 @@ class VCardService
         }
 
         try {
-            $disque = Storage::disk('public');
+            /*
+             | ON DEMANDE LES OCTETS, PAS LE FICHIER.
+             |
+             | photoBinaire() lit le disque quand il l'a encore, la base sinon.
+             | Tester l'existence du fichier privait de portrait toutes les
+             | fiches enregistrées après un déploiement, alors que la photo
+             | était bel et bien conservée.
+             */
+            $binaire = (string) $profile->photoBinaire();
 
-            if (! $disque->exists($profile->photo_path)) {
-                return null;
-            }
-
-            if ($disque->size($profile->photo_path) > self::PHOTO_MAX_OCTETS) {
-                return null;
-            }
-
-            $binaire = (string) $disque->get($profile->photo_path);
-
-            if ($binaire === '') {
+            if ($binaire === '' || strlen($binaire) > self::PHOTO_MAX_OCTETS) {
                 return null;
             }
 

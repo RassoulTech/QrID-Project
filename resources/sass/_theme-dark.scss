@@ -202,6 +202,11 @@
   .offcanvas{background:var(--surface);color:var(--texte)}
   .offcanvas-header{border-bottom-color:var(--bord)}
   .offcanvas-title{color:var(--texte)}
+
+  // La croix de Bootstrap est une image NOIRE encodée en dur : sur un panneau
+  // sombre elle disparaît. L'inversion est le seul moyen de la retourner sans
+  // réécrire l'image.
+  .offcanvas .btn-close{filter:invert(1) grayscale(1) brightness(2)}
   .btn-close{filter:invert(1) grayscale(1) brightness(2)}
 
   .hero__lead{color:var(--texte-2)}
@@ -370,7 +375,6 @@
   .drop__text{color:var(--texte)}
   .drop__hint{color:var(--texte-2)}
   .social-row{background:var(--surface-3);border-color:var(--bord)}
-  .social-add{border-color:var(--bord-fort);color:var(--texte)}
 
   // ---------------------------------------------------------------------------
   // Paiement

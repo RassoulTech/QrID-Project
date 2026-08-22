@@ -35,10 +35,21 @@
   font-weight:700;
   line-height:1;
 
-  // La couleur est déclarée pour TOUS les états. Un bouton d'aide qui
-  // deviendrait illisible au survol serait un comble.
+  /*
+   | L'ENCRE EST SOMBRE, ET C'EST UNE CORRECTION MESURÉE.
+   |
+   | Le texte était blanc : 1,98:1 sur ce vert, très loin des 4,5:1 exigés.
+   | « Une question ? » se devinait plus qu'il ne se lisait, et disparaissait
+   | franchement en plein soleil — c'est-à-dire dans la situation où ce
+   | bouton sert le plus.
+   |
+   | Le VERT NE CHANGE PAS : c'est lui qu'on reconnaît de loin, et le
+   | repeindre reviendrait à effacer ce qui rend le bouton compréhensible
+   | sans le lire. C'est l'encre qui passe au noir-bleuté de WhatsApp,
+   | #0B141A — celui de leurs propres bulles. 9,38:1.
+   */
   &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
-    color:#FFFFFF;
+    color:#0B141A;
     text-decoration:none;
   }
 
