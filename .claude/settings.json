@@ -30,7 +30,17 @@
       "Bash(composer audit *)",
       "Bash(composer show *)",
       "Bash(composer update *)",
-      "Bash(php -l app/Http/Controllers/Auth/PasswordResetLinkController.php)"
+      "Bash(php -l app/Http/Controllers/Auth/PasswordResetLinkController.php)",
+      "PowerShell(php artisan event:list 2>&1)",
+      "PowerShell(php artisan route:list --columns=name --json 2>$null | ConvertFrom-Json | Select-Object -ExpandProperty name | Where-Object { $_ -match 'admin\\\\.\\(clients|payments|profiles\\)|abonnement|dashboard|profile\\\\.\\(public|create|activate\\)|password' })",
+      "PowerShell(php artisan route:list --columns=name 2>&1)",
+      "PowerShell(php artisan test 2>&1)",
+      "PowerShell(php artisan test --filter=ClientMailFlowTest 2>&1)",
+      "PowerShell(php artisan test --filter=PaymentMailFlowTest 2>&1)",
+      "PowerShell(php artisan test --filter=ScheduledRemindersTest 2>&1)",
+      "PowerShell(php artisan test --filter=\"MailFailureIsContainedTest|ScheduledRemindersTest\" 2>&1)",
+      "PowerShell(php artisan test --filter=\"MailFailureIsContainedTest\" 2>&1)",
+      "PowerShell(php artisan test --filter=EveryMailRendersTest 2>&1)"
     ]
   }
 }
