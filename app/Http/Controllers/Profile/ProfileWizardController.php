@@ -110,7 +110,10 @@ class ProfileWizardController extends Controller
             ['path' => $chemin, 'octets' => $octets] = $this->wizard->storePhoto($request->file('photo'));
 
             $data['photo_path'] = $chemin;
-            $data['photo_data'] = base64_encode($octets);
+
+            // octets null : la photo dépasse le plafond de la base et ne vit
+            // que sur le disque. Voir ProfileWizardService::storePhoto().
+            $data['photo_data'] = $octets === null ? null : base64_encode($octets);
         }
 
         $this->wizard->saveStep(1, $data);

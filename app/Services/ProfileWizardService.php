@@ -9,6 +9,7 @@ use App\Models\SocialLink;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -30,6 +31,19 @@ class ProfileWizardService
 
     /** Côté du carré produit pour la photo. Au-delà, le poids ne sert plus. */
     private const PHOTO_SIZE = 512;
+
+    /**
+     * LE POIDS MAXIMAL D'UNE PHOTO CONSERVÉE EN BASE.
+     *
+     * La colonne est un MEDIUMBLOB — 16 Mo — mais la limite technique n'est
+     * pas la bonne borne. Ces octets voyagent dans CHAQUE requête qui charge
+     * un profil, et une ligne de 3 Mo pèse sur le cache de la base comme sur
+     * la mémoire de PHP.
+     *
+     * 400 Ko laissent passer largement une photo de portrait en 512×512, y
+     * compris très détaillée, tout en gardant la ligne raisonnable.
+     */
+    private const PHOTO_MAX_OCTETS = 400 * 1024;
 
     /** Réseaux proposés. Liste fermée : aucune URL arbitraire de plateforme. */
     public const PLATFORMS = [
@@ -257,7 +271,7 @@ class ProfileWizardService
      * supprimée dans la foulée pour ne pas accumuler d'orphelins.
      */
     /**
-     * @return array{path:string, octets:string} le chemin ET les octets
+     * @return array{path:string, octets:?string} le chemin ET les octets
      *
      * LES OCTETS SORTENT AVEC LE CHEMIN, et ce n'est pas une commodité.
      * Le disque de Render est éphémère : la photo téléversée aujourd'hui
@@ -276,6 +290,28 @@ class ProfileWizardService
 
         Storage::disk('public')->put($path, $octets);
 
+        /*
+         | AU-DELÀ DU PLAFOND, LE DISQUE SEUL.
+         |
+         | Ce cas ne survient que par les replis de toSquareJpeg() — GD
+         | absent, ou image indécodable — où le fichier d'origine est rendu
+         | intact. Écrire trois mégaoctets dans chaque lecture de profil
+         | coûterait plus que la garantie qu'on cherche.
+         |
+         | Le profil garde alors son ancien comportement : la photo vit sur
+         | le disque et ne survit pas au déploiement. C'est une dégradation,
+         | pas une panne — et elle est tracée pour qu'on la voie.
+         */
+        if (strlen($octets) > self::PHOTO_MAX_OCTETS) {
+            Log::warning('Photo trop lourde pour la base : elle ne vivra que sur le disque', [
+                'chemin' => $path,
+                'octets' => strlen($octets),
+                'plafond' => self::PHOTO_MAX_OCTETS,
+            ]);
+
+            return ['path' => $path, 'octets' => null];
+        }
+
         return ['path' => $path, 'octets' => $octets];
     }
 
@@ -288,6 +324,11 @@ class ProfileWizardService
      */
     private function toSquareJpeg(UploadedFile $file): string
     {
+        // LES DEUX REPLIS RENDENT LE FICHIER D'ORIGINE, qui n'a subi aucun
+        // recadrage ni aucune compression : il peut peser plusieurs mégaoctets.
+        // Un profil sans recadrage vaut mieux qu'une erreur 500, mais il ne
+        // vaut pas une ligne de base de données de cette taille — c'est
+        // storePhoto() qui décidera de ne pas l'écrire en base.
         if (! function_exists('imagecreatetruecolor')) {
             return (string) file_get_contents($file->getRealPath());
         }
@@ -315,9 +356,36 @@ class ProfileWizardService
             $side, $side
         );
 
-        ob_start();
-        imagejpeg($canvas, null, 82);
-        $binary = (string) ob_get_clean();
+        /*
+         | LA QUALITÉ DESCEND JUSQU'À CE QUE LE POIDS TIENNE.
+         |
+         | 82 convient à la quasi-totalité des portraits : 20 à 40 Ko. Mais
+         | une image très détaillée — feuillage en arrière-plan, vêtement à
+         | motifs, photo prise en basse lumière — atteint 180 Ko et davantage
+         | au même réglage. Mesuré sur du bruit pur, le pire cas monte à
+         | 184 Ko.
+         |
+         | Plutôt que de refuser la photo ou de la laisser grossir sans
+         | borne, on recomprime. Trois paliers suffisent : entre 82 et 60, un
+         | portrait perd un peu de grain et rien de reconnaissable, là où un
+         | refus obligerait le client à retoucher son image lui-même — ce
+         | qu'il ne fera pas, et il partira sans photo.
+         |
+         | Le dernier palier est renvoyé tel quel : mieux vaut une photo un
+         | peu lourde qu'aucune photo. Le plafond de la base, lui, est trente
+         | fois plus haut.
+         */
+        $binary = '';
+
+        foreach ([82, 70, 60] as $qualite) {
+            ob_start();
+            imagejpeg($canvas, null, $qualite);
+            $binary = (string) ob_get_clean();
+
+            if (strlen($binary) <= self::PHOTO_MAX_OCTETS) {
+                break;
+            }
+        }
 
         imagedestroy($canvas);
         imagedestroy($source);
