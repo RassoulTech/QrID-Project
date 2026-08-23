@@ -113,6 +113,34 @@ class VCardTest extends TestCase
         }
     }
 
+    /**
+     * L'ADRESSE N'A PAS D'EXTENSION, et c'est ce qui décide sur iPhone.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * CE QUE TROIS CORRECTIONS D'EN-TÊTE N'AVAIENT PAS VU
+     * ═══════════════════════════════════════════════════════════════════
+     * iOS regarde D'ABORD l'extension de l'adresse, avant le type MIME. Une
+     * URL en « .vcf » est traitée comme un document à télécharger, quels que
+     * soient les en-têtes — ce qui explique que ni « attachment », ni
+     * « inline », ni l'absence de disposition n'aient rien changé : on
+     * discutait d'un en-tête que Safari ne consultait jamais.
+     *
+     * Ce test garde l'adresse propre. Si quelqu'un remet une extension pour
+     * « faire plus clair », le téléchargement revient et personne ne
+     * comprendra pourquoi.
+     */
+    public function test_the_contact_route_carries_no_file_extension(): void
+    {
+        $this->assertStringEndsWith(
+            '/contact',
+            route('profile.vcard', 'awa-ndiaye'),
+            "L'adresse porte une extension : iOS téléchargera au lieu d'ouvrir les contacts."
+        );
+
+        // L'ancienne adresse reste servie : des cartes sont déjà imprimées.
+        $this->get('/p/awa-ndiaye/contact.vcf')->assertOk();
+    }
+
     /** SUR ORDINATEUR, le fichier reste la bonne réponse — et il est nommé. */
     public function test_a_desktop_browser_gets_a_named_file(): void
     {

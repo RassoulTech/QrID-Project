@@ -252,8 +252,29 @@ require __DIR__.'/auth.php';
  | ne peut donc pas l'avaler, mais l'ordre reste celui du plus précis au plus
  | large : c'est la règle qui a déjà sauvé « /dashboard » plus haut.
  */
-Route::get('/p/{slug}/contact.vcf', [PublicProfileController::class, 'vcard'])
+/*
+ | ═══════════════════════════════════════════════════════════════════════
+ | L'ADRESSE N'A PLUS D'EXTENSION, ET C'EST LA CORRECTION PRINCIPALE
+ | ═══════════════════════════════════════════════════════════════════════
+ | Elle se terminait par « .vcf ». iOS décide du sort d'une réponse en
+ | regardant D'ABORD l'extension de l'adresse, avant le type MIME : une URL
+ | en .vcf est traitée comme un document à télécharger, quels que soient les
+ | en-têtes. C'est pour cela que ni « attachment », ni « inline », ni
+ | l'absence de disposition n'ont rien changé — on discutait d'un en-tête
+ | que Safari ne consultait jamais.
+ |
+ | Sans extension, il ne reste que le type MIME. Safari reconnaît alors
+ | text/vcard et ouvre sa feuille « Ajouter aux contacts ».
+ |
+ | L'ANCIENNE ADRESSE RESTE SERVIE. Des cartes sont déjà imprimées, des
+ | liens déjà partagés : une adresse publique ne se retire pas parce qu'on
+ | en a trouvé une meilleure. Elle mène au même endroit.
+ */
+Route::get('/p/{slug}/contact', [PublicProfileController::class, 'vcard'])
     ->name('profile.vcard');
+
+Route::get('/p/{slug}/contact.vcf', [PublicProfileController::class, 'vcard'])
+    ->name('profile.vcard.fichier');
 
 Route::get('/p/{slug}', [PublicProfileController::class, 'show'])
     ->name('profile.public');
