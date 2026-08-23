@@ -58,37 +58,87 @@
   margin-bottom:64px;
 }
 
-// LE FOND DE COUVERTURE — composé, jamais un aplat.
+// LE DÉCOR DE COUVERTURE — composé, quand le porteur n'a pas mis d'image.
 //
-// « L'ensemble doit se sentir sans se voir » : trois couches superposées, tout
-// en CSS, aucune image à télécharger sur une 3G.
+// ═══════════════════════════════════════════════════════════════════════
+// CE QUI N'ALLAIT PAS DANS LA VERSION PRÉCÉDENTE
+// ═══════════════════════════════════════════════════════════════════════
+// Une trame de fines lignes couvrait toute la bande : à l'œil, cela donnait
+// une moustiquaire, pas une bannière. Et le nom du produit, écrit en très
+// grand et coupé par le bord droit, se lisait comme un débordement de mise
+// en page plutôt que comme un filigrane.
 //
-//   1. le dégradé de marque, en base ;
-//   2. deux halos radiaux très diffus, qui cassent la platitude d'un aplat
-//      sans dessiner de forme reconnaissable ;
-//   3. une trame de modules carrés — l'écho du QR Code — à 5 % d'opacité.
+// Un motif qui se répète sur toute une surface se voit TOUJOURS, quelle que
+// soit son opacité : c'est la régularité qui accroche l'œil, pas le
+// contraste. La texture est donc supprimée au profit de formes uniques.
 //
-// La trame est produite par un dégradé répété plutôt que par un SVG : aucune
-// requête, aucun octet de plus, et elle s'adapte à toute largeur.
+// ═══════════════════════════════════════════════════════════════════════
+// CE QUI LA REMPLACE — quatre couches, aucune image à télécharger
+// ═══════════════════════════════════════════════════════════════════════
+//   1. un dégradé de marque en diagonale, du vert profond au vert vif ;
+//   2. deux masses lumineuses très diffuses, de tailles différentes, qui
+//      donnent du relief sans dessiner quoi que ce soit de reconnaissable ;
+//   3. une ombre chaude en bas à gauche, qui empêche le bloc de paraître
+//      plat sous le médaillon ;
+//   4. un voile clair en diagonale — la lumière qui glisse sur une surface.
+//
+// Aucune ne se répète. C'est ce qui fait la différence entre une texture
+// qu'on remarque et une matière qu'on ne remarque pas.
 .pubc__couverture-fond{
   position:absolute;inset:0;
-  // Le filigrane déborde volontairement : c'est le cadre qui le coupe.
   overflow:hidden;
   background:
-    // 3. la trame de modules, la plus haute et la plus discrète
-    //
-    // Un trait de 2px tous les 10 couvrait un cinquième de la surface : à
-    // l'œil, la bannière prenait l'aspect d'une moustiquaire. Un trait de
-    // 1px tous les 14, à 3,5 %, redonne la texture sans le tissu.
-    repeating-linear-gradient(0deg,
-      rgba(255,255,255,.035) 0 1px, transparent 1px 14px),
-    repeating-linear-gradient(90deg,
-      rgba(255,255,255,.035) 0 1px, transparent 1px 14px),
-    // 2. les halos organiques
-    radial-gradient(120% 90% at 12% 18%, rgba(255,255,255,.18) 0%, transparent 55%),
-    radial-gradient(90% 80% at 88% 92%, rgba(0,0,0,.20) 0%, transparent 60%),
+    // 4. le voile de lumière, en diagonale
+    linear-gradient(118deg,
+      transparent 0%,
+      rgba(255,255,255,.10) 38%,
+      rgba(255,255,255,.02) 52%,
+      transparent 68%),
+
+    // 2 & 3. les masses — grandes, molles, jamais centrées
+    radial-gradient(78% 120% at 88% -12%,
+      rgba(120, 230, 190, .38) 0%, transparent 62%),
+    radial-gradient(62% 96% at 8% 108%,
+      rgba(4, 32, 24, .55) 0%, transparent 66%),
+    radial-gradient(46% 70% at 62% 88%,
+      rgba(30, 158, 122, .40) 0%, transparent 70%),
+
     // 1. le dégradé de marque
-    linear-gradient(135deg, var(--accent) 0%, var(--accent-vif) 100%);
+    linear-gradient(142deg, #0B3B2E 0%, #0F5A44 46%, #1E9E7A 100%);
+}
+
+// LE MONOGRAMME — discret, cadré, jamais coupé.
+//
+// Le nom entier écrit en 58px et tranché par le bord de la carte faisait
+// désordre. Un monogramme dans une pastille se lit comme une signature :
+// il dit d'où vient la carte sans réclamer l'attention que mérite le nom
+// du porteur, qui est le sujet de la page.
+.pubc__couverture-marque{
+  position:absolute;
+  right:14px;bottom:12px;
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 11px 5px 8px;
+  border-radius:$r-full;
+  background:rgba(255,255,255,.14);
+  // Le liseré détache la pastille des zones claires du dégradé, où un fond
+  // translucide seul disparaîtrait.
+  border:1px solid rgba(255,255,255,.22);
+  backdrop-filter:blur(6px);
+  font-size:10.5px;font-weight:700;
+  letter-spacing:.10em;text-transform:uppercase;
+  color:rgba(255,255,255,.92);
+  user-select:none;
+}
+
+// Le petit carré de modules : l'écho du QR, en signature et non en trame.
+.pubc__couverture-puce{
+  display:grid;
+  grid-template-columns:repeat(2, 4px);
+  grid-auto-rows:4px;
+  gap:1.5px;
+
+  span{background:rgba(255,255,255,.92);border-radius:1px}
+  span:last-child{opacity:.45}
 }
 
 // LE MÉDAILLON DÉBORDE SUR LA COUVERTURE, comme sur la maquette : c'est ce
@@ -97,7 +147,11 @@
   position:absolute;
   left:20px;bottom:-56px;
   width:112px;height:112px;
-  border-radius:$r-md;
+  // ROND, et non un carré aux angles adoucis. Un portrait est un visage :
+  // le cercle est la forme que tous les répertoires de contacts, tous les
+  // réseaux et tous les téléphones lui donnent. Le carré arrondi se lisait
+  // comme une vignette d'application.
+  border-radius:$r-full;
   // Cadre épais : il détache le visage du dégradé, quelle que soit la photo.
   border:4px solid var(--surface);
   box-shadow:var(--ombre-1);
@@ -122,26 +176,6 @@
   width:100%;height:100%;
   object-fit:cover;
   display:block;
-}
-
-// LE NOM DU PRODUIT, EN FILIGRANE.
-//
-// Il se sent, il ne se lit pas. Un logo lisible posé au-dessus du portrait de
-// quelqu'un ferait de sa carte une publicité pour nous — or cette page
-// appartient au porteur, pas à la plateforme.
-//
-// Débordant à droite et en bas : un mot centré se lirait comme un titre.
-// Coupé par le bord, il devient une texture.
-.pubc__couverture-marque{
-  position:absolute;
-  right:-6px;bottom:-14px;
-  font-size:58px;
-  font-weight:800;
-  letter-spacing:-.04em;
-  line-height:1;
-  color:rgba(255,255,255,.14);
-  user-select:none;
-  white-space:nowrap;
 }
 
 // -----------------------------------------------------------------------------

@@ -220,18 +220,23 @@ $ease: cubic-bezier(.2,.8,.2,1);
   margin-bottom:26px;
 }
 
-// Le même fond composé que la page publique : dégradé de marque, deux halos
-// diffus, et la trame de modules du QR à très basse opacité.
+// LE MÊME DÉCOR QUE LA PAGE PUBLIQUE, à l'échelle. Les deux doivent
+// évoluer ensemble : voir .pubc__couverture-fond dans _carte-publique.scss.
+//
+// Aucune trame répétée : un motif régulier se voit toujours, quelle que soit
+// son opacité, et donnait à la bande l'aspect d'une moustiquaire.
 .phc__couverture-fond{
   position:absolute;inset:0;
   background:
-    repeating-linear-gradient(0deg,
-      rgba(255,255,255,.035) 0 1px, transparent 1px 14px),
-    repeating-linear-gradient(90deg,
-      rgba(255,255,255,.035) 0 1px, transparent 1px 14px),
-    radial-gradient(120% 90% at 12% 18%, rgba(255,255,255,.18) 0%, transparent 55%),
-    radial-gradient(90% 80% at 88% 92%, rgba(0,0,0,.20) 0%, transparent 60%),
-    linear-gradient(135deg, $vert-fonce 0%, $vert-accent 100%);
+    linear-gradient(118deg,
+      transparent 0%,
+      rgba(255,255,255,.10) 38%,
+      rgba(255,255,255,.02) 52%,
+      transparent 68%),
+    radial-gradient(78% 120% at 88% -12%, rgba(120, 230, 190, .38) 0%, transparent 62%),
+    radial-gradient(62% 96% at 8% 108%, rgba(4, 32, 24, .55) 0%, transparent 66%),
+    radial-gradient(46% 70% at 62% 88%, rgba(30, 158, 122, .40) 0%, transparent 70%),
+    linear-gradient(142deg, #0B3B2E 0%, #0F5A44 46%, #1E9E7A 100%);
 }
 
 // Le médaillon DÉBORDE sur la couverture, comme sur la page publique : c'est
@@ -240,7 +245,8 @@ $ease: cubic-bezier(.2,.8,.2,1);
   position:absolute;
   left:12px;bottom:-24px;
   width:52px;height:52px;
-  border-radius:14px;
+  // ROND, comme sur la page publique : c'est la même carte, à l'échelle.
+  border-radius:999px;
   border:3px solid $blanc;
   box-shadow:0 2px 8px rgba(10,31,26,.18);
   overflow:hidden;

@@ -116,7 +116,65 @@ class ProfileWizardController extends Controller
 
         $this->wizard->saveStep(1, $data);
 
+        /*
+         | ═══════════════════════════════════════════════════════════════
+         | UNE IMAGE DÉPOSÉE SUR UN PROFIL QUI EXISTE EST ÉCRITE TOUT DE SUITE
+         | ═══════════════════════════════════════════════════════════════
+         | LE DÉFAUT QUE CELA CORRIGE, ET IL A COÛTÉ TROIS ALLERS-RETOURS.
+         |
+         | Le profil n'était écrit qu'à l'ÉTAPE 3. Quelqu'un qui ouvrait
+         | « Modifier », déposait sa photo, la voyait apparaître dans la
+         | vignette et refermait l'onglet — parce que tout semblait fait —
+         | ne changeait rien du tout. Le fichier restait sur le disque, la
+         | session gardait son chemin, et la carte publique continuait
+         | d'afficher son repli. Rien n'échouait, rien n'était signalé, et
+         | le client concluait que le produit ne savait pas garder une photo.
+         |
+         | La règle est donc : à la CRÉATION, on écrit à la fin, parce
+         | qu'aucune ligne incomplète ne doit polluer la table. À l'ÉDITION,
+         | le profil existe déjà — il n'y a plus rien à protéger, et une
+         | image déposée est une intention claire. On l'écrit.
+         |
+         | Seules les IMAGES sont concernées. Un nom à moitié corrigé n'a
+         | pas à partir en base avant que la personne ait validé son
+         | parcours ; une photo, si : c'est le geste le plus explicite du
+         | formulaire, et le plus coûteux à refaire.
+         */
+        $this->enregistrerImagesImmediatement($request);
+
         return redirect()->route('profile.create.step2');
+    }
+
+    /**
+     * Écrit photo et bannière sur le profil existant, sans attendre la fin.
+     *
+     * Sans effet à la création : il n'y a pas encore de profil à écrire, et
+     * persist() s'en chargera. Sans effet non plus si rien n'a été déposé.
+     */
+    private function enregistrerImagesImmediatement(Request $request): void
+    {
+        $profile = $request->user()->profile;
+
+        if ($profile === null) {
+            return;
+        }
+
+        $colonnes = [];
+
+        foreach (['photo' => ['photo_path', 'photo_data'], 'cover' => ['cover_path', 'cover_data']] as $champ => [$chemin, $octets]) {
+            if (! $request->hasFile($champ)) {
+                continue;
+            }
+
+            $depose = $this->wizard->get('data.'.$chemin);
+
+            $colonnes[$chemin] = $depose;
+            $colonnes[$octets] = $this->wizard->octetsDuFichier($depose);
+        }
+
+        if ($colonnes !== []) {
+            $profile->forceFill($colonnes)->save();
+        }
     }
 
     // =======================================================================

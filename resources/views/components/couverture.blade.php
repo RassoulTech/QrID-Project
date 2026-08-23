@@ -43,7 +43,12 @@
              decoding="async" fetchpriority="high">
     @else
         <span class="pubc__couverture-fond" aria-hidden="true">
-            <span class="pubc__couverture-marque">{{ config('app.name') }}</span>
+            <span class="pubc__couverture-marque">
+                <span class="pubc__couverture-puce">
+                    <span></span><span></span><span></span><span></span>
+                </span>
+                {{ config('app.name') }}
+            </span>
         </span>
     @endif
 
