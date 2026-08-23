@@ -417,56 +417,68 @@ class CardPresentationTest extends TestCase
     }
 
     /**
-     * LE VERSO EST ASYMÉTRIQUE — deux tiers, un tiers.
+     * LE VERSO SUIT LA COMPOSITION VALIDÉE.
      *
-     * Une composition centrée donne une carte d'organisme public. C'est le
-     * déséquilibre qui fait lire l'objet comme un objet dessiné.
+     * ═══════════════════════════════════════════════════════════════════
+     * CE TEST A ÉTÉ ÉCRIT DEUX FOIS, ET C'EST LA SECONDE QUI COMPTE
+     * ═══════════════════════════════════════════════════════════════════
+     * Il vérifiait une grille en deux tiers / un tiers, avec une colonne
+     * verticale dont le texte se lisait de bas en haut. Cette composition
+     * était une PROPOSITION, pas une demande : elle remplaçait un verso qui
+     * avait été validé, et elle a été retirée.
      *
-     * Ce test remplace celui qui vérifiait que le QR et le bloc de texte
-     * partaient du même « top ». Cette règle appartenait à une composition
-     * en positionnement absolu qui n'existe plus : les deux blocs sont
-     * désormais les deux extrémités d'une colonne en space-between, ce qui
-     * les aligne par construction plutôt que par une valeur recopiée.
+     * Un test qui verrouille une proposition non demandée transforme un
+     * essai en acquis. Celui-ci décrit ce qui a été validé : marque en haut
+     * à gauche, QR à droite, mentions en pied.
      */
-    public function test_the_back_is_an_asymmetric_two_thirds_layout(): void
+    public function test_the_back_keeps_the_approved_composition(): void
     {
         $css = $this->pvc();
 
-        preg_match('/\.pvc__face--verso\{.*?grid-template-columns:1fr ([\d.]+)%/s', $css, $colonnes);
-
-        $this->assertNotEmpty($colonnes, 'La face verso n\'est plus une grille à deux zones.');
-
-        $part = (float) $colonnes[1];
-
-        // Sous 25 % la colonne ne porte plus une ligne pivotée lisible ;
-        // au-delà de 40 % elle cesse d'être une colonne et devient une moitié.
-        $this->assertGreaterThanOrEqual(25, $part);
-        $this->assertLessThanOrEqual(40, $part);
-
-        // La zone gauche descend jusqu'au bas : c'est ce qui supprime la
-        // plage vide que laissait le bloc flottant en haut de la face.
+        // Le bloc de marque part du HAUT GAUCHE.
         $this->assertMatchesRegularExpression(
-            '/\.pvc__v-zone\{.*?justify-content:space-between/s',
+            '/\.pvc__v-texte\{.*?top:0;\s*left:0/s',
             $css,
-            'La zone gauche ne pousse plus le code jusqu\'au bas de la carte.'
+            'Le bloc de marque a quitté le coin haut gauche.'
+        );
+
+        // Le QR est à DROITE, aligné sur le haut du bloc de texte.
+        $this->assertMatchesRegularExpression(
+            '/\.pvc__v-qr\{.*?right:0;\s*top:0/s',
+            $css,
+            'Le QR du verso a quitté le coin haut droit.'
+        );
+
+        // Le pied porte les deux mentions, aux deux bouts.
+        $this->assertMatchesRegularExpression(
+            '/\.pvc__v-pied\{.*?justify-content:space-between/s',
+            $css,
+            'Les mentions de pied ne sont plus réparties aux deux extrémités.'
+        );
+
+        // Et la colonne verticale a bien disparu.
+        $this->assertStringNotContainsString(
+            'pvc__v-colonne',
+            $css,
+            "La colonne verticale est revenue : ce n'est pas la composition validée."
         );
     }
 
     /**
-     * LE TEXTE DE LA COLONNE SE LIT DE BAS EN HAUT.
+     * LES DÉCALAGES DU VERSO PARTENT DE ZÉRO.
      *
-     * writing-mode:vertical-rl seul le ferait lire de HAUT en bas, ce qui
-     * oblige à pencher la tête vers la gauche — le geste inverse de celui
-     * qu'on fait spontanément devant une tranche. La rotation de 180° remet
-     * le sens de lecture à l'endroit, et son absence ne se voit pas sur une
-     * capture : elle se découvre la carte en main.
+     * Un élément en position absolue se place par rapport à la boîte de
+     * REMPLISSAGE de son ancêtre. La face porte padding:6% : « 0 » vaut donc
+     * déjà la marge demandée. Les valeurs étaient « 3,5cqw », héritées de
+     * l'époque où la marge de la face était elle-même en cqw — et se
+     * cumulaient avec elle, ce qui faisait chevaucher le QR et le pied.
      */
-    public function test_the_vertical_band_reads_bottom_to_top(): void
+    public function test_the_back_offsets_do_not_add_a_second_margin(): void
     {
-        $this->assertMatchesRegularExpression(
-            '/\.pvc__v-colonne-texte\{[^}]*writing-mode:vertical-rl;[^}]*transform:rotate\(180deg\)/s',
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.pvc__v-(texte|qr|pied)\{[^}]*3\.5cqw/s',
             $this->pvc(),
-            'Le texte de la colonne se lirait de haut en bas.'
+            "Un décalage en cqw s'ajoute à la marge de la face : le contenu se chevauchera."
         );
     }
 

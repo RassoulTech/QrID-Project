@@ -242,75 +242,25 @@
 // haut (largeur / 1,586) : chaque valeur ci-dessous est posée dans ce repère,
 // et tient donc à toute taille d'affichage sans recalcul.
 // =============================================================================
-// LA FACE EST UNE GRILLE ASYMETRIQUE — deux tiers, un tiers.
+// LA COMPOSITION VALIDÉE, RESTAURÉE.
 //
-// Une composition centree donne une carte d'organisme public. C'est le
-// desequilibre — masse a gauche, colonne etroite a droite — qui fait lire
-// l'objet comme un objet dessine.
+// ═══════════════════════════════════════════════════════════════════════
+// CE QUI AVAIT ÉTÉ CHANGÉ, ET POURQUOI ON REVIENT
+// ═══════════════════════════════════════════════════════════════════════
+// Le verso avait été recomposé en deux tiers / un tiers, avec une colonne
+// verticale à droite dont le texte se lisait de bas en haut. C'était une
+// proposition, pas une demande — et elle remplaçait une composition qui
+// avait été validée.
 //
-// La colonne ne descend pas sous une largeur lisible : a 31 % d'une carte de
-// 85,6 mm elle fait 26 mm, largement de quoi porter une ligne pivotee.
-// .pvc__face EST REPRIS DANS LE SÉLECTEUR, et ce n'est pas décoratif : une
-// règle .pvc__face{padding:6%} est déclarée plus bas dans ce fichier, à
-// spécificité égale, et l'emportait donc sur ce padding:0. Le verso se
-// retrouvait avec une marge de 6 % ET une grille, et la colonne verticale
-// n'atteignait plus les bords.
-.pvc__face.pvc__face--verso{
+// On restaure donc l'original : bloc de marque en haut à gauche, QR à
+// droite, mentions en pied. Les corrections acquises depuis restent, elles :
+// les marges de la face sont en POUR-CENT et non en cqw, et .pvc__visuel
+// est exclu de la règle qui repasse les enfants en position relative.
+
+.pvc__face--verso{
   padding:0;
-  display:grid;
-  grid-template-columns:1fr 31%;
   align-items:stretch;
-  justify-content:stretch;
-}
-
-// ── LA ZONE ORGANIQUE ────────────────────────────────────────────────────
-// Signature en haut, code en bas, et RIEN entre les deux qui ne serve a
-// l'un ou a l'autre : c'est l'ecart entre ces deux blocs qui fait respirer
-// la carte, pas un vide ajoute au milieu.
-.pvc__v-zone{
-  position:relative;
-  z-index:2;
-  min-width:0;
-  padding:5cqw;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  gap:3cqw;
-}
-
-// ── LA COLONNE ───────────────────────────────────────────────────────────
-//
-// ELLE N'EST PAS UN APLAT D'ENCRE, et c'est une correction.
-//
-// Peinte en --pvc-encre pleine, elle donnait sur la carte VERTE une colonne
-// blanche occupant un tiers de la face : une carte verte qui parait blanche
-// a un tiers n'est plus une carte verte. Un voile a 14 % suffit a detacher
-// la zone, laisse la couleur de la carte traverser, et rend au texte toute
-// sa densite.
-.pvc__v-colonne{
-  position:relative;
-  z-index:2;
-  display:grid;
-  place-items:center;
-  background:color-mix(in srgb, var(--pvc-encre) 14%, transparent);
-  // Le trait de separation, seul element franc de la zone.
-  border-left:.35cqw solid color-mix(in srgb, var(--pvc-encre) 28%, transparent);
-}
-
-// LE TEXTE SE LIT DE BAS EN HAUT, comme sur une tranche de livre.
-//
-// vertical-rl seul le ferait lire de HAUT en bas, ce qui oblige a pencher la
-// tete vers la gauche — le geste inverse de celui qu'on fait spontanement.
-// La rotation de 180 degres remet le sens de lecture a l'endroit.
-.pvc__v-colonne-texte{
-  writing-mode:vertical-rl;
-  transform:rotate(180deg);
-  font-size:3.4cqw;
-  font-weight:700;
-  letter-spacing:.28em;
-  text-transform:uppercase;
-  white-space:nowrap;
-  color:var(--pvc-encre);
+  justify-content:flex-start;
 }
 
 // FOND ORGANIQUE — des formes diffuses, sans géométrie répétitive.
@@ -360,11 +310,27 @@
 // l'autre.
 // -----------------------------------------------------------------------------
 .pvc__v-texte{
+  position:absolute;
+// LES DÉCALAGES PARTENT DE ZÉRO, ET C'EST EXACT.
+//
+// Un élément en position absolue se place par rapport à la BOÎTE DE
+// REMPLISSAGE de son ancêtre positionné. La face porte padding:6% : « 0 »
+// vaut donc déjà 6 % du bord de la carte — la marge demandée, ni plus ni
+// moins.
+//
+// Les valeurs étaient « 3,5cqw », calibrées à l'époque où la face portait
+// padding:6cqw. Or une unité cqw écrite sur la face se mesurait sur la
+// FENÊTRE : la marge réelle valait 115px sur un grand écran, et ces 3,5cqw
+// s'y ajoutaient. En ramenant la marge à 6 % — la correction juste — les
+// décalages sont devenus une seconde marge, et le QR est venu chevaucher
+// le pied.
+  top:0; left:0;
+  z-index:2;
+  width:53cqw;
   display:flex;
   flex-direction:column;
   align-items:flex-start;
-  gap:2.4cqw;
-  min-width:0;
+  gap:3cqw;
 }
 
 // LA SIGNATURE — carré et nom sur une seule ligne.
@@ -410,10 +376,10 @@
     // Sensiblement la hauteur des capitales du nom qui le suit : les deux
     // éléments doivent peser pareil, sinon l'un devient l'accessoire de
     // l'autre.
-    width:13cqw;
-    height:13cqw;
-    font-size:5.6cqw;
-    border-radius:3cqw;
+    width:12cqw;
+    height:12cqw;
+    font-size:5cqw;
+    border-radius:2.8cqw;
     color:$blanc !important;
   }
 
@@ -431,14 +397,8 @@
   &.brand--dark .brand__mark{background:$vert-fonce !important}
 }
 
-// LE NOM REMPLIT LA LARGEUR UTILE.
-//
-// A 11cqw, la signature — carre compris — occupait 40 des 59cqw disponibles
-// et laissait a sa droite une bande vide qui n'appartenait a rien. 14cqw la
-// mene au bord de la zone : le bloc se lit comme un titre, pas comme une
-// etiquette posee dans un coin.
 .pvc__v-nom{
-  font-size:14cqw;
+  font-size:11cqw;
   font-weight:800;
   letter-spacing:-.035em;
   line-height:1;
@@ -454,6 +414,7 @@
   font-weight:600;
   line-height:1.42;
   color:color-mix(in srgb, var(--pvc-encre) 82%, transparent);
+  max-width:46cqw;
 }
 
 // -----------------------------------------------------------------------------
@@ -463,17 +424,14 @@
 // qui partent de la même ligne se lisent comme une composition ; l'un centré
 // et l'autre en haut se lisent comme deux éléments posés au hasard.
 // -----------------------------------------------------------------------------
-// LE CODE ET SON INVITATION, COTE A COTE.
-//
-// La mention etait SOUS le code : elle repoussait le bloc vers le haut et
-// rouvrait en bas la plage vide que cette composition cherche a supprimer.
-// A droite, elle remplit la largeur restante et le code descend jusqu'au
-// bord inferieur de la zone.
 .pvc__v-qr{
+  position:absolute;
+  right:0; top:0;
+  z-index:2;
   display:flex;
-  align-items:flex-end;
-  gap:3cqw;
-  min-width:0;
+  flex-direction:column;
+  align-items:center;
+  gap:1.6cqw;
 }
 
 /*
@@ -488,21 +446,9 @@
  | sombre sur clair, conforme à ISO/IEC 18004, y compris sur la carte blanche
  | où le cadre devient alors invisible — et c'est très bien ainsi.
  */
-/*
- | LE CADRE EST DIMENSIONNE SUR LA HAUTEUR, pas sur la largeur.
- |
- | Le rapport ID-1 vaut 1,586 : 45 % de la HAUTEUR font 45 / 1,586 = 28,4 %
- | de la LARGEUR, seule dimension que connaisse un conteneur declare en
- | inline-size. D'ou 26cqw de code plus 1,2cqw de marge de chaque cote.
- |
- | Cette taille n'est pas decorative : un QR de 45 % de la hauteur d'une carte
- | ID-1 fait environ 24 mm de cote, la limite basse pour un scan fiable a bout
- | de bras avec un telephone d'entree de gamme.
- */
 .pvc__v-qr-cadre{
-  flex:0 0 auto;
   background:#FFFFFF;
-  padding:1.2cqw;
+  padding:1.3cqw;
   line-height:0;
   box-shadow:0 .6cqw 1.6cqw rgba(0,0,0,.22);
 
@@ -513,41 +459,45 @@
   }
 }
 
-// La colonne de texte a droite du code : l'invitation, puis la nature du
-// produit en plus petit.
-.pvc__v-qr-texte{
-  display:flex;
-  flex-direction:column;
-  gap:1.4cqw;
-  min-width:0;
-  padding-bottom:.6cqw;
-}
-
 .pvc__v-qr-mention{
-  font-size:3.1cqw;
+  font-size:2.6cqw;
   font-weight:700;
-  line-height:1.3;
-  letter-spacing:.02em;
-  color:color-mix(in srgb, var(--pvc-encre) 92%, transparent);
+  letter-spacing:.05em;
+  text-align:center;
+  color:color-mix(in srgb, var(--pvc-encre) 90%, transparent);
 }
 
 // -----------------------------------------------------------------------------
-// LA NATURE DU PRODUIT
+// PIED — nature à gauche, adresse à droite
 // -----------------------------------------------------------------------------
-// Elle vivait dans un pied de page en bas de la face, avec l'adresse du site.
-// Ce pied a disparu : l'adresse est passee dans la colonne verticale, et la
-// nature sous l'invitation du code, la ou elle la complete au lieu de
-// l'attendre trois centimetres plus bas.
-//
-// Pas de white-space:nowrap : sur une carte imprimee, une ligne coupee par
-// des points de suspension est un defaut definitif. Elle s'enroule.
-.pvc__v-nature{
+// Le pied touche la même marge de 4cqw que tout le reste : c'est la
+// régularité de la bordure qui fait qu'une carte paraît soignée.
+.pvc__v-pied{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  z-index:2;
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:3cqw;
+}
+
+.pvc__v-nature,
+.pvc__v-site{
   font-size:2.4cqw;
-  font-weight:600;
-  line-height:1.35;
-  letter-spacing:.09em;
+  letter-spacing:.13em;
   text-transform:uppercase;
-  color:color-mix(in srgb, var(--pvc-encre) 55%, transparent);
+  white-space:nowrap;
+}
+
+.pvc__v-nature{
+  font-weight:500;
+  color:color-mix(in srgb, var(--pvc-encre) 52%, transparent);
+}
+
+.pvc__v-site{
+  font-weight:700;
+  color:var(--pvc-encre);
 }
 
 // =============================================================================
@@ -694,18 +644,17 @@
   .pvc__fonction{font-size:12px}
   .pvc__qr{width:107px}
 
-  .pvc__v-zone{padding:17px;gap:10px}
-  .pvc__v-texte{gap:8px}
+  .pvc__v-texte{top:11px;left:11px;width:177px;gap:10px}
   .pvc__v-marque{gap:9px}
-  .pvc__v-logo .brand__mark{width:43px;height:43px;font-size:19px;border-radius:10px}
-  .pvc__v-nom{font-size:47px}
-  .pvc__v-accroche{font-size:12px}
-  .pvc__v-qr{gap:10px}
+  .pvc__v-logo .brand__mark{width:40px;height:40px;font-size:17px;border-radius:9px}
+  .pvc__v-nom{font-size:37px}
+  .pvc__v-accroche{font-size:12px;max-width:154px}
+  .pvc__v-qr{right:11px;top:11px}
   .pvc__v-qr-cadre{padding:4px}
   .pvc__v-qr-cadre svg{width:87px;height:87px}
-  .pvc__v-qr-mention{font-size:10px}
-  .pvc__v-nature{font-size:8px}
-  .pvc__v-colonne-texte{font-size:11px}
+  .pvc__v-qr-mention{font-size:9px}
+  .pvc__v-pied{left:11px;right:11px;bottom:11px}
+  .pvc__v-nature,.pvc__v-site{font-size:8px}
 }
 
 // -----------------------------------------------------------------------------
@@ -910,3 +859,44 @@
  */
 .pvc__face{padding:6%}
 
+
+// =============================================================================
+// L'APERÇU DES DEUX VARIANTES — étape de personnalisation
+// =============================================================================
+//
+// Ce sont les VRAIES faces, rendues aux couleurs de la variante, et non une
+// maquette schématique : on choisissait auparavant une carte sans l'avoir
+// vue, et la vraie arrivait deux écrans plus loin.
+//
+// LE CONTENEUR EST DÉCLARÉ EN inline-size : les faces sont dimensionnées en
+// cqw, et sans conteneur elles se mesureraient sur la fenêtre.
+.varcard__faces{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  width:100%;
+}
+
+.varcard__face{
+  display:block;
+  container-type:inline-size;
+  position:relative;
+  // Le rapport ID-1, pour que la face ne soit jamais déformée.
+  aspect-ratio:1.586;
+
+  .pvc__face{
+    position:absolute;
+    inset:0;
+    // Les faces d'aperçu ne s'animent pas et ne se retournent pas : deux
+    // cartes qui pivotent pendant qu'on choisit empêchent de comparer.
+    transform:none !important;
+    transition:none;
+    backface-visibility:visible;
+  }
+}
+
+// Sous 420px, deux faces côte à côte tombent à 90px de large : le nom y
+// devient illisible et l'aperçu ne renseigne plus. Elles s'empilent.
+@media (max-width:419px){
+  .varcard__faces{grid-template-columns:1fr}
+}

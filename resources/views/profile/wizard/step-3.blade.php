@@ -4,6 +4,22 @@
     $modeleChoisi = (int) $wizard->field('template_id', $templates->first()?->id);
     $varianteChoisie = $wizard->field('primary_color', \App\Enums\VarianteCarte::DEFAUT->value);
 
+    /*
+     | LE PROFIL D'APERÇU EST CELUI QU'ON EST EN TRAIN DE CRÉER.
+     |
+     | Les étapes 1 et 2 ont déjà recueilli le nom et la fonction : les
+     | montrer ici coûte une ligne et transforme une maquette en aperçu.
+     | Le profil n'est pas enregistré — c'est un objet en mémoire, jamais
+     | écrit, qui sert uniquement au rendu des deux faces.
+     */
+    $apercuProfil = new \App\Models\Profile([
+        'first_name' => $wizard->field('first_name', 'Votre'),
+        'last_name' => $wizard->field('last_name', 'nom'),
+        'job_title' => $wizard->field('job_title', 'Votre fonction'),
+        'company' => $wizard->field('company'),
+        'slug' => auth()->user()?->profile?->slug ?? 'apercu',
+    ]);
+
     // Classe d'aperçu par modèle : la miniature ne fait pas que changer de nom.
     $apercus = ['classique' => '', 'moderne' => ' tpl__mini--moderne', 'minimal' => ' tpl__mini--minimal'];
 @endphp
@@ -86,16 +102,32 @@
                                class="varcard__input" @checked($varianteChoisie === $variante->value)>
 
                         <span class="varcard__box">
-                            {{-- Aperçu réduit du recto : fond et encre de la
-                                 variante, aux proportions exactes d'une carte
-                                 ID-1. Le carré figure le QR Code sans le
-                                 générer — cet écran ne connaît pas encore le
-                                 slug du profil. --}}
-                            <span class="varcard__apercu" aria-hidden="true"
-                                  style="--v-fond:{{ $variante->fond() }};--v-encre:{{ $variante->encre() }}">
-                                <span class="varcard__nom">VOTRE NOM</span>
-                                <span class="varcard__qr"></span>
-                                <span class="varcard__fonction">VOTRE FONCTION</span>
+                            {{-- ═══════════════════════════════════════════
+                                 LES VRAIES CARTES, RECTO ET VERSO
+                                 ═══════════════════════════════════════════
+                                 C'était une maquette schématique : un carré
+                                 gris à la place du QR, « VOTRE NOM » en
+                                 majuscules, et le verso absent. On choisissait
+                                 donc une variante sans l'avoir vue — et la
+                                 vraie carte arrivait deux écrans plus loin.
+
+                                 Ce sont maintenant les composants servis à
+                                 l'impression, rendus aux couleurs de la
+                                 variante. Ce qu'on choisit est ce qu'on
+                                 recevra.
+
+                                 aria-hidden : les deux faces sont décoratives
+                                 ici. Le libellé et la description qui suivent
+                                 portent seuls l'information, et c'est le
+                                 bouton radio qui est annoncé. --}}
+                            <span class="varcard__faces" aria-hidden="true"
+                                  style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }}">
+                                <span class="varcard__face">
+                                    <x-pvc-card-face-recto :profile="$apercuProfil" :variante="$variante" />
+                                </span>
+                                <span class="varcard__face">
+                                    <x-pvc-card-face-verso :variante="$variante" />
+                                </span>
                             </span>
 
                             <span class="varcard__texte">

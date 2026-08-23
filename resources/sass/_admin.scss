@@ -20,7 +20,30 @@ $adm-nuit: #0A2A21;
 
 .adm {
   display: flex;
-  min-height: 100vh;
+  // 100dvh et non 100vh : sur mobile, 100vh vaut la hauteur AVEC la barre
+  // d'adresse dépliée, ce qui laisse un vide en bas quand elle se replie.
+  min-height: 100dvh;
+  background: var(--surface-2);
+}
+
+/*
+ | LE CANEVAS PREND LE FOND DE LA COQUILLE, ET NON DU BLANC.
+ |
+ | <html> ne déclare aucun fond : le canevas — la surface peinte au-delà du
+ | contenu — prend donc celui du <body>, qui vaut blanc en dur dans
+ | _base.scss. Tant que rien ne dépasse, cela ne se voit pas. Dès qu'un
+ | élément déborde d'un pixel, une bande blanche apparaît sous la page, et
+ | elle est blanche même en thème sombre.
+ |
+ | La cause du débordement est corrigée par ailleurs (voir le tableau
+ | accessible de activity-chart). Cette règle est la ceinture : quoi qu'il
+ | arrive en dessous, la couleur est celle de la page.
+ |
+ | :has() plutôt qu'une classe sur <body> : les deux coquilles — client et
+ | administration — partagent .adm, et une classe de plus serait une chose
+ | de plus à ne pas oublier dans un troisième gabarit.
+ */
+body:has(> .adm){
   background: var(--surface-2);
 }
 

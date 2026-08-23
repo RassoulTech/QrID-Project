@@ -94,7 +94,10 @@
                         <span><span class="chart-legende__puce chart-legende__puce--scan"></span> Scans</span>
                     </div>
 
-                    <table class="visually-hidden">
+                    {{-- Voir dashboard/partials/activity-chart :
+                         « height:1px » ne borne pas un <table>. --}}
+                    <div class="visually-hidden">
+                    <table>
                         <caption>Vues et scans par jour</caption>
                         <thead><tr><th>Jour</th><th>Vues</th><th>Scans</th></tr></thead>
                         <tbody>
@@ -107,6 +110,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @else
                     <div class="db-vide">
                         <svg width="26" height="26" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">

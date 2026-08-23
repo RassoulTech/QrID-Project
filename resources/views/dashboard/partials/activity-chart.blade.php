@@ -41,7 +41,15 @@
 
         {{-- Équivalent textuel : un histogramme en CSS reste illisible pour un
              lecteur d'écran. Le tableau porte les mêmes chiffres. --}}
-        <table class="visually-hidden">
+        {{-- LA CLASSE EST SUR L'ENVELOPPE, PAS SUR LE TABLEAU.
+             « height:1px » ne borne pas un <table> : la spécification traite
+             la hauteur d'un tableau comme un MINIMUM. Posée directement sur
+             lui, .visually-hidden le laissait à sa hauteur naturelle — 262px
+             mesurés — en position absolue, ce qui rallongeait le document de
+             198px et faisait apparaître une bande blanche sous la page.
+             Un <div> obéit, lui. --}}
+        <div class="visually-hidden">
+        <table>
             <caption>Vues par jour</caption>
             <thead><tr><th>Jour</th><th>Vues</th></tr></thead>
             <tbody>
@@ -50,6 +58,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     @else
         <div class="db-vide">
             <svg width="26" height="26" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
