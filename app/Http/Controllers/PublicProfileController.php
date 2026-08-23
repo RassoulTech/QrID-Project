@@ -138,6 +138,34 @@ class PublicProfileController extends Controller
     }
 
     /**
+     * L'appareil est-il un téléphone ou une tablette ?
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * RENIFLER L'AGENT UTILISATEUR EST UNE MAUVAISE HABITUDE — SAUF ICI
+     * ═══════════════════════════════════════════════════════════════════
+     * On ne l'emploie pas pour deviner une taille d'écran, ce que les
+     * requêtes média font mieux, ni pour supposer une capacité, ce que la
+     * détection de fonctionnalité fait mieux.
+     *
+     * Il s'agit d'autre chose : le MÊME en-tête HTTP produit deux
+     * comportements SYSTÈME opposés. Un Content-Disposition fait ouvrir les
+     * contacts sur un ordinateur et ranger un fichier sur un iPhone. Aucune
+     * négociation de contenu n'exprime cela — il n'existe pas d'en-tête
+     * « ce que votre système fera d'un text/vcard ».
+     *
+     * La liste est volontairement courte et grossière : se tromper coûte un
+     * fichier téléchargé au lieu d'une feuille de contact, jamais une page
+     * cassée.
+     */
+    private function estUnMobile(Request $request): bool
+    {
+        return (bool) preg_match(
+            '/Android|iPhone|iPad|iPod|Mobile Safari|Opera Mini/i',
+            (string) $request->userAgent()
+        );
+    }
+
+    /**
      * L'adresse de la photo, ou null si le fichier n'est pas là.
      *
      * La vérification coûte un accès disque par affichage. C'est le prix d'un
@@ -351,30 +379,45 @@ class PublicProfileController extends Controller
         $this->enregistrerVisite($request, $profile, ProfileEvent::TYPE_SAVE);
 
         /*
-         | « inline » ET NON « attachment », et la nuance décide de tout.
+         | ═══════════════════════════════════════════════════════════════
+         | SUR MOBILE, AUCUNE DISPOSITION — ET C'EST TOUT LE SUJET
+         | ═══════════════════════════════════════════════════════════════
+         | LE DÉFAUT QUE CELA CORRIGE.
          |
-         | Avec « attachment », Safari sur iOS DÉPOSE le fichier dans les
-         | téléchargements : il faut ensuite le retrouver, le toucher, choisir
-         | Contacts. Avec « inline » et le bon type MIME, iOS reconnaît une
-         | fiche de contact et ouvre directement l'écran d'ajout, prérempli.
-         | C'est le geste unique qu'un scan promet.
+         | L'en-tête est passé par « attachment », puis par « inline ». Les
+         | deux faisaient télécharger sur iPhone, et pour la même raison :
+         | dès qu'une réponse porte un Content-Disposition AVEC un nom de
+         | fichier, Safari la traite comme un document à ranger dans
+         | Fichiers. « inline » ne change que l'endroit du rangement, pas la
+         | décision.
          |
-         | Le nom de fichier reste annoncé : il sert aux systèmes qui, eux,
-         | choisissent malgré tout d'enregistrer — un navigateur de bureau,
-         | par exemple, où « ouvrir les contacts » n'a pas de sens.
+         | SANS AUCUNE DISPOSITION, Safari se fie au seul type MIME. Il
+         | reconnaît text/vcard, ouvre sa feuille de contact et propose
+         | « Ajouter aux contacts » — le geste unique qu'un scan promet.
          |
-         | Sur ANDROID, l'affaire se joue ailleurs : aucun en-tête ne fait
-         | ouvrir l'écran de création de contact. C'est le module
-         | enregistrer-contact.js qui remplace le lien par une intention
-         | native, et qui retombe sur cette réponse-ci s'il ne peut pas.
+         | SUR ORDINATEUR, LE FICHIER RESTE LA BONNE RÉPONSE. Un navigateur
+         | de bureau n'a pas d'application Contacts à ouvrir ; le
+         | téléchargement, avec un nom lisible, est ce qu'on attend. D'où la
+         | distinction par l'appareil : ce n'est pas une préférence, ce sont
+         | deux comportements système différents pour la même réponse.
+         |
+         | SUR ANDROID, l'affaire se joue ailleurs : aucun en-tête ne fait
+         | ouvrir l'écran de création de contact. C'est enregistrer-contact.js
+         | qui remplace le lien par une intention native, et cette
+         | réponse-ci ne sert plus que de repli.
          */
-        return response($vcard->pour($profile), 200, [
+        $entetes = [
             'Content-Type' => 'text/vcard; charset=utf-8',
-            'Content-Disposition' => 'inline; filename="'.$vcard->nomFichier($profile).'"',
 
             // Une fiche de contact ne se met pas en cache partagé : elle
             // porte des coordonnées personnelles.
             'Cache-Control' => 'private, max-age=0, must-revalidate',
-        ]);
+        ];
+
+        if (! $this->estUnMobile($request)) {
+            $entetes['Content-Disposition'] = 'attachment; filename="'.$vcard->nomFichier($profile).'"';
+        }
+
+        return response($vcard->pour($profile), 200, $entetes);
     }
 }

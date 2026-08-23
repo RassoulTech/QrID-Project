@@ -72,47 +72,58 @@ class VCardTest extends TestCase
     // =======================================================================
 
     /**
-     * LA FICHE EST SERVIE « INLINE », ET NON EN PIÈCE JOINTE.
+     * L'EN-TÊTE DÉPEND DE L'APPAREIL, et ce n'est pas une préférence.
      *
      * ═══════════════════════════════════════════════════════════════════
-     * POURQUOI CE TEST A CHANGÉ D'AVIS
+     * POURQUOI CE TEST A CHANGÉ D'AVIS DEUX FOIS
      * ═══════════════════════════════════════════════════════════════════
-     * Il exigeait « attachment ». Le raisonnement d'alors : sans cet en-tête,
-     * Android afficherait le fichier comme du texte brut et l'utilisateur
-     * verrait BEGIN:VCARD avant de refermer.
+     * Il a d'abord exigé « attachment », au motif que sans lui Android
+     * afficherait la fiche en texte brut. Puis « inline », au motif que
+     * « attachment » faisait télécharger sur iPhone. Les deux raisonnements
+     * étaient justes sur le risque et faux sur le remède.
      *
-     * Le raisonnement était juste sur le risque et faux sur le remède.
-     * « attachment » ne fait pas ouvrir les Contacts : il fait TÉLÉCHARGER.
-     * Sur Android, le visiteur récoltait une pastille de téléchargement et
-     * devait ensuite retrouver le fichier, le toucher, choisir Contacts,
-     * confirmer un compte — cinq gestes après un scan qui en promettait un.
-     * Sur iOS, il forçait le même détour alors que Safari sait ouvrir une
-     * fiche de contact d'elle-même.
+     * Le fait, mesuré : dès qu'une réponse porte un Content-Disposition
+     * AVEC un nom de fichier, Safari sur iOS la range dans Fichiers.
+     * « inline » ne change que l'endroit du rangement, pas la décision.
+     * Sans aucune disposition, Safari se fie au type MIME, reconnaît
+     * text/vcard et propose « Ajouter aux contacts ».
      *
-     * « inline » avec le bon type MIME fait ouvrir l'écran d'ajout de contact
-     * directement sur iOS. Sur Android, c'est le module enregistrer-contact.js
-     * qui prend le relais avec une intention native, et qui retombe sur cette
-     * réponse-ci s'il ne peut pas.
+     * Sur ordinateur, le téléchargement reste ce qu'on attend : un
+     * navigateur de bureau n'a pas d'application Contacts à ouvrir.
      *
-     * Le nom de fichier reste annoncé : il sert aux systèmes qui, eux,
-     * choisissent malgré tout d'enregistrer — un navigateur de bureau, où
-     * « ouvrir les contacts » n'a pas de sens.
+     * Le même en-tête produit donc deux comportements système opposés.
+     * C'est le seul endroit du produit où l'appareil est reniflé, et c'est
+     * pour cela.
      */
-    public function test_it_is_served_inline_so_contacts_opens_it(): void
+    public function test_a_phone_gets_no_disposition_so_contacts_opens_it(): void
     {
-        $reponse = $this->get(route('profile.vcard', 'awa-ndiaye'))->assertOk();
+        foreach ([
+            'iPhone' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
+            'Android' => 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36',
+        ] as $appareil => $agent) {
+            $reponse = $this->withHeader('User-Agent', $agent)
+                ->get(route('profile.vcard', 'awa-ndiaye'))
+                ->assertOk();
 
-        $this->assertStringContainsString('text/vcard', $reponse->headers->get('Content-Type'));
-        $this->assertStringContainsString('charset=utf-8', strtolower((string) $reponse->headers->get('Content-Type')));
+            $this->assertStringContainsString('text/vcard', (string) $reponse->headers->get('Content-Type'));
+            $this->assertNull(
+                $reponse->headers->get('Content-Disposition'),
+                $appareil.' reçoit une disposition : la fiche sera rangée dans les fichiers au lieu des contacts.'
+            );
+        }
+    }
+
+    /** SUR ORDINATEUR, le fichier reste la bonne réponse — et il est nommé. */
+    public function test_a_desktop_browser_gets_a_named_file(): void
+    {
+        $reponse = $this->withHeader(
+            'User-Agent',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36'
+        )->get(route('profile.vcard', 'awa-ndiaye'))->assertOk();
 
         $disposition = (string) $reponse->headers->get('Content-Disposition');
 
-        $this->assertStringContainsString('inline', $disposition);
-        $this->assertStringNotContainsString(
-            'attachment',
-            $disposition,
-            'La fiche redevient un téléchargement : iOS n\'ouvrira plus les Contacts tout seul.'
-        );
+        $this->assertStringContainsString('attachment', $disposition);
         $this->assertStringContainsString('awa-ndiaye.vcf', $disposition);
     }
 
