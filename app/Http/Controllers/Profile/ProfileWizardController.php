@@ -104,14 +104,29 @@ class ProfileWizardController extends Controller
 
         $data = $request->safe()->except(['photo', 'cover']);
 
-        // Seul le CHEMIN est retenu : persist() relira les octets sur le
-        // disque au moment d'écrire le profil. Voir ProfileWizardService.
+        /*
+         | LES OCTETS SONT GARDÉS EN MÉMOIRE, pas relus sur le disque.
+         |
+         | C'est ce qu'on vient de produire, à l'instant, dans ce processus.
+         | Toute relecture ultérieure peut échouer — et un échec silencieux
+         | écrivait un profil avec un chemin et sans image.
+         */
+        $images = [];
+
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $this->wizard->storePhoto($request->file('photo'));
+            $depot = $this->wizard->storePhoto($request->file('photo'));
+
+            $data['photo_path'] = $depot['chemin'];
+            $images['photo_path'] = $depot['chemin'];
+            $images['photo_data'] = $depot['octets'];
         }
 
         if ($request->hasFile('cover')) {
-            $data['cover_path'] = $this->wizard->storeCover($request->file('cover'));
+            $depot = $this->wizard->storeCover($request->file('cover'));
+
+            $data['cover_path'] = $depot['chemin'];
+            $images['cover_path'] = $depot['chemin'];
+            $images['cover_data'] = $depot['octets'];
         }
 
         $this->wizard->saveStep(1, $data);
@@ -140,7 +155,7 @@ class ProfileWizardController extends Controller
          | parcours ; une photo, si : c'est le geste le plus explicite du
          | formulaire, et le plus coûteux à refaire.
          */
-        $this->enregistrerImagesImmediatement($request);
+        $this->enregistrerImagesImmediatement($request, $images);
 
         return redirect()->route('profile.create.step2');
     }
@@ -151,29 +166,38 @@ class ProfileWizardController extends Controller
      * Sans effet à la création : il n'y a pas encore de profil à écrire, et
      * persist() s'en chargera. Sans effet non plus si rien n'a été déposé.
      */
-    private function enregistrerImagesImmediatement(Request $request): void
+    /**
+     * @param  array<string, string|null>  $images  colonnes prêtes à écrire
+     */
+    private function enregistrerImagesImmediatement(Request $request, array $images): void
     {
         $profile = $request->user()->profile;
 
-        if ($profile === null) {
+        if ($profile === null || $images === []) {
             return;
         }
 
-        $colonnes = [];
+        $profile->forceFill($images)->save();
 
-        foreach (['photo' => ['photo_path', 'photo_data'], 'cover' => ['cover_path', 'cover_data']] as $champ => [$chemin, $octets]) {
-            if (! $request->hasFile($champ)) {
-                continue;
-            }
+        /*
+         | L'ÉCHEC EST DIT, JAMAIS AVALÉ.
+         |
+         | Une image trop lourde pour la base est déposée sur le disque et
+         | disparaîtra au prochain déploiement. C'est rare — il faut que GD
+         | manque ou que l'image soit indécodable — mais c'était jusqu'ici
+         | parfaitement silencieux : le client voyait sa photo, puis ne la
+         | voyait plus, sans que rien ne le lui ait dit.
+         */
+        $perdues = array_keys(array_filter(
+            ['photo_data' => $images['photo_data'] ?? true, 'cover_data' => $images['cover_data'] ?? true],
+            fn ($octets) => $octets === null
+        ));
 
-            $depose = $this->wizard->get('data.'.$chemin);
-
-            $colonnes[$chemin] = $depose;
-            $colonnes[$octets] = $this->wizard->octetsDuFichier($depose);
-        }
-
-        if ($colonnes !== []) {
-            $profile->forceFill($colonnes)->save();
+        if ($perdues !== []) {
+            session()->flash('alerte', __(
+                "Votre image a été enregistrée, mais elle est trop lourde pour être conservée durablement. ".
+                "Choisissez une image plus légère si elle venait à disparaître."
+            ));
         }
     }
 

@@ -74,8 +74,16 @@
         <meta name="twitter:image" content="{{ $apercuUrl }}">
     @endif
 
-    @vite(['resources/sass/app.scss'])
-    {{-- Pas de JavaScript ici : rien sur cette page n'en a besoin. --}}
+    {{-- UN SCRIPT, ET UN SEUL.
+         Le commentaire disait ici « pas de JavaScript : rien sur cette page
+         n'en a besoin ». C'était vrai, puis ça a cessé de l'être sans que
+         personne ne le remarque : le bouton « Enregistrer » a besoin d'un
+         script pour ouvrir les contacts d'Android, et il est resté muet
+         pendant tout ce temps. Le module vivait dans app.js, qui n'est pas
+         chargé ici — le code était juste, il ne s'exécutait pas.
+
+         carte-publique.js ne contient QUE cela. Voir vite.config.js. --}}
+    @vite(['resources/sass/app.scss', 'resources/js/carte-publique.js'])
 </head>
 <body>
     {{--

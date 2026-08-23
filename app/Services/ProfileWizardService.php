@@ -283,19 +283,23 @@ class ProfileWizardService
      * supprimée dans la foulée pour ne pas accumuler d'orphelins.
      *
      * ═══════════════════════════════════════════════════════════════════
-     * LES OCTETS NE VOYAGENT PLUS PAR LA SESSION
+     * LES OCTETS SORTENT AVEC LE CHEMIN, ET C'EST LE POINT
      * ═══════════════════════════════════════════════════════════════════
-     * Ils y transitaient, encodés en base64, du formulaire jusqu'à la
-     * finalisation. Ce détour ajoutait un maillon fragile à une chaîne qui
-     * n'en avait pas besoin : quarante kilo-octets de texte recopiés dans la
-     * session, puis dans le brouillon en base, puis relus — et il suffisait
-     * qu'un maillon les perde pour que la photo se retrouve sur le disque et
-     * nulle part ailleurs, sans que rien ne le signale.
+     * Ils ont d'abord voyagé par la session, encodés en base64 : un maillon
+     * fragile, supprimé. Ils ont ensuite été RELUS SUR LE DISQUE au moment
+     * d'écrire le profil — plus court, mais pas plus sûr : toute lecture qui
+     * échoue (disque plein, droits, conteneur remplacé entre deux requêtes)
+     * fait écrire un profil avec un chemin et sans octets, sans que rien ne
+     * le signale.
      *
-     * Le fichier EST sur le disque à cet instant. persist() n'a qu'à le
-     * relire : c'est plus court, et il n'y a plus rien à perdre en route.
+     * Or les octets sont ICI, en mémoire, à l'instant où on les calcule. Les
+     * rendre coûte une variable et supprime toute une classe de pannes : ce
+     * qu'on écrit est ce qu'on vient de produire, pas ce qu'on espère
+     * retrouver.
+     *
+     * @return array{chemin:string, octets:?string} octets null si trop lourd
      */
-    public function storePhoto(UploadedFile $file): string
+    public function storePhoto(UploadedFile $file): array
     {
         if ($old = $this->get('data.photo_path')) {
             Storage::disk('public')->delete($old);
@@ -306,7 +310,7 @@ class ProfileWizardService
 
         Storage::disk('public')->put($path, $octets);
 
-        return $path;
+        return ['chemin' => $path, 'octets' => $this->octetsConservables($octets, $path)];
     }
 
     /**
@@ -320,27 +324,18 @@ class ProfileWizardService
      * ancien comportement : il vit sur le disque et ne survit pas au
      * déploiement. C'est une dégradation, pas une panne — et elle est tracée.
      */
-    public function octetsDuFichier(?string $chemin): ?string
+    /**
+     * Les octets, s'ils tiennent en base ; null sinon, et c'est tracé.
+     *
+     * AU-DELÀ DU PLAFOND, LE DISQUE SEUL. Le cas ne survient que par les
+     * replis de toSquareJpeg() et toBannerJpeg() — GD absent, ou image
+     * indécodable — où le fichier d'origine est rendu intact et peut peser
+     * plusieurs mégaoctets. Le média garde alors son ancien comportement :
+     * il vit sur le disque et ne survit pas au déploiement. C'est une
+     * dégradation, pas une panne.
+     */
+    private function octetsConservables(string $octets, string $chemin): ?string
     {
-        if (blank($chemin)) {
-            return null;
-        }
-
-        try {
-            if (! Storage::disk('public')->exists($chemin)) {
-                return null;
-            }
-
-            $octets = (string) Storage::disk('public')->get($chemin);
-        } catch (\Throwable $e) {
-            Log::warning('Média illisible sur le disque', [
-                'chemin' => $chemin,
-                'erreur' => $e->getMessage(),
-            ]);
-
-            return null;
-        }
-
         if ($octets === '' || strlen($octets) > self::PHOTO_MAX_OCTETS) {
             Log::warning('Média trop lourd pour la base : il ne vivra que sur le disque', [
                 'chemin' => $chemin,
@@ -352,6 +347,37 @@ class ProfileWizardService
         }
 
         return $octets;
+    }
+
+    /**
+     * Les octets d'un fichier déjà déposé, pour la FINALISATION seulement.
+     *
+     * À la création, le profil n'existe pas encore quand la photo arrive :
+     * les octets ne peuvent pas être écrits tout de suite, et persist() doit
+     * bien les relire quelque part. C'est le seul endroit où cette lecture
+     * subsiste — et le seul où elle soit sans risque, puisqu'un échec laisse
+     * simplement un profil sans photo à créer, pas une photo perdue.
+     */
+    public function octetsDuFichier(?string $chemin): ?string
+    {
+        if (blank($chemin)) {
+            return null;
+        }
+
+        try {
+            if (! Storage::disk('public')->exists($chemin)) {
+                return null;
+            }
+
+            return $this->octetsConservables((string) Storage::disk('public')->get($chemin), $chemin);
+        } catch (\Throwable $e) {
+            Log::warning('Média illisible sur le disque', [
+                'chemin' => $chemin,
+                'erreur' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -368,17 +394,18 @@ class ProfileWizardService
      * de quatre mégaoctets sortie d'un téléphone n'a aucune raison de voyager
      * en entier sur une 3G.
      */
-    public function storeCover(UploadedFile $file): string
+    public function storeCover(UploadedFile $file): array
     {
         if ($ancienne = $this->get('data.cover_path')) {
             Storage::disk('public')->delete($ancienne);
         }
 
         $chemin = 'couvertures/'.Str::uuid()->toString().'.jpg';
+        $octets = $this->toBannerJpeg($file);
 
-        Storage::disk('public')->put($chemin, $this->toBannerJpeg($file));
+        Storage::disk('public')->put($chemin, $octets);
 
-        return $chemin;
+        return ['chemin' => $chemin, 'octets' => $this->octetsConservables($octets, $chemin)];
     }
 
     /**

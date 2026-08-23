@@ -4,10 +4,25 @@ import laravel from 'laravel-vite-plugin';
 export default defineConfig({
     plugins: [
         laravel({
-            // Un seul point d'entrée JS : app.js importe ses modules.
-            // Vite émet un <script type="module">, donc chargé en DEFER
-            // par défaut — le HTML n'attend jamais le script.
-            input: ['resources/sass/app.scss', 'resources/js/app.js'],
+            /*
+             | DEUX POINTS D'ENTRÉE JS, ET LE SECOND EST VOLONTAIREMENT NU.
+             |
+             | app.js embarque Bootstrap et une douzaine de modules : c'est le
+             | script de l'application, pour qui est connecté.
+             |
+             | carte-publique.js ne contient qu'une chose — l'ouverture des
+             | contacts natifs — parce que la page publique s'ouvre après un
+             | scan, sur le téléphone d'un inconnu, souvent en 3G. Lui faire
+             | télécharger le tableau de bord serait absurde.
+             |
+             | Vite émet des <script type="module">, donc chargés en DEFER :
+             | le HTML n'attend jamais le script.
+             */
+            input: [
+                'resources/sass/app.scss',
+                'resources/js/app.js',
+                'resources/js/carte-publique.js',
+            ],
             refresh: true,
         }),
     ],

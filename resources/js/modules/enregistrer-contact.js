@@ -70,9 +70,20 @@ export default function enregistrerContact() {
         .map(([clef, valeur]) => `S.${clef}=${encodeURIComponent(valeur).replace(/[;#]/g, escapeHex)}`)
         .join(';');
 
+    /*
+     | AUCUN « scheme= » DANS L'INTENTION.
+     |
+     | La première version déclarait « scheme=qrid » : Android cherchait
+     | alors une application capable d'ouvrir qrid://contact, n'en trouvait
+     | aucune, et retombait sur l'adresse de repli — c'est-à-dire le
+     | téléchargement qu'on voulait éviter.
+     |
+     | Une intention INSERT se résout par son ACTION et son TYPE MIME, pas
+     | par un schéma d'URI. Sans schéma déclaré, Android interroge
+     | directement l'application Contacts.
+     */
     const intention =
         'intent://contact#Intent' +
-        ';scheme=qrid' +
         ';action=android.intent.action.INSERT' +
         ';type=vnd.android.cursor.dir/contact' +
         (extras ? ';' + extras : '') +

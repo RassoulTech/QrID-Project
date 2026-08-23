@@ -116,6 +116,48 @@ class PhotoParcoursTest extends TestCase
     }
 
     /**
+     * LA PHOTO EST ÉCRITE DÈS L'ÉTAPE 1, SANS ALLER JUSQU'AU BOUT.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * LE DÉFAUT QUE CE TEST GARDE FERMÉ
+     * ═══════════════════════════════════════════════════════════════════
+     * Le profil n'était écrit qu'à l'étape 3. Quelqu'un qui ouvrait
+     * « Modifier », déposait sa photo, la voyait apparaître dans la vignette
+     * et refermait l'onglet — parce que tout semblait fait — ne changeait
+     * rien du tout. Rien n'échouait, rien n'était signalé.
+     *
+     * Ce test s'arrête VOLONTAIREMENT après l'étape 1 : c'est le geste réel
+     * du client, et c'est celui qui doit suffire.
+     */
+    public function test_an_edit_saves_the_photo_at_step_one(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create(['email_verified_at' => now()]);
+
+        $profile = $this->parcours($user, []);
+        $this->assertEmpty($profile->photo_data);
+
+        app(ProfileWizardService::class)->hydrateFrom($profile->fresh());
+
+        $this->post(route('profile.store.step1'), [
+            'first_name' => 'Awa',
+            'last_name' => 'Ndiaye',
+            'job_title' => 'Architecte',
+            'photo' => UploadedFile::fake()->image('portrait.jpg', 800, 800),
+        ])->assertSessionHasNoErrors();
+
+        // On NE VA PAS jusqu'à l'étape 3 : c'est tout le sujet.
+        $apres = $profile->fresh();
+
+        $this->assertNotEmpty($apres->photo_path, "Le chemin n'a pas été écrit.");
+        $this->assertNotEmpty(
+            $apres->photo_data,
+            "La photo n'est enregistrée qu'au bout du parcours : celui qui referme avant la perd."
+        );
+    }
+
+    /**
      * MODIFIER SON NOM N'EFFACE PAS SA PHOTO.
      *
      * persist() écrit toutes les colonnes à chaque passage. Sans le repli sur
