@@ -28,11 +28,7 @@
              confort du visiteur, pas à l'identité du porteur. --}}
         <div class="pubc__theme"><x-theme-toggle /></div>
 
-        {{-- ?texture=b permet de juger un parti pris sur la VRAIE page, et
-             pas seulement sur la planche. Strictement local : en production,
-             la texture vient de la configuration. --}}
         <x-carte-publique
-            :variante="app()->environment('local') ? request()->query('texture') : null"
             :profile="$profile"
             :photo-url="$photoUrl"
             :couverture-url="$couvertureUrl ?? null"

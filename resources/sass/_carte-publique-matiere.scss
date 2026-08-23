@@ -11,15 +11,10 @@
 // sont des dégradés répétés ou des SVG encodés en ligne, tous inférieurs à
 // 400 octets une fois compressés.
 //
-// ═══════════════════════════════════════════════════════════════════════
-// LES TROIS PARTIS PRIS
-// ═══════════════════════════════════════════════════════════════════════
-// Ils ne diffèrent QUE par la texture du corps de la carte. Tout le reste —
-// bloc de coordonnées, grille, barre, bandeau — leur est commun.
-//
-//   .pubc--a   trame de modules, l'écho du QR Code
-//   .pubc--b   réseau de points reliés, le graphe professionnel
-//   .pubc--c   formes organiques floutées, la lumière diffuse
+// UNE SEULE TEXTURE EST SERVIE. Trois ont été comparées côte à côte ; le
+// choix est fait, et les deux autres ont été retirées plutôt que laissées
+// dormir dans la feuille. Du CSS mort est du CSS qu'on finit par croire
+// vivant. Voir la note sur .pubc__carte::after.
 //
 // ═══════════════════════════════════════════════════════════════════════
 // LE MOTIF NE TOUCHE JAMAIS AU CONTRASTE DU TEXTE
@@ -30,11 +25,9 @@
 // ContrasteCarteTest les rejoue.
 // =============================================================================
 
-// L'encre du motif suit le thème : sombre sur une carte claire, claire sur
-// une carte sombre. Un motif qui disparaîtrait dans l'un des deux thèmes
-// n'est pas un motif, c'est un oubli.
+// La force du voile suit le thème : à luminance égale, une lueur claire sur
+// fond sombre se voit MOINS qu'une lueur sombre sur fond clair.
 .pubc{
-  --pubc-motif: #{rgba($vert-fonce, 1)};
 
   /*
    | ═══════════════════════════════════════════════════════════════════
@@ -46,24 +39,19 @@
    | #0B3B2E.
    |
    | En résolvant l'équation de contraste, ce couple casse à 11,9 % en
-   | thème clair et à 15,8 % en thème sombre. Les valeurs retenues sont
-   | juste en dessous, et --pubc-motif-plafond borne les propositions qui
-   | multiplient cette force.
+   | thème clair et à 15,8 % en thème sombre. Les valeurs ci-dessous sont
+   | juste en dessous de ces limites — c'est le maximum de matière que la
+   | lisibilité autorise, pas un réglage de goût.
    |
-   | Les trois propositions passaient sous le seuil avant ce calcul :
-   | B tombait à 3,85:1 en clair et 2,60:1 en sombre. Rien ne le montrait
-   | à l'écran — c'est exactement pourquoi on mesure.
+   | Le premier jet passait sous le seuil sans que rien ne le montre à
+   | l'écran : 3,85:1 en clair, 2,60:1 en sombre. C'est exactement pourquoi
+   | on mesure au lieu de regarder.
    */
-  --pubc-motif-force: .045;
-  --pubc-motif-plafond: .115;
+  --pubc-motif-force: .115;
 }
 
 .theme-dark .pubc{
-  --pubc-motif: #E8EDEB;
-  // Plus fort en sombre : à luminance égale, un motif clair sur fond sombre
-  // se voit MOINS qu'un motif sombre sur fond clair.
-  --pubc-motif-force: .075;
-  --pubc-motif-plafond: .150;
+  --pubc-motif-force: .150;
 }
 
 // -----------------------------------------------------------------------------
@@ -84,76 +72,26 @@
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// A — TRAME DE MODULES
+// LA TEXTURE — une lumière diffuse, et rien d'autre
 // ═══════════════════════════════════════════════════════════════════════
-// Des carrés de deux tailles, sur deux grilles décalées et de pas différents :
-// c'est le décalage qui empêche l'œil de lire une grille régulière et lui
-// fait voir une trame irrégulière, comme les modules d'un QR Code.
+// TROIS PARTIS PRIS ONT ÉTÉ COMPARÉS, celui-ci a été retenu.
 //
-// LE MASQUE EST L'ÉLÉMENT CLÉ. Sans lui, le motif couvrirait le centre de la
-// carte, là où se lisent le nom et les coordonnées. Le dégradé radial le
-// creuse au milieu et le laisse aux angles — exactement l'inverse d'une
-// texture uniforme, qui gênerait la lecture au seul endroit qui compte.
-.pubc--a .pubc__carte::after{
-  background-image:
-    // Modules de 3px, pas de 22px
-    linear-gradient(var(--pubc-motif) 3px, transparent 3px),
-    linear-gradient(90deg, var(--pubc-motif) 3px, transparent 3px),
-    // Modules de 5px, pas de 37px — premier avec 22 : aucun alignement avant
-    // 814px, donc jamais de répétition visible sur une carte de 420.
-    linear-gradient(var(--pubc-motif) 5px, transparent 5px),
-    linear-gradient(90deg, var(--pubc-motif) 5px, transparent 5px);
-  background-size:22px 22px, 22px 22px, 37px 37px, 37px 37px;
-  background-position:0 0, 0 0, 11px 7px, 11px 7px;
-  background-blend-mode:multiply;
-  opacity:var(--pubc-motif-force);
-
-  mask-image:radial-gradient(105% 78% at 50% 46%, transparent 8%, #000 92%);
-  -webkit-mask-image:radial-gradient(105% 78% at 50% 46%, transparent 8%, #000 92%);
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// B — RÉSEAU DE CONNEXIONS
-// ═══════════════════════════════════════════════════════════════════════
-// Un graphe : des nœuds reliés par des arêtes fines. Deux compositions SVG
-// distinctes — une en haut à droite, une en bas à gauche — plutôt qu'un
-// motif répété, parce qu'un graphe qui se répète cesse d'être un graphe.
+//   A  une trame de petits carrés, l'écho du QR Code — visible, presque du
+//      papier millimétré, et 0,70 Ko ;
+//   B  un réseau de points reliés — narratif mais bavard, et 2,19 Ko ;
+//   C  celle-ci — 0,44 Ko.
 //
-// currentColor est impossible dans une image de fond : la couleur est donc
-// écrite dans le SVG. Le thème sombre redéclare la règle avec la sienne.
-.pubc--b .pubc__carte::after{
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='150' fill='none' stroke='%230B3B2E' stroke-width='1'%3E%3Cpath d='M20 130 L62 96 L118 112 L150 62 L108 30 L54 44 L20 130 M62 96 L108 30 M118 112 L54 44'/%3E%3Cg fill='%230B3B2E' stroke='none'%3E%3Ccircle cx='20' cy='130' r='4'/%3E%3Ccircle cx='62' cy='96' r='5.5'/%3E%3Ccircle cx='118' cy='112' r='3.5'/%3E%3Ccircle cx='150' cy='62' r='5'/%3E%3Ccircle cx='108' cy='30' r='4'/%3E%3Ccircle cx='54' cy='44' r='3'/%3E%3C/g%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='130' fill='none' stroke='%230B3B2E' stroke-width='1'%3E%3Cpath d='M18 34 L70 20 L124 58 L96 104 L34 92 L18 34 M70 20 L96 104 M124 58 L34 92'/%3E%3Cg fill='%230B3B2E' stroke='none'%3E%3Ccircle cx='18' cy='34' r='4.5'/%3E%3Ccircle cx='70' cy='20' r='3'/%3E%3Ccircle cx='124' cy='58' r='5'/%3E%3Ccircle cx='96' cy='104' r='3.5'/%3E%3Ccircle cx='34' cy='92' r='4'/%3E%3C/g%3E%3C/svg%3E");
-  background-repeat:no-repeat, no-repeat;
-  /*
-   | LE BANDEAU EST OPAQUE, et il occupe les 150 premiers pixels.
-   |
-   | La première composition était posée à 8px du haut : elle passait donc
-   | INTÉGRALEMENT dessous, et la carte paraissait n'en porter qu'une. On la
-   | descend sous le bandeau, là où elle a une chance d'être vue.
-   */
-  background-position:right -34px top 178px, left -38px bottom 34px;
-  // min() borne le produit au plafond calculé : voir la note en tête.
-  opacity:min(calc(var(--pubc-motif-force) * 4.4), var(--pubc-motif-plafond));
-}
-
-// En thème sombre, le tracé encodé en vert foncé disparaîtrait : on repeint.
-.theme-dark .pubc--b .pubc__carte::after{
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='150' fill='none' stroke='%23E8EDEB' stroke-width='1'%3E%3Cpath d='M20 130 L62 96 L118 112 L150 62 L108 30 L54 44 L20 130 M62 96 L108 30 M118 112 L54 44'/%3E%3Cg fill='%23E8EDEB' stroke='none'%3E%3Ccircle cx='20' cy='130' r='4'/%3E%3Ccircle cx='62' cy='96' r='5.5'/%3E%3Ccircle cx='118' cy='112' r='3.5'/%3E%3Ccircle cx='150' cy='62' r='5'/%3E%3Ccircle cx='108' cy='30' r='4'/%3E%3Ccircle cx='54' cy='44' r='3'/%3E%3C/g%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='130' fill='none' stroke='%23E8EDEB' stroke-width='1'%3E%3Cpath d='M18 34 L70 20 L124 58 L96 104 L34 92 L18 34 M70 20 L96 104 M124 58 L34 92'/%3E%3Cg fill='%23E8EDEB' stroke='none'%3E%3Ccircle cx='18' cy='34' r='4.5'/%3E%3Ccircle cx='70' cy='20' r='3'/%3E%3Ccircle cx='124' cy='58' r='5'/%3E%3Ccircle cx='96' cy='104' r='3.5'/%3E%3Ccircle cx='34' cy='92' r='4'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// C — FORMES ORGANIQUES
-// ═══════════════════════════════════════════════════════════════════════
+// LE CRITÈRE N'ÉTAIT PAS LE GOÛT. Cette page est la carte de visite de
+// quelqu'un : ce qui doit s'y voir est son nom, pas notre décor. A et B
+// dessinent quelque chose, et ce quelque chose entre en concurrence avec le
+// sujet. Celle-ci ne dessine rien — elle éclaire.
+//
 // Trois masses très larges, débordant volontairement des bords, qui se
-// comportent comme une lumière derrière le contenu plutôt que comme un
-// motif posé dessus. Pas de flou logiciel : un dégradé radial EST déjà
-// flou, et filter:blur() coûterait une couche de composition à chaque
-// défilement sur un téléphone d'entrée de gamme.
-.pubc--c .pubc__carte::after{
+// comportent comme une lumière derrière le contenu plutôt que comme un motif
+// posé dessus. Pas de flou logiciel : un dégradé radial EST déjà flou, et
+// filter:blur() coûterait une couche de composition à chaque défilement sur
+// un téléphone d'entrée de gamme — l'appareil de la majorité des visiteurs.
+.pubc__carte::after{
   background-image:
     radial-gradient(58% 34% at 108% 18%,
       color-mix(in srgb, var(--accent-vif) 42%, transparent) 0%, transparent 72%),
@@ -161,7 +99,7 @@
       color-mix(in srgb, var(--accent) 34%, transparent) 0%, transparent 70%),
     radial-gradient(74% 40% at 46% 112%,
       color-mix(in srgb, var(--accent-vif) 30%, transparent) 0%, transparent 76%);
-  opacity:min(calc(var(--pubc-motif-force) * 4.2), var(--pubc-motif-plafond));
+  opacity:var(--pubc-motif-force);
 }
 
 // -----------------------------------------------------------------------------
@@ -424,40 +362,13 @@
 }
 
 // =============================================================================
-// LA PLANCHE DE COMPARAISON — /design-system uniquement
+// LA RÉFÉRENCE — /design-system uniquement
 // =============================================================================
 //
-// Elle n'est jamais servie en production : la page est fermée hors de
-// l'environnement local. Ces règles ne coûtent donc rien au visiteur, mais
-// elles vivent ici plutôt que dans un fichier à part, parce qu'elles n'ont
-// de sens qu'en regard des trois propositions qu'elles présentent.
+// La page est fermée hors de l'environnement local : ces règles ne sont
+// jamais servies à un visiteur.
 
-.ds-cartes{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:64px;
-  margin-top:48px;
-
-  // Trois colonnes dès qu'il y a la place : c'est CÔTE À CÔTE que trois
-  // partis pris se comparent. Empilés, on juge le dernier vu.
-  @media (min-width:1180px){grid-template-columns:repeat(3, 1fr);gap:32px}
-}
-
-.ds-carte__entete{margin-bottom:24px}
-
-.ds-carte__titre{
-  font-size:19px;font-weight:800;letter-spacing:-.02em;
-  color:var(--texte);
-  margin:0 0 8px;
-}
-
-.ds-carte__texte{
-  font-size:13.5px;line-height:1.6;
-  color:var(--texte-2);
-  margin:0;
-}
-
-.ds-carte__paire{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.ds-carte__paire{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
 
 .ds-carte__vue{margin:0;flex:0 0 auto}
 
@@ -468,11 +379,9 @@
   margin-bottom:10px;
 }
 
-// LA LARGEUR DE RÉFÉRENCE EST FIXÉE À 375px.
-//
-// Sans ce cadre, la carte s'étirerait à sa colonne et l'on jugerait un rendu
-// que personne ne verra jamais : la carte publique est lue sur un téléphone,
-// debout, après un scan.
+// LA LARGEUR DE RÉFÉRENCE EST FIXÉE À 375px : la carte publique est lue sur
+// un téléphone, debout, après un scan. L'étirer à la page reviendrait à
+// juger un rendu que personne ne verra.
 .ds-carte__cadre{
   width:375px;
   max-width:100%;
@@ -482,19 +391,14 @@
   border:1px solid var(--bord);
 }
 
-// Le thème sombre appliqué à un sous-arbre : les jetons étant déclarés sur
-// .theme-dark, ils se redéclarent ici sans toucher au reste de la page.
 .ds-carte__vue.theme-dark{
   color:var(--texte);
 
   .ds-carte__legende{color:var(--texte-2)}
 }
 
-// EN APERÇU, LA SÉQUENCE D'ENTRÉE EST COUPÉE.
-//
-// Six cartes qui s'animent en même temps au chargement de la planche
-// donneraient une page qui tressaute, et l'on jugerait l'animation au lieu
-// de juger les textures.
+// EN APERÇU, LA SÉQUENCE D'ENTRÉE EST COUPÉE : deux cartes qui s'animent au
+// chargement de la planche feraient juger l'animation au lieu de la carte.
 .pubc--apercu{
   .pubc__carte,
   .pubc__infos,

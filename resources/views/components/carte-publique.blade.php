@@ -19,15 +19,13 @@
   LA STRUCTURE EST VALIDÉE ET NE BOUGE PAS
   ═══════════════════════════════════════════════════════════════════════
   Bandeau, médaillon, identité, bloc de coordonnées, grille de six boutons,
-  barre d'actions. Dans cet ordre. La variante ne change QUE la texture du
-  corps — voir _carte-publique-matiere.scss.
+  barre d'actions. Dans cet ordre.
 
   Props :
     profile       le porteur
     photoUrl      l'adresse du portrait, ou null (repli : les initiales)
     couvertureUrl l'adresse de la bannière, ou null (repli : le décor)
     qrSvg         le QR en plein écran, ou null
-    variante      a, b ou c — la texture du corps
     apercu        true sur /design-system : les liens ne mènent nulle part
 --}}
 @props([
@@ -35,13 +33,8 @@
     'photoUrl' => null,
     'couvertureUrl' => null,
     'qrSvg' => null,
-    'variante' => null,
     'apercu' => false,
 ])
-
-@php
-    $variante = $variante ?: config('carte.texture', 'a');
-@endphp
 
 @php
     $initiales = mb_strtoupper(
@@ -81,7 +74,7 @@
     }
 @endphp
 
-<div class="pubc pubc--{{ $variante }}{{ $apercu ? ' pubc--apercu' : '' }}">
+<div class="pubc{{ $apercu ? ' pubc--apercu' : '' }}">
     <article class="pubc__carte">
 
         {{-- ═══════════════ COUVERTURE ET MÉDAILLON ═══════════════ --}}
