@@ -54,7 +54,12 @@
         'dribbble' => ['#EA4C89', 'M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm9.9 11.06c-.13-.02-3.2-.65-6.3-.26a29 29 0 0 0-.8-1.83c3.42-1.4 4.9-3.4 4.92-3.43a9.87 9.87 0 0 1 2.18 5.52zM18.5 4.2c-.02.03-1.35 1.9-4.63 3.13a48 48 0 0 0-3.34-5.2 9.9 9.9 0 0 1 7.97 2.07zM8.35 2.72a56 56 0 0 1 3.32 5.13c-4.2 1.12-7.9 1.1-8.3 1.1a9.94 9.94 0 0 1 4.98-6.23zM2.1 12.02v-.32c.39.01 4.74.07 9.22-1.27.26.5.5 1 .72 1.51-.12.04-.24.07-.35.11-4.63 1.5-7.1 5.58-7.3 5.93a9.87 9.87 0 0 1-2.29-5.96zm3.94 7.4c.13-.27 1.83-3.53 6.9-5.3l.06-.02a41 41 0 0 1 2.12 7.53 9.9 9.9 0 0 1-9.08-2.21zm10.93 1.16a43 43 0 0 0-1.93-7.1c2.92-.47 5.48.29 5.8.39a9.9 9.9 0 0 1-3.87 6.71z'],
     ];
 
-    [$couleur, $trace] = $marques[$plateforme] ?? [null, null];
+    [, $trace] = $marques[$plateforme] ?? [null, null];
+
+    // LA COULEUR VIENT DU CATALOGUE PARTAGÉ, plus du tableau ci-dessus : la
+    // tuile qui entoure cette icône en a besoin AVANT de la rendre, et une
+    // variable posée sur l'enfant ne remonte pas au parent.
+    $couleur = \App\Support\CouleursPlateformes::pour($plateforme);
 @endphp
 
 @if ($trace)

@@ -14,7 +14,10 @@
 // x-social-icon — elles n'appartiennent pas à notre palette.
 // =============================================================================
 
-.pubc{
+// LA PAGE — c'est elle qui porte le fond et la hauteur d'écran. La CARTE,
+// elle, est un composant qui peut vivre ailleurs : voir x-carte-publique,
+// rendu aussi bien ici que sur la planche de /design-system.
+.pubc-page{
   position:relative;
   min-height:100dvh;
   padding:16px 14px 40px;
@@ -26,6 +29,8 @@
 
 // La bascule de thème appartient au confort du VISITEUR, pas à l'identité du
 // porteur : elle flotte donc hors de la carte.
+.pubc{position:relative}
+
 .pubc__theme{
   max-width:420px;
   margin:0 auto 10px;

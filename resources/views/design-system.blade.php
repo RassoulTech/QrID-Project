@@ -235,6 +235,8 @@
                 </div>
             </div>
 
+            @include('design-system.cartes-publiques', ['profile' => $profile])
+
             {{-- ---------------------------------------------------------- --}}
             <h2 class="section-title" style="margin-top:96px">Palette</h2>
             <div class="figures__grid" style="margin-top:32px">

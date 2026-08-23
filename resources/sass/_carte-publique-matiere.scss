@@ -1,0 +1,503 @@
+// =============================================================================
+// LA CARTE PUBLIQUE — LA MATIÈRE
+// =============================================================================
+//
+// _carte-publique.scss pose la STRUCTURE : ce qui est où, dans quel ordre, à
+// quelle largeur. Ce fichier-ci pose la MATIÈRE : textures, teintes, reliefs,
+// transitions, séquence d'entrée. La séparation n'est pas cosmétique — la
+// structure est validée et ne doit plus bouger ; la matière, elle, se discute.
+//
+// TOUT EST EN CSS. Aucune image, aucun octet de plus sur une 3G : les motifs
+// sont des dégradés répétés ou des SVG encodés en ligne, tous inférieurs à
+// 400 octets une fois compressés.
+//
+// ═══════════════════════════════════════════════════════════════════════
+// LES TROIS PARTIS PRIS
+// ═══════════════════════════════════════════════════════════════════════
+// Ils ne diffèrent QUE par la texture du corps de la carte. Tout le reste —
+// bloc de coordonnées, grille, barre, bandeau — leur est commun.
+//
+//   .pubc--a   trame de modules, l'écho du QR Code
+//   .pubc--b   réseau de points reliés, le graphe professionnel
+//   .pubc--c   formes organiques floutées, la lumière diffuse
+//
+// ═══════════════════════════════════════════════════════════════════════
+// LE MOTIF NE TOUCHE JAMAIS AU CONTRASTE DU TEXTE
+// ═══════════════════════════════════════════════════════════════════════
+// Il est peint dans un ::after en position absolue, SOUS le contenu
+// (z-index négatif) et à une opacité qui ne déplace jamais un ratio d'un
+// dixième. Les mesures sont dans la note de livraison, et le test
+// ContrasteCarteTest les rejoue.
+// =============================================================================
+
+// L'encre du motif suit le thème : sombre sur une carte claire, claire sur
+// une carte sombre. Un motif qui disparaîtrait dans l'un des deux thèmes
+// n'est pas un motif, c'est un oubli.
+.pubc{
+  --pubc-motif: #{rgba($vert-fonce, 1)};
+
+  /*
+   | ═══════════════════════════════════════════════════════════════════
+   | LE PLAFOND N'EST PAS CHOISI À L'ŒIL, IL EST CALCULÉ
+   | ═══════════════════════════════════════════════════════════════════
+   | La contrainte est ferme : aucun texte ne descend sous 4,5:1. Le pire
+   | cas est le texte le PLUS PÂLE posé sur le point le PLUS DENSE du
+   | motif — en clair, --texte-2 (#5C6B66) sur du blanc assombri par
+   | #0B3B2E.
+   |
+   | En résolvant l'équation de contraste, ce couple casse à 11,9 % en
+   | thème clair et à 15,8 % en thème sombre. Les valeurs retenues sont
+   | juste en dessous, et --pubc-motif-plafond borne les propositions qui
+   | multiplient cette force.
+   |
+   | Les trois propositions passaient sous le seuil avant ce calcul :
+   | B tombait à 3,85:1 en clair et 2,60:1 en sombre. Rien ne le montrait
+   | à l'écran — c'est exactement pourquoi on mesure.
+   */
+  --pubc-motif-force: .045;
+  --pubc-motif-plafond: .115;
+}
+
+.theme-dark .pubc{
+  --pubc-motif: #E8EDEB;
+  // Plus fort en sombre : à luminance égale, un motif clair sur fond sombre
+  // se voit MOINS qu'un motif sombre sur fond clair.
+  --pubc-motif-force: .075;
+  --pubc-motif-plafond: .150;
+}
+
+// -----------------------------------------------------------------------------
+// LE CORPS DE LA CARTE — le support du motif
+// -----------------------------------------------------------------------------
+.pubc__carte{
+  position:relative;
+  isolation:isolate;   // le motif ne peut pas déborder sur la page
+}
+
+.pubc__carte::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:-1;          // sous tout le contenu, jamais au-dessus
+  pointer-events:none;
+  border-radius:inherit;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// A — TRAME DE MODULES
+// ═══════════════════════════════════════════════════════════════════════
+// Des carrés de deux tailles, sur deux grilles décalées et de pas différents :
+// c'est le décalage qui empêche l'œil de lire une grille régulière et lui
+// fait voir une trame irrégulière, comme les modules d'un QR Code.
+//
+// LE MASQUE EST L'ÉLÉMENT CLÉ. Sans lui, le motif couvrirait le centre de la
+// carte, là où se lisent le nom et les coordonnées. Le dégradé radial le
+// creuse au milieu et le laisse aux angles — exactement l'inverse d'une
+// texture uniforme, qui gênerait la lecture au seul endroit qui compte.
+.pubc--a .pubc__carte::after{
+  background-image:
+    // Modules de 3px, pas de 22px
+    linear-gradient(var(--pubc-motif) 3px, transparent 3px),
+    linear-gradient(90deg, var(--pubc-motif) 3px, transparent 3px),
+    // Modules de 5px, pas de 37px — premier avec 22 : aucun alignement avant
+    // 814px, donc jamais de répétition visible sur une carte de 420.
+    linear-gradient(var(--pubc-motif) 5px, transparent 5px),
+    linear-gradient(90deg, var(--pubc-motif) 5px, transparent 5px);
+  background-size:22px 22px, 22px 22px, 37px 37px, 37px 37px;
+  background-position:0 0, 0 0, 11px 7px, 11px 7px;
+  background-blend-mode:multiply;
+  opacity:var(--pubc-motif-force);
+
+  mask-image:radial-gradient(105% 78% at 50% 46%, transparent 8%, #000 92%);
+  -webkit-mask-image:radial-gradient(105% 78% at 50% 46%, transparent 8%, #000 92%);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// B — RÉSEAU DE CONNEXIONS
+// ═══════════════════════════════════════════════════════════════════════
+// Un graphe : des nœuds reliés par des arêtes fines. Deux compositions SVG
+// distinctes — une en haut à droite, une en bas à gauche — plutôt qu'un
+// motif répété, parce qu'un graphe qui se répète cesse d'être un graphe.
+//
+// currentColor est impossible dans une image de fond : la couleur est donc
+// écrite dans le SVG. Le thème sombre redéclare la règle avec la sienne.
+.pubc--b .pubc__carte::after{
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='150' fill='none' stroke='%230B3B2E' stroke-width='1'%3E%3Cpath d='M20 130 L62 96 L118 112 L150 62 L108 30 L54 44 L20 130 M62 96 L108 30 M118 112 L54 44'/%3E%3Cg fill='%230B3B2E' stroke='none'%3E%3Ccircle cx='20' cy='130' r='4'/%3E%3Ccircle cx='62' cy='96' r='5.5'/%3E%3Ccircle cx='118' cy='112' r='3.5'/%3E%3Ccircle cx='150' cy='62' r='5'/%3E%3Ccircle cx='108' cy='30' r='4'/%3E%3Ccircle cx='54' cy='44' r='3'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='130' fill='none' stroke='%230B3B2E' stroke-width='1'%3E%3Cpath d='M18 34 L70 20 L124 58 L96 104 L34 92 L18 34 M70 20 L96 104 M124 58 L34 92'/%3E%3Cg fill='%230B3B2E' stroke='none'%3E%3Ccircle cx='18' cy='34' r='4.5'/%3E%3Ccircle cx='70' cy='20' r='3'/%3E%3Ccircle cx='124' cy='58' r='5'/%3E%3Ccircle cx='96' cy='104' r='3.5'/%3E%3Ccircle cx='34' cy='92' r='4'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat:no-repeat, no-repeat;
+  /*
+   | LE BANDEAU EST OPAQUE, et il occupe les 150 premiers pixels.
+   |
+   | La première composition était posée à 8px du haut : elle passait donc
+   | INTÉGRALEMENT dessous, et la carte paraissait n'en porter qu'une. On la
+   | descend sous le bandeau, là où elle a une chance d'être vue.
+   */
+  background-position:right -34px top 178px, left -38px bottom 34px;
+  // min() borne le produit au plafond calculé : voir la note en tête.
+  opacity:min(calc(var(--pubc-motif-force) * 4.4), var(--pubc-motif-plafond));
+}
+
+// En thème sombre, le tracé encodé en vert foncé disparaîtrait : on repeint.
+.theme-dark .pubc--b .pubc__carte::after{
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='150' fill='none' stroke='%23E8EDEB' stroke-width='1'%3E%3Cpath d='M20 130 L62 96 L118 112 L150 62 L108 30 L54 44 L20 130 M62 96 L108 30 M118 112 L54 44'/%3E%3Cg fill='%23E8EDEB' stroke='none'%3E%3Ccircle cx='20' cy='130' r='4'/%3E%3Ccircle cx='62' cy='96' r='5.5'/%3E%3Ccircle cx='118' cy='112' r='3.5'/%3E%3Ccircle cx='150' cy='62' r='5'/%3E%3Ccircle cx='108' cy='30' r='4'/%3E%3Ccircle cx='54' cy='44' r='3'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='130' fill='none' stroke='%23E8EDEB' stroke-width='1'%3E%3Cpath d='M18 34 L70 20 L124 58 L96 104 L34 92 L18 34 M70 20 L96 104 M124 58 L34 92'/%3E%3Cg fill='%23E8EDEB' stroke='none'%3E%3Ccircle cx='18' cy='34' r='4.5'/%3E%3Ccircle cx='70' cy='20' r='3'/%3E%3Ccircle cx='124' cy='58' r='5'/%3E%3Ccircle cx='96' cy='104' r='3.5'/%3E%3Ccircle cx='34' cy='92' r='4'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// C — FORMES ORGANIQUES
+// ═══════════════════════════════════════════════════════════════════════
+// Trois masses très larges, débordant volontairement des bords, qui se
+// comportent comme une lumière derrière le contenu plutôt que comme un
+// motif posé dessus. Pas de flou logiciel : un dégradé radial EST déjà
+// flou, et filter:blur() coûterait une couche de composition à chaque
+// défilement sur un téléphone d'entrée de gamme.
+.pubc--c .pubc__carte::after{
+  background-image:
+    radial-gradient(58% 34% at 108% 18%,
+      color-mix(in srgb, var(--accent-vif) 42%, transparent) 0%, transparent 72%),
+    radial-gradient(52% 30% at -12% 52%,
+      color-mix(in srgb, var(--accent) 34%, transparent) 0%, transparent 70%),
+    radial-gradient(74% 40% at 46% 112%,
+      color-mix(in srgb, var(--accent-vif) 30%, transparent) 0%, transparent 76%);
+  opacity:min(calc(var(--pubc-motif-force) * 4.2), var(--pubc-motif-plafond));
+}
+
+// -----------------------------------------------------------------------------
+// LE BANDEAU — formes lisibles, moins d'aplat
+// -----------------------------------------------------------------------------
+// La version précédente était un dégradé propre mais plat. Trois arcs larges
+// et un voile oblique lui donnent du volume sans dessiner de sujet : ce qui
+// doit se voir ici, c'est le portrait, pas le fond.
+.pubc__couverture-fond{
+  background:
+    linear-gradient(112deg,
+      transparent 0%,
+      rgba(255,255,255,.14) 34%,
+      rgba(255,255,255,.03) 50%,
+      transparent 66%),
+    radial-gradient(64% 130% at 96% -18%, rgba(140,240,200,.44) 0%, transparent 60%),
+    radial-gradient(52% 96% at 20% 122%, rgba(3,28,21,.60) 0%, transparent 64%),
+    radial-gradient(40% 78% at 58% 8%, rgba(60,200,158,.34) 0%, transparent 66%),
+    linear-gradient(142deg, #0A362A 0%, #10604A 48%, #23A882 100%);
+}
+
+// LE FILIGRANE EST SUPPRIMÉ, et la pastille prend sa place.
+//
+// Le mot coupé par le bord droit se lisait comme un défaut de mise en page.
+// La pastille, elle, est cadrée : elle dit d'où vient la carte sans réclamer
+// l'attention que mérite le nom du porteur.
+.pubc__couverture-marque{
+  top:12px;bottom:auto;right:12px;
+  padding:5px 12px 5px 9px;
+  background:rgba(8,40,31,.34);
+  border-color:rgba(255,255,255,.26);
+  font-size:9.5px;
+  letter-spacing:.14em;
+}
+
+// LE MÉDAILLON SE DÉTACHE DU BANDEAU.
+//
+// Une ombre unique et douce le collait au fond. Deux ombres — une courte et
+// dense au contact, une longue et diffuse en dessous — donnent l'épaisseur
+// d'un objet posé, pas d'un cercle découpé.
+.pubc__medaillon{
+  box-shadow:
+    0 2px 6px rgba(6,28,21,.22),
+    0 12px 26px rgba(6,28,21,.20);
+}
+
+// LES INITIALES, ET NON UN PORTRAIT GÉNÉRIQUE.
+//
+// Un visage dessiné que personne n'a choisi ne représente pas le porteur :
+// il représente « quelqu'un », ce qui est pire qu'un repli assumé. Deux
+// lettres sur un dégradé de marque disent « c'est cette personne, sans
+// photo » — et se lisent à trois mètres.
+.pubc__initiales{
+  display:grid;place-items:center;
+  width:100%;height:100%;
+  background:linear-gradient(142deg, var(--accent) 0%, var(--accent-vif) 100%);
+  color:$blanc;
+  font-size:40px;font-weight:800;
+  letter-spacing:.01em;
+  // Les capitales d'une police à grande hauteur d'x paraissent basses dans un
+  // cercle : un demi-pixel de remontée recentre optiquement le bloc.
+  padding-bottom:2px;
+}
+
+// -----------------------------------------------------------------------------
+// LE BLOC DE COORDONNÉES
+// -----------------------------------------------------------------------------
+// Il était un cadre gris neutre, c'est-à-dire rien. Une teinte de marque très
+// pâle suffit à le rattacher au reste sans le faire crier.
+.pubc__infos{
+  background:color-mix(in srgb, var(--accent) 5%, var(--surface));
+  border-color:color-mix(in srgb, var(--accent) 16%, transparent);
+  padding:2px 0;
+  overflow:hidden;
+}
+
+// Le filet entre deux lignes : plus discret qu'une bordure pleine, et absent
+// sous la dernière — un trait qui ne sépare rien est un trait de trop.
+.pubc__infos li + li .pubc__info{
+  border-top:1px solid color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.pubc__info{
+  transition:background 200ms ease, transform 200ms ease;
+  will-change:transform;
+
+  &:hover,&:focus-visible{
+    background:color-mix(in srgb, var(--accent) 9%, transparent);
+    // 2px vers la droite : le geste dit « cette ligne mène quelque part »
+    // sans déplacer quoi que ce soit d'autre sur la page.
+    transform:translateX(2px);
+  }
+}
+
+// La pastille de l'icône reçoit un relief : un liseré interne clair en haut,
+// une ombre interne en bas. C'est ce qui la fait lire comme un bouton creusé
+// plutôt que comme un rond de couleur.
+.pubc__info-icone{
+  width:34px;height:34px;
+  background:color-mix(in srgb, var(--accent) 13%, var(--surface));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -1px 2px rgba(11,59,46,.10),
+    0 1px 2px rgba(11,59,46,.06);
+}
+
+.theme-dark .pubc__info-icone{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 2px rgba(0,0,0,.40);
+}
+
+// -----------------------------------------------------------------------------
+// LA GRILLE — le point le plus faible, entièrement repris
+// -----------------------------------------------------------------------------
+// Les tuiles étaient des rectangles blancs bordés de gris : des cellules de
+// tableur. Elles portent maintenant la couleur de leur plateforme, en version
+// très pâle au repos et franche au survol.
+//
+// --marque est posée sur la TUILE par la vue, depuis
+// App\Support\CouleursPlateformes. Une variable posée sur l'icône ne
+// remonterait pas jusqu'ici.
+.pubc__grille{gap:11px}
+
+.pubc__tuile{
+  // 64px de côté minimum sur mobile, comme demandé. aspect-ratio:1 garde le
+  // carré ; min-height garantit la cible tactile même sur un écran étroit.
+  min-height:64px;
+  gap:7px;
+  padding:10px 5px;
+  border-radius:16px;
+
+  background:color-mix(in srgb, var(--marque) 9%, var(--surface));
+  border:1px solid color-mix(in srgb, var(--marque) 18%, transparent);
+  box-shadow:0 1px 2px rgba(11,59,46,.05);
+
+  transition:
+    background 250ms ease,
+    border-color 250ms ease,
+    box-shadow 250ms ease,
+    transform 250ms ease;
+
+  // Le logo porte sa couleur officielle DÈS LE REPOS. Éteint en gris, il se
+  // lisait comme un bouton désactivé — et c'est la couleur qui rend une
+  // plateforme reconnaissable avant qu'on ait lu son nom.
+  .social-svg{color:var(--marque);transition:color 250ms ease}
+
+  &:hover,&:focus-visible{
+    background:var(--marque);
+    border-color:var(--marque);
+    // L'ombre prend la teinte de la marque : une ombre grise sous une tuile
+    // colorée fait sale, une ombre teintée fait matière.
+    box-shadow:0 6px 16px color-mix(in srgb, var(--marque) 34%, transparent);
+    transform:translateY(-3px);
+
+    .social-svg{color:$blanc}
+    .pubc__tuile-nom{color:$blanc}
+  }
+
+  &:active{transform:translateY(-1px)}
+}
+
+.pubc__tuile-nom{
+  font-size:11px;font-weight:700;
+  letter-spacing:.01em;
+  transition:color 250ms ease;
+}
+
+// En thème sombre, un fond à 9 % de la couleur sur une surface sombre est
+// invisible : on monte la proportion et on éclaircit le liseré.
+.theme-dark .pubc__tuile{
+  background:color-mix(in srgb, var(--marque) 20%, var(--surface));
+  border-color:color-mix(in srgb, var(--marque) 34%, transparent);
+  box-shadow:none;
+}
+
+// -----------------------------------------------------------------------------
+// LA BARRE D'ACTIONS
+// -----------------------------------------------------------------------------
+.pubc__barre{gap:11px;padding-top:22px}
+
+.pubc__action{
+  min-height:52px;
+  font-size:14px;
+  border-radius:$r-full;
+  transition:transform 160ms ease, box-shadow 200ms ease, background 200ms ease;
+
+  // L'enfoncement au clic : le seul retour tactile qu'une page web peut
+  // donner, et celui qu'on attend d'un bouton qu'on vient de toucher.
+  &:active{transform:translateY(1px) scale(.99)}
+}
+
+// « Enregistrer » DOMINE. C'est lui qui termine le parcours ; « Partager »
+// n'est qu'un service. Son ombre est teintée de vert : une ombre grise sous
+// un bouton vert le fait paraître décollé du fond plutôt que posé dessus.
+.pubc__action--plein{
+  box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 38%, transparent);
+
+  &:hover,&:focus-visible{
+    box-shadow:0 8px 22px color-mix(in srgb, var(--accent) 46%, transparent);
+  }
+}
+
+.pubc__action--clair{
+  border-width:1.5px;
+  border-color:color-mix(in srgb, var(--accent) 30%, transparent);
+  background:var(--surface);
+}
+
+// -----------------------------------------------------------------------------
+// SÉQUENCE D'ENTRÉE
+// -----------------------------------------------------------------------------
+// UNIQUEMENT transform ET opacity. Toute autre propriété animée provoquerait
+// un recalcul de mise en page à chaque image, ce qui se voit immédiatement
+// sur un téléphone d'entrée de gamme — l'appareil de la majorité des
+// visiteurs.
+//
+// Les blocs arrivent dans l'ordre de lecture, décalés de 80ms. Ce n'est pas
+// un effet : c'est ce qui guide l'œil de haut en bas au premier affichage.
+@keyframes pubc-entree{
+  from{opacity:0;transform:translateY(20px)}
+  to  {opacity:1;transform:none}
+}
+
+.pubc__carte{
+  animation:pubc-entree 500ms cubic-bezier(.22,.68,.28,1) both;
+}
+
+.pubc__infos{animation:pubc-entree 500ms cubic-bezier(.22,.68,.28,1) 80ms both}
+.pubc__grille{animation:pubc-entree 500ms cubic-bezier(.22,.68,.28,1) 160ms both}
+.pubc__barre{animation:pubc-entree 500ms cubic-bezier(.22,.68,.28,1) 240ms both}
+
+// LA PRÉFÉRENCE SYSTÈME COUPE TOUT. Pour qui souffre de troubles
+// vestibulaires, un mouvement non sollicité n'est pas un agrément : c'est un
+// malaise. La carte s'affiche alors telle quelle, sans rien perdre.
+@media (prefers-reduced-motion: reduce){
+  .pubc__carte,
+  .pubc__infos,
+  .pubc__grille,
+  .pubc__barre{animation:none}
+
+  .pubc__info,
+  .pubc__tuile,
+  .pubc__action{transition:none}
+}
+
+// -----------------------------------------------------------------------------
+// TRÈS PETITS ÉCRANS — 320px
+// -----------------------------------------------------------------------------
+// La grille RESTE à trois colonnes : c'est la composition validée. Seuls le
+// pas et la taille du libellé se resserrent — deux colonnes changeraient la
+// structure, ce qui n'est pas demandé.
+@media (max-width:359px){
+  .pubc__grille{gap:7px}
+  .pubc__tuile{min-height:60px;padding:8px 3px;border-radius:13px}
+  .pubc__tuile-nom{font-size:9.5px}
+  .pubc__info-icone{width:30px;height:30px}
+  .pubc__action{min-height:48px;font-size:12.5px}
+  .pubc__initiales{font-size:34px}
+}
+
+// =============================================================================
+// LA PLANCHE DE COMPARAISON — /design-system uniquement
+// =============================================================================
+//
+// Elle n'est jamais servie en production : la page est fermée hors de
+// l'environnement local. Ces règles ne coûtent donc rien au visiteur, mais
+// elles vivent ici plutôt que dans un fichier à part, parce qu'elles n'ont
+// de sens qu'en regard des trois propositions qu'elles présentent.
+
+.ds-cartes{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:64px;
+  margin-top:48px;
+
+  // Trois colonnes dès qu'il y a la place : c'est CÔTE À CÔTE que trois
+  // partis pris se comparent. Empilés, on juge le dernier vu.
+  @media (min-width:1180px){grid-template-columns:repeat(3, 1fr);gap:32px}
+}
+
+.ds-carte__entete{margin-bottom:24px}
+
+.ds-carte__titre{
+  font-size:19px;font-weight:800;letter-spacing:-.02em;
+  color:var(--texte);
+  margin:0 0 8px;
+}
+
+.ds-carte__texte{
+  font-size:13.5px;line-height:1.6;
+  color:var(--texte-2);
+  margin:0;
+}
+
+.ds-carte__paire{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+
+.ds-carte__vue{margin:0;flex:0 0 auto}
+
+.ds-carte__legende{
+  font-size:10.5px;font-weight:700;
+  letter-spacing:.10em;text-transform:uppercase;
+  color:var(--texte-2);
+  margin-bottom:10px;
+}
+
+// LA LARGEUR DE RÉFÉRENCE EST FIXÉE À 375px.
+//
+// Sans ce cadre, la carte s'étirerait à sa colonne et l'on jugerait un rendu
+// que personne ne verra jamais : la carte publique est lue sur un téléphone,
+// debout, après un scan.
+.ds-carte__cadre{
+  width:375px;
+  max-width:100%;
+  padding:14px;
+  border-radius:$r-md;
+  background:var(--surface-2);
+  border:1px solid var(--bord);
+}
+
+// Le thème sombre appliqué à un sous-arbre : les jetons étant déclarés sur
+// .theme-dark, ils se redéclarent ici sans toucher au reste de la page.
+.ds-carte__vue.theme-dark{
+  color:var(--texte);
+
+  .ds-carte__legende{color:var(--texte-2)}
+}
+
+// EN APERÇU, LA SÉQUENCE D'ENTRÉE EST COUPÉE.
+//
+// Six cartes qui s'animent en même temps au chargement de la planche
+// donneraient une page qui tressaute, et l'on jugerait l'animation au lieu
+// de juger les textures.
+.pubc--apercu{
+  .pubc__carte,
+  .pubc__infos,
+  .pubc__grille,
+  .pubc__barre{animation:none}
+}

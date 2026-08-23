@@ -195,7 +195,8 @@
             {{-- LA GRILLE — trois par rangée, logos officiels. --}}
             <div class="phc__grille">
                 @foreach ($actions as [$plateforme, $libelle])
-                    <span class="phc__tuile">
+                    <span class="phc__tuile"
+                          style="--marque:{{ \App\Support\CouleursPlateformes::pour($plateforme) }}">
                         <x-social-icon :plateforme="$plateforme" :taille="14" />
                         <span class="phc__tuile-nom">{{ $libelle }}</span>
                     </span>
