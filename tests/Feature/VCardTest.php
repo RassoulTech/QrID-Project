@@ -72,20 +72,48 @@ class VCardTest extends TestCase
     // =======================================================================
 
     /**
-     * Le type et l'attachement, sans quoi rien ne s'ouvre.
+     * LA FICHE EST SERVIE « INLINE », ET NON EN PIÈCE JOINTE.
      *
-     * Sans « attachment », Android affiche le fichier comme du texte brut :
-     * l'utilisateur voit BEGIN:VCARD et referme. Sans le jeu de caractères
-     * annoncé, plusieurs lecteurs retombent sur un encodage local.
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI CE TEST A CHANGÉ D'AVIS
+     * ═══════════════════════════════════════════════════════════════════
+     * Il exigeait « attachment ». Le raisonnement d'alors : sans cet en-tête,
+     * Android afficherait le fichier comme du texte brut et l'utilisateur
+     * verrait BEGIN:VCARD avant de refermer.
+     *
+     * Le raisonnement était juste sur le risque et faux sur le remède.
+     * « attachment » ne fait pas ouvrir les Contacts : il fait TÉLÉCHARGER.
+     * Sur Android, le visiteur récoltait une pastille de téléchargement et
+     * devait ensuite retrouver le fichier, le toucher, choisir Contacts,
+     * confirmer un compte — cinq gestes après un scan qui en promettait un.
+     * Sur iOS, il forçait le même détour alors que Safari sait ouvrir une
+     * fiche de contact d'elle-même.
+     *
+     * « inline » avec le bon type MIME fait ouvrir l'écran d'ajout de contact
+     * directement sur iOS. Sur Android, c'est le module enregistrer-contact.js
+     * qui prend le relais avec une intention native, et qui retombe sur cette
+     * réponse-ci s'il ne peut pas.
+     *
+     * Le nom de fichier reste annoncé : il sert aux systèmes qui, eux,
+     * choisissent malgré tout d'enregistrer — un navigateur de bureau, où
+     * « ouvrir les contacts » n'a pas de sens.
      */
-    public function test_it_is_served_as_a_downloadable_vcard(): void
+    public function test_it_is_served_inline_so_contacts_opens_it(): void
     {
         $reponse = $this->get(route('profile.vcard', 'awa-ndiaye'))->assertOk();
 
         $this->assertStringContainsString('text/vcard', $reponse->headers->get('Content-Type'));
         $this->assertStringContainsString('charset=utf-8', strtolower((string) $reponse->headers->get('Content-Type')));
-        $this->assertStringContainsString('attachment', (string) $reponse->headers->get('Content-Disposition'));
-        $this->assertStringContainsString('awa-ndiaye.vcf', (string) $reponse->headers->get('Content-Disposition'));
+
+        $disposition = (string) $reponse->headers->get('Content-Disposition');
+
+        $this->assertStringContainsString('inline', $disposition);
+        $this->assertStringNotContainsString(
+            'attachment',
+            $disposition,
+            'La fiche redevient un téléchargement : iOS n\'ouvrira plus les Contacts tout seul.'
+        );
+        $this->assertStringContainsString('awa-ndiaye.vcf', $disposition);
     }
 
     /** Les coordonnées attendues sont toutes là. */

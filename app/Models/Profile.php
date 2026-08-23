@@ -35,6 +35,8 @@ class Profile extends Model
         'maps_url',
         'photo_path',
         'photo_data',
+        'cover_path',
+        'cover_data',
         'template_id',
         'primary_color',
         'is_active',
@@ -228,17 +230,49 @@ class Profile extends Model
      */
     public function photoBinaire(): ?string
     {
-        if (filled($this->photo_path)) {
+        return $this->mediaBinaire('photo_path', 'photo_data');
+    }
+
+    /** Y a-t-il une bannière de couverture choisie par le porteur ? */
+    public function aUneCouverture(): bool
+    {
+        return $this->couvertureBinaire() !== null;
+    }
+
+    /**
+     * LES OCTETS DE LA COUVERTURE — même mécanique que la photo.
+     *
+     * Facultative : sans elle, la page rend une bannière composée qui porte
+     * le nom du produit. Voir x-couverture.
+     */
+    public function couvertureBinaire(): ?string
+    {
+        return $this->mediaBinaire('cover_path', 'cover_data');
+    }
+
+    /**
+     * UNE SEULE MÉCANIQUE POUR LES DEUX IMAGES.
+     *
+     * Photo et couverture posent exactement le même problème et méritent
+     * exactement la même réponse. Deux copies de ces vingt lignes auraient
+     * divergé à la première correction — c'est toujours la seconde qu'on
+     * oublie de mettre à jour.
+     */
+    private function mediaBinaire(string $colonneChemin, string $colonneOctets): ?string
+    {
+        $chemin = $this->{$colonneChemin};
+
+        if (filled($chemin)) {
             try {
-                if (Storage::disk('public')->exists($this->photo_path)) {
-                    return Storage::disk('public')->get($this->photo_path);
+                if (Storage::disk('public')->exists($chemin)) {
+                    return Storage::disk('public')->get($chemin);
                 }
             } catch (\Throwable) {
                 // Un disque injoignable ne doit pas casser la page.
             }
         }
 
-        $octets = $this->photo_data;
+        $octets = $this->{$colonneOctets};
 
         if (blank($octets)) {
             return null;
@@ -246,9 +280,9 @@ class Profile extends Model
 
         // Le cache se reconstitue tout seul, sans bloquer l'affichage si le
         // disque refuse l'écriture.
-        if (filled($this->photo_path)) {
+        if (filled($chemin)) {
             try {
-                Storage::disk('public')->put($this->photo_path, $octets);
+                Storage::disk('public')->put($chemin, $octets);
             } catch (\Throwable) {
             }
         }

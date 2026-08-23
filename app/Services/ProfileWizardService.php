@@ -45,6 +45,15 @@ class ProfileWizardService
      */
     private const PHOTO_MAX_OCTETS = 400 * 1024;
 
+    /**
+     * LA LARGEUR D'AFFICHAGE D'UNE BANNIÈRE.
+     *
+     * La carte publique ne dépasse jamais 420px de large. 840px couvre les
+     * écrans à deux pixels physiques par pixel logique, et rien au-delà : plus
+     * haut, on ferait payer des octets que personne ne verra jamais.
+     */
+    private const COVER_WIDTH = 840;
+
     /** Réseaux proposés. Liste fermée : aucune URL arbitraire de plateforme. */
     public const PLATFORMS = [
         'linkedin' => 'LinkedIn',
@@ -180,6 +189,7 @@ class ProfileWizardService
                 'job_title' => $profile->job_title,
                 'company' => $profile->company,
                 'photo_path' => $profile->photo_path,
+                'cover_path' => $profile->cover_path,
                 'phone' => $profile->phone,
                 'whatsapp' => $profile->whatsapp,
                 'public_email' => $profile->public_email,
@@ -229,9 +239,11 @@ class ProfileWizardService
      */
     public function clear(): void
     {
-        // La photo déposée mais jamais confirmée part avec l'état.
-        if ($path = $this->get('data.photo_path')) {
-            Storage::disk('public')->delete($path);
+        // Les images déposées mais jamais confirmées partent avec l'état.
+        foreach (['data.photo_path', 'data.cover_path'] as $clef) {
+            if ($chemin = $this->get($clef)) {
+                Storage::disk('public')->delete($chemin);
+            }
         }
 
         session()->forget(self::KEY);
@@ -269,17 +281,21 @@ class ProfileWizardService
      * Un fichier ne tient pas en session : on l'écrit tout de suite sur le
      * disque public et on ne garde que le chemin. L'ancienne version est
      * supprimée dans la foulée pour ne pas accumuler d'orphelins.
-     */
-    /**
-     * @return array{path:string, octets:?string} le chemin ET les octets
      *
-     * LES OCTETS SORTENT AVEC LE CHEMIN, et ce n'est pas une commodité.
-     * Le disque de Render est éphémère : la photo téléversée aujourd'hui
-     * disparaît au prochain déploiement, et le profil garde un chemin qui ne
-     * mène nulle part. La base devient donc la source durable — mais le profil
-     * n'existe pas encore à cette étape, d'où le passage par l'appelant.
+     * ═══════════════════════════════════════════════════════════════════
+     * LES OCTETS NE VOYAGENT PLUS PAR LA SESSION
+     * ═══════════════════════════════════════════════════════════════════
+     * Ils y transitaient, encodés en base64, du formulaire jusqu'à la
+     * finalisation. Ce détour ajoutait un maillon fragile à une chaîne qui
+     * n'en avait pas besoin : quarante kilo-octets de texte recopiés dans la
+     * session, puis dans le brouillon en base, puis relus — et il suffisait
+     * qu'un maillon les perde pour que la photo se retrouve sur le disque et
+     * nulle part ailleurs, sans que rien ne le signale.
+     *
+     * Le fichier EST sur le disque à cet instant. persist() n'a qu'à le
+     * relire : c'est plus court, et il n'y a plus rien à perdre en route.
      */
-    public function storePhoto(UploadedFile $file): array
+    public function storePhoto(UploadedFile $file): string
     {
         if ($old = $this->get('data.photo_path')) {
             Storage::disk('public')->delete($old);
@@ -290,29 +306,129 @@ class ProfileWizardService
 
         Storage::disk('public')->put($path, $octets);
 
-        /*
-         | AU-DELÀ DU PLAFOND, LE DISQUE SEUL.
-         |
-         | Ce cas ne survient que par les replis de toSquareJpeg() — GD
-         | absent, ou image indécodable — où le fichier d'origine est rendu
-         | intact. Écrire trois mégaoctets dans chaque lecture de profil
-         | coûterait plus que la garantie qu'on cherche.
-         |
-         | Le profil garde alors son ancien comportement : la photo vit sur
-         | le disque et ne survit pas au déploiement. C'est une dégradation,
-         | pas une panne — et elle est tracée pour qu'on la voie.
-         */
-        if (strlen($octets) > self::PHOTO_MAX_OCTETS) {
-            Log::warning('Photo trop lourde pour la base : elle ne vivra que sur le disque', [
-                'chemin' => $path,
+        return $path;
+    }
+
+    /**
+     * LES OCTETS D'UN FICHIER DÉPOSÉ, s'ils tiennent en base.
+     *
+     * AU-DELÀ DU PLAFOND, LE DISQUE SEUL. Le cas ne survient que par les
+     * replis de toSquareJpeg() et toBannerJpeg() — GD absent, ou image
+     * indécodable — où le fichier d'origine est rendu intact et peut peser
+     * plusieurs mégaoctets. Écrire cela dans chaque lecture de profil
+     * coûterait plus que la garantie qu'on cherche. Le média garde alors son
+     * ancien comportement : il vit sur le disque et ne survit pas au
+     * déploiement. C'est une dégradation, pas une panne — et elle est tracée.
+     */
+    public function octetsDuFichier(?string $chemin): ?string
+    {
+        if (blank($chemin)) {
+            return null;
+        }
+
+        try {
+            if (! Storage::disk('public')->exists($chemin)) {
+                return null;
+            }
+
+            $octets = (string) Storage::disk('public')->get($chemin);
+        } catch (\Throwable $e) {
+            Log::warning('Média illisible sur le disque', [
+                'chemin' => $chemin,
+                'erreur' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+
+        if ($octets === '' || strlen($octets) > self::PHOTO_MAX_OCTETS) {
+            Log::warning('Média trop lourd pour la base : il ne vivra que sur le disque', [
+                'chemin' => $chemin,
                 'octets' => strlen($octets),
                 'plafond' => self::PHOTO_MAX_OCTETS,
             ]);
 
-            return ['path' => $path, 'octets' => null];
+            return null;
         }
 
-        return ['path' => $path, 'octets' => $octets];
+        return $octets;
+    }
+
+    // -----------------------------------------------------------------------
+    // Couverture
+    // -----------------------------------------------------------------------
+
+    /**
+     * Dépose une bannière de couverture et rend son chemin.
+     *
+     * ELLE N'EST PAS RECADRÉE EN CARRÉ, contrairement au portrait : une
+     * bannière est un rectangle large, et la découper en carré reviendrait à
+     * jeter les deux tiers de ce que le porteur a choisi de montrer. Elle est
+     * simplement ramenée à une largeur d'affichage et recomprimée : une photo
+     * de quatre mégaoctets sortie d'un téléphone n'a aucune raison de voyager
+     * en entier sur une 3G.
+     */
+    public function storeCover(UploadedFile $file): string
+    {
+        if ($ancienne = $this->get('data.cover_path')) {
+            Storage::disk('public')->delete($ancienne);
+        }
+
+        $chemin = 'couvertures/'.Str::uuid()->toString().'.jpg';
+
+        Storage::disk('public')->put($chemin, $this->toBannerJpeg($file));
+
+        return $chemin;
+    }
+
+    /**
+     * Ramène l'image à la largeur d'affichage, en gardant ses proportions.
+     *
+     * Comme pour le portrait : si GD manque ou si l'image est indécodable, on
+     * rend le fichier d'origine. Une couverture non redimensionnée vaut mieux
+     * qu'une erreur 500 au milieu du parcours de création.
+     */
+    private function toBannerJpeg(UploadedFile $file): string
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            return (string) file_get_contents($file->getRealPath());
+        }
+
+        $source = @imagecreatefromstring((string) file_get_contents($file->getRealPath()));
+
+        if ($source === false) {
+            return (string) file_get_contents($file->getRealPath());
+        }
+
+        $largeur = imagesx($source);
+        $hauteur = imagesy($source);
+
+        // Une image déjà plus étroite n'est jamais AGRANDIE : on ne fabrique
+        // pas de la définition qui n'existe pas, on la rendrait juste floue.
+        $cible = min(self::COVER_WIDTH, $largeur);
+        $cibleHauteur = max(1, (int) round($hauteur * $cible / $largeur));
+
+        $toile = imagecreatetruecolor($cible, $cibleHauteur);
+        imagefill($toile, 0, 0, imagecolorallocate($toile, 255, 255, 255));
+
+        imagecopyresampled($toile, $source, 0, 0, 0, 0, $cible, $cibleHauteur, $largeur, $hauteur);
+
+        $binaire = '';
+
+        foreach ([82, 70, 60] as $qualite) {
+            ob_start();
+            imagejpeg($toile, null, $qualite);
+            $binaire = (string) ob_get_clean();
+
+            if (strlen($binaire) <= self::PHOTO_MAX_OCTETS) {
+                break;
+            }
+        }
+
+        imagedestroy($toile);
+        imagedestroy($source);
+
+        return $binaire;
     }
 
     /**
@@ -424,15 +540,29 @@ class ProfileWizardService
                 'website' => $data['website'] ?? null,
                 'address' => $data['address'] ?? null,
                 'photo_path' => $data['photo_path'] ?? null,
+                'cover_path' => $data['cover_path'] ?? null,
 
                 /*
-                 | LA PHOTO EST ÉCRITE EN BASE, pas seulement sur le disque.
-                 | Sans cela, elle disparaît au premier déploiement et le
-                 | profil affiche ses initiales sans que rien ne le signale.
+                 | LES IMAGES SONT ÉCRITES EN BASE, pas seulement sur le disque.
+                 |
+                 | Sans cela, elles disparaissent au premier déploiement et le
+                 | profil affiche son repli sans que rien ne le signale.
+                 |
+                 | LES OCTETS SONT RELUS SUR LE DISQUE, ici et maintenant. Ils
+                 | transitaient auparavant par la session, encodés en base64,
+                 | du formulaire jusqu'ici : un maillon de plus, pour rien,
+                 | dans une chaîne qui doit tenir. Le fichier vient d'être
+                 | déposé, il est là — autant le lire.
+                 |
+                 | Rien de nouveau déposé : on garde ce que le profil avait
+                 | déjà. Corriger une faute dans son nom ne doit pas effacer
+                 | sa photo.
                  */
-                'photo_data' => isset($data['photo_data'])
-                    ? base64_decode((string) $data['photo_data'])
-                    : ($existing?->photo_data),
+                'photo_data' => $this->octetsDuFichier($data['photo_path'] ?? null)
+                    ?? $existing?->photo_data,
+
+                'cover_data' => $this->octetsDuFichier($data['cover_path'] ?? null)
+                    ?? $existing?->cover_data,
                 'template_id' => $data['template_id'] ?? null,
                 // Le repli passe par l'enum : la valeur par défaut de la carte
                 // ne doit exister qu'à un seul endroit du projet.

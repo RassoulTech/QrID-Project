@@ -102,18 +102,16 @@ class ProfileWizardController extends Controller
             return redirect()->route('profile.edit');
         }
 
-        $data = $request->safe()->except('photo');
+        $data = $request->safe()->except(['photo', 'cover']);
 
+        // Seul le CHEMIN est retenu : persist() relira les octets sur le
+        // disque au moment d'écrire le profil. Voir ProfileWizardService.
         if ($request->hasFile('photo')) {
-            // Le chemin ET les octets : le disque est un cache, la base est la
-            // source durable. Voir ProfileWizardService::storePhoto().
-            ['path' => $chemin, 'octets' => $octets] = $this->wizard->storePhoto($request->file('photo'));
+            $data['photo_path'] = $this->wizard->storePhoto($request->file('photo'));
+        }
 
-            $data['photo_path'] = $chemin;
-
-            // octets null : la photo dépasse le plafond de la base et ne vit
-            // que sur le disque. Voir ProfileWizardService::storePhoto().
-            $data['photo_data'] = $octets === null ? null : base64_encode($octets);
+        if ($request->hasFile('cover')) {
+            $data['cover_path'] = $this->wizard->storeCover($request->file('cover'));
         }
 
         $this->wizard->saveStep(1, $data);

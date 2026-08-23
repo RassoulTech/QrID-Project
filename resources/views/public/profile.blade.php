@@ -67,29 +67,21 @@
 
         <article class="pubc__carte">
 
-            {{-- ═══════════════ COUVERTURE ═══════════════ --}}
-            <header class="pubc__couverture">
-                {{-- Aucune image de couverture définie : un dégradé de marque
-                     plutôt qu'un vide. Un bandeau gris ferait croire à un
-                     chargement qui n'aboutit pas. --}}
-                <span class="pubc__couverture-fond" aria-hidden="true"></span>
-
-                {{-- ═══════════════ MÉDAILLON ═══════════════
-                     LA VÉRIFICATION PORTE SUR LE FICHIER, PAS SUR LE CHAMP.
-                     photo_path renseigné ne veut pas dire fichier présent :
-                     sur un disque éphémère, chaque déploiement efface les
-                     photos et laissait un bandeau vide avec une icône
-                     d'image cassée. Voir PublicProfileController::photo(). --}}
-                <div class="pubc__medaillon">
-                    @if ($photoUrl)
-                        <img src="{{ $photoUrl }}" alt=""
-                             class="pubc__photo" width="120" height="120"
-                             decoding="async" fetchpriority="high">
-                    @else
-                        <span class="pubc__initiales" aria-hidden="true">{{ $initiales }}</span>
-                    @endif
-                </div>
-            </header>
+            {{-- ═══════════════ COUVERTURE ET MÉDAILLON ═══════════════ --}}
+            <x-couverture :profile="$profile" :url="$couvertureUrl ?? null">
+                @if ($photoUrl)
+                    <img src="{{ $photoUrl }}" alt=""
+                         class="pubc__photo" width="120" height="120"
+                         decoding="async" fetchpriority="high">
+                @else
+                    {{-- UN PORTRAIT DESSINÉ, ET PLUS DEUX LETTRES.
+                         Les initiales sur un carré vert disaient « ce profil
+                         est incomplet ». Un portrait dessiné occupe la même
+                         place et ne dit rien de tel : il se lit comme une
+                         illustration assumée, pas comme un vide. --}}
+                    <x-avatar-demo :taille="120" class="pubc__photo" />
+                @endif
+            </x-couverture>
 
             {{-- ═══════════════ IDENTITÉ ═══════════════ --}}
             <div class="pubc__identite">
@@ -203,7 +195,26 @@
                     </a>
                 @endif
 
-                <a href="{{ route('profile.vcard', $profile->slug) }}" class="pubc__action pubc__action--plein">
+                {{-- LES DONNÉES SONT PORTÉES PAR LE LIEN, en data-*.
+                     Le module enregistrer-contact.js les relit pour composer
+                     l'intention Android — sans aller-retour serveur au moment
+                     précis où le visiteur a décidé d'agir, et sans dupliquer
+                     côté client des règles de formatage qui vivent déjà dans
+                     VCardService.
+
+                     SANS JAVASCRIPT, ce lien reste la vCard, qui fonctionne
+                     partout : sur iOS elle ouvre Contacts d'elle-même grâce à
+                     l'en-tête « inline ». --}}
+                <a href="{{ route('profile.vcard', $profile->slug) }}"
+                   class="pubc__action pubc__action--plein"
+                   data-enregistrer-contact
+                   data-nom="{{ $profile->full_name }}"
+                   data-telephone="{{ $profile->phone }}"
+                   data-email="{{ $profile->public_email }}"
+                   data-entreprise="{{ $profile->company }}"
+                   data-fonction="{{ $profile->job_title }}"
+                   data-adresse="{{ $profile->address }}"
+                   data-notes="{{ $profile->website }}">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>

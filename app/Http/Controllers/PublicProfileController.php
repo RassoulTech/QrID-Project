@@ -88,6 +88,7 @@ class PublicProfileController extends Controller
              | initiales prennent le relais — jamais un vide.
              */
             'photoUrl' => $this->photo($profile),
+            'couvertureUrl' => $this->couvertureUrl($profile),
         ]);
     }
 
@@ -145,20 +146,42 @@ class PublicProfileController extends Controller
      */
     private function photo(Profile $profile): ?string
     {
-        if (blank($profile->photo_path)) {
+        return $this->urlDuMedia($profile, 'photo');
+    }
+
+    /**
+     * L'ADRESSE DE LA BANNIÈRE DE COUVERTURE, ou null.
+     *
+     * Facultative : sans elle, x-couverture rend le décor de la marque.
+     */
+    private function couvertureUrl(Profile $profile): ?string
+    {
+        return $this->urlDuMedia($profile, 'couverture');
+    }
+
+    /**
+     * UNE SEULE MÉCANIQUE POUR LES DEUX IMAGES.
+     *
+     * On ne teste pas l'existence du FICHIER mais la disponibilité des
+     * OCTETS : photoBinaire() et couvertureBinaire() lisent la base quand le
+     * disque est vide — et remettent le fichier en place au passage. Tester
+     * le fichier privait d'image toutes les cartes servies après un
+     * déploiement, alors que l'image était bel et bien conservée.
+     */
+    private function urlDuMedia(Profile $profile, string $genre): ?string
+    {
+        $chemin = $genre === 'photo' ? $profile->photo_path : $profile->cover_path;
+
+        if (blank($chemin)) {
             return null;
         }
 
         try {
-            /*
-             | photoBinaire() lit la BASE quand le disque est vide — et remet
-             | le fichier en place au passage. On ne teste donc plus l'existence
-             | du fichier : on demande les octets, et l'URL n'est rendue que
-             | s'ils existent réellement quelque part.
-             */
-            return $profile->photoBinaire() !== null
-                ? Storage::url($profile->photo_path)
-                : null;
+            $octets = $genre === 'photo'
+                ? $profile->photoBinaire()
+                : $profile->couvertureBinaire();
+
+            return $octets !== null ? Storage::url($chemin) : null;
         } catch (\Throwable $e) {
             Log::warning('Photo de profil illisible', [
                 'slug' => $profile->slug,
@@ -327,9 +350,31 @@ class PublicProfileController extends Controller
          */
         $this->enregistrerVisite($request, $profile, ProfileEvent::TYPE_SAVE);
 
+        /*
+         | « inline » ET NON « attachment », et la nuance décide de tout.
+         |
+         | Avec « attachment », Safari sur iOS DÉPOSE le fichier dans les
+         | téléchargements : il faut ensuite le retrouver, le toucher, choisir
+         | Contacts. Avec « inline » et le bon type MIME, iOS reconnaît une
+         | fiche de contact et ouvre directement l'écran d'ajout, prérempli.
+         | C'est le geste unique qu'un scan promet.
+         |
+         | Le nom de fichier reste annoncé : il sert aux systèmes qui, eux,
+         | choisissent malgré tout d'enregistrer — un navigateur de bureau,
+         | par exemple, où « ouvrir les contacts » n'a pas de sens.
+         |
+         | Sur ANDROID, l'affaire se joue ailleurs : aucun en-tête ne fait
+         | ouvrir l'écran de création de contact. C'est le module
+         | enregistrer-contact.js qui remplace le lien par une intention
+         | native, et qui retombe sur cette réponse-ci s'il ne peut pas.
+         */
         return response($vcard->pour($profile), 200, [
             'Content-Type' => 'text/vcard; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="'.$vcard->nomFichier($profile).'"',
+            'Content-Disposition' => 'inline; filename="'.$vcard->nomFichier($profile).'"',
+
+            // Une fiche de contact ne se met pas en cache partagé : elle
+            // porte des coordonnées personnelles.
+            'Cache-Control' => 'private, max-age=0, must-revalidate',
         ]);
     }
 }

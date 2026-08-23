@@ -30,6 +30,7 @@ import autoFiltre from './modules/auto-filtre';
 import flashAuto from './modules/flash-auto';
 import telephone from './modules/telephone';
 import langue from './modules/langue';
+import enregistrerContact from './modules/enregistrer-contact';
 
 const modules = [
     scrollReveal,
@@ -47,6 +48,7 @@ const modules = [
     flashAuto,
     telephone,
     langue,
+    enregistrerContact,
 ];
 
 // Chaque module renvoie tôt s'il n'a rien à faire sur la page courante.

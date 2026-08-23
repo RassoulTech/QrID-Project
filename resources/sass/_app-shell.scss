@@ -535,6 +535,22 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 // prochain thème reparte avec un fond figé :
 //   clair  — #0B3B2E sur #E4F2EC ........ 10,84:1
 //   sombre — #2FBF92 sur --accent-doux ... au-dessus de 4,5:1
+// -----------------------------------------------------------------------------
+// DÉPÔT DE BANNIÈRE — la variante large de .drop
+// -----------------------------------------------------------------------------
+// Une bannière est un rectangle : sa vignette doit l'être aussi. Une
+// prévisualisation carrée montrerait un recadrage que le produit ne fera
+// jamais, et le client découvrirait le vrai cadrage sur sa carte publiée.
+.drop__thumb--banniere{
+  width:96px;
+  // 16/9 : le rapport d'affichage réel de la bande sur la carte publique.
+  aspect-ratio:16 / 9;
+  height:auto;
+  border-radius:$r-sm;
+
+  img{width:100%;height:100%;object-fit:cover;display:block}
+}
+
 .social-add{
   align-self:flex-start;
   display:inline-flex;align-items:center;gap:7px;

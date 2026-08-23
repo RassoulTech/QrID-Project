@@ -216,6 +216,16 @@
                 {!! __('Carte créée avec <b>:marque</b>', ['marque' => e(config('app.name'))]) !!}
             </span>
           </div>
+
+          {{-- SOUS LA CARTE, UNE LIGNE — et non un vide.
+               L'écran laissait en dessous un tiers de blanc sans rien : une
+               page qui paraît avoir fini de charger à moitié. Cette phrase
+               occupe la place, et elle dit ce que la maquette montre — ce
+               qu'un visiteur de la landing est justement en train de se
+               demander. --}}
+          <p class="phc__note">
+            {{ __('Un lien, un QR Code. Vos coordonnées à jour, partout.') }}
+          </p>
         </div>
     </div>
 </div>

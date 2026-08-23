@@ -178,12 +178,22 @@ $ease: cubic-bezier(.2,.8,.2,1);
 // clair — c'est une illustration de produit, pas une préférence
 // d'affichage — d'où les valeurs figées plutôt que var(--surface).
 // LA PAGE — grise, comme .pubc. C'est elle qui détache la carte.
+//
+// LE CONTENU EST CENTRÉ VERTICALEMENT, et ce n'est pas cosmétique. Il était
+// collé sous l'encoche, et l'écran se terminait sur un tiers de blanc : la
+// maquette donnait l'impression d'une page arrêtée en cours de chargement,
+// alors qu'elle est censée montrer un produit fini.
 .phc{
   flex:1 1 auto;
   min-height:0;
-  padding:8px 7px;
+  padding:10px 7px 8px;
   background:$gris-fond;
   overflow:hidden;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:9px;
 }
 
 // LA CARTE — blanche, bordée, arrondie, comme .pubc__carte. Sans ce second
@@ -357,6 +367,17 @@ $ease: cubic-bezier(.2,.8,.2,1);
   color:$gris-second;
 
   b{color:$vert-fonce;font-weight:700}
+}
+
+// La phrase sous la carte : elle occupe le bas de l'écran plutôt que de le
+// laisser vide, et elle dit ce que la maquette montre.
+.phc__note{
+  margin:0;
+  padding:0 12px;
+  text-align:center;
+  font-size:7.5px;
+  line-height:1.45;
+  color:$gris-second;
 }
 
 .phc__action{

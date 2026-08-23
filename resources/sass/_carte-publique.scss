@@ -50,6 +50,10 @@
 .pubc__couverture{
   position:relative;
   height:150px;
+  // PAS d'overflow:hidden ICI : le médaillon déborde volontairement vers le
+  // bas, et le couper supprimerait le chevauchement qui fait tout l'intérêt
+  // de cette composition. C'est .pubc__couverture-fond, à l'intérieur, qui
+  // cadre le filigrane.
   // La marge du bas laisse la place au médaillon qui déborde.
   margin-bottom:64px;
 }
@@ -68,6 +72,8 @@
 // requête, aucun octet de plus, et elle s'adapte à toute largeur.
 .pubc__couverture-fond{
   position:absolute;inset:0;
+  // Le filigrane déborde volontairement : c'est le cadre qui le coupe.
+  overflow:hidden;
   background:
     // 3. la trame de modules, la plus haute et la plus discrète
     //
@@ -103,15 +109,39 @@
 // chargement de l'image et le visiteur clique à côté.
 .pubc__photo{width:100%;height:100%;object-fit:cover;display:block}
 
-// LES INITIALES, JAMAIS LE NOM COMPLET — et jamais un vide. Le contrôleur
-// vérifie l'EXISTENCE du fichier, pas seulement la colonne : sur un stockage
-// éphémère, la colonne survit au déploiement, le fichier non.
-.pubc__initiales{
-  display:grid;place-items:center;
+// L'IMAGE DE COUVERTURE CHOISIE PAR LE PORTEUR.
+//
+// object-fit:cover et non contain : une bannière doit remplir la bande. En
+// « contain », une photo au mauvais rapport laisserait deux bandes vides sur
+// les côtés — exactement le vide qu'on cherche à supprimer.
+.pubc__couverture-image{
+  position:absolute;inset:0;
+  // Le rayon du haut de la carte : sans lui, une photo carrée dépasse des
+  // coins arrondis et la carte paraît mal découpée.
+  border-radius:$r-md $r-md 0 0;
   width:100%;height:100%;
-  background:linear-gradient(135deg, var(--accent) 0%, var(--accent-vif) 100%);
-  color:var(--sur-accent);
-  font-size:42px;font-weight:700;letter-spacing:.02em;
+  object-fit:cover;
+  display:block;
+}
+
+// LE NOM DU PRODUIT, EN FILIGRANE.
+//
+// Il se sent, il ne se lit pas. Un logo lisible posé au-dessus du portrait de
+// quelqu'un ferait de sa carte une publicité pour nous — or cette page
+// appartient au porteur, pas à la plateforme.
+//
+// Débordant à droite et en bas : un mot centré se lirait comme un titre.
+// Coupé par le bord, il devient une texture.
+.pubc__couverture-marque{
+  position:absolute;
+  right:-6px;bottom:-14px;
+  font-size:58px;
+  font-weight:800;
+  letter-spacing:-.04em;
+  line-height:1;
+  color:rgba(255,255,255,.14);
+  user-select:none;
+  white-space:nowrap;
 }
 
 // -----------------------------------------------------------------------------

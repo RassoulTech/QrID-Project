@@ -27,6 +27,16 @@ class WizardStepOneRequest extends FormRequest
             'job_title' => ['required', 'string', 'max:100'],
             'company' => ['nullable', 'string', 'max:100'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+
+            /*
+             | LA COUVERTURE EST FACULTATIVE, et son plafond est plus haut.
+             |
+             | Une bannière est un rectangle large : la même limite que le
+             | portrait ferait refuser des photos de paysage tout à fait
+             | ordinaires sorties d'un téléphone. Le service la ramène de
+             | toute façon à 840px de large avant de la conserver.
+             */
+            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ];
     }
 
@@ -40,6 +50,10 @@ class WizardStepOneRequest extends FormRequest
             'photo.mimes' => 'Formats acceptés : JPG, PNG ou WEBP.',
             'photo.max' => 'Votre photo dépasse 2 Mo. Choisissez une image plus légère.',
             'photo.uploaded' => 'L\'envoi a échoué : la photo dépasse 2 Mo ou la connexion s\'est interrompue.',
+            'cover.image' => 'Ce fichier n\'est pas une image.',
+            'cover.mimes' => 'Formats acceptés : JPG, PNG ou WEBP.',
+            'cover.max' => 'Votre bannière dépasse 4 Mo. Choisissez une image plus légère.',
+            'cover.uploaded' => 'L\'envoi a échoué : la bannière dépasse 4 Mo ou la connexion s\'est interrompue.',
         ];
     }
 }
