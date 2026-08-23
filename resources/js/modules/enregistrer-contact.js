@@ -45,9 +45,50 @@ export default function enregistrerContact() {
         return;
     }
 
-    // Le test est volontairement étroit. « Android » suffit : c'est le seul
-    // système où le schéma d'intention existe, et se tromper coûterait un
-    // lien mort — bien pire que le téléchargement qu'on remplace.
+    /*
+     | ═══════════════════════════════════════════════════════════════════
+     | SUR ORDINATEUR, LE FICHIER NE SERT À RIEN — ON PROPOSE LE QR
+     | ═══════════════════════════════════════════════════════════════════
+     | Un navigateur de bureau n'a pas d'application Contacts à ouvrir : le
+     | téléchargement d'un .vcf est le seul comportement possible, et il ne
+     | rend service à personne. Le visiteur récupère un fichier qu'il ne
+     | saura pas quoi faire, referme, et le contact n'est jamais enregistré.
+     |
+     | Le geste utile est ailleurs : sortir son téléphone et scanner. Le
+     | bouton ouvre donc le QR en plein écran — celui qui est déjà dans la
+     | page, sans une requête de plus.
+     |
+     | Aucun QR dans la page (le profil n'en a pas) : on laisse le lien tel
+     | quel. Un fichier vaut encore mieux que rien.
+     */
+    const bureau = !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (bureau) {
+        if (document.getElementById('qr')) {
+            lien.setAttribute('href', '#qr');
+            lien.removeAttribute('target');
+            lien.dataset.enregistrerBureau = 'qr';
+
+            // LE LIBELLÉ DIT CE QUE LE BOUTON FAIT. « Enregistrer » qui
+            // ouvre un QR Code serait une promesse tenue de travers.
+            const texte = lien.querySelector('[data-enregistrer-texte]');
+
+            if (texte) {
+                texte.textContent = texte.dataset.bureau || texte.textContent;
+            }
+        }
+
+        return;
+    }
+
+    /*
+     | iOS N'A PAS D'ÉQUIVALENT DE L'INTENTION ANDROID, et c'est définitif :
+     | aucune API web n'ouvre l'écran « nouveau contact » sur iPhone. La
+     | fiche est servie « inline » avec le bon type MIME, ce qui fait ouvrir
+     | à Safari sa feuille d'aperçu de contact, avec « Ajouter les
+     | contacts ». C'est le maximum atteignable, et c'est ce que font tous
+     | les produits de cette catégorie.
+     */
     if (!/Android/i.test(navigator.userAgent)) {
         return;
     }

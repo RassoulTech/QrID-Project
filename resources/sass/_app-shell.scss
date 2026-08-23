@@ -1106,3 +1106,33 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   dt{color:$gris-second}
   dd{margin:0;color:$texte;font-weight:600}
 }
+
+// -----------------------------------------------------------------------------
+// ÉTAT DES IMAGES — sur le tableau de bord
+// -----------------------------------------------------------------------------
+// IL FAUT POUVOIR VÉRIFIER SANS ALLER SUR LA PAGE PUBLIQUE.
+//
+// Un client qui téléverse sa photo, la voit dans la vignette du formulaire,
+// puis la découvre absente de sa carte n'a aucun moyen de savoir ce qui s'est
+// passé. Cette ligne dit ce que la BASE contient — pas ce que le formulaire a
+// affiché, qui ne prouve rien.
+.board-medias{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-bottom:12px;
+}
+
+.board-media{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 11px;
+  border-radius:$r-full;
+  font-size:12px;font-weight:600;
+  background:var(--accent-doux, #{$vert-clair});
+  color:var(--accent, #{$vert-fonce});
+
+  // L'absence n'est pas une erreur : la photo est facultative. Une teinte
+  // neutre le dit, là où du rouge accuserait le client de mal faire.
+  &--absente{
+    background:var(--survol, #{$gris-fond});
+    color:var(--texte-2, #{$gris-second});
+  }
+}

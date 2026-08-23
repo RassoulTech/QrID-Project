@@ -180,6 +180,27 @@ class ProfileWizardController extends Controller
         $profile->forceFill($images)->save();
 
         /*
+         | LA CONFIRMATION EST EXPLICITE.
+         |
+         | Le client voyait sa photo dans la vignette du formulaire — un
+         | aperçu produit par le navigateur, à partir du fichier local, qui
+         | ne prouve strictement rien sur ce que le serveur a reçu. Rien
+         | ensuite ne lui disait si elle avait été enregistrée.
+         |
+         | Ce message-ci vient d'APRÈS l'écriture en base. Il ne s'affiche
+         | que si elle a eu lieu.
+         */
+        $noms = [];
+
+        if (array_key_exists('photo_path', $images)) {
+            $noms[] = __('votre photo');
+        }
+
+        if (array_key_exists('cover_path', $images)) {
+            $noms[] = __('votre bannière');
+        }
+
+        /*
          | L'ÉCHEC EST DIT, JAMAIS AVALÉ.
          |
          | Une image trop lourde pour la base est déposée sur le disque et
@@ -194,11 +215,17 @@ class ProfileWizardController extends Controller
         ));
 
         if ($perdues !== []) {
-            session()->flash('alerte', __(
+            session()->flash('warning', __(
                 "Votre image a été enregistrée, mais elle est trop lourde pour être conservée durablement. ".
                 "Choisissez une image plus légère si elle venait à disparaître."
             ));
+
+            return;
         }
+
+        session()->flash('success', __('Enregistré : :quoi apparaît maintenant sur votre carte.', [
+            'quoi' => implode(__(' et '), $noms),
+        ]));
     }
 
     // =======================================================================
