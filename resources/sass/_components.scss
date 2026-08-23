@@ -610,16 +610,29 @@
 }
 
 // -----------------------------------------------------------------------------
-// BASCULE DE LANGUE — voir x-language-toggle
+// SÉLECTEUR DE LANGUE — voir x-language-toggle
 // -----------------------------------------------------------------------------
-// Elle voisine la bascule de thème : deux préférences d'affichage, un seul
+// Il voisine la bascule de thème : deux préférences d'affichage, un seul
 // endroit où les chercher. Même hauteur, même rayon, même comportement de
 // focus — sinon la barre paraît bricolée.
-.langue-form{display:inline-flex}
+//
+// Le composant est un <details> : il ouvre et ferme nativement, sans script.
+.langue{
+  position:relative;
+  display:inline-block;
 
-.langue-toggle{
+  // La flèche par défaut du <summary> est un triangle noir de navigateur,
+  // posé hors du bouton. On la supprime : le chevron est dans le balisage,
+  // et lui suit la couleur du texte.
+  summary{list-style:none}
+  summary::-webkit-details-marker{display:none}
+}
+
+.langue__declencheur{
   display:inline-flex;align-items:center;gap:6px;
-  height:34px;padding:0 11px;
+  // 34px : la hauteur des autres pastilles de la barre. En dessous de 640px
+  // il passe à 40px — une barre de navigation se touche au pouce.
+  height:34px;padding:0 10px;
   border:1px solid var(--bord-fort, #{$bordure-forte});
   border-radius:$r-full;
   background:transparent;
@@ -627,9 +640,10 @@
   font-size:12px;font-weight:700;
   letter-spacing:.04em;
   cursor:pointer;
+  user-select:none;
   transition:color 140ms ease, border-color 140ms ease, background 140ms ease;
 
-  &:hover,&:focus-visible{
+  &:hover{
     color:var(--accent, #{$vert-fonce});
     border-color:var(--accent, #{$vert-fonce});
   }
@@ -637,11 +651,87 @@
   &:focus-visible{outline:2px solid var(--accent-vif, #{$vert-accent});outline-offset:2px}
 }
 
-.langue-toggle__code{line-height:1}
+.langue__code{line-height:1}
 
-// Sous 380px, la barre supérieure est déjà pleine : le code suffit, le globe
-// devient décoratif et disparaît plutôt que de pousser le reste.
-@media (max-width:379px){
-  .langue-toggle svg{display:none}
-  .langue-toggle{padding:0 9px}
+// Le chevron pivote à l'ouverture : c'est le seul retour visuel qui dise que
+// le menu est déplié quand il s'ouvre vers le bas, hors du champ de vision
+// immédiat sur un petit écran.
+.langue__chevron{transition:transform 160ms ease}
+.langue[open] .langue__chevron{transform:rotate(180deg)}
+
+.langue[open] .langue__declencheur{
+  color:var(--accent, #{$vert-fonce});
+  border-color:var(--accent, #{$vert-fonce});
 }
+
+// LE MENU EST ANCRÉ À DROITE.
+//
+// Le sélecteur vit dans le coin supérieur droit de toutes les barres : un
+// menu aligné à gauche déborderait de la fenêtre. `right:0` le fait grandir
+// vers l'intérieur de la page, jamais vers le bord.
+.langue__menu{
+  position:absolute;
+  top:calc(100% + 6px);
+  right:0;
+  z-index:60;
+  min-width:150px;
+  padding:5px;
+  display:flex;flex-direction:column;gap:2px;
+  background:var(--surface-3, #{$blanc});
+  border:1px solid var(--bord, #{$bordure});
+  border-radius:$r-sm;
+  box-shadow:var(--ombre-2, #{$shadow-2});
+}
+
+.langue__option{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  width:100%;
+  // 40px : une ligne de menu se touche, elle ne se vise pas.
+  min-height:40px;
+  padding:0 10px;
+  border:0;
+  border-radius:8px;   // un cran sous $r-sm : une ligne de menu, pas une carte
+  background:transparent;
+  color:var(--texte, #{$texte});
+  font-family:inherit;
+  font-size:13.5px;font-weight:600;
+  text-align:left;
+  cursor:pointer;
+
+  &:hover{background:var(--survol, #{$gris-fond})}
+  &:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+  // La langue active se signale par la coche ET par la couleur : la coche
+  // seule disparaît pour qui ne distingue pas les petits symboles.
+  &[aria-current]{color:var(--accent, #{$vert-fonce})}
+}
+
+.langue__coche{flex:0 0 auto}
+
+// L'ANCRAGE SUIT LA POSITION DU SÉLECTEUR, il n'est pas absolu.
+//
+// « right:0 » convient dans la barre supérieure, où le sélecteur est collé au
+// bord droit : le menu grandit alors vers l'intérieur de la page.
+//
+// Dans le panneau mobile, il est collé au bord GAUCHE. Le même ancrage y
+// faisait grandir le menu vers la gauche, c'est-à-dire hors de l'écran :
+// mesuré à x = -60px sur 320px de large, il ne restait visible que la coche.
+// On voyait une pastille vide s'ouvrir sur rien.
+.menu-mobile .langue__menu{
+  left:0;
+  right:auto;
+}
+
+// MOBILE — la barre supérieure est étroite, le doigt ne l'est pas.
+@media (max-width:639px){
+  .langue__declencheur{height:40px;padding:0 12px}
+  .langue__menu{min-width:170px}
+}
+
+// Sous 380px, la barre est pleine : le globe devient décoratif et disparaît
+// plutôt que de pousser le reste. Le code de langue, lui, reste.
+@media (max-width:379px){
+  .langue__globe{display:none}
+  .langue__declencheur{padding:0 10px}
+}
+

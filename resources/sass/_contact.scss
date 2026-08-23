@@ -105,6 +105,10 @@
   @media (min-width:576px){grid-template-columns:1fr 1fr}
 }
 
+// La légende de l'astérisque tient contre le premier champ plutôt que de
+// flotter au milieu de l'écart de 18px du formulaire.
+.contact__form .f__legende{margin-bottom:-8px}
+
 .contact__legal{
   margin:0;
   font-size:12.5px;

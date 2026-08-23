@@ -86,6 +86,21 @@
   // ---------------------------------------------------------------------------
   .f__control,
   .form-control,
+  /*
+   | LE CHEVRON DU <select> EST UNE IMAGE, ET SA COULEUR EST ÉCRITE DEDANS.
+   |
+   | Bootstrap encode la flèche en SVG dans --bs-form-select-bg-img, en gris
+   | ardoise (#343a40). Sur un champ sombre elle devient invisible : le
+   | sélecteur de motif du formulaire de contact ressemblait à un champ de
+   | texte, et rien ne disait qu'il ouvrait une liste.
+   |
+   | La variable est redéclarée avec la même flèche en clair. C'est la seule
+   | façon de la retourner sans réécrire le composant.
+   */
+  .form-select{
+    --bs-form-select-bg-img:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239BB0A8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  }
+
   .form-select,
   .board-link__input{
     background:var(--surface-3);
@@ -197,6 +212,13 @@
   }
   .site-nav__link,.site-nav__signin{color:var(--texte-2);&:hover{color:var(--texte)}}
   .site-nav__burger{color:var(--texte-2);&:hover{color:var(--texte)}}
+
+  // Le menu de langue est posé SUR la page : sans surface propre et sans
+  // bordure franche, il se confondrait avec le fond sombre et paraîtrait
+  // flotter sans contour.
+  .langue__menu{background:var(--surface-3);border-color:var(--bord-fort)}
+  .langue__option{color:var(--texte)}
+  .langue__option[aria-current]{color:var(--accent)}
 
   // Menu mobile : c'est un panneau Bootstrap, il reste blanc sans cette règle.
   .offcanvas{background:var(--surface);color:var(--texte)}

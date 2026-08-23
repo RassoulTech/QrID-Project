@@ -5,8 +5,8 @@
     @foreach ($figures as $figure)
       <div class="figure-card" data-reveal>
         <div class="figure-card__n">{{ $figure['number'] }}</div>
-        <div class="figure-card__w">{{ $figure['word'] }}</div>
-        <div class="figure-card__l">{{ $figure['label'] }}</div>
+        <div class="figure-card__w">{{ __($figure['word']) }}</div>
+        <div class="figure-card__l">{{ __($figure['label']) }}</div>
       </div>
     @endforeach
   </div>

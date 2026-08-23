@@ -71,11 +71,13 @@ $ease: cubic-bezier(.2,.8,.2,1);
 
     .phone__screen{border-radius:31px}
     .phone__notch{width:76px;height:20px}
-    .phone__avatar{width:58px;height:58px;font-size:18px}
-    .phone__name{font-size:14px}
-    .phone__role,.phone__company{font-size:10px}
-    .phone__action{height:42px}
-    .phone__save{height:34px;font-size:10px}
+    // La carte se resserre : mêmes proportions, deux points de moins.
+    .phc__couverture{height:48px;margin-bottom:22px}
+    .phc__medaillon{width:46px;height:46px;bottom:-21px;left:10px}
+    .phc__nom{font-size:11.5px}
+    .phc__role,.phc__entreprise{font-size:8.5px}
+    .phc__tuile-nom{font-size:6px}
+    .phc__action{height:22px;font-size:8px}
   }
 
   // Mobile : 220px pour les deux variantes
@@ -86,9 +88,10 @@ $ease: cubic-bezier(.2,.8,.2,1);
 
     .phone__screen{border-radius:31px}
     .phone__notch{width:70px;height:19px}
-    .phone__avatar{width:54px;height:54px;font-size:17px}
-    .phone__name{font-size:13px}
-    .phone__action{height:40px}
+    .phc__couverture{height:44px;margin-bottom:20px}
+    .phc__medaillon{width:42px;height:42px;bottom:-19px}
+    .phc__nom{font-size:11px}
+    .phc__action{height:21px}
   }
 }
 
@@ -151,127 +154,221 @@ $ease: cubic-bezier(.2,.8,.2,1);
 .phone__icons{display:flex;align-items:center;gap:3px}
 
 // En-tête vert foncé
-.phone__header{
-  // Teinte du profil, avec le vert de la marque en repli : le rendu reste
-  // correct si la variable n'est pas posée (landing, profil sans couleur).
-  background:var(--phone-accent, #{$vert-fonce});
-  padding:14px 14px 30px;
-  text-align:center;
+// =============================================================================
+// LA CARTE, DANS L'ÉCRAN — reprise de .pubc, à l'échelle
+// =============================================================================
+//
+// LES PROPORTIONS SONT CELLES DE LA PAGE PUBLIQUE, divisées par deux pour
+// tenir dans 280px de large. Chaque bloc a son équivalent exact dans
+// _carte-publique.scss, et ils doivent évoluer ensemble :
+//
+//   .pubc__couverture   →  .phc__couverture
+//   .pubc__medaillon    →  .phc__medaillon
+//   .pubc__infos        →  .phc__infos
+//   .pubc__grille       →  .phc__grille
+//   .pubc__barre        →  .phc__barre
+//
+// POURQUOI PAS LES MÊMES CLASSES. .pubc est dimensionné en pixels pour un
+// écran de téléphone RÉEL — médaillon de 112px, grille de 44px de cible
+// tactile. Posé dans une maquette de 280px, il déborderait de toutes parts.
+// Réécrire les tailles sous .phone les rendrait par ailleurs impossibles à
+// lire : on ne saurait plus laquelle s'applique où.
+//
+// LES COULEURS, ELLES, SONT LES MÊMES JETONS. La maquette est toujours en
+// clair — c'est une illustration de produit, pas une préférence
+// d'affichage — d'où les valeurs figées plutôt que var(--surface).
+// LA PAGE — grise, comme .pubc. C'est elle qui détache la carte.
+.phc{
+  flex:1 1 auto;
+  min-height:0;
+  padding:8px 7px;
+  background:$gris-fond;
+  overflow:hidden;
+}
+
+// LA CARTE — blanche, bordée, arrondie, comme .pubc__carte. Sans ce second
+// niveau, la maquette montrait une application plein écran ; la page
+// publique, elle, montre une CARTE posée sur un fond.
+.phc__carte{
   display:flex;
   flex-direction:column;
-  align-items:center;
-}
-
-.phone__avatar{
-  position:relative;
-  width:66px;height:66px;
-  border-radius:50%;
-  background:$vert-clair;
-  color:$vert-fonce;
-  display:grid;place-items:center;
-  font-size:20px;font-weight:700;
-  margin-bottom:10px;
-
-  img{width:100%;height:100%;border-radius:50%;object-fit:cover}
-}
-
-.phone__halo{
-  position:absolute;inset:0;
-  border-radius:50%;
-  background:$vert-clair;
-  animation:phone-halo 3s ease-out infinite;
-  pointer-events:none;
-  z-index:-1;
-}
-
-.phone__name{color:$blanc;font-size:15px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
-.phone__role{color:rgba($blanc,.78);font-size:11px;margin-top:2px}
-.phone__company{color:rgba($blanc,.55);font-size:9px;margin-top:1px}
-
-// Quatre actions, remontant sur l'en-tête
-.phone__actions{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:5px;
-  padding:0 10px;
-  margin-top:-20px;
-  position:relative;
-  z-index:2;
-}
-
-.phone__action{
   background:$blanc;
   border:1px solid $bordure;
-  border-radius:11px;
-  height:46px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:2px;
-  color:$vert-fonce;
-  box-shadow:0 1px 3px rgba(10,31,26,.06);
-
-  span{font-size:7px;font-weight:600;color:$gris-second;letter-spacing:.01em}
-}
-
-// Coordonnées
-.phone__list{
-  padding:14px 12px 8px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.phone__row{display:flex;align-items:center;gap:8px}
-
-.phone__row-icon{
-  width:22px;height:22px;
-  border-radius:7px;
-  background:$vert-clair;
-  color:$vert-fonce;
-  display:grid;place-items:center;
-  flex:0 0 auto;
-}
-
-.phone__row-text{
-  font-size:9px;
-  color:$gris-second;
+  border-radius:14px;
+  box-shadow:0 6px 18px rgba(10,31,26,.08);
   overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
 }
 
-// Réseaux sociaux
-.phone__socials{
-  display:flex;
-  justify-content:center;
-  gap:8px;
-  padding:6px 12px 10px;
+// -----------------------------------------------------------------------------
+// COUVERTURE ET MÉDAILLON
+// -----------------------------------------------------------------------------
+.phc__couverture{
+  position:relative;
+  height:56px;
+  flex:0 0 auto;
+  // La marge du bas laisse la place au médaillon qui déborde.
+  margin-bottom:26px;
 }
-.phone__social{
-  width:24px;height:24px;
-  border-radius:50%;
+
+// Le même fond composé que la page publique : dégradé de marque, deux halos
+// diffus, et la trame de modules du QR à très basse opacité.
+.phc__couverture-fond{
+  position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(0deg,
+      rgba(255,255,255,.035) 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(90deg,
+      rgba(255,255,255,.035) 0 1px, transparent 1px 14px),
+    radial-gradient(120% 90% at 12% 18%, rgba(255,255,255,.18) 0%, transparent 55%),
+    radial-gradient(90% 80% at 88% 92%, rgba(0,0,0,.20) 0%, transparent 60%),
+    linear-gradient(135deg, $vert-fonce 0%, $vert-accent 100%);
+}
+
+// Le médaillon DÉBORDE sur la couverture, comme sur la page publique : c'est
+// ce chevauchement qui fait lire le portrait et le nom comme un seul bloc.
+.phc__medaillon{
+  position:absolute;
+  left:12px;bottom:-24px;
+  width:52px;height:52px;
+  border-radius:14px;
+  border:3px solid $blanc;
+  box-shadow:0 2px 8px rgba(10,31,26,.18);
+  overflow:hidden;
+  background:$vert-clair;
+}
+
+.phc__photo{display:block;width:100%;height:100%}
+
+// -----------------------------------------------------------------------------
+// IDENTITÉ
+// -----------------------------------------------------------------------------
+.phc__identite{
+  padding:0 12px;
+  display:flex;flex-direction:column;gap:1px;
+  min-width:0;
+}
+
+.phc__nom{
+  font-size:13px;font-weight:700;
+  letter-spacing:-.02em;line-height:1.15;
+  color:$texte;
+  overflow-wrap:anywhere;
+}
+
+.phc__role{font-size:9.5px;color:$gris-second;line-height:1.2}
+.phc__entreprise{font-size:9px;font-weight:600;color:$vert-fonce;line-height:1.2}
+
+// -----------------------------------------------------------------------------
+// COORDONNÉES — un bloc teinté, lu d'un seul regard
+// -----------------------------------------------------------------------------
+.phc__infos{
+  margin:8px 10px 0;
+  padding:3px 0;
   background:$gris-fond;
   border:1px solid $bordure;
-  // Initiale du réseau quand la pastille porte un vrai lien.
-  display:grid;place-items:center;
-  font-size:10px;font-weight:700;
-  color:$gris-second;
-  text-transform:uppercase;
+  border-radius:9px;
+  display:flex;flex-direction:column;
 }
 
-// Bouton pleine largeur
-.phone__save{
-  margin:auto 12px 14px;
-  height:36px;
+.phc__info{
+  display:flex;align-items:center;gap:7px;
+  padding:4px 8px;
+  min-width:0;
+}
+
+.phc__info-icone{
+  flex:0 0 auto;
+  width:17px;height:17px;
+  display:grid;place-items:center;
   border-radius:999px;
-  background:$texte;
-  color:$blanc;
-  display:grid;place-items:center;
-  font-size:11px;font-weight:600;
+  background:$vert-clair;
+  color:$vert-fonce;
 }
 
+// La troncature est ACCEPTABLE ICI, et seulement ici : c'est une maquette,
+// pas une fiche qu'on doit pouvoir lire. Sur la vraie page publique,
+// .pubc__info-valeur passe à la ligne plutôt que de couper une adresse.
+.phc__info-texte{
+  font-size:8.5px;font-weight:600;
+  color:$texte;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  min-width:0;
+}
+
+// -----------------------------------------------------------------------------
+// LA GRILLE — trois par rangée, comme sur la page publique
+// -----------------------------------------------------------------------------
+.phc__grille{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:5px;
+  padding:8px 10px 0;
+}
+
+.phc__tuile{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;
+  aspect-ratio:1;
+  min-width:0;
+  padding:3px 2px;
+  border-radius:9px;
+  background:$gris-fond;
+  border:1px solid $bordure;
+  color:$gris-second;
+
+  // La couleur officielle de chaque plateforme, posée par x-social-icon. La
+  // page publique ne la révèle qu'au survol ; ici rien ne se survole — la
+  // maquette est une image — et les logos éteints se liraient comme des
+  // boutons désactivés.
+  .social-svg{color:var(--marque, #{$vert-fonce})}
+}
+
+.phc__tuile-nom{
+  font-size:6.5px;font-weight:600;
+  text-align:center;line-height:1.1;
+  color:$texte;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:100%;
+}
+
+// -----------------------------------------------------------------------------
+// BARRE D'ACTIONS
+// -----------------------------------------------------------------------------
+// Une seule action est PLEINE. Deux boutons primaires n'en font aucun : c'est
+// « Enregistrer » qui termine le parcours, « Partager » n'est qu'un service.
+// PAS DE margin-top:auto ICI, et c'est délibéré.
+//
+// Poussée en bas de l'écran, la barre laissait entre la grille et elle une
+// plage blanche d'un tiers de la maquette — un écran qui paraît à moitié
+// chargé. La carte se termine où son contenu se termine, exactement comme
+// la page publique, et le reste de l'écran est simplement du fond.
+.phc__barre{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  padding:9px 10px 0;
+}
+
+.phc__pied{
+  display:block;
+  padding:8px 10px 12px;
+  text-align:center;
+  font-size:7px;
+  color:$gris-second;
+
+  b{color:$vert-fonce;font-weight:700}
+}
+
+.phc__action{
+  display:grid;place-items:center;
+  height:24px;
+  border-radius:999px;
+  font-size:8.5px;font-weight:700;
+  letter-spacing:.02em;
+}
+
+.phc__action--plein{background:$vert-fonce;color:$blanc}
+.phc__action--clair{background:$gris-fond;border:1px solid $bordure-forte;color:$texte}
 // -----------------------------------------------------------------------------
 // ANIMATIONS DU TÉLÉPHONE
 // -----------------------------------------------------------------------------

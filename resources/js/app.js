@@ -29,6 +29,7 @@ import socialRepeater from './modules/social-repeater';
 import autoFiltre from './modules/auto-filtre';
 import flashAuto from './modules/flash-auto';
 import telephone from './modules/telephone';
+import langue from './modules/langue';
 
 const modules = [
     scrollReveal,
@@ -45,6 +46,7 @@ const modules = [
     autoFiltre,
     flashAuto,
     telephone,
+    langue,
 ];
 
 // Chaque module renvoie tôt s'il n'a rien à faire sur la page courante.

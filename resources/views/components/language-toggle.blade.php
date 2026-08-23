@@ -1,47 +1,90 @@
 {{--
-  x-language-toggle — bascule français / anglais.
+  x-language-toggle — le sélecteur de langue, en menu déroulant.
 
       <x-language-toggle />
 
-  MÊME MÉCANIQUE QUE LA BASCULE DE THÈME, et pour les mêmes raisons : un vrai
-  formulaire POST, aucune ligne de JavaScript, la langue posée par le serveur
-  avant le premier rendu. Une bascule faite après affichage laisserait voir la
-  page dans l'ancienne langue puis la retraduirait sous les yeux.
+  ═══════════════════════════════════════════════════════════════════════
+  POURQUOI UN MENU, ET PLUS UNE BASCULE
+  ═══════════════════════════════════════════════════════════════════════
+  Le bouton précédent affichait « FR » et basculait vers l'autre langue au
+  clic. Il posait deux problèmes que seule une liste résout.
 
-  POST et non GET : changer de langue MODIFIE un état. Un lien serait suivi par
-  les robots d'indexation et les préchargeurs de navigateur, qui basculeraient
-  la langue de visiteurs n'ayant rien demandé.
+  Il ne DISAIT PAS ce qu'il ferait. « FR » ne dit pas s'il s'agit de la
+  langue affichée ou de celle qu'on obtiendrait — le title le précisait,
+  mais un title ne se lit ni au doigt ni d'un coup d'œil.
+
+  Il ne MONTRAIT PAS les langues disponibles. Un visiteur anglophone devant
+  « FR » ne sait pas si l'anglais existe : il faut cliquer pour l'apprendre,
+  et cliquer c'est déjà avoir changé de page.
+
+  Le menu montre les deux langues, écrites chacune DANS SA PROPRE LANGUE —
+  « Français », « English » — et coche celle qui est active. On voit ce
+  qu'on a et ce qu'on peut avoir, sans rien deviner.
+
+  ═══════════════════════════════════════════════════════════════════════
+  <details> ET NON UN COMPOSANT À SCRIPT
+  ═══════════════════════════════════════════════════════════════════════
+  <details>/<summary> ouvre et ferme nativement : au clic, au doigt, à la
+  touche Entrée et à la barre d'espace, sans une ligne de JavaScript. Le
+  module langue.js n'ajoute que le confort — fermer en cliquant ailleurs ou
+  avec Échap — et son absence ne casse rien.
+
+  POST et non GET : changer de langue MODIFIE un état. Un lien serait suivi
+  par les robots d'indexation et les préchargeurs de navigateur, qui
+  basculeraient la langue de visiteurs n'ayant rien demandé.
 
   Accessible aux invités comme aux comptes : la route est hors du groupe
   « auth ». Pour un compte, la préférence est écrite en base — c'est elle qui
   sert aussi aux e-mails, qui partent hors session et n'ont aucun cookie à
   lire ; pour un invité, dans un cookie d'un an.
-
-  LE BOUTON AFFICHE LA LANGUE COURANTE, pas la destination. C'est l'inverse de
-  la bascule de thème, et c'est voulu : une lune dit « aller vers le sombre »
-  sans ambiguïté, tandis qu'un « EN » isolé ne dit pas s'il désigne la langue
-  affichée ou celle qu'on obtiendrait. Le libellé complet de la destination est
-  donc porté par le title et l'aria-label.
 --}}
 @php
     $courante = App\Support\Langue::courante();
-    $vers = App\Support\Langue::inverse();
 @endphp
 
-<form method="POST" action="{{ route('preferences.langue') }}"
-      {{ $attributes->merge(['class' => 'langue-form']) }}>
-    @csrf
-    <input type="hidden" name="langue" value="{{ $vers }}">
-
-    <button type="submit" class="langue-toggle"
-            aria-label="{{ __('Passer en :langue', ['langue' => App\Support\Langue::libelle($vers)]) }}"
-            title="{{ App\Support\Langue::libelle($vers) }}">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<details {{ $attributes->merge(['class' => 'langue']) }} data-langue>
+    <summary class="langue__declencheur"
+             title="{{ __('Changer de langue') }}"
+             aria-label="{{ __('Langue : :langue', ['langue' => App\Support\Langue::libelle($courante)]) }}">
+        <svg class="langue__globe" width="15" height="15" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
             <circle cx="12" cy="12" r="9"/>
             <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>
         </svg>
 
-        <span class="langue-toggle__code">{{ App\Support\Langue::code($courante) }}</span>
-    </button>
-</form>
+        <span class="langue__code">{{ App\Support\Langue::code($courante) }}</span>
+
+        <svg class="langue__chevron" width="11" height="11" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
+            <path d="m6 9 6 6 6-6"/>
+        </svg>
+    </summary>
+
+    {{-- Le formulaire EST le menu : chaque langue est un bouton d'envoi qui
+         porte sa propre valeur. Aucun état intermédiaire à gérer, aucun
+         champ caché à tenir à jour. --}}
+    <form method="POST" action="{{ route('preferences.langue') }}" class="langue__menu">
+        @csrf
+
+        @foreach (App\Support\Langue::libelles() as $code => $libelle)
+            <button type="submit" name="langue" value="{{ $code }}"
+                    class="langue__option"
+                    @if ($code === $courante) aria-current="true" @endif>
+                {{-- Le nom de la langue n'est JAMAIS traduit : un anglophone
+                     perdu dans une page française doit reconnaître
+                     « English », pas lire « Anglais ». --}}
+                <span class="langue__nom">{{ $libelle }}</span>
+
+                @if ($code === $courante)
+                    <svg class="langue__coche" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="m5 13 4 4L19 7"/>
+                    </svg>
+                @endif
+            </button>
+        @endforeach
+    </form>
+</details>
