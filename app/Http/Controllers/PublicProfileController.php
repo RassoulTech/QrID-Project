@@ -87,7 +87,6 @@ class PublicProfileController extends Controller
              | On vérifie donc l'EXISTENCE du fichier. En son absence, les
              | initiales prennent le relais — jamais un vide.
              */
-            'photoUrl' => $this->photo($profile),
             'couvertureUrl' => $this->couvertureUrl($profile),
         ]);
     }
@@ -305,6 +304,20 @@ class PublicProfileController extends Controller
     /** L'URL absolue de l'image de partage, ou null si elle n'a pu être produite. */
     private function apercu(Profile $profile): ?string
     {
+        /*
+         | L'IMAGE DE COUVERTURE EST L'IMAGE DE PARTAGE.
+         |
+         | Quand le porteur en a choisi une, c'est elle qui doit apparaître
+         | dans WhatsApp, pas une vignette composée : il l'a choisie pour
+         | représenter sa carte, et l'aperçu de partage est le premier endroit
+         | où on la verra — souvent avant même d'ouvrir le lien.
+         |
+         | L'aperçu composé reste le repli, pour les profils sans image.
+         */
+        if ($couverture = $this->couvertureUrl($profile)) {
+            return $couverture;
+        }
+
         try {
             $service = app(SharePreviewService::class);
 

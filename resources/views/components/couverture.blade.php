@@ -26,9 +26,17 @@
     3. une trame de modules carrés — l'écho du QR Code — à 3,5 % ;
     4. le nom du produit, en grand, très transparent, débordant du cadre.
 
-  Le nom est POSÉ EN FILIGRANE et non centré comme un titre : il doit se
-  sentir, pas se lire. Un logo lisible au-dessus du portrait de quelqu'un
-  ferait de sa carte une publicité pour nous.
+  Le nom du produit est POSÉ EN FILIGRANE et non centré comme un titre : il
+  doit se sentir, pas se lire. Un logo lisible au-dessus de l'identité de
+  quelqu'un ferait de sa carte une publicité pour nous.
+
+  ═══════════════════════════════════════════════════════════════════════
+  ELLE PORTE L'IDENTITÉ
+  ═══════════════════════════════════════════════════════════════════════
+  Le nom, la fonction et l'entreprise sont DANS la couverture, en bas à
+  gauche, sur un voile sombre. Ils ne sont plus répétés en dessous : deux
+  fois la même information à quelques pixels d'écart repousserait les
+  coordonnées d'un écran entier.
 
   Props : profile, url (l'adresse de l'image, ou null)
 --}}
@@ -37,9 +45,9 @@
 <header class="pubc__couverture">
     @if ($url)
         {{-- width et height sont déclarés : sans eux, la page saute au
-             chargement de l'image et le médaillon se déplace sous le doigt. --}}
+             chargement de l'image et le nom se déplace sous le doigt. --}}
         <img src="{{ $url }}" alt=""
-             class="pubc__couverture-image" width="840" height="300"
+             class="pubc__couverture-image" width="960" height="680"
              decoding="async" fetchpriority="high">
     @else
         <span class="pubc__couverture-fond" aria-hidden="true">
@@ -52,12 +60,30 @@
         </span>
     @endif
 
-    {{-- ═══════════════ MÉDAILLON ═══════════════
-         LA VÉRIFICATION PORTE SUR LES OCTETS, PAS SUR LE CHAMP.
-         photo_path renseigné ne veut pas dire image disponible : sur un
-         disque éphémère, la colonne survit au déploiement, le fichier non.
-         Voir Profile::photoBinaire(). --}}
-    <div class="pubc__medaillon">
-        {{ $slot }}
+    {{-- ═══════════════ LE VOILE ═══════════════
+         IL N'EST PAS DÉCORATIF, IL EST LA CONDITION DE LISIBILITÉ.
+
+         Le nom est posé sur une image que le porteur choisit : elle peut
+         être un ciel blanc, un mur clair, une photo surexposée. Sans voile,
+         du blanc sur blanc — et rien à l'écran n'aurait prévenu.
+
+         Le dégradé est calibré pour que le PIRE CAS tienne : sur une image
+         entièrement blanche, l'encre du texte reste au-dessus de 4,5:1.
+         Les mesures sont dans la note de _carte-publique.scss. --}}
+    <span class="pubc__couverture-voile" aria-hidden="true"></span>
+
+    {{-- ═══════════════ L'IDENTITÉ, POSÉE SUR L'IMAGE ═══════════════
+         En bas à gauche : c'est le point de départ de la lecture, et c'est
+         là que le voile est le plus dense. --}}
+    <div class="pubc__identite">
+        <h1 class="pubc__nom">{{ $profile->full_name }}</h1>
+
+        @if ($profile->job_title)
+            <p class="pubc__role">{{ $profile->job_title }}</p>
+        @endif
+
+        @if ($profile->company)
+            <p class="pubc__entreprise">{{ $profile->company }}</p>
+        @endif
     </div>
 </header>

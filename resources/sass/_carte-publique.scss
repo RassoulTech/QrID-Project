@@ -17,193 +17,137 @@
 // LA PAGE — c'est elle qui porte le fond et la hauteur d'écran. La CARTE,
 // elle, est un composant qui peut vivre ailleurs : voir x-carte-publique,
 // rendu aussi bien ici que sur la planche de /design-system.
+/*
+ | ═══════════════════════════════════════════════════════════════════════
+ | BORD À BORD SUR TÉLÉPHONE, CARTE CENTRÉE SUR ORDINATEUR
+ | ═══════════════════════════════════════════════════════════════════════
+ | La page ressemblait à une carte flottante posée sur un fond gris : marges
+ | latérales, coins arrondis, ombre. Sur un écran de 375px, cette mise en
+ | scène coûte 28px de largeur utile et fait lire l'écran comme un aperçu
+ | plutôt que comme LA page — or c'est bien la page, celle qu'on ouvre après
+ | un scan.
+ |
+ | Mobile first, donc : bord à bord par défaut, aucune marge extérieure,
+ | aucun arrondi, le fond du thème actif et rien d'autre. La carte ne
+ | revient qu'à partir de 640px, où elle n'occupe plus qu'une partie de
+ | l'écran et redevient une composition plutôt qu'un cadre.
+ */
 .pubc-page{
   position:relative;
   min-height:100dvh;
-  padding:16px 14px 40px;
-  background:var(--surface-2);
-  // Aucune ligne ne peut élargir la page, quelle que soit la longueur d'une
-  // adresse e-mail sans espace.
+  background:var(--surface);
   overflow-x:hidden;
 }
 
 // La bascule de thème appartient au confort du VISITEUR, pas à l'identité du
-// porteur : elle flotte donc hors de la carte.
+// porteur : elle flotte donc au-dessus de la couverture.
+.pubc__theme{
+  position:absolute;
+  top:14px;right:14px;
+  z-index:5;
+  display:flex;
+}
+
 .pubc{position:relative}
 
-.pubc__theme{
-  max-width:420px;
-  margin:0 auto 10px;
-  display:flex;justify-content:flex-end;
-}
-
-// La carte ne s'étire jamais : au-delà de 420px elle se centre. Un bandeau de
-// 1400px de large n'est pas une carte de visite.
 .pubc__carte{
-  max-width:420px;
-  margin:0 auto;
   background:var(--surface);
-  border:1px solid var(--bord);
-  border-radius:$r-md;
-  box-shadow:var(--ombre-2);
   overflow:hidden;
 }
 
 // -----------------------------------------------------------------------------
-// COUVERTURE ET MÉDAILLON
+// LA COUVERTURE — le visuel principal
 // -----------------------------------------------------------------------------
+// 280px sur téléphone, 340px au-delà. C'est la première chose qu'on voit
+// après un scan : elle doit occuper l'écran, pas le décorer.
 .pubc__couverture{
   position:relative;
-  height:150px;
-  // PAS d'overflow:hidden ICI : le médaillon déborde volontairement vers le
-  // bas, et le couper supprimerait le chevauchement qui fait tout l'intérêt
-  // de cette composition. C'est .pubc__couverture-fond, à l'intérieur, qui
-  // cadre le filigrane.
-  // La marge du bas laisse la place au médaillon qui déborde.
-  margin-bottom:64px;
-}
-
-// LE DÉCOR DE COUVERTURE — composé, quand le porteur n'a pas mis d'image.
-//
-// ═══════════════════════════════════════════════════════════════════════
-// CE QUI N'ALLAIT PAS DANS LA VERSION PRÉCÉDENTE
-// ═══════════════════════════════════════════════════════════════════════
-// Une trame de fines lignes couvrait toute la bande : à l'œil, cela donnait
-// une moustiquaire, pas une bannière. Et le nom du produit, écrit en très
-// grand et coupé par le bord droit, se lisait comme un débordement de mise
-// en page plutôt que comme un filigrane.
-//
-// Un motif qui se répète sur toute une surface se voit TOUJOURS, quelle que
-// soit son opacité : c'est la régularité qui accroche l'œil, pas le
-// contraste. La texture est donc supprimée au profit de formes uniques.
-//
-// ═══════════════════════════════════════════════════════════════════════
-// CE QUI LA REMPLACE — quatre couches, aucune image à télécharger
-// ═══════════════════════════════════════════════════════════════════════
-//   1. un dégradé de marque en diagonale, du vert profond au vert vif ;
-//   2. deux masses lumineuses très diffuses, de tailles différentes, qui
-//      donnent du relief sans dessiner quoi que ce soit de reconnaissable ;
-//   3. une ombre chaude en bas à gauche, qui empêche le bloc de paraître
-//      plat sous le médaillon ;
-//   4. un voile clair en diagonale — la lumière qui glisse sur une surface.
-//
-// Aucune ne se répète. C'est ce qui fait la différence entre une texture
-// qu'on remarque et une matière qu'on ne remarque pas.
-.pubc__couverture-fond{
-  position:absolute;inset:0;
+  height:280px;
+  display:flex;
+  align-items:flex-end;
   overflow:hidden;
-  background:
-    // 4. le voile de lumière, en diagonale
-    linear-gradient(118deg,
-      transparent 0%,
-      rgba(255,255,255,.10) 38%,
-      rgba(255,255,255,.02) 52%,
-      transparent 68%),
-
-    // 2 & 3. les masses — grandes, molles, jamais centrées
-    radial-gradient(78% 120% at 88% -12%,
-      rgba(120, 230, 190, .38) 0%, transparent 62%),
-    radial-gradient(62% 96% at 8% 108%,
-      rgba(4, 32, 24, .55) 0%, transparent 66%),
-    radial-gradient(46% 70% at 62% 88%,
-      rgba(30, 158, 122, .40) 0%, transparent 70%),
-
-    // 1. le dégradé de marque
-    linear-gradient(142deg, #0B3B2E 0%, #0F5A44 46%, #1E9E7A 100%);
 }
 
-// LE MONOGRAMME — discret, cadré, jamais coupé.
-//
-// Le nom entier écrit en 58px et tranché par le bord de la carte faisait
-// désordre. Un monogramme dans une pastille se lit comme une signature :
-// il dit d'où vient la carte sans réclamer l'attention que mérite le nom
-// du porteur, qui est le sujet de la page.
-.pubc__couverture-marque{
-  position:absolute;
-  right:14px;bottom:12px;
-  display:inline-flex;align-items:center;gap:6px;
-  padding:5px 11px 5px 8px;
-  border-radius:$r-full;
-  background:rgba(255,255,255,.14);
-  // Le liseré détache la pastille des zones claires du dégradé, où un fond
-  // translucide seul disparaîtrait.
-  border:1px solid rgba(255,255,255,.22);
-  backdrop-filter:blur(6px);
-  font-size:10.5px;font-weight:700;
-  letter-spacing:.10em;text-transform:uppercase;
-  color:rgba(255,255,255,.92);
-  user-select:none;
-}
-
-// Le petit carré de modules : l'écho du QR, en signature et non en trame.
-.pubc__couverture-puce{
-  display:grid;
-  grid-template-columns:repeat(2, 4px);
-  grid-auto-rows:4px;
-  gap:1.5px;
-
-  span{background:rgba(255,255,255,.92);border-radius:1px}
-  span:last-child{opacity:.45}
-}
-
-// LE MÉDAILLON DÉBORDE SUR LA COUVERTURE, comme sur la maquette : c'est ce
-// chevauchement qui fait lire la photo et le nom comme un seul bloc.
-.pubc__medaillon{
-  position:absolute;
-  left:20px;bottom:-56px;
-  width:112px;height:112px;
-  // ROND, et non un carré aux angles adoucis. Un portrait est un visage :
-  // le cercle est la forme que tous les répertoires de contacts, tous les
-  // réseaux et tous les téléphones lui donnent. Le carré arrondi se lisait
-  // comme une vignette d'application.
-  border-radius:$r-full;
-  // Cadre épais : il détache le visage du dégradé, quelle que soit la photo.
-  border:4px solid var(--surface);
-  box-shadow:var(--ombre-1);
-  overflow:hidden;
-  background:var(--accent-doux);
-}
-
-// width et height sont déclarés dans le HTML : sans eux, la page saute au
-// chargement de l'image et le visiteur clique à côté.
-.pubc__photo{width:100%;height:100%;object-fit:cover;display:block}
-
-// L'IMAGE DE COUVERTURE CHOISIE PAR LE PORTEUR.
-//
-// object-fit:cover et non contain : une bannière doit remplir la bande. En
-// « contain », une photo au mauvais rapport laisserait deux bandes vides sur
-// les côtés — exactement le vide qu'on cherche à supprimer.
+// L'image REMPLIT la zone sans jamais se déformer. object-fit:cover recadre,
+// object-position:center garde le sujet au milieu — c'est là qu'il est sur
+// la quasi-totalité des photos.
 .pubc__couverture-image{
   position:absolute;inset:0;
-  // Le rayon du haut de la carte : sans lui, une photo carrée dépasse des
-  // coins arrondis et la carte paraît mal découpée.
-  border-radius:$r-md $r-md 0 0;
   width:100%;height:100%;
   object-fit:cover;
+  object-position:center;
   display:block;
 }
 
+.pubc__couverture-fond{position:absolute;inset:0}
+
+/*
+ | ═══════════════════════════════════════════════════════════════════════
+ | LE VOILE — CALIBRÉ SUR LE PIRE CAS, PAS SUR UNE PHOTO D'ESSAI
+ | ═══════════════════════════════════════════════════════════════════════
+ | Le porteur choisit son image. Elle peut être un ciel blanc, un mur clair,
+ | une photo surexposée. Le texte est blanc : sans voile, blanc sur blanc, et
+ | rien à l'écran n'aurait prévenu.
+ |
+ | Le pire cas est donc une image ENTIÈREMENT BLANCHE. Sur elle, le voile
+ | compose ainsi, en partant du bas :
+ |
+ |   .94 sur #041 0F  →  fond #0F1F19  →  blanc à 15,6:1
+ |   .78              →  fond #3C4844  →  blanc à  8,0:1
+ |   .55              →  fond #77807D  →  blanc à  3,6:1   ← hors zone de texte
+ |
+ | Le texte n'occupe jamais plus du tiers bas de la couverture, là où le
+ | voile est au-dessus de .78. Les deux paliers supérieurs ne servent qu'à
+ | fondre le voile dans l'image, et aucun texte n'y est posé.
+ */
+.pubc__couverture-voile{
+  position:absolute;inset:0;
+  pointer-events:none;
+  background:linear-gradient(
+    to top,
+    rgba(4, 22, 17, .94) 0%,
+    rgba(4, 22, 17, .78) 26%,
+    rgba(4, 22, 17, .55) 46%,
+    rgba(4, 22, 17, .18) 68%,
+    transparent 100%
+  );
+}
+
 // -----------------------------------------------------------------------------
-// IDENTITÉ
+// IDENTITÉ — posée sur la couverture
 // -----------------------------------------------------------------------------
-.pubc__identite{padding:0 20px}
+// En bas à GAUCHE : c'est le point de départ de la lecture, et c'est là que
+// le voile est le plus dense. Centrée, elle tomberait au milieu du dégradé,
+// là où le contraste n'est plus garanti.
+.pubc__identite{
+  position:relative;
+  z-index:2;
+  width:100%;
+  padding:0 20px 20px;
+  min-width:0;
+}
 
 .pubc__nom{
-  font-size:23px;font-weight:700;
-  letter-spacing:-.02em;line-height:1.2;
-  color:var(--texte);
-  margin:0 0 4px;
+  font-size:27px;font-weight:800;
+  letter-spacing:-.025em;line-height:1.12;
+  color:#FFFFFF;
+  margin:0 0 5px;
   overflow-wrap:anywhere;   // un nom long passe à la ligne
+  text-shadow:0 1px 12px rgba(0,0,0,.35);
 }
 
 .pubc__role{
-  font-size:14px;color:var(--texte-2);
+  font-size:14.5px;font-weight:500;
+  color:rgba(255,255,255,.88);
   margin:0;overflow-wrap:anywhere;
+  text-shadow:0 1px 10px rgba(0,0,0,.3);
 }
 
 .pubc__entreprise{
-  font-size:13px;font-weight:600;color:var(--accent);
+  font-size:13px;font-weight:600;
+  color:rgba(255,255,255,.72);
   margin:3px 0 0;overflow-wrap:anywhere;
+  text-shadow:0 1px 10px rgba(0,0,0,.3);
 }
 
 // -----------------------------------------------------------------------------
@@ -211,7 +155,7 @@
 // -----------------------------------------------------------------------------
 .pubc__infos{
   list-style:none;
-  margin:18px 16px 0;padding:4px 0;
+  margin:16px 20px 0;padding:2px 0;
   background:var(--surface-3);
   border:1px solid var(--bord);
   border-radius:$r-sm;
@@ -267,7 +211,7 @@
   display:grid;
   grid-template-columns:repeat(3, 1fr);
   gap:10px;
-  padding:18px 16px 0;
+  padding:14px 20px 0;
 }
 
 .pubc__tuile{
@@ -309,7 +253,7 @@
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
-  padding:20px 16px 0;
+  padding:16px 20px 0;
 }
 
 // Une seule action est PLEINE. Deux boutons primaires n'en font aucun : c'est
@@ -347,7 +291,7 @@
 
 .pubc__pied{
   text-align:center;
-  margin:18px 0 0;padding:0 20px 20px;
+  margin:14px 0 0;padding:0 20px 22px;
   font-size:11.5px;color:var(--texte-2);
 
   a{color:var(--accent);font-weight:600}
@@ -389,4 +333,80 @@
   .pubc__couverture{margin-bottom:56px}
   .pubc__nom{font-size:20px}
   .pubc__tuile-nom{font-size:9.5px}
+}
+
+// =============================================================================
+// À PARTIR DE 640px — la carte redevient une carte
+// =============================================================================
+//
+// Elle n'occupe plus alors qu'une partie de l'écran : les coins arrondis et
+// l'ombre redeviennent une composition, et non un cadre qui rétrécit la
+// seule chose qu'on est venu lire.
+@media (min-width:640px){
+  .pubc-page{
+    background:var(--surface-2);
+    padding:24px 16px 48px;
+  }
+
+  .pubc{
+    max-width:480px;
+    margin:0 auto;
+  }
+
+  .pubc__carte{
+    border:1px solid var(--bord);
+    border-radius:$r-md;
+    box-shadow:var(--ombre-2);
+  }
+
+  .pubc__theme{top:34px;right:auto;left:50%;transform:translateX(258px)}
+
+  // 340px au-delà du téléphone, comme demandé.
+  .pubc__couverture{height:340px}
+
+  .pubc__nom{font-size:30px}
+}
+
+// Très petits écrans : la couverture se resserre un peu, le reste tient.
+@media (max-width:359px){
+  .pubc__couverture{height:250px}
+  .pubc__identite{padding:0 16px 16px}
+  .pubc__nom{font-size:23px}
+}
+
+// -----------------------------------------------------------------------------
+// LA PASTILLE DE MARQUE — sur le décor par défaut uniquement
+// -----------------------------------------------------------------------------
+// Elle dit d'où vient la carte sans réclamer l'attention que mérite le nom du
+// porteur. Elle n'apparaît QUE sur le repli : sur l'image choisie par le
+// porteur, poser notre marque reviendrait à la signer à sa place.
+.pubc__couverture-marque{
+  position:absolute;
+  right:14px;top:14px;
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 11px 5px 8px;
+  border-radius:$r-full;
+  background:rgba(255,255,255,.14);
+  // Le liseré détache la pastille des zones claires du dégradé, où un fond
+  // translucide seul disparaîtrait.
+  border:1px solid rgba(255,255,255,.22);
+  backdrop-filter:blur(6px);
+  font-size:10.5px;font-weight:700;
+  letter-spacing:.10em;text-transform:uppercase;
+  color:rgba(255,255,255,.92);
+  user-select:none;
+  z-index:3;
+}
+
+// La puce : quatre carrés, l'écho des modules du QR.
+.pubc__couverture-puce{
+  display:grid;
+  grid-template-columns:repeat(2, 4px);
+  gap:1.5px;
+
+  span{
+    width:4px;height:4px;
+    border-radius:1px;
+    background:currentColor;
+  }
 }

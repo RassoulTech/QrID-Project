@@ -15,7 +15,7 @@
      page en portait une sous l'identité et un lien WhatsApp séparé plus bas,
      ce qui obligeait à chercher à deux endroits ce qui est une seule chose.
 
-     Props : $profile (avec socialLinks), $apercuUrl, $qrSvg, $photoUrl
+     Props : $profile (avec socialLinks), $apercuUrl, $qrSvg, $couvertureUrl
 ============================================================================ --}}
 <x-public-profile-layout
     :title="$profile->full_name"
@@ -30,7 +30,6 @@
 
         <x-carte-publique
             :profile="$profile"
-            :photo-url="$photoUrl"
             :couverture-url="$couvertureUrl ?? null"
             :qr-svg="$qrSvg ?? null" />
 

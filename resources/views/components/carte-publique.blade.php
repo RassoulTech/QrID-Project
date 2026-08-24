@@ -21,30 +21,32 @@
   Bandeau, médaillon, identité, bloc de coordonnées, grille de six boutons,
   barre d'actions. Dans cet ordre.
 
+  ═══════════════════════════════════════════════════════════════════════
+  IL N'Y A PLUS DE MÉDAILLON, ET L'IDENTITÉ EST DANS L'IMAGE
+  ═══════════════════════════════════════════════════════════════════════
+  Un portrait rond posé sur une bannière obligeait à deux images : une
+  photo de visage ET une couverture. Le porteur en fournissait rarement
+  deux, et la page montrait donc le plus souvent un médaillon d'initiales
+  sur un dégradé — deux replis empilés, c'est-à-dire un vide décoré.
+
+  Une seule image désormais, qui occupe toute la largeur, et le nom posé
+  DESSUS. Le visiteur reçoit un visuel plein écran et un nom, pas une
+  vignette et un bandeau.
+
   Props :
     profile       le porteur
-    photoUrl      l'adresse du portrait, ou null (repli : les initiales)
-    couvertureUrl l'adresse de la bannière, ou null (repli : le décor)
+    couvertureUrl l'adresse de l'image, ou null (repli : le décor de marque)
     qrSvg         le QR en plein écran, ou null
     apercu        true sur /design-system : les liens ne mènent nulle part
 --}}
 @props([
     'profile',
-    'photoUrl' => null,
     'couvertureUrl' => null,
     'qrSvg' => null,
     'apercu' => false,
 ])
 
 @php
-    $initiales = mb_strtoupper(
-        mb_substr((string) $profile->first_name, 0, 1).mb_substr((string) $profile->last_name, 0, 1)
-    );
-
-    $initiales = $initiales !== ''
-        ? $initiales
-        : mb_strtoupper(mb_substr($profile->full_name, 0, 1));
-
     /*
      | LA GRILLE D'ACTIONS — réseaux ET moyens de contact, ensemble.
      |
@@ -77,36 +79,11 @@
 <div class="pubc{{ $apercu ? ' pubc--apercu' : '' }}">
     <article class="pubc__carte">
 
-        {{-- ═══════════════ COUVERTURE ET MÉDAILLON ═══════════════ --}}
-        <x-couverture :profile="$profile" :url="$couvertureUrl ?? null">
-            @if ($photoUrl)
-                <img src="{{ $photoUrl }}" alt=""
-                     class="pubc__photo" width="120" height="120"
-                     decoding="async" fetchpriority="high">
-            @else
-                {{-- LES INITIALES, ET NON UN PORTRAIT GÉNÉRIQUE.
-                     Un visage dessiné que personne n'a choisi ne
-                     représente pas le porteur : il représente
-                     « quelqu'un », ce qui est pire qu'un repli assumé.
-                     Deux lettres sur un dégradé de marque disent « c'est
-                     cette personne, sans photo » — et se lisent à trois
-                     mètres. --}}
-                <span class="pubc__initiales" aria-hidden="true">{{ $initiales }}</span>
-            @endif
-        </x-couverture>
-
-        {{-- ═══════════════ IDENTITÉ ═══════════════ --}}
-        <div class="pubc__identite">
-            <h1 class="pubc__nom">{{ $profile->full_name }}</h1>
-
-            @if ($profile->job_title)
-                <p class="pubc__role">{{ $profile->job_title }}</p>
-            @endif
-
-            @if ($profile->company)
-                <p class="pubc__entreprise">{{ $profile->company }}</p>
-            @endif
-        </div>
+        {{-- ═══════════════ COUVERTURE ═══════════════
+             Elle porte l'identité. Le nom n'est donc PAS répété en dessous :
+             le répéter donnerait deux fois la même information à quelques
+             pixels d'écart, et repousserait les coordonnées d'un écran. --}}
+        <x-couverture :profile="$profile" :url="$couvertureUrl ?? null" />
 
         {{-- ═══════════════ COORDONNÉES ═══════════════
              Encadrées et teintées : elles forment un bloc qu'on lit d'un

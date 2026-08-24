@@ -28,65 +28,26 @@
              Sans JavaScript : le champ fichier fonctionne, la photo part au
              « Continuer », l'aperçu apparaît simplement une page plus tard.
              Avec JavaScript : la vignette se remplit immédiatement. --}}
-        @php
-            $photo = $wizard->get('data.photo_path');
-            $couverture = $wizard->get('data.cover_path');
-        @endphp
+        @php $couverture = $wizard->get('data.cover_path'); @endphp
 
-        <div class="f">
-            <span class="f__label">
-                Photo
-                <span class="f__opt">optionnel</span>
-            </span>
+        {{-- ═══════════════ IMAGE DE COUVERTURE ═══════════════
+             C'EST LE SEUL VISUEL DE LA CARTE, ET C'EST UN CHANGEMENT.
 
-            <label class="drop" data-photo-drop>
-                <span class="drop__thumb" data-photo-thumb>
-                    @if ($photo)
-                        <img src="{{ Storage::url($photo) }}" alt="Photo actuelle">
-                    @else
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <rect x="3" y="5" width="18" height="14" rx="2.5"/>
-                            <circle cx="12" cy="12" r="3.2"/><path d="M8 5l1.2-2h5.6L16 5"/>
-                        </svg>
-                    @endif
-                </span>
+             Il y avait deux champs : une photo de portrait et une bannière.
+             Le porteur en remplissait rarement deux, et sa page montrait le
+             plus souvent un médaillon d'initiales sur un dégradé — deux
+             replis empilés, c'est-à-dire un vide décoré.
 
-                <span>
-                    <span class="drop__text" data-photo-label>
-                        {{ $photo ? 'Changer la photo' : 'Ajouter une photo' }}
-                    </span>
-                    <span class="drop__hint">JPG, PNG ou WEBP — 2 Mo maximum</span>
-                </span>
-
-                <input type="file" name="photo" accept="image/jpeg,image/png,image/webp"
-                       class="drop__input" data-photo-input>
-            </label>
-
-            @error('photo')
-                <span class="f__error">{{ $message }}</span>
-            @enderror
-
-            <p class="f__help">
-                Sans photo, votre carte affiche un portrait dessiné — jamais un vide.
-            </p>
-        </div>
-
-        {{-- ═══════════════ BANNIÈRE ═══════════════
-             LE HAUT DE LA CARTE PUBLIQUE APPARTIENT AU PORTEUR.
-
-             C'était un dégradé vert identique chez tout le monde. Or cette
-             bande est l'endroit le plus visible de la page : la première
-             chose qu'on voit après un scan. La laisser inchangée d'un profil
-             à l'autre revient à imprimer la même carte pour tous les clients
-             et à leur demander de la reconnaître.
+             Une seule image désormais. Elle occupe toute la largeur du haut
+             de la page, et le nom se pose dessus.
 
              Elle reste FACULTATIVE : personne ne doit être bloqué à la
-             création parce qu'il n'a pas d'image sous la main. Sans bannière,
-             la carte porte un décor composé aux couleurs de la marque. --}}
+             création parce qu'il n'a pas d'image sous la main. Sans elle, la
+             carte porte un décor composé aux couleurs de la marque, et le nom
+             s'y affiche de la même façon. --}}
         <div class="f">
             <span class="f__label">
-                Bannière de couverture
+                Image de couverture
                 <span class="f__opt">optionnel</span>
             </span>
 
@@ -105,9 +66,9 @@
 
                 <span>
                     <span class="drop__text" data-cover-label>
-                        {{ $couverture ? 'Changer la bannière' : 'Ajouter une bannière' }}
+                        {{ $couverture ? "Changer l'image" : 'Ajouter une image' }}
                     </span>
-                    <span class="drop__hint">JPG, PNG ou WEBP — 4 Mo maximum</span>
+                    <span class="drop__hint">JPG, PNG ou WEBP — 2 Mo maximum</span>
                 </span>
 
                 <input type="file" name="cover" accept="image/jpeg,image/png,image/webp"
@@ -119,8 +80,10 @@
             @enderror
 
             <p class="f__help">
-                Une image large, au format paysage. Sans bannière, votre carte
-                porte le décor de {{ config('app.name') }}.
+                Format paysage, idéalement 1200 × 800 pixels. Elle est recadrée
+                pour remplir le haut de votre carte, et votre nom s'affiche
+                dessus. Sans image, votre carte porte le décor de
+                {{ config('app.name') }}.
             </p>
         </div>
     </x-step-shell>

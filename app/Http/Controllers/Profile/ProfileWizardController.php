@@ -102,7 +102,7 @@ class ProfileWizardController extends Controller
             return redirect()->route('profile.edit');
         }
 
-        $data = $request->safe()->except(['photo', 'cover']);
+        $data = $request->safe()->except('cover');
 
         /*
          | LES OCTETS SONT GARDÉS EN MÉMOIRE, pas relus sur le disque.
@@ -112,14 +112,6 @@ class ProfileWizardController extends Controller
          | écrivait un profil avec un chemin et sans image.
          */
         $images = [];
-
-        if ($request->hasFile('photo')) {
-            $depot = $this->wizard->storePhoto($request->file('photo'));
-
-            $data['photo_path'] = $depot['chemin'];
-            $images['photo_path'] = $depot['chemin'];
-            $images['photo_data'] = $depot['octets'];
-        }
 
         if ($request->hasFile('cover')) {
             $depot = $this->wizard->storeCover($request->file('cover'));
