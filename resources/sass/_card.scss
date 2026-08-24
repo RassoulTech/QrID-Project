@@ -121,7 +121,25 @@
   column-gap:5%;height:100%;align-items:center;
 }
 
-.who{grid-column:1}
+/*
+ | LE BLOC SE RÉDUIT À LA LARGEUR DU NOM, et c'est ce qui centre le reste.
+ |
+ | La fonction et l'entreprise doivent être centrées SUR LE NOM, pas dans la
+ | colonne. Un simple text-align:center sur une colonne en 1fr les aurait
+ | centrées sur toute sa largeur — donc décalées vers la droite du nom, qui
+ | ne l'occupe jamais entièrement.
+ |
+ | inline-block réduit le bloc à son contenu le plus large : le nom, qui
+ | porte white-space:nowrap. Le centrage se fait alors sur cette largeur-là,
+ | et il tombe juste quelle que soit la longueur du nom. justify-self place
+ | ensuite le bloc entier au milieu de sa colonne.
+ */
+.who{
+  grid-column:1;
+  justify-self:center;
+  display:inline-block;
+  text-align:center;
+}
 
 // Nom : UNE seule ligne, occupant toute la largeur de la colonne.
 // Taille réduite en conséquence. Blade ajuste la classe selon la longueur.
