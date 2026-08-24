@@ -73,7 +73,7 @@
                     Présentation « duo » — les deux faces en perspective, comme la référence.
                 </p>
                 <div style="display:flex;justify-content:center">
-                    <x-pvc-card :profile="$profile" layout="duo" :flip="false" />
+                    <x-card-duo :profile="$profile" />
                 </div>
             </div>
 
@@ -115,12 +115,7 @@
 
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;align-items:start">
                         <div>
-                            <div class="pvc pvc--md"
-                                 style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }};max-width:none">
-                                <div class="pvc__scene">
-                                    @include('components.pvc-card-face-recto', ['profile' => $exemplaire])
-                                </div>
-                            </div>
+                            <x-card face="recto" :profile="$exemplaire" :variant="$variante->carte()" />
                             <p class="section-sub" style="margin-top:16px">
                                 <strong>Recto</strong> — centré, symétrique. Son QR mène
                                 à la carte du porteur.
@@ -128,12 +123,7 @@
                         </div>
 
                         <div>
-                            <div class="pvc pvc--md"
-                                 style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }};max-width:none">
-                                <div class="pvc__scene">
-                                    <x-pvc-card-face-verso :variante="$variante" />
-                                </div>
-                            </div>
+                            <x-card face="verso" :profile="$exemplaire" :variant="$variante->carte()" />
                             <p class="section-sub" style="margin-top:16px">
                                 <strong>Verso</strong> — asymétrique, identique sur toutes
                                 les cartes. Son QR mène à la <em>plateforme</em>.
@@ -148,8 +138,8 @@
                     Trois tailles, avec permutation.
                 </p>
                 <div style="display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start">
-                    <x-pvc-card :profile="$profile" size="sm" />
-                    <x-pvc-card :profile="$profile" size="md" />
+                    <x-card face="recto" :profile="$profile" />
+                    <x-card face="verso" :profile="$profile" />
                 </div>
             </div>
 

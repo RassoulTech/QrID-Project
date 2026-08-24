@@ -20,7 +20,7 @@ import navbarScroll from './modules/navbar-scroll';
 import passwordToggle from './modules/password-toggle';
 import passwordMeter from './modules/password-meter';
 import resendTimer from './modules/resend-timer';
-import pvcFlip from './modules/pvc-flip';
+import cardDuo from './modules/card-duo';
 import copyToClipboard from './modules/copy-to-clipboard';
 import confirmAction from './modules/confirm-action';
 import charCounter from './modules/char-counter';
@@ -38,7 +38,7 @@ const modules = [
     passwordToggle,
     passwordMeter,
     resendTimer,
-    pvcFlip,
+    cardDuo,
     copyToClipboard,
     confirmAction,
     charCounter,

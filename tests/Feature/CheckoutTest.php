@@ -143,7 +143,8 @@ class CheckoutTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('class="pvc', $html);
+        // La carte est désormais x-card-duo : voir CardPresentationTest.
+        $this->assertStringContainsString('class="card ', $html);
         $this->assertStringContainsString(route('profile.public', $this->profile->slug), $html);
         $this->assertStringContainsString(route('carte.qr.png'), $html);
         $this->assertStringContainsString(route('carte.imprimable'), $html);

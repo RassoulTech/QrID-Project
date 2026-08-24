@@ -96,6 +96,36 @@ enum VarianteCarte: string
      * Une carte blanche est blanche. Du centre jusqu'aux bords. C'est la
      * bordure qui la détache du fond, pas un dégradé.
      */
+    /**
+     * LA COULEUR DE LA BANDE DE CHEVRONS ET DE L'ONDE SANS CONTACT.
+     *
+     * Elle ne se déduit ni du fond ni de l'encre : sur la carte BLANCHE la
+     * bande est en vert foncé — l'encre — mais sur la VERTE elle est en vert
+     * ACCENT, plus clair que le fond sans être blanc. Une bande blanche sur
+     * une carte verte ferait une deuxième zone de papier ; le vert accent la
+     * signe sans la trouer.
+     */
+    public function accent(): string
+    {
+        return $this === self::Verte ? '#2FBF92' : '#0B3B2E';
+    }
+
+    /**
+     * LE NOM DE LA VARIANTE DANS LE VOCABULAIRE DE LA CARTE.
+     *
+     * La référence figée nomme ses deux variantes « light » et « dark ».
+     * L'énumération, elle, les nomme Blanche et Verte — depuis toujours, et
+     * c'est ce nom-là qui est écrit en base.
+     *
+     * Cette méthode est le seul point de passage entre les deux. Traduire à
+     * la volée dans chaque vue reviendrait à disséminer la correspondance,
+     * et la première à diverger serait celle qu'on ne relit jamais.
+     */
+    public function carte(): string
+    {
+        return $this === self::Verte ? 'dark' : 'light';
+    }
+
     public function relief(): int
     {
         return $this === self::Verte ? 1 : 0;

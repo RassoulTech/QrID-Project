@@ -60,7 +60,7 @@
                 <h2 class="db-card__titre">Aperçu de la carte</h2>
 
                 <div class="db-carte__visuel">
-                    <x-pvc-card :profile="$profile" size="lg" />
+                    <x-card-duo :profile="$profile" />
                 </div>
             </section>
         </div>

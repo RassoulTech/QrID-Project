@@ -1,0 +1,241 @@
+// =============================================================================
+// LA CARTE QrID — transposition de la référence figée
+// =============================================================================
+//
+// ═══════════════════════════════════════════════════════════════════════
+// CE FICHIER EST UNE TRANSPOSITION, PAS UNE CRÉATION
+// ═══════════════════════════════════════════════════════════════════════
+// Il reprend le bloc <style> de la référence validée, valeur pour valeur.
+// Aucune couleur, aucune taille, aucun espacement, aucun rayon, aucune ombre
+// et aucune position n'a été modifié. Les seules différences avec la source
+// sont l'usage des jetons de couleur du projet — dont les valeurs sont
+// identiques — et les commentaires.
+//
+// NE RIEN « AMÉLIORER » ICI. Cette composition a été approuvée après de
+// nombreuses itérations. Une correction qui semble évidente en lisant le
+// code ne l'est plus une fois la carte sortie de l'imprimerie.
+//
+// ═══════════════════════════════════════════════════════════════════════
+// LES DEUX PROPRIÉTÉS QUI NE SE TOUCHENT PAS
+// ═══════════════════════════════════════════════════════════════════════
+// Toutes les tailles sont en cqw — un pourcentage de la LARGEUR DU
+// CONTENEUR. C'est ce qui rend la carte proportionnelle à toute taille
+// d'affichage sans jamais se déformer.
+//
+//   container-type: inline-size   sans lui, cqw se mesure sur la FENÊTRE et
+//                                 toutes les tailles cassent ;
+//   aspect-ratio: 1.586           une hauteur fixe à la place déformerait la
+//                                 carte dès que la largeur change.
+//
+// Ces deux-là ne se retirent pas, ne se remplacent pas, ne se contournent
+// pas. Un test les garde.
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// LA CARTE
+// -----------------------------------------------------------------------------
+.card{
+  width:min(420px, 92vw);
+  aspect-ratio:1.586;          // format carte bancaire — jamais de hauteur fixe
+  border-radius:0;             // angles vifs
+  padding:5.5% 6%;
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+  container-type:inline-size;  // permet le dimensionnement en cqw
+  font-family:$font-base;
+}
+
+// Variante blanche (par défaut).
+.card.light{
+  background:$blanc;
+  border:1px solid #DCE1DE;
+  box-shadow:0 6px 18px rgba(10,31,26,.07);   // légère, non salissante
+  color:$vert-fonce;
+}
+
+// Variante verte.
+.card.dark{
+  background:linear-gradient(135deg,#124a3a 0%,$vert-fonce 55%,#08281f 100%);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 6px 18px rgba(10,31,26,.18);
+  color:$blanc;
+}
+
+// -----------------------------------------------------------------------------
+// VERSO
+// -----------------------------------------------------------------------------
+.back{
+  display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto;
+  column-gap:5%;height:100%;
+}
+
+.brand{display:flex;align-items:center;gap:3.2cqw;grid-column:1;grid-row:1}
+
+.mark{
+  width:12cqw;height:12cqw;border-radius:2.4cqw;
+  display:grid;place-items:center;
+  font-weight:800;font-size:5.4cqw;letter-spacing:-.02em;flex:0 0 auto;
+}
+.light .mark{background:$vert-fonce;color:$blanc}
+.dark  .mark{background:$vert-accent;color:$blanc}
+
+.wordmark{font-weight:800;font-size:11cqw;line-height:1;letter-spacing:-.035em}
+
+// Alignée sur le bord gauche du logo, jamais centrée.
+.tagline{
+  grid-column:1;grid-row:2;text-align:left;
+  font-size:5.2cqw;font-weight:600;line-height:1.3;letter-spacing:-.01em;
+  margin-top:4cqw;max-width:22ch;align-self:start;
+}
+.light .tagline{color:#2B4A40}
+.dark  .tagline{color:rgba(255,255,255,.9)}
+
+.qrbox{grid-column:2;grid-row:1 / span 2;justify-self:end;align-self:start;text-align:center}
+
+.qr{
+  width:33cqw;height:33cqw;background:$blanc;padding:1.7cqw;
+  display:block;
+}
+
+.qr img,.qr svg{width:100%;height:100%;display:block}
+
+.qrcap{font-size:3.2cqw;font-weight:700;margin-top:1.8cqw}
+.light .qrcap{color:$vert-fonce}
+.dark  .qrcap{color:$blanc}
+
+.foot{
+  grid-column:1 / -1;grid-row:3;display:flex;justify-content:space-between;
+  align-items:flex-end;font-size:2.9cqw;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.light .foot .l{color:#8FA39A}
+.light .foot .r{color:$vert-fonce}
+.dark  .foot .l{color:rgba(255,255,255,.55)}
+.dark  .foot .r{color:$blanc}
+
+// -----------------------------------------------------------------------------
+// RECTO
+// -----------------------------------------------------------------------------
+.front{
+  display:grid;grid-template-columns:1fr auto;
+  column-gap:5%;height:100%;align-items:center;
+}
+
+.who{grid-column:1}
+
+// Nom : UNE seule ligne, occupant toute la largeur de la colonne.
+// Taille réduite en conséquence. Blade ajuste la classe selon la longueur.
+.who .name{
+  font-weight:800;font-size:6.2cqw;line-height:1.06;letter-spacing:-.02em;
+  text-transform:uppercase;white-space:nowrap;
+}
+// Nom court (1 mot) : peut être plus grand.
+.who .name--short{font-size:9cqw}
+// Nom long (3 mots et plus) : plus petit pour rester sur une ligne.
+.who .name--long{font-size:4.8cqw;letter-spacing:-.01em}
+
+.who .role{
+  font-size:3.4cqw;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  margin-top:2.6cqw;
+}
+.who .org{font-size:3.2cqw;font-weight:600;margin-top:1.4cqw}
+
+.light .who .name{color:$vert-fonce}
+.light .who .role{color:$vert-accent}
+.light .who .org{color:$gris-second}
+.dark  .who .name{color:$blanc}
+.dark  .who .role{color:#8FD9C2}
+.dark  .who .org{color:rgba(255,255,255,.7)}
+
+.access{grid-column:2;justify-self:end;text-align:center;position:relative;overflow:visible}
+
+// Icône : juste au-dessus du QR, alignée sur son bord droit.
+.nfc{
+  position:absolute;display:block;width:7cqw;height:7cqw;
+  transform:rotate(45deg);bottom:100%;right:-3cqw;
+}
+.light .nfc{color:$vert-accent}
+.dark  .nfc{color:#8FD9C2}
+
+.access .qr{width:24cqw;height:24cqw}
+
+// =============================================================================
+// LA PERMUTATION RECTO / VERSO — voir x-card-duo
+// =============================================================================
+//
+// ═══════════════════════════════════════════════════════════════════════
+// L'ÉTAT PAR DÉFAUT MONTRE TOUT
+// ═══════════════════════════════════════════════════════════════════════
+// Sans .is-flippable — c'est-à-dire sans JavaScript — les deux faces
+// s'affichent l'une SOUS l'autre et le bouton reste [hidden]. Rien n'est
+// masqué, rien ne dépend d'un script pour être vu.
+//
+// C'est le module qui ajoute la classe. Cet ordre n'est pas négociable : on
+// ne met pas une face en scène avant d'être certain de savoir l'en sortir.
+.card-duo{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+}
+
+.card-duo__scene{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+  width:100%;
+}
+
+.card-duo__bouton{
+  display:inline-flex;align-items:center;gap:8px;
+  min-height:44px;
+  padding:0 18px;
+  border:1px solid var(--bord-fort, rgba(10,31,26,.14));
+  border-radius:999px;
+  background:var(--surface, #{$blanc});
+  color:var(--texte, #{$texte});
+  font-family:inherit;
+  font-size:13.5px;font-weight:600;
+  cursor:pointer;
+
+  &:hover,&:focus-visible{border-color:var(--accent, #{$vert-fonce});color:var(--accent, #{$vert-fonce})}
+  &:focus-visible{outline:2px solid var(--accent-vif, #{$vert-accent});outline-offset:2px}
+}
+
+// -----------------------------------------------------------------------------
+// AVEC JAVASCRIPT — les faces se superposent et pivotent
+// -----------------------------------------------------------------------------
+.card-duo.is-flippable{
+  .card-duo__scene{
+    position:relative;
+    display:block;
+    // La scène prend la place d'UNE carte : les faces se superposent.
+    width:min(420px, 92vw);
+    aspect-ratio:1.586;
+    perspective:1400px;
+  }
+
+  .card-duo__face{
+    position:absolute;
+    inset:0;
+    width:100%;
+    // 600ms, sur l'axe vertical.
+    transition:transform 600ms cubic-bezier(.22,.68,.28,1);
+    transform-style:preserve-3d;
+    backface-visibility:hidden;
+    cursor:pointer;
+  }
+
+  .card-duo__face--recto{transform:rotateY(0deg)}
+  .card-duo__face--verso{transform:rotateY(180deg)}
+
+  &.is-flipped .card-duo__face--recto{transform:rotateY(-180deg)}
+  &.is-flipped .card-duo__face--verso{transform:rotateY(0deg)}
+}
+
+// LA PRÉFÉRENCE SYSTÈME COUPE LA ROTATION, jamais la fonction : les faces
+// permutent instantanément plutôt que de pivoter.
+@media (prefers-reduced-motion: reduce){
+  .card-duo.is-flippable .card-duo__face{transition:none}
+}

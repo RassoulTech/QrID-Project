@@ -168,7 +168,7 @@ class CardTest extends TestCase
         $this->assertStringContainsString('Ce que verront vos contacts', $html);
 
         // La carte PVC et le cadre de téléphone, tous deux présents.
-        $this->assertStringContainsString('class="pvc', $html);
+        $this->assertStringContainsString('class="card ', $html);
         $this->assertStringContainsString('class="phone', $html);
 
         // Le QR est intégré dans la page, pas seulement annoncé.
@@ -201,8 +201,8 @@ class CardTest extends TestCase
          | les </div> imbriqués rendait ce test dépendant de la structure
          | interne des faces, qu'on a le droit de faire évoluer.
          */
-        preg_match('#pvc__face--recto(.*?)pvc__face--verso#s', $html, $recto);
-        preg_match('#pvc__face--verso(.*?)(?:pvc__commande|</main>)#s', $html, $verso);
+        preg_match('#card-duo__face--recto(.*?)card-duo__face--verso#s', $html, $recto);
+        preg_match('#card-duo__face--verso(.*?)(?:card-duo__commande|</main>)#s', $html, $verso);
 
         $this->assertNotEmpty($recto, 'Recto introuvable.');
         $this->assertNotEmpty($verso, 'Verso introuvable.');
@@ -251,7 +251,8 @@ class CardTest extends TestCase
      */
     public function test_the_back_renders_without_any_profile(): void
     {
-        $rendu = view('components.pvc-card-face-verso')->render();
+        $rendu = view('components.card', ['face' => 'verso', 'variant' => null, 'profile' => null,
+                'attributes' => new \Illuminate\View\ComponentAttributeBag])->render();
 
         $this->assertStringContainsString(config('app.name'), $rendu);
         $this->assertStringContainsString(config('landing.brand.tagline'), $rendu);
@@ -311,7 +312,7 @@ class CardTest extends TestCase
      */
     public function test_no_card_text_can_ever_be_truncated(): void
     {
-        $css = file_get_contents(resource_path('sass/_pvc.scss'));
+        $css = file_get_contents(resource_path('sass/_card.scss'));
 
         // On ignore les commentaires, qui documentent justement ce retrait.
         $regles = preg_replace('#//[^\n]*|/\*.*?\*/#s', '', $css);
@@ -328,17 +329,25 @@ class CardTest extends TestCase
     /** Les coins restent à zéro : rectangle strict. */
     public function test_the_card_corners_stay_square(): void
     {
-        $css = file_get_contents(resource_path('sass/_pvc.scss'));
+        $css = file_get_contents(resource_path('sass/_card.scss'));
 
-        preg_match('/\.pvc__face\{[^}]*border-radius:\s*([^;]+);/s', $css, $m);
+        preg_match('/\.card\{[^}]*border-radius:\s*([^;]+);/s', $css, $m);
 
-        $this->assertSame('0 !important', trim($m[1] ?? ''), 'Un arrondi est revenu sur la carte.');
+        /*
+         | « 0 » ET NON « 0 !important ».
+         |
+         | Le !important répondait à une règle de thème qui arrondissait les
+         | surfaces de l'application. La référence figée déclare border-radius:0
+         | sur .card, et aucune règle du projet ne vise cette classe : il n'y a
+         | plus rien à neutraliser.
+         */
+        $this->assertSame('0', trim($m[1] ?? ''), 'Un arrondi est revenu sur la carte.');
     }
 
     /** La carte n'impose jamais de hauteur fixe : elle suit son ratio. */
     public function test_the_card_is_never_cropped_by_a_fixed_height(): void
     {
-        $css = file_get_contents(resource_path('sass/_pvc.scss'));
+        $css = file_get_contents(resource_path('sass/_card.scss'));
 
         $this->assertStringContainsString('aspect-ratio:1.586', $css);
 
@@ -435,7 +444,7 @@ class CardTest extends TestCase
 
         $html = $this->actingAs($this->user)->get(route('dashboard'))->assertOk()->getContent();
 
-        $this->assertStringContainsString('class="pvc', $html);
+        $this->assertStringContainsString('class="card ', $html);
         $this->assertStringContainsString(route('carte.qr.png'), $html);
         $this->assertStringContainsString(route('carte.qr.svg'), $html);
         $this->assertStringContainsString(route('carte.imprimable'), $html);

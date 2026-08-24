@@ -25,7 +25,7 @@
             <section class="preview__col">
                 <h2 class="preview__legend">Votre carte physique</h2>
 
-                <x-pvc-card :profile="$profile" size="lg" />
+                <x-card-duo :profile="$profile" />
 
                 <p class="preview__note">Format carte bancaire, prête à imprimer.</p>
             </section>

@@ -20,7 +20,7 @@
         {{-- La carte et son bouton de permutation, groupés : le bouton
              appartient à la carte, il la suit quelle que soit la largeur. --}}
         <div class="db-carte__visuel">
-            <x-pvc-card :profile="$profile" size="md" />
+            <x-card-duo :profile="$profile" />
         </div>
 
         <div class="db-carte__cote">

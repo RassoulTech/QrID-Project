@@ -158,7 +158,7 @@
                 <h2 class="db-card__titre">Aperçu</h2>
 
                 <div class="db-carte__visuel">
-                    <x-pvc-card :profile="$profile" size="sm" />
+                    <x-card-duo :profile="$profile" />
                 </div>
             </section>
         </aside>

@@ -121,12 +121,12 @@
                                  portent seuls l'information, et c'est le
                                  bouton radio qui est annoncé. --}}
                             <span class="varcard__faces" aria-hidden="true"
-                                  style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }};--pvc-relief:{{ $variante->relief() }}">
+                                  style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }};--pvc-relief:{{ $variante->relief() }};--pvc-chevron:{{ $variante->accent() }};--pvc-onde:{{ $variante->accent() }}">
                                 <span class="varcard__face">
-                                    <x-pvc-card-face-recto :profile="$apercuProfil" :variante="$variante" />
+                                    <x-card face="recto" :profile="$apercuProfil" :variant="$variante->carte()" />
                                 </span>
                                 <span class="varcard__face">
-                                    <x-pvc-card-face-verso :variante="$variante" />
+                                    <x-card face="verso" :profile="$apercuProfil" :variant="$variante->carte()" />
                                 </span>
                             </span>
 

@@ -27,7 +27,7 @@
         </p>
 
         <div class="preview__stage">
-            <x-pvc-card :profile="$profile" size="lg" class="mx-auto" />
+            <x-card-duo :profile="$profile" class="mx-auto" />
         </div>
 
         {{-- Le lien, copiable. Champ readonly : sans JavaScript il reste
