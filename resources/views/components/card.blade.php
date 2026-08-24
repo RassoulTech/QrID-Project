@@ -121,10 +121,16 @@
                      qu'on ait rien lu, que ce morceau de plastique mène
                      quelque part — la convention des cartes de paiement. --}}
                 <svg class="nfc" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2.6" stroke-linecap="round" aria-hidden="true">
-                    <path d="M3.5 12.5a12 12 0 0 1 17 0"/>
-                    <path d="M7 16a7 7 0 0 1 10 0"/>
-                    <path d="M10.5 19.5a2.2 2.2 0 0 1 3 0"/>
+                     stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+                    {{-- LE GLYPHE EST CELUI DU WIFI : trois arcs concentriques
+                         ET LE POINT D'ORIGINE. Le point n'est pas un détail —
+                         c'est lui qui distingue le WiFi d'un simple indicateur
+                         de réseau, et sans lui les trois arcs se lisaient comme
+                         une barre de signal couchée. --}}
+                    <path d="M2 9.2a15.5 15.5 0 0 1 20 0"/>
+                    <path d="M5.4 13a10.5 10.5 0 0 1 13.2 0"/>
+                    <path d="M8.8 16.8a5.5 5.5 0 0 1 6.4 0"/>
+                    <circle cx="12" cy="20.2" r="1.35" fill="currentColor" stroke="none"/>
                 </svg>
 
                 {{-- Le QR du recto mène au PROFIL du porteur. Deux codes, deux
