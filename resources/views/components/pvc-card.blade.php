@@ -49,7 +49,7 @@
 
 <div {{ $attributes->merge(['class' => 'pvc pvc--'.$size.' pvc--'.$layout.' pvc--'.mb_strtolower($variante->name)]) }}
      @if ($flip) data-pvc @endif
-     style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }}">
+     style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }};--pvc-relief:{{ $variante->relief() }}">
 
     <div class="pvc__scene">
         {{-- Le verso ne reçoit AUCUNE donnée de profil : il est rigoureusement

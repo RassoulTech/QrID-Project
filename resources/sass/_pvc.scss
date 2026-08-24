@@ -105,10 +105,34 @@
    | contour sur un fond clair ; ici elle devient un filet vert très pâle,
    | qui la pose.
    */
-  box-shadow:
-    0 3px 6px rgba(10,31,26,.22),
-    0 22px 46px rgba(10,31,26,.28),
-    inset 0 0 0 1px color-mix(in srgb, var(--pvc-encre) 16%, transparent);
+  /*
+   | ═══════════════════════════════════════════════════════════════════
+   | L'OMBRE SUGGÈRE UN APPUI, ELLE NE TEINTE PAS LA CARTE
+   | ═══════════════════════════════════════════════════════════════════
+   | Elle valait .22 et .28 d'opacité sur 46px de diffusion. Sur la carte
+   | BLANCHE, cela grisait visiblement les angles : le fond cessait d'être
+   | blanc uni du centre jusqu'aux bords, et le QR perdait du contraste
+   | dans sa zone de silence — la seule chose qu'une ombre n'a pas le droit
+   | de faire sur cette carte.
+   |
+   | Ce qui reste : un décalage vertical MINIME, une diffusion large, une
+   | opacité très basse. Assez pour poser l'objet, pas assez pour le salir.
+   |
+   | L'ARÊTE INTERNE EST REMPLACÉE PAR UNE BORDURE. Un inset assombrit le
+   | pourtour par l'intérieur — c'est un vignettage, précisément ce qu'on
+   | veut supprimer. Une bordure de 1px se pose SUR le bord et n'entre
+   | jamais dans la carte. Elle est tirée de l'encre : filet vert très pâle
+   | sur la carte blanche, filet clair sur la verte.
+   */
+  border:1px solid color-mix(in srgb, var(--pvc-encre) 14%, transparent);
+  box-shadow:0 2px 18px rgba(10,31,26,.10);
+}
+
+// EN THÈME SOMBRE, L'OMBRE NE SERT PLUS À RIEN : une ombre noire sur un fond
+// noir ne se voit pas. C'est la bordure qui détache la carte, et elle suffit.
+.theme-dark .pvc__face{
+  box-shadow:none;
+  border-color:color-mix(in srgb, var(--pvc-encre) 22%, transparent);
 }
 
 // Reflet oblique : ce qui donne l'impression du plastique.
@@ -122,8 +146,11 @@
   // z-index 3 : le reflet traverse TOUT. C'est ce qui donne l'unité de
   // surface d'une carte plastique.
   z-index:3;
+  // QUASI IMPERCEPTIBLE, et volontairement. À .14 il dessinait une diagonale
+  // claire en travers de la carte blanche, qu'on lisait comme une salissure
+  // plutôt que comme une lumière.
   background:linear-gradient(102deg,
-    transparent 38%, rgba($blanc,.14) 47%, rgba($blanc,.03) 54%, transparent 62%);
+    transparent 40%, rgba($blanc,.05) 48%, rgba($blanc,.01) 54%, transparent 60%);
   pointer-events:none;
 
   // Il SUIT le mouvement, légèrement et en retard sur lui. Un reflet fixe
@@ -283,6 +310,23 @@
   position:absolute;
   inset:0;
   pointer-events:none;
+  /*
+   | ═══════════════════════════════════════════════════════════════════
+   | PLUS AUCUN NOIR, ET RIEN DU TOUT SUR LA CARTE BLANCHE
+   | ═══════════════════════════════════════════════════════════════════
+   | Deux des six couches étaient des dégradés de noir pur, à 14 % et 10 %
+   | d'opacité, posés dans les angles HAUTS. Sur la carte verte, ils creusaient le
+   | fond. Sur la carte BLANCHE, ils y peignaient deux nuages gris —
+   | précisément dans les coins, là où l'œil lit le bord de l'objet, et
+   | juste à côté de la zone de silence du QR.
+   |
+   | Ils sont retirés. Les halos restants sont tirés de l'encre et ne
+   | s'affichent que si la variante déclare du relief : --pvc-relief vaut
+   | 1 sur la verte et 0 sur la blanche. Une carte blanche est blanche du
+   | centre jusqu'aux bords ; c'est sa bordure qui la détache, pas un
+   | dégradé.
+   */
+  opacity:var(--pvc-relief, 0);
   background:
     radial-gradient(38% 52% at 18% 76%,
       color-mix(in srgb, var(--pvc-encre) 9%, transparent) 0%, transparent 68%),
@@ -291,11 +335,7 @@
     radial-gradient(46% 58% at 88% 62%,
       color-mix(in srgb, var(--pvc-encre) 6%, transparent) 0%, transparent 70%),
     radial-gradient(26% 34% at 40% 92%,
-      color-mix(in srgb, var(--pvc-encre) 5%, transparent) 0%, transparent 62%),
-    radial-gradient(54% 42% at 6% 12%,
-      color-mix(in srgb, #000 14%, transparent) 0%, transparent 66%),
-    radial-gradient(34% 46% at 96% 4%,
-      color-mix(in srgb, #000 10%, transparent) 0%, transparent 62%);
+      color-mix(in srgb, var(--pvc-encre) 5%, transparent) 0%, transparent 62%);
 }
 
 // -----------------------------------------------------------------------------
@@ -574,12 +614,10 @@
     &.is-flipped .pvc__face--recto{transform:rotateY(-182deg) rotateX(1deg) translateY(-4px)}
     &.is-flipped .pvc__face--verso{transform:rotateY(-2deg) rotateX(1deg) translateY(-4px)}
 
-    // L'ombre s'allonge : la carte s'est éloignée de la surface.
+    // L'ombre s'allonge un peu : la carte s'est éloignée de la surface.
+    // Elle reste très pâle — au survol comme au repos, elle ne teinte pas.
     .pvc__face{
-      box-shadow:
-        0 34px 60px rgba(10,31,26,.34),
-        0 8px 18px rgba(10,31,26,.20),
-        inset 0 0 0 1px color-mix(in srgb, var(--pvc-encre) 22%, transparent);
+      box-shadow:0 10px 30px rgba(10,31,26,.14);
     }
   }
 
@@ -825,8 +863,30 @@
 // flux, s'est mis à occuper la première colonne, la zone de contenu a reçu
 // la colonne étroite, et la colonne verticale a débordé hors du cadre. La
 // carte se lisait à l'envers, contenu tassé à droite sur un tiers.
-.pvc__face--recto > *:not(.pvc__bande):not(.pvc__reflet):not(.pvc__visuel),
-.pvc__face--verso > *:not(.pvc__bande):not(.pvc__reflet):not(.pvc__visuel){position:relative;z-index:2}
+/*
+ | ═══════════════════════════════════════════════════════════════════════
+ | :where() — ET C'EST TOUTE LA CORRECTION DU QR
+ | ═══════════════════════════════════════════════════════════════════════
+ | Cette règle donne aux enfants de la face un contexte d'empilement, pour
+ | qu'ils passent au-dessus du fond. Écrite en sélecteurs ordinaires, elle
+ | pèse (0,2,1) de spécificité — plus que « .pvc__v-qr » qui n'en pèse que
+ | (0,1,0). Son « position:relative » ÉCRASAIT donc le « position:absolute »
+ | de chaque bloc du verso.
+ |
+ | Conséquence exacte : le QR, le bloc de marque et le pied cessaient d'être
+ | positionnés et retombaient dans le flux, les uns sous les autres. Le QR
+ | descendait sous l'accroche et venait chevaucher la ligne du bas — ce qui
+ | se voyait à l'écran sans qu'aucune de leurs déclarations ne soit fausse.
+ |
+ | :where() met la spécificité de son contenu à ZÉRO. La règle continue de
+ | s'appliquer par défaut, et la moindre déclaration d'un composant la
+ | reprend. C'est exactement ce qu'on veut d'une règle de fond.
+ */
+:where(.pvc__face--recto, .pvc__face--verso)
+  > :where(:not(.pvc__bande):not(.pvc__reflet):not(.pvc__visuel)){
+  position:relative;
+  z-index:2;
+}
 
 // UNE FINE BORDURE détache la carte blanche du fond, en thème clair comme en
 // thème sombre. Sans elle, une carte blanche posée sur une surface claire

@@ -121,7 +121,7 @@
                                  portent seuls l'information, et c'est le
                                  bouton radio qui est annoncé. --}}
                             <span class="varcard__faces" aria-hidden="true"
-                                  style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }}">
+                                  style="--pvc-fond:{{ $variante->fond() }};--pvc-encre:{{ $variante->encre() }};--pvc-relief:{{ $variante->relief() }}">
                                 <span class="varcard__face">
                                     <x-pvc-card-face-recto :profile="$apercuProfil" :variante="$variante" />
                                 </span>

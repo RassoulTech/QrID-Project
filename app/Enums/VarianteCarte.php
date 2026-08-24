@@ -82,6 +82,25 @@ enum VarianteCarte: string
     }
 
     /** Couleur de fond de la carte. Identique à la valeur stockée. */
+    /**
+     * L'INTENSITÉ DU RELIEF DE FOND — 1 sur la verte, 0 sur la blanche.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI LA CARTE BLANCHE N'EN A PAS
+     * ═══════════════════════════════════════════════════════════════════
+     * Les halos de fond donnent du volume à un aplat vert profond : sans
+     * eux, la carte verte est plate. Sur un fond BLANC, les mêmes halos
+     * deviennent des taches grises — et dans les angles, exactement là où
+     * l'œil lit le bord de l'objet, ils se voient comme une salissure.
+     *
+     * Une carte blanche est blanche. Du centre jusqu'aux bords. C'est la
+     * bordure qui la détache du fond, pas un dégradé.
+     */
+    public function relief(): int
+    {
+        return $this === self::Verte ? 1 : 0;
+    }
+
     public function fond(): string
     {
         return $this->value;

@@ -465,6 +465,36 @@ class CardPresentationTest extends TestCase
     }
 
     /**
+     * LA RÈGLE DE FOND NE PEUT PAS ÉCRASER LE POSITIONNEMENT DES BLOCS.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * LE DÉFAUT QUE CE TEST GARDE FERMÉ
+     * ═══════════════════════════════════════════════════════════════════
+     * Une règle donne aux enfants de la face un contexte d'empilement. Écrite
+     * en sélecteurs ordinaires, elle pèse (0,2,1) — plus que « .pvc__v-qr »
+     * qui n'en pèse que (0,1,0). Son « position:relative » écrasait donc le
+     * « position:absolute » de chaque bloc du verso : le QR, la marque et le
+     * pied retombaient dans le flux, les uns sous les autres, et le QR venait
+     * chevaucher la ligne du bas.
+     *
+     * Aucune de leurs déclarations n'était fausse. C'est la spécificité qui
+     * décidait — et cela ne se voit qu'à l'écran.
+     *
+     * :where() met la spécificité de son contenu à zéro. Le test vérifie
+     * qu'elle y reste.
+     */
+    public function test_the_stacking_rule_cannot_override_positioning(): void
+    {
+        $css = $this->pvc();
+
+        $this->assertMatchesRegularExpression(
+            '/:where\([^)]*pvc__face--verso[^)]*\)[^{]*\{[^}]*position:relative/s',
+            $css,
+            "La règle d'empilement a repris de la spécificité : elle écrasera le placement du QR."
+        );
+    }
+
+    /**
      * LES DÉCALAGES DU VERSO PARTENT DE ZÉRO.
      *
      * Un élément en position absolue se place par rapport à la boîte de
@@ -508,25 +538,84 @@ class CardPresentationTest extends TestCase
     // =======================================================================
 
     /**
-     * DEUX OMBRES, PAS UNE.
+     * L'OMBRE SUGGÈRE UN APPUI, ELLE NE TEINTE PAS LA CARTE.
      *
-     * Une courte et dense marque le CONTACT avec la surface ; une longue et
-     * diffuse marque la lumière ambiante. Une ombre unique, quelle que soit sa
-     * qualité, donne toujours l'impression d'un autocollant : l'œil cherche le
-     * point de contact et ne le trouve pas.
+     * ═══════════════════════════════════════════════════════════════════
+     * CE TEST DEMANDAIT L'INVERSE, ET IL AVAIT TORT
+     * ═══════════════════════════════════════════════════════════════════
+     * Il exigeait TROIS couches d'ombre — contact, ambiante, arête interne —
+     * au nom de l'épaisseur de l'objet. Sur la carte VERTE cela fonctionnait.
+     * Sur la carte BLANCHE, les mêmes couches grisaient les angles : le fond
+     * cessait d'être blanc uni jusqu'aux bords, et le QR perdait du contraste
+     * dans sa zone de silence.
+     *
+     * Une carte blanche est blanche. Ce qui la détache d'un fond clair est sa
+     * BORDURE, pas une ombre appuyée — et une bordure, contrairement à un
+     * inset, se pose sur le bord sans entrer dans la carte.
      */
-    public function test_the_card_casts_a_contact_shadow_and_an_ambient_one(): void
+    public function test_the_card_shadow_stays_light_and_does_not_tint_it(): void
     {
-        preg_match('/\.pvc__face\{.*?box-shadow:(.*?);/s', $this->pvc(), $trouve);
+        $css = $this->pvc();
 
-        $this->assertNotEmpty($trouve, 'L\'ombre de la carte est introuvable.');
+        preg_match('/\.pvc__face\{.*?box-shadow:(.*?);/s', $css, $trouve);
 
-        // Trois couches : contact, ambiante, arête. Deux suffiraient à
-        // « avoir une ombre » — c'est la troisième qui fait l'objet.
-        $this->assertGreaterThanOrEqual(
-            3,
-            substr_count($trouve[1], 'rgba') + substr_count($trouve[1], 'color-mix'),
-            'La carte a perdu une de ses trois couches d\'ombre.'
+        $this->assertNotEmpty($trouve, "L'ombre de la carte est introuvable.");
+
+        // AUCUN INSET : un inset assombrit le pourtour par l'intérieur, ce qui
+        // est un vignettage — précisément ce qu'on veut interdire ici.
+        $this->assertStringNotContainsString(
+            'inset',
+            $trouve[1],
+            "L'ombre porte un inset : elle assombrira le pourtour de la carte blanche."
+        );
+
+        // L'opacité reste basse. Au-delà, les angles de la carte blanche
+        // commencent à se voir.
+        preg_match_all('/rgba\([^)]*?,\s*\.(\d+)\)/', $trouve[1], $opacites);
+
+        foreach ($opacites[1] as $centiemes) {
+            $this->assertLessThanOrEqual(
+                12,
+                (int) $centiemes,
+                "Une couche d'ombre dépasse 12 % d'opacité : elle grisera la carte blanche."
+            );
+        }
+
+        // Et c'est bien une BORDURE qui détache la carte.
+        $this->assertMatchesRegularExpression(
+            '/\.pvc__face\{[^}]*border:1px solid/s',
+            $css,
+            'La bordure a disparu : la carte blanche flottera sans contour sur un fond clair.'
+        );
+    }
+
+    /**
+     * LE FOND DE LA CARTE NE CONTIENT AUCUN NOIR.
+     *
+     * Deux des six couches du relief étaient des dégradés de #000 à 14 % et
+     * 10 %, posés dans les angles HAUTS. Sur la carte verte, ils creusaient le
+     * fond. Sur la BLANCHE, ils y peignaient deux nuages gris — dans les coins,
+     * là où l'œil lit le bord de l'objet, et juste à côté du QR.
+     *
+     * Le relief restant est tiré de l'encre et ne s'affiche que si la variante
+     * le déclare : --pvc-relief vaut 1 sur la verte et 0 sur la blanche.
+     */
+    public function test_the_card_background_holds_no_black(): void
+    {
+        preg_match('/\.pvc__visuel\{(.*?)\}/s', $this->pvc(), $trouve);
+
+        $this->assertNotEmpty($trouve, 'Le relief de fond est introuvable.');
+
+        $this->assertStringNotContainsString(
+            '#000',
+            $trouve[1],
+            'Le relief contient du noir : il grisera les angles de la carte blanche.'
+        );
+
+        $this->assertStringContainsString(
+            'var(--pvc-relief',
+            $trouve[1],
+            "Le relief n'est plus lié à la variante : il s'appliquera aussi à la carte blanche."
         );
     }
 
