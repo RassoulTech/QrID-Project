@@ -55,6 +55,33 @@ Schedule::command('app:agreger-statistiques --purger')
     ->timezone('Africa/Dakar')
     ->withoutOverlapping();
 
+/*
+ | LA SAUVEGARDE — hebdomadaire, le dimanche à 04:00.
+ |
+ | Elle passe APRÈS l'agrégation et la purge : sauvegarder avant reviendrait
+ | à conserver chaque semaine des millions d'événements bruts qu'on
+ | s'apprête à supprimer.
+ |
+ | Hebdomadaire et non quotidienne : Aiven garde déjà des sauvegardes
+ | quotidiennes. Celle-ci est le filet du jour où le compte Aiven lui-même
+ | devient inaccessible, et ce risque-là ne se matérialise pas en un jour.
+ */
+Schedule::command('app:sauvegarder')
+    ->weeklyOn(0, '04:00')
+    ->timezone('Africa/Dakar')
+    ->withoutOverlapping();
+
+/*
+ | LES PAIEMENTS RESTÉS EN ATTENTE — tous les matins.
+ |
+ | Une ligne `pending` de plus de deux jours signifie soit un abandon, soit
+ | quelqu'un qui a payé et attend un service. Le second cas ne se voit pas
+ | tout seul : il faut aller le chercher.
+ */
+Schedule::command('app:reconcilier-paiements')
+    ->dailyAt('08:45')
+    ->timezone('Africa/Dakar');
+
 Schedule::command('profiles:remind')->dailyAt('09:00')->timezone('Africa/Dakar');
 Schedule::command('subscriptions:notify')->dailyAt('09:15')->timezone('Africa/Dakar');
 

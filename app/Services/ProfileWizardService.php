@@ -54,6 +54,40 @@ class ProfileWizardService
      */
     private const COVER_WIDTH = 840;
 
+    /**
+     * LA VIGNETTE — pour les listes d'administration.
+     *
+     * Une liste de cent clients affichait cent images de 840px de large,
+     * réduites à cent pixels par le navigateur. Le client paie le
+     * téléchargement, l'administrateur attend, et personne ne voit la
+     * différence : c'est exactement le genre de dépense qui ne se remarque
+     * que sur la facture de bande passante.
+     */
+    private const COVER_VIGNETTE = 240;
+
+    /**
+     * LE FORMAT DE SORTIE — WebP quand GD sait l'écrire.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI PAS TOUJOURS
+     * ═══════════════════════════════════════════════════════════════════
+     * WebP pèse 25 à 35 % de moins que JPEG à qualité perçue égale. Sur une
+     * page ouverte en 3G après un scan, c'est une seconde de moins.
+     *
+     * Mais imagewebp() n'existe que si GD a été compilé avec. C'est le cas
+     * de notre image Docker, ce n'est pas garanti d'une machine à l'autre —
+     * et un service qui suppose une extension présente échoue au moment
+     * précis où on ne peut plus rien y faire.
+     *
+     * On teste donc, et on retombe sur JPEG. Le nom du fichier suit le
+     * format réellement produit : servir un .webp qui contient du JPEG
+     * ferait échouer le décodage sur les navigateurs stricts.
+     */
+    private function formatImage(): string
+    {
+        return function_exists('imagewebp') ? 'webp' : 'jpg';
+    }
+
     /** Réseaux proposés. Liste fermée : aucune URL arbitraire de plateforme. */
     public const PLATFORMS = [
         'linkedin' => 'LinkedIn',
@@ -398,14 +432,52 @@ class ProfileWizardService
     {
         if ($ancienne = $this->get('data.cover_path')) {
             Storage::disk('public')->delete($ancienne);
+            Storage::disk('public')->delete($this->cheminVignette($ancienne));
         }
 
-        $chemin = 'couvertures/'.Str::uuid()->toString().'.jpg';
-        $octets = $this->toBannerJpeg($file);
+        $format = $this->formatImage();
+        $identifiant = Str::uuid()->toString();
+        $chemin = "couvertures/{$identifiant}.{$format}";
+
+        $octets = $this->redimensionner($file, self::COVER_WIDTH, $format);
 
         Storage::disk('public')->put($chemin, $octets);
 
+        /*
+         | LA VIGNETTE EST ÉCRITE DANS LA FOULÉE, jamais à la demande.
+         |
+         | La produire au premier affichage ferait payer la première visite
+         | de chaque liste — et sur un disque éphémère, cette « première
+         | visite » revient à chaque déploiement. Ici elle coûte une fois,
+         | au dépôt, pendant que le client attend déjà.
+         |
+         | Son échec n'empêche RIEN : sans vignette, les listes affichent
+         | l'image pleine, ce qui est seulement plus lourd.
+         */
+        try {
+            Storage::disk('public')->put(
+                $this->cheminVignette($chemin),
+                $this->redimensionner($file, self::COVER_VIGNETTE, $format)
+            );
+        } catch (\Throwable $e) {
+            Log::warning('Vignette non produite', ['chemin' => $chemin, 'erreur' => $e->getMessage()]);
+        }
+
         return ['chemin' => $chemin, 'octets' => $this->octetsConservables($octets, $chemin)];
+    }
+
+    /**
+     * Le chemin de la vignette, déduit de celui de l'image.
+     *
+     * Un suffixe plutôt qu'une colonne : une colonne de plus se désynchronise
+     * du fichier au premier bug de suppression, alors qu'un chemin déduit ne
+     * peut pas mentir.
+     */
+    public function cheminVignette(string $chemin): string
+    {
+        $extension = pathinfo($chemin, PATHINFO_EXTENSION);
+
+        return preg_replace('/\.'.preg_quote($extension, '/').'$/', '', $chemin)."-mini.{$extension}";
     }
 
     /**
@@ -415,7 +487,14 @@ class ProfileWizardService
      * rend le fichier d'origine. Une couverture non redimensionnée vaut mieux
      * qu'une erreur 500 au milieu du parcours de création.
      */
-    private function toBannerJpeg(UploadedFile $file): string
+    /**
+     * Ramène l'image à une largeur donnée et l'encode au format demandé.
+     *
+     * Comme pour le portrait : si GD manque ou si l'image est indécodable, on
+     * rend le fichier d'origine. Une couverture non redimensionnée vaut mieux
+     * qu'une erreur 500 au milieu du parcours de création.
+     */
+    private function redimensionner(UploadedFile $file, int $largeurCible, string $format): string
     {
         if (! function_exists('imagecreatetruecolor')) {
             return (string) file_get_contents($file->getRealPath());
@@ -432,7 +511,7 @@ class ProfileWizardService
 
         // Une image déjà plus étroite n'est jamais AGRANDIE : on ne fabrique
         // pas de la définition qui n'existe pas, on la rendrait juste floue.
-        $cible = min(self::COVER_WIDTH, $largeur);
+        $cible = min($largeurCible, $largeur);
         $cibleHauteur = max(1, (int) round($hauteur * $cible / $largeur));
 
         $toile = imagecreatetruecolor($cible, $cibleHauteur);
@@ -444,7 +523,13 @@ class ProfileWizardService
 
         foreach ([82, 70, 60] as $qualite) {
             ob_start();
-            imagejpeg($toile, null, $qualite);
+
+            if ($format === 'webp') {
+                imagewebp($toile, null, $qualite);
+            } else {
+                imagejpeg($toile, null, $qualite);
+            }
+
             $binaire = (string) ob_get_clean();
 
             if (strlen($binaire) <= self::PHOTO_MAX_OCTETS) {

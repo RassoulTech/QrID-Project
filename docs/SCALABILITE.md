@@ -69,33 +69,50 @@ et la table source seulement pour la journée en cours — bornée par définiti
 
 ## Les leviers, dans l'ordre
 
-### 1. Ajouter un worker — *quand les e-mails ralentissent l'inscription*
+### 1. Le worker — *déclaré, pas encore branché*
 
-Aujourd'hui `QUEUE_CONNECTION=sync` : tout part dans la requête HTTP. C'est un
-choix documenté dans `App\Mail\BaseMailable`, et il est juste tant qu'aucun worker
-ne tourne — un e-mail de confirmation qui reste en file signifie « personne ne peut
-créer de compte ».
+`qrid-worker` figure dans `render.yaml`, plan Starter (~7 $/mois).
+`QUEUE_CONNECTION` reste sur **`sync`** jusqu'à ce que le worker soit vu vivant :
+déclarer un service ne le fait pas exister, et sa création peut échouer si aucun
+moyen de paiement n'est enregistré.
 
-**Quand** : dès qu'un envoi SMTP dépasse régulièrement 1 s, ou avant d'ajouter le
-moindre appel réseau au parcours d'inscription.
+**La marche à suivre, dans cet ordre** :
 
-**Comment** : un service `worker` sur Render lançant
-`php artisan queue:work --queue=mail,default,low`, puis basculer
-`QUEUE_CONNECTION` sur `database`. **Dans cet ordre.** L'inverse arrête tous les
-e-mails sans aucun message d'erreur.
+1. appliquer le Blueprint ; le worker est créé et démarre ;
+2. `php artisan app:health` — « Attente la plus longue » doit rester basse ;
+3. **alors seulement**, passer `QUEUE_CONNECTION` à `database`.
 
-**Coût** : un service Render supplémentaire, ~7 $/mois au plan Starter.
+Files, dans l'ordre de priorité : **`mail`** (quelqu'un attend devant son
+écran), **`default`**, **`low`** (personne n'attend). `queue:work` les vide dans
+cet ordre : une seule confirmation d'inscription passe avant cent
+récapitulatifs.
 
-Un worker suffit jusqu'à quelques centaines d'envois par heure. Au-delà, en ajouter
-un second et répartir les files.
+`--tries=3 --backoff=10,60,300` : un SMTP indisponible l'est rarement plus de
+cinq minutes. Au-delà, la tâche part dans `failed_jobs`, où elle reste
+relançable. `--max-time=3600` fait redémarrer le processus toutes les heures —
+le remède le plus simple aux fuites mémoire d'un PHP de longue durée.
+
+**L'ordre de déploiement n'est pas négociable** : le worker doit tourner avant
+que `QUEUE_CONNECTION` passe à `database`. L'inverse met les e-mails dans la
+table `jobs` sans que personne ne les en sorte, et « plus personne ne peut créer
+de compte » sans aucune erreur nulle part. C'est déjà arrivé.
+
+Le filet : `app:health` surveille **l'âge de la plus vieille tâche**, pas leur
+nombre. Zéro tâche peut signifier « tout va bien » comme « rien n'arrive
+jamais » ; dix minutes d'attente ne peuvent signifier qu'une chose.
+
+Un worker suffit jusqu'à quelques centaines d'envois par heure.
 
 ### 2. Augmenter le plan de base — *quand les connexions saturent*
 
-Aiven plafonne les connexions simultanées selon le plan. **Cette limite n'a pas été
-relevée** — elle est à lire dans la console et à noter ici.
+Aiven plafonne les connexions simultanées selon le plan. **`app:health` lit ce
+plafond directement de MySQL** — plus besoin d'aller le chercher dans une console
+au moment où le problème survient, et plus de valeur recopiée à la main qui
+devient fausse au premier changement de plan.
 
-Chaque processus PHP-FPM ouvre une connexion. Avec le `pm.max_children` actuel,
-le plafond côté application est connu ; c'est côté Aiven qu'il manque le chiffre.
+Chaque processus PHP-FPM ouvre une connexion. La commande affiche le pic atteint
+depuis le dernier redémarrage du serveur et alerte au-delà de 80 % du plafond —
+c'est-à-dire avant que la prochaine pointe de trafic ne rende des erreurs.
 
 **Quand** : dès qu'apparaissent des `SQLSTATE[HY000] [1040] Too many connections`.
 
@@ -111,17 +128,26 @@ changer — c'est tout l'intérêt d'être passé par les façades.
 
 **Coût** : ~10 $/mois pour un Key Value Render.
 
-### 4. Externaliser le stockage — *avant toute mise en service réelle*
+### 4. Externaliser le stockage — *préparé, en attente d'identifiants*
 
-`FILESYSTEM_DISK=local` sur un disque **éphémère** : les images de couverture
-disparaissent à chaque déploiement. Le contournement en place — les octets sont
-aussi écrits en base, le disque n'est qu'un cache — fonctionne mais ne passe pas
-l'échelle : ces octets voyagent dans chaque requête qui charge un profil.
+Les cinq variables R2 sont déclarées dans `render.yaml` en `sync: false`. Il
+reste à les saisir dans l'interface de Render, **puis** à passer
+`FILESYSTEM_DISK` de `local` à `s3`. Dans cet ordre : un disque `s3` sans
+identifiants échoue à la première écriture, au milieu d'une création de profil.
 
-**Quand** : avant les premiers clients payants, ou dès que la moyenne des images
-dépasse 200 Ko.
+Les images sont déjà préparées pour ce basculement :
 
-**Comment** : `FILESYSTEM_DISK=s3` vers Cloudflare R2. **Coût** : ~1 $/mois.
+| | Avant | Maintenant |
+|---|---|---|
+| Format | JPEG | **WebP** si GD sait l'écrire, JPEG sinon |
+| Tailles | une (840px) | **deux** — 840px pour la carte, 240px pour les listes |
+
+Mesuré sur une bannière 1600x900 : **34 Ko en JPEG d'origine, 2 Ko en WebP**.
+La vignette est écrite au dépôt, jamais à la demande — la produire au premier
+affichage ferait payer la première visite de chaque liste, et sur un disque
+éphémère cette « première visite » revient à chaque déploiement.
+
+**Coût** : environ 1 $/mois.
 
 ### 5. Un CDN devant les pages publiques — *quand une carte devient virale*
 
@@ -143,9 +169,12 @@ lorsque le porteur le modifie.
 | Latence base | 200 ms |
 | `profile_events` | 5 000 000 lignes |
 | Dernière agrégation | 2 jours de retard |
+| Connexions | 80 % du plafond MySQL |
 | File en attente | 500 tâches |
+| **Attente la plus longue** | **10 min** — le signal d'un worker arrêté |
 | Tâches échouées | 0 |
 | Stockage public | écriture et lecture |
+| Dernier envoi réussi | — |
 
 La commande rend un code de sortie non nul dès qu'un seuil est franchi : une
 surveillance externe peut s'y brancher sans lire la sortie.
@@ -159,8 +188,18 @@ l'avait signalée, parce que rien ne regardait.
 
 ## Ce qui reste ouvert
 
-- **Limite de connexions Aiven** : non relevée.
-- **Webhook de paiement** : il n'y en a pas — le paiement passe par WhatsApp.
-  L'idempotence n'a pas d'objet tant qu'aucune passerelle n'appelle en retour.
-- **Worker** : non déployé. C'est une dépense, donc une décision.
-- **Sauvegardes** : voir `ENVIRONNEMENTS.md`. Aucune restauration testée.
+- **Webhook de paiement** : il n'y en a toujours pas — le paiement passe par
+  WhatsApp, et il n'existe aucune source de vérité automatique à interroger.
+  `app:reconcilier-paiements` comble le vide : tous les matins, il signale les
+  paiements `pending` de plus de deux jours. Il ne décide **rien** — marquer
+  `success` sans preuve donnerait un abonnement à qui n'a pas payé, marquer
+  `failed` effacerait la trace de qui a payé. Un humain tranche.
+
+- **Test de restauration** : jamais effectué. Voir `ENVIRONNEMENTS.md`.
+
+- **Fenêtre de restauration Aiven** : à relever dans leur console.
+
+La **limite de connexions** n'est plus une inconnue : `app:health` la lit
+directement de MySQL (`max_connections`, `Max_used_connections`) et alerte
+au-delà de 80 % du plafond. Aucune valeur n'est recopiée à la main — une valeur
+recopiée devient fausse au premier changement de plan.

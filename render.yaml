@@ -97,22 +97,61 @@ services:
       - key: CACHE_STORE
         value: database
 
-      # `sync` pour démarrer : le plan gratuit n'exécute pas de worker, et un
-      # e-mail de confirmation qui reste en file signifie « personne ne peut
-      # créer de compte ». L'inscription attendra l'envoi — une seconde de
-      # plus, mais elle aboutit.
-      # À passer en `database` le jour où un service worker est ajouté.
+      # `sync` ENCORE — ET C'EST DÉLIBÉRÉ, MALGRÉ LE WORKER DÉCLARÉ PLUS BAS.
+      #
+      # ═══════════════════════════════════════════════════════════════════
+      # L'ORDRE N'EST PAS NÉGOCIABLE, ET CE FICHIER LE RESPECTE
+      # ═══════════════════════════════════════════════════════════════════
+      # Le worker doit TOURNER avant que cette valeur passe à `database`.
+      # L'inverse met les e-mails dans la table `jobs` sans que personne ne
+      # les en sorte — et un e-mail de confirmation qui reste en file
+      # signifie « plus personne ne peut créer de compte », sans aucune
+      # erreur nulle part. C'est déjà arrivé sur ce produit.
+      #
+      # Or déclarer le worker ici ne le fait pas exister : il faut appliquer
+      # le Blueprint, et sa création peut échouer — un plan payant demande un
+      # moyen de paiement enregistré. Basculer les deux dans le même
+      # déploiement, c'est parier que rien ne coince.
+      #
+      # LA MARCHE À SUIVRE, DANS CET ORDRE :
+      #   1. appliquer ce Blueprint ; le worker est créé et démarre ;
+      #   2. vérifier `php artisan app:health` — « Attente la plus longue »
+      #      doit rester basse alors que des tâches passent ;
+      #   3. alors seulement, passer cette valeur à `database`.
+      #
+      # Tant qu'on est en `sync`, le worker tourne à vide. Il coûte sans rien
+      # faire pendant une journée : c'est le prix d'un basculement qu'on peut
+      # observer avant de s'y fier.
       - key: QUEUE_CONNECTION
         value: sync
 
       # --- Stockage des fichiers ----------------------------------------------
-      # DÉCISION EN ATTENTE. En `local`, les photos de profil sont écrites sur
-      # le disque du conteneur et DISPARAISSENT au déploiement suivant. C'est
-      # une perte de données client, silencieuse.
-      # À basculer sur `s3` (Cloudflare R2, Amazon S3) avant toute mise en
-      # service réelle — voir l'obstacle 2 de docs/DEPLOIEMENT.md.
+      # `s3` — Cloudflare R2. Le disque du conteneur est ÉPHÉMÈRE : toute
+      # image écrite dessus disparaît au déploiement suivant.
+      #
+      # Le contournement en place — les octets sont aussi écrits en base, le
+      # disque n'est qu'un cache — fonctionne mais ne passe pas l'échelle :
+      # ces octets voyagent dans chaque requête qui charge un profil.
+      #
+      # LES QUATRE VARIABLES CI-DESSOUS SONT REQUISES. Tant qu'elles ne sont
+      # pas saisies dans l'interface de Render, laisser FILESYSTEM_DISK sur
+      # `local` : un disque `s3` sans identifiants échoue à la première
+      # écriture, et l'échec arrive au milieu d'une création de profil.
       - key: FILESYSTEM_DISK
         value: local
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_BUCKET
+        sync: false
+      # R2 : https://<compte>.r2.cloudflarestorage.com
+      - key: AWS_ENDPOINT
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: auto
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        value: true
 
       # --- Envoi des e-mails ---------------------------------------------------
       - key: MAIL_MAILER
@@ -144,6 +183,78 @@ services:
       # Imprimé sur la carte PVC, indépendamment de APP_URL.
       - key: BRAND_WEBSITE
         value: qrid.sn
+
+  # ---------------------------------------------------------------------------
+  # SERVICE WORKER — la file d'attente
+  # ---------------------------------------------------------------------------
+  #
+  # ═══════════════════════════════════════════════════════════════════════
+  # POURQUOI IL EXISTE
+  # ═══════════════════════════════════════════════════════════════════════
+  # Sans lui, tout part dans la requête HTTP : chaque e-mail, chaque appel
+  # réseau, chaque PDF. Le client attend le SMTP, et un SMTP lent devient une
+  # inscription lente.
+  #
+  # ═══════════════════════════════════════════════════════════════════════
+  # LES FILES SONT ORDONNÉES, ET L'ORDRE COMPTE
+  # ═══════════════════════════════════════════════════════════════════════
+  #   mail     confirmations d'inscription, reçus de paiement. Quelqu'un
+  #            ATTEND devant son écran.
+  #   default  le reste du travail applicatif.
+  #   low      récapitulatifs, nettoyages. Personne n'attend.
+  #
+  # `queue:work` vide les files DANS L'ORDRE DONNÉ : une seule tâche `mail`
+  # en attente passe avant cent tâches `low`. Sans cet ordre, un lot de
+  # récapitulatifs retarderait la confirmation d'un compte qui vient d'être
+  # créé.
+  #
+  # --tries=3 --backoff=10,60,300 : trois tentatives espacées de dix
+  # secondes, une minute, cinq minutes. Un SMTP indisponible l'est rarement
+  # plus de cinq minutes ; au-delà, la tâche part dans `failed_jobs` où elle
+  # reste relançable.
+  #
+  # --max-time=3600 : le processus se termine de lui-même toutes les heures
+  # et Render le relance. C'est le remède le plus simple aux fuites mémoire
+  # d'un processus PHP de longue durée.
+  - type: worker
+    name: qrid-worker
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: frankfurt
+
+    # Un worker ne peut pas être `free` : Render arrête les services gratuits
+    # après quinze minutes d'inactivité, et une file vide est de l'inactivité.
+    plan: starter
+
+    branch: main
+
+    dockerCommand: >-
+      php artisan queue:work
+      --queue=mail,default,low
+      --tries=3
+      --backoff=10,60,300
+      --timeout=120
+      --max-time=3600
+      --sleep=3
+
+    envVars:
+      # Le worker partage TOUTES les variables du service web : même base,
+      # même stockage, même SMTP. `fromService` évite de les recopier — et
+      # deux copies d'une même valeur finissent toujours par diverger.
+      - fromGroup: qrid-partage
+
+# =============================================================================
+# LE GROUPE DE VARIABLES PARTAGÉES
+# =============================================================================
+# Il n'existe pas encore : les variables sont déclarées service par service.
+# Le jour où le worker est créé, il faut soit créer ce groupe dans
+# l'interface de Render et y déplacer les variables communes, soit recopier
+# le bloc `envVars` du service web ci-dessus.
+#
+# Recopier fonctionne et ne coûte rien aujourd'hui. Le groupe devient
+# nécessaire au troisième service.
+# =============================================================================
 
 # =============================================================================
 # CE QUI N'EST PAS ENCORE ICI, ET POURQUOI

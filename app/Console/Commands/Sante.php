@@ -41,6 +41,15 @@ class Sante extends Command
     /** Une file qui dépasse ce seuil n'est plus en retard : elle est bloquée. */
     private const SEUIL_FILE = 500;
 
+    /**
+     * Au-delà, aucun worker ne consomme la file.
+     *
+     * Dix minutes : un worker sain prend une tâche en quelques secondes. Ce
+     * seuil laisse passer un redémarrage de conteneur sans crier, et attrape
+     * une file abandonnée avant qu'un client ne s'en aperçoive.
+     */
+    private const SEUIL_ATTENTE_MINUTES = 10;
+
     public function handle(): int
     {
         $alertes = 0;
@@ -51,6 +60,7 @@ class Sante extends Command
         $this->newLine();
 
         $alertes += $this->base();
+        $alertes += $this->connexions();
         $alertes += $this->tables();
         $alertes += $this->files();
         $alertes += $this->stockage();
@@ -85,6 +95,52 @@ class Sante extends Command
 
             return 1;
         }
+    }
+
+    /**
+     * LA LIMITE DE CONNEXIONS, LUE DEPUIS LA BASE ELLE-MÊME.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * ON NE LA DEMANDE PLUS À L'HÉBERGEUR
+     * ═══════════════════════════════════════════════════════════════════
+     * Le plan Aiven fixe un plafond de connexions simultanées. Il figure
+     * dans leur console — c'est-à-dire dans un endroit que personne ne
+     * consulte au moment où le problème survient, et que le code ne peut
+     * pas lire.
+     *
+     * Or MySQL le connaît : `max_connections` est une variable serveur, et
+     * `Max_used_connections` retient le pic depuis le dernier redémarrage.
+     * Deux requêtes suffisent donc à répondre à la question sans qu'aucune
+     * valeur soit recopiée à la main quelque part — et une valeur recopiée
+     * à la main est une valeur qui devient fausse au premier changement de
+     * plan.
+     *
+     * LE SEUIL EST À 80 % DU PIC. En dessous, on a de la marge ; au-dessus,
+     * la prochaine pointe de trafic rendra des « Too many connections », et
+     * ce message-là arrive toujours au pire moment.
+     */
+    private function connexions(): int
+    {
+        try {
+            $max = (int) DB::selectOne('SHOW VARIABLES LIKE "max_connections"')->Value;
+            $actuelles = (int) DB::selectOne('SHOW STATUS LIKE "Threads_connected"')->Value;
+            $pic = (int) DB::selectOne('SHOW STATUS LIKE "Max_used_connections"')->Value;
+        } catch (\Throwable) {
+            $this->ligne('Connexions', 'illisibles sur ce serveur', false);
+
+            return 1;
+        }
+
+        $part = $max > 0 ? round($pic / $max * 100) : 0;
+        $sain = $part < 80;
+
+        $this->ligne(
+            'Connexions',
+            "{$actuelles} ouverte(s), pic {$pic} sur {$max} ({$part} % du plafond)",
+            $sain
+        );
+
+        return $sain ? 0 : 1;
     }
 
     private function tables(): int
@@ -135,7 +191,45 @@ class Sante extends Command
         $this->ligne('File en attente', "{$enAttente} tâche(s) (seuil ".self::SEUIL_FILE.')', $enAttente < self::SEUIL_FILE);
         $this->ligne('Tâches échouées', (string) $echoues, $echoues === 0);
 
-        return ($enAttente < self::SEUIL_FILE ? 0 : 1) + ($echoues === 0 ? 0 : 1);
+        /*
+         | ═══════════════════════════════════════════════════════════════
+         | L'ÂGE DE LA PLUS VIEILLE TÂCHE — LE VRAI SIGNAL
+         | ═══════════════════════════════════════════════════════════════
+         | Le NOMBRE de tâches en attente ne dit rien : zéro tâche peut
+         | signifier « tout va bien » comme « rien n'arrive jamais », et
+         | cinquante tâches peuvent être une pointe normale.
+         |
+         | L'ÂGE, lui, ne ment pas. Si la plus ancienne attend depuis dix
+         | minutes, c'est qu'aucun worker ne la prend — et c'est exactement
+         | la panne qui a déjà coûté deux parcours au produit : les e-mails
+         | de confirmation partaient dans la table `jobs` et n'en sortaient
+         | jamais, SANS AUCUNE ERREUR nulle part.
+         |
+         | Ce contrôle attrape ce silence en dix minutes au lieu de le
+         | laisser passer jusqu'à cinq cents tâches.
+         */
+        $plusVieille = DB::table('jobs')->min('available_at');
+        $attenteMinutes = $plusVieille
+            ? (int) round((now()->timestamp - (int) $plusVieille) / 60)
+            : 0;
+
+        $fileSaine = $plusVieille === null || $attenteMinutes < self::SEUIL_ATTENTE_MINUTES;
+
+        $this->ligne(
+            'Attente la plus longue',
+            $plusVieille
+                ? "{$attenteMinutes} min (seuil ".self::SEUIL_ATTENTE_MINUTES.' min)'
+                : 'file vide',
+            $fileSaine
+        );
+
+        if (! $fileSaine) {
+            $this->line('       <fg=yellow>Aucun worker ne semble consommer la file. Vérifier le service qrid-worker.</>');
+        }
+
+        return ($enAttente < self::SEUIL_FILE ? 0 : 1)
+            + ($echoues === 0 ? 0 : 1)
+            + ($fileSaine ? 0 : 1);
     }
 
     private function stockage(): int

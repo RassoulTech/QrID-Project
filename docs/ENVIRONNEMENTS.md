@@ -61,28 +61,49 @@ Les seeders de démonstration sont soumis à la même règle : ils ne peuplent q
 
 ## Sauvegarde de la production
 
-**État actuel : les sauvegardes automatiques d'Aiven sont le seul filet.** Aucune
-sauvegarde applicative n'est en place, et aucune restauration n'a jamais été
-testée.
+### Deux filets, chez deux hébergeurs
 
-C'est le trou le plus sérieux de ce document, et il faut le dire plutôt que de
-décrire une procédure qui n'existe pas.
+**Aiven** sauvegarde automatiquement. Mais ces copies vivent chez Aiven, et
+partagent donc le sort du compte : une facture impayée, une suspension, une
+erreur de leur côté, et la base **et** ses sauvegardes disparaissent ensemble.
+Une sauvegarde qui vit au même endroit que la donnée n'est pas une sauvegarde,
+c'est une copie.
 
-### Ce qu'il faut mettre en place
+**`app:sauvegarder`** produit un `mysqldump` et le dépose sur le disque
+applicatif — donc, en production, sur le stockage objet. Deux hébergeurs, deux
+comptes, deux factures.
 
-1. **Vérifier ce qu'Aiven conserve réellement.** Le plan détermine la fenêtre de
-   restauration — souvent 2 jours sur les petits plans, 14 sur les suivants. Cette
-   valeur est à relever dans la console et à noter ici.
+```
+php artisan app:sauvegarder            # dump + rotation sur 8 fichiers
+php artisan app:sauvegarder --garder=4
+```
 
-2. **Une sauvegarde hors Aiven.** Un `mysqldump` hebdomadaire déposé sur un
-   stockage tiers. Une sauvegarde qui vit chez le même hébergeur que la base ne
-   protège pas d'un compte suspendu ou d'une erreur de facturation.
+Planifiée le **dimanche à 04:00**, après l'agrégation et la purge : sauvegarder
+avant reviendrait à conserver chaque semaine des millions d'événements bruts
+qu'on s'apprête à supprimer.
 
-3. **Un test de restauration, écrit et daté.** Une sauvegarde jamais restaurée est
-   une hypothèse, pas une garantie. La procédure : restaurer le dernier dump dans
-   une base locale vide, lancer `php artisan app:health`, vérifier que les
-   comptes, profils et paiements sont là. À refaire tous les trimestres, et à
-   dater ici.
+Le dump utilise `--single-transaction` (aucun verrou sur les tables) et
+`--quick` (ligne à ligne, pas de table entière en mémoire). Le mot de passe
+passe par `MYSQL_PWD`, jamais en argument : un mot de passe en ligne de commande
+est visible de tout le système. Un dump de moins d'un kilo-octet est **refusé** :
+un dump vide qui écrase la rotation ne se découvrirait que le jour de la
+restauration.
+
+### Reste à relever
+
+**La fenêtre de restauration d'Aiven** — souvent 2 jours sur les petits plans,
+14 sur les suivants. À lire dans leur console et à noter ici.
+
+### Le test de restauration
+
+Une sauvegarde jamais restaurée est une hypothèse, pas une garantie.
+
+1. Créer une base locale vide.
+2. `mysql -u root base_test < storage/app/private/sauvegardes/qrid-....sql`
+3. Pointer `.env` dessus, lancer `php artisan app:health`.
+4. Vérifier que comptes, profils et paiements sont là.
+
+À refaire **tous les trimestres**, et à dater ci-dessous.
 
 | Date du test | Dump utilisé | Résultat |
 |---|---|---|
