@@ -28,6 +28,17 @@ use Tests\TestCase;
  * utile, le code de réponse ne dit rien de plus qu'avant. Plusieurs tests
  * ci-dessous existent uniquement pour empêcher qu'on « corrige » ce 404.
  */
+/*
+ | NOTE SUR assertSee ET L'ÉCHAPPEMENT.
+ |
+ | Les phrases de cet écran passent par __(), donc par {{ }}, qui échappe
+ | l'apostrophe en « &#039; ». Les assertions qui les cherchent ont perdu leur
+ | second argument « false » : sans lui, Laravel échappe la valeur attendue de
+ | la même façon, et la comparaison redevient juste.
+ |
+ | Le rendu à l'écran n'a pas bougé d'un pixel — seuls les octets ont changé.
+ | Celles qui gardent « false » cherchent des URL, qui ne s'échappent pas.
+ */
 class InactiveCardTest extends TestCase
 {
     use RefreshDatabase;
@@ -81,7 +92,7 @@ class InactiveCardTest extends TestCase
             ->get(route('profile.public', 'awa-ndiaye'))
             ->assertNotFound();
 
-        $reponse->assertSee('Votre carte n\'est pas encore en ligne', false);
+        $reponse->assertSee('Votre carte n\'est pas encore en ligne');
         $reponse->assertSee('votre QR Code est juste', false);
         $reponse->assertSee(route('profile.preview'), false);
     }
@@ -102,7 +113,7 @@ class InactiveCardTest extends TestCase
             ->get(route('profile.public', 'awa-ndiaye'))
             ->assertNotFound();
 
-        $reponse->assertSee('abonnement n\'est plus actif', false);
+        $reponse->assertSee('abonnement n\'est plus actif');
         $reponse->assertSee(route('abonnement.paiement'), false);
     }
 
@@ -221,7 +232,7 @@ class InactiveCardTest extends TestCase
 
         $reponse->assertDontSee('Awa Ndiaye');
         $reponse->assertDontSee('Ndiaye');
-        $reponse->assertSee('Cette carte n\'est pas active', false);
+        $reponse->assertSee('Cette carte n\'est pas active');
     }
 
     /**
@@ -262,6 +273,6 @@ class InactiveCardTest extends TestCase
         $this->get(route('profile.public', 'awa-ndiaye'))
             ->assertOk()
             ->assertSee('Awa Ndiaye')
-            ->assertDontSee('Cette carte n\'est pas active', false);
+            ->assertDontSee('Cette carte n\'est pas active');
     }
 }

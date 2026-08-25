@@ -13,9 +13,9 @@
      | écrit, qui sert uniquement au rendu des deux faces.
      */
     $apercuProfil = new \App\Models\Profile([
-        'first_name' => $wizard->field('first_name', 'Votre'),
-        'last_name' => $wizard->field('last_name', 'nom'),
-        'job_title' => $wizard->field('job_title', 'Votre fonction'),
+        'first_name' => $wizard->field('first_name', __('profile.wizard.apercu_prenom')),
+        'last_name' => $wizard->field('last_name', __('profile.wizard.apercu_nom')),
+        'job_title' => $wizard->field('job_title', __('profile.wizard.apercu_fonction')),
         'company' => $wizard->field('company'),
         'slug' => auth()->user()?->profile?->slug ?? 'apercu',
     ]);
@@ -24,25 +24,25 @@
     $apercus = ['classique' => '', 'moderne' => ' tpl__mini--moderne', 'minimal' => ' tpl__mini--minimal'];
 @endphp
 
-<x-app-layout title="Créer mon profil — étape 3">
+<x-app-layout :title="__('profile.wizard.titre_3')">
     <x-step-shell
         :step="3"
-        title="Votre style"
-        subtitle="Tout est déjà choisi. Modifiez si vous le souhaitez, ou terminez."
+        :title="__('profile.wizard.entete_3')"
+        :subtitle="__('profile.wizard.sous_3')"
         :action="route('profile.store.step3')"
         :back="route('profile.create.step2')"
-        submit="Terminer"
+        :submit="__('profile.wizard.terminer')"
     >
         {{-- MODÈLES ---------------------------------------------------------
              Trois boutons radio habillés en cartes. Fonctionne au clavier et
              sans JavaScript : ce sont de vrais champs de formulaire. --}}
         <div class="f">
-            <span class="f__label">Modèle</span>
+            <span class="f__label">{{ __('profile.wizard.modele') }}</span>
 
             {{-- La teinte des miniatures vit dans une variable CSS : le rendu
                  initial est correct sans JavaScript, le module ne fait que la
                  mettre à jour au clic. --}}
-            <div class="tpl-grid" role="radiogroup" aria-label="Modèle de profil"
+            <div class="tpl-grid" role="radiogroup" aria-label="{{ __('profile.wizard.modele_aria') }}"
                  data-color-target style="--tpl-color:{{ \App\Enums\VarianteCarte::DEFAUT->value }}">
                 @foreach ($templates as $template)
                     <label class="tpl">
@@ -93,9 +93,9 @@
              De vrais boutons radio, habillés en cartes : cela fonctionne au
              clavier et sans JavaScript. --}}
         <div class="f">
-            <span class="f__label">Votre carte</span>
+            <span class="f__label">{{ __('profile.wizard.carte') }}</span>
 
-            <div class="varcard-grid" role="radiogroup" aria-label="Variante de carte">
+            <div class="varcard-grid" role="radiogroup" aria-label="{{ __('profile.wizard.carte_aria') }}">
                 @foreach ($variantes as $variante)
                     <label class="varcard">
                         <input type="radio" name="primary_color" value="{{ $variante->value }}"

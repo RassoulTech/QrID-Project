@@ -7,15 +7,15 @@
   traitement de la photo et la gestion des réseaux — pour le même résultat,
   avec deux fois plus de surface de bugs.
 --}}
-<x-app-layout title="Mon profil">
+<x-app-layout :title="__('profile.fiche.titre')">
 
     <div class="db-tete">
         <div>
-            <h1 class="db-tete__titre">Mon profil</h1>
-            <p class="db-tete__sous">Les informations que verront vos contacts.</p>
+            <h1 class="db-tete__titre">{{ __('profile.fiche.titre') }}</h1>
+            <p class="db-tete__sous">{{ __('profile.fiche.sous') }}</p>
         </div>
 
-        <x-button :href="route('profile.edit')" size="sm">Modifier mes informations</x-button>
+        <x-button :href="route('profile.edit')" size="sm">{{ __('profile.fiche.modifier') }}</x-button>
     </div>
 
     <div class="db-grille">
@@ -24,21 +24,21 @@
             {{-- ===================== IDENTITÉ ===================== --}}
             <section class="db-card">
                 <div class="db-card__tete">
-                    <h2 class="db-card__titre">Identité</h2>
+                    <h2 class="db-card__titre">{{ __('profile.fiche.identite') }}</h2>
                     <x-badge :status="$profile->is_active ? 'published' : 'draft'" />
                 </div>
 
                 <dl class="fiche">
                     <div class="fiche__ligne">
-                        <dt>Nom complet</dt>
+                        <dt>{{ __('profile.fiche.nom_complet') }}</dt>
                         <dd>{{ $profile->full_name }}</dd>
                     </div>
                     <div class="fiche__ligne">
-                        <dt>Fonction</dt>
+                        <dt>{{ __('common.champs.fonction') }}</dt>
                         <dd>{{ $profile->job_title }}</dd>
                     </div>
                     <div class="fiche__ligne">
-                        <dt>Entreprise</dt>
+                        <dt>{{ __('common.champs.entreprise') }}</dt>
                         <dd>{{ $profile->company ?: '—' }}</dd>
                     </div>
                 </dl>
@@ -46,27 +46,27 @@
 
             {{-- ===================== COORDONNÉES ===================== --}}
             <section class="db-card">
-                <h2 class="db-card__titre">Coordonnées</h2>
+                <h2 class="db-card__titre">{{ __('profile.fiche.coordonnees') }}</h2>
 
                 <dl class="fiche">
                     <div class="fiche__ligne">
-                        <dt>Téléphone</dt>
+                        <dt>{{ __('common.champs.telephone') }}</dt>
                         <dd>{{ $profile->formatted_phone ?: '—' }}</dd>
                     </div>
                     <div class="fiche__ligne">
-                        <dt>WhatsApp</dt>
+                        <dt>{{ __('profile.fiche.whatsapp') }}</dt>
                         <dd>{{ $profile->whatsapp ? \App\Models\Profile::formatSenegalPhone($profile->whatsapp) : '—' }}</dd>
                     </div>
                     <div class="fiche__ligne">
-                        <dt>E-mail public</dt>
+                        <dt>{{ __('profile.fiche.email_public') }}</dt>
                         <dd>{{ $profile->public_email ?: '—' }}</dd>
                     </div>
                     <div class="fiche__ligne">
-                        <dt>Site web</dt>
+                        <dt>{{ __('common.champs.site_web') }}</dt>
                         <dd>{{ $profile->website ?: '—' }}</dd>
                     </div>
                     <div class="fiche__ligne">
-                        <dt>Adresse</dt>
+                        <dt>{{ __('common.champs.adresse') }}</dt>
                         <dd>{{ $profile->address ?: '—' }}</dd>
                     </div>
                 </dl>
@@ -74,7 +74,7 @@
 
             {{-- ===================== RÉSEAUX ===================== --}}
             <section class="db-card">
-                <h2 class="db-card__titre">Réseaux sociaux</h2>
+                <h2 class="db-card__titre">{{ __('profile.fiche.reseaux') }}</h2>
 
                 @forelse ($profile->socialLinks as $lien)
                     <div class="visite">
@@ -90,19 +90,18 @@
                     </div>
                 @empty
                     <p class="db-vide__texte db-vide__texte--serre">
-                        Aucun réseau ajouté. Vous pouvez en ajouter jusqu'à six
-                        depuis la modification.
+                        {{ __('profile.fiche.aucun_reseau') }}
                     </p>
                 @endforelse
             </section>
 
             {{-- ===================== APPARENCE ET LIEN ===================== --}}
             <section class="db-card">
-                <h2 class="db-card__titre">Apparence et lien</h2>
+                <h2 class="db-card__titre">{{ __('profile.fiche.apparence') }}</h2>
 
                 <dl class="fiche">
                     <div class="fiche__ligne">
-                        <dt>Modèle</dt>
+                        <dt>{{ __('profile.fiche.modele') }}</dt>
                         <dd>{{ $profile->template?->name ?? '—' }}</dd>
                     </div>
                     {{-- On nomme la variante, on n'affiche plus un code
@@ -110,7 +109,7 @@
                          suggérait que la valeur se règle librement — ce qui
                          n'est plus le cas. --}}
                     <div class="fiche__ligne">
-                        <dt>Carte</dt>
+                        <dt>{{ __('profile.fiche.carte') }}</dt>
                         <dd>
                             <span class="fiche__pastille"
                                   style="background:{{ $profile->variante()->fond() }}" aria-hidden="true"></span>
@@ -120,13 +119,14 @@
                 </dl>
 
                 <label class="board-link mt-3">
-                    <span class="board-link__label">Lien public</span>
+                    <span class="board-link__label">{{ __('dashboard.carte.lien_public') }}</span>
                     <span class="board-link__row">
                         <input type="text" class="board-link__input" readonly
                                id="lienProfil" value="{{ $publicUrl }}"
-                               aria-label="Lien public de votre carte">
+                               aria-label="{{ __('dashboard.carte.lien_aria') }}">
                         <button type="button" class="board-link__copy"
-                                data-copy="lienProfil" data-copy-done="Copié">Copier</button>
+                                data-copy="lienProfil"
+                                data-copy-done="{{ __('dashboard.carte.copie') }}">{{ __('dashboard.carte.copier') }}</button>
                     </span>
                 </label>
 
@@ -138,14 +138,9 @@
                     </svg>
                     <span>
                         @if ($profile->canChangeSlug())
-                            Votre lien peut être modifié <strong>une seule fois</strong>,
-                            depuis la modification. Après changement, les cartes déjà
-                            imprimées et les QR Codes en circulation cesseront de
-                            fonctionner&nbsp;: ils pointeront vers une page introuvable.
+                            {!! __('profile.fiche.lien_modifiable') !!}
                         @else
-                            Votre lien a déjà été modifié une fois&nbsp;: il est
-                            définitif. C'est ce qui garantit que les cartes déjà
-                            imprimées continueront de fonctionner.
+                            {!! __('profile.fiche.lien_definitif') !!}
                         @endif
                     </span>
                 </div>
@@ -155,7 +150,7 @@
         {{-- ===================== APERÇU ===================== --}}
         <aside class="db-rail">
             <section class="db-card">
-                <h2 class="db-card__titre">Aperçu</h2>
+                <h2 class="db-card__titre">{{ __('profile.fiche.apercu') }}</h2>
 
                 <div class="db-carte__visuel">
                     <x-card-duo :profile="$profile" />

@@ -45,7 +45,7 @@
     };
 @endphp
 
-<x-app-layout title="Paiement">
+<x-app-layout :title="__('payment.titre')">
 
     <form method="POST" action="{{ route('abonnement.paiement.store') }}"
           class="checkout" novalidate>
@@ -54,21 +54,22 @@
         {{-- ═══════════════ COLONNE PRINCIPALE ═══════════════ --}}
         <div class="checkout__main">
             <header class="checkout__head">
-                <p class="checkout__kicker">Abonnement</p>
+                <p class="checkout__kicker">{{ __('payment.kicker') }}</p>
 
                 <h1 class="checkout__title">
-                    {{ $renewal ? 'Renouveler mon abonnement' : 'Choisir ma formule' }}
+                    {{ $renewal ? __('payment.entete.renouveler') : __('payment.entete.choisir') }}
                 </h1>
 
                 <p class="checkout__sub">
                     @if ($renewal)
-                        Votre abonnement court jusqu'au
-                        {{ $subscription->ends_at?->translatedFormat('j F Y') }}.
-                        Un renouvellement s'ajoute à ce qui reste dû, il ne le
-                        remplace pas.
+                        {{-- translatedFormat suit la locale posée par le
+                             middleware : « 3 septembre 2026 » devient
+                             « September 3, 2026 » sans rien de plus. --}}
+                        {{ __('payment.entete.sous_renouveler', [
+                            'date' => $subscription->ends_at?->translatedFormat('j F Y'),
+                        ]) }}
                     @else
-                        Votre carte est prête. Choisissez la formule qui vous
-                        convient pour la mettre en ligne.
+                        {{ __('payment.entete.sous_choisir') }}
                     @endif
                 </p>
             </header>
@@ -78,7 +79,7 @@
             <fieldset class="checkout__group">
                 <legend class="checkout__legend">
                     <span class="checkout__step" aria-hidden="true">1</span>
-                    Votre formule
+                    {{ __('payment.formule.legende') }}
                 </legend>
 
                 <div class="plan-grid">
@@ -97,16 +98,21 @@
                                     <span class="plan-card__name">{{ $plan->name }}</span>
 
                                     @if ($remise)
-                                        <span class="plan-card__badge">Économisez {{ $remise }} %</span>
+                                        <span class="plan-card__badge">{{ __('payment.formule.economie', ['pourcent' => $remise]) }}</span>
                                     @endif
                                 </span>
 
                                 <span class="plan-card__price">{{ $plan->formattedPrice() }}</span>
 
                                 <span class="plan-card__meta">
-                                    {{ $plan->periodicite() }} · {{ $plan->duration_days }} jours
+                                    {{ __('payment.formule.duree', [
+                                        'periodicite' => $plan->periodicite(),
+                                        'jours' => $plan->duration_days,
+                                    ]) }}
                                     @if ($parMois)
-                                        <br>soit {{ number_format($parMois, 0, ',', ' ') }} FCFA par mois
+                                        <br>{{ __('payment.formule.par_mois', [
+                                            'montant' => number_format($parMois, 0, ',', ' '),
+                                        ]) }}
                                     @endif
                                 </span>
 
@@ -156,7 +162,7 @@
             <fieldset class="checkout__group" @unless ($paiementDisponible) hidden @endunless>
                 <legend class="checkout__legend">
                     <span class="checkout__step" aria-hidden="true">2</span>
-                    Comment payer
+                    {{ __('payment.moyen.legende') }}
                 </legend>
 
                 <div class="method-grid">
@@ -208,7 +214,7 @@
                      qu'une erreur serveur au seul moment où le client sortait
                      son argent. --}}
                 <div class="checkout__panel">
-                    <h2 class="checkout__panel-title">Paiement à la main, pour l'instant</h2>
+                    <h2 class="checkout__panel-title">{{ __('payment.manuel.titre') }}</h2>
 
                     <ul class="trust">
                         <li class="trust__item">
@@ -220,11 +226,8 @@
                                 </svg>
                             </span>
                             <span>
-                                <strong>Le paiement en ligne n'est pas encore
-                                ouvert.</strong>
-                                Écrivez-nous sur WhatsApp en indiquant la
-                                formule choisie : nous activons votre carte à
-                                la main, dès réception.
+                                <strong>{{ __('payment.manuel.ferme_titre') }}</strong>
+                                {{ __('payment.manuel.ferme_texte') }}
                             </span>
                         </li>
 
@@ -238,15 +241,15 @@
                                 </svg>
                             </span>
                             <span>
-                                <strong>Rien ne vous est débité ici.</strong>
-                                Aucun montant ne transite par cette page.
+                                <strong>{{ __('payment.manuel.aucun_debit_titre') }}</strong>
+                                {{ __('payment.manuel.aucun_debit_texte') }}
                             </span>
                         </li>
                     </ul>
 
                     <x-button :href="$supportWhatsapp" :block="true"
                               target="_blank" rel="noopener">
-                        Écrire sur WhatsApp
+                        {{ __('payment.manuel.whatsapp') }}
                     </x-button>
 
                     @if ($ficheAdmin)
@@ -255,15 +258,15 @@
                              le chemin — trois écrans plus loin, dans une
                              liste où il ne pensait pas se chercher. --}}
                         <a href="{{ $ficheAdmin }}" class="checkout__later">
-                            Vous êtes administrateur — prolonger cet abonnement
+                            {{ __('payment.manuel.admin') }}
                         </a>
                     @endif
 
-                    <a href="{{ route('dashboard') }}" class="checkout__later">Retour à mon espace</a>
+                    <a href="{{ route('dashboard') }}" class="checkout__later">{{ __('payment.manuel.retour') }}</a>
                 </div>
             @else
             <div class="checkout__panel">
-                <h2 class="checkout__panel-title">Avant de payer</h2>
+                <h2 class="checkout__panel-title">{{ __('payment.confiance.titre') }}</h2>
 
                 <ul class="trust">
                     <li class="trust__item">
@@ -276,9 +279,8 @@
                             </svg>
                         </span>
                         <span>
-                            <strong>Aucun débit immédiat.</strong>
-                            La somme n'est prélevée qu'après votre confirmation
-                            chez l'opérateur.
+                            <strong>{{ __('payment.confiance.debit_titre') }}</strong>
+                            {{ __('payment.confiance.debit_texte') }}
                         </span>
                     </li>
 
@@ -294,10 +296,8 @@
                             </svg>
                         </span>
                         <span>
-                            <strong>Votre lien et votre QR Code ne changent
-                            jamais.</strong>
-                            Les cartes déjà distribuées continueront de
-                            fonctionner.
+                            <strong>{{ __('payment.confiance.lien_titre') }}</strong>
+                            {{ __('payment.confiance.lien_texte') }}
                         </span>
                     </li>
 
@@ -310,18 +310,17 @@
                             </svg>
                         </span>
                         <span>
-                            <strong>En ligne aussitôt.</strong>
-                            Votre carte devient publique dès le paiement
-                            confirmé.
+                            <strong>{{ __('payment.confiance.ligne_titre') }}</strong>
+                            {{ __('payment.confiance.ligne_texte') }}
                         </span>
                     </li>
                 </ul>
 
                 <x-button :block="true">
-                    {{ $renewal ? 'Renouveler mon abonnement' : 'Payer et publier ma carte' }}
+                    {{ $renewal ? __('payment.confiance.renouveler') : __('payment.confiance.payer') }}
                 </x-button>
 
-                <a href="{{ route('dashboard') }}" class="checkout__later">Plus tard</a>
+                <a href="{{ route('dashboard') }}" class="checkout__later">{{ __('payment.confiance.plus_tard') }}</a>
             </div>
             @endunless
         </aside>

@@ -13,11 +13,11 @@
 @props(['qrPath' => null])
 
 <div class="qr-card">
-    <p class="qr-card__label">Mon QR Code</p>
+    <p class="qr-card__label">{{ __('card.qr.titre') }}</p>
 
     <div class="qr-card__frame">
         @if ($qrPath)
-            <img src="{{ Storage::url($qrPath) }}" alt="QR Code de votre profil" class="qr-card__img">
+            <img src="{{ Storage::url($qrPath) }}" alt="{{ __('card.qr.alt') }}" class="qr-card__img">
         @else
             <div class="qr-card__pending" aria-hidden="true">
                 <svg viewBox="0 0 48 48" width="76" height="76" fill="none">

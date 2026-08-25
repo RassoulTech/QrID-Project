@@ -46,10 +46,10 @@
             :qr-svg="$qrSvg ?? null" />
 
         @if (! empty($qrSvg))
-            <div id="qr" class="pubc__qr-plein" role="dialog" aria-label="QR Code">
+            <div id="qr" class="pubc__qr-plein" role="dialog" aria-label="{{ __('card.publique.qr_aria') }}">
                 <p class="pubc__qr-nom">{{ $profile->full_name }}</p>
                 {!! $qrSvg !!}
-                <a href="#" class="pubc__qr-fermer">Fermer</a>
+                <a href="#" class="pubc__qr-fermer">{{ __('card.publique.fermer') }}</a>
             </div>
         @endif
     </main>

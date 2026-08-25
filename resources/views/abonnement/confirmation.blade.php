@@ -7,7 +7,7 @@
 
   ACTION PRINCIPALE : récupérer son lien et ses fichiers.
 --}}
-<x-app-layout title="Votre carte est en ligne">
+<x-app-layout :title="__('payment.confirmation.titre')">
     <div class="preview">
 
         <span class="confirm__coche" aria-hidden="true">
@@ -16,13 +16,16 @@
             </svg>
         </span>
 
-        <h1 class="preview__title">Votre carte est en ligne</h1>
+        <h1 class="preview__title">{{ __('payment.confirmation.titre') }}</h1>
         <p class="preview__sub">
-            Paiement confirmé. Vos contacts peuvent désormais ouvrir votre carte
+            {{-- La phrase entière est traduite d'un bloc, pas assemblée : en
+                 anglais l'incise de date ne se place pas au même endroit. --}}
             @if ($subscription?->ends_at)
-                — jusqu'au {{ $subscription->ends_at->translatedFormat('j F Y') }}.
+                {{ __('payment.confirmation.sous_avec_date', [
+                    'date' => $subscription->ends_at->translatedFormat('j F Y'),
+                ]) }}
             @else
-                dès maintenant.
+                {{ __('payment.confirmation.sous_sans_date') }}
             @endif
         </p>
 
@@ -33,28 +36,28 @@
         {{-- Le lien, copiable. Champ readonly : sans JavaScript il reste
              sélectionnable à la main, le bouton n'est qu'un raccourci. --}}
         <label class="board-link">
-            <span class="board-link__label">Votre lien public</span>
+            <span class="board-link__label">{{ __('payment.confirmation.lien') }}</span>
             <span class="board-link__row">
                 <input type="text" class="board-link__input" readonly
                        id="lienConfirme" value="{{ $publicUrl }}"
-                       aria-label="Lien public de votre carte">
+                       aria-label="{{ __('dashboard.carte.lien_aria') }}">
                 <button type="button" class="board-link__copy"
-                        data-copy="lienConfirme" data-copy-done="Copié">
-                    Copier
+                        data-copy="lienConfirme" data-copy-done="{{ __('dashboard.carte.copie') }}">
+                    {{ __('dashboard.carte.copier') }}
                 </button>
             </span>
         </label>
 
         <div class="board-downloads">
-            <x-button :href="route('carte.qr.png')" variant="outline" size="sm">QR en PNG</x-button>
-            <x-button :href="route('carte.qr.svg')" variant="outline" size="sm">QR en SVG</x-button>
+            <x-button :href="route('carte.qr.png')" variant="outline" size="sm">{{ __('dashboard.carte.qr_png') }}</x-button>
+            <x-button :href="route('carte.qr.svg')" variant="outline" size="sm">{{ __('dashboard.carte.qr_svg') }}</x-button>
             <x-button :href="route('carte.imprimable')" variant="outline" size="sm">
-                Carte imprimable (PDF)
+                {{ __('payment.confirmation.imprimable') }}
             </x-button>
         </div>
 
         <div class="preview__action">
-            <x-button :href="route('dashboard')">Aller à mon tableau de bord</x-button>
+            <x-button :href="route('dashboard')">{{ __('payment.confirmation.tableau') }}</x-button>
         </div>
     </div>
 </x-app-layout>

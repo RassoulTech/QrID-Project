@@ -8,17 +8,14 @@
 
   Ce sont des LIENS : la passerelle réelle nous rappellera aussi par une URL.
 --}}
-<x-app-layout title="Simulation de paiement">
+<x-app-layout :title="__('payment.simulation.titre')">
 
     <div class="step-card">
-        <p class="step-card__kicker">Environnement de développement</p>
+        <p class="step-card__kicker">{{ __('payment.simulation.kicker') }}</p>
 
-        <h1 class="step-card__title">Simulation de paiement</h1>
+        <h1 class="step-card__title">{{ __('payment.simulation.titre') }}</h1>
 
-        <p class="step-card__sub">
-            Aucune somme réelle n'est en jeu. Cet écran remplace celui de
-            l'opérateur tant qu'aucun contrat n'est signé.
-        </p>
+        <p class="step-card__sub">{{ __('payment.simulation.sous') }}</p>
 
         <div class="mail-spam">
             <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -33,24 +30,24 @@
                 <span>
                     <strong>{{ $payment->method_label }}</strong> ·
                     {{ $payment->formattedAmount() }} ·
-                    référence {{ $payment->provider_ref }}
+                    {{ __('payment.simulation.reference', ['ref' => $payment->provider_ref]) }}
                 </span>
             </span>
         </div>
 
         <div class="step-fields mt-4">
             <x-button :href="route('abonnement.retour', ['payment' => $payment->id, 'statut' => 'succes', 'reference' => $payment->provider_ref])">
-                Confirmer le paiement
+                {{ __('payment.simulation.confirmer') }}
             </x-button>
 
             <x-button variant="outline"
                       :href="route('abonnement.retour', ['payment' => $payment->id, 'statut' => 'echec'])">
-                Simuler un refus
+                {{ __('payment.simulation.refus') }}
             </x-button>
 
             <a class="step-back text-center"
                href="{{ route('abonnement.retour', ['payment' => $payment->id, 'statut' => 'annule']) }}">
-                Annuler et revenir
+                {{ __('payment.simulation.annuler') }}
             </a>
         </div>
     </div>

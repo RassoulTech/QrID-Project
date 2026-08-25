@@ -119,7 +119,7 @@
                             </span>
                             <span class="pubc__info-texte">
                                 <span class="pubc__info-valeur">{{ preg_replace('#^https?://(www\.)?#', '', $profile->website) }}</span>
-                                <span class="pubc__info-etiquette">Site web</span>
+                                <span class="pubc__info-etiquette">{{ __('card.publique.site_web') }}</span>
                             </span>
                         </a>
                     </li>
@@ -140,7 +140,7 @@
                             </span>
                             <span class="pubc__info-texte">
                                 <span class="pubc__info-valeur">{{ $profile->address }}</span>
-                                <span class="pubc__info-etiquette">Localisation</span>
+                                <span class="pubc__info-etiquette">{{ __('card.publique.localisation') }}</span>
                             </span>
                         </a>
                     </li>
@@ -152,7 +152,7 @@
              Trois par rangée. Elle se réorganise seule s'il y a moins de
              six entrées : une grille à trous se lirait comme un défaut. --}}
         @if (! empty($actions))
-            <nav class="pubc__grille" aria-label="Contacter et suivre">
+            <nav class="pubc__grille" aria-label="{{ __('card.publique.grille_aria') }}">
                 @foreach ($actions as [$plateforme, $url, $libelle, $externe])
                     {{-- LA COULEUR EST POSÉE SUR LA TUILE, pas sur l'icône.
                          C'est elle qui teinte le fond, la bordure et le
@@ -214,12 +214,12 @@
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>
                 </svg>
-                {{ __('Enregistrer') }}
+                {{ __('card.publique.enregistrer') }}
             </a>
         </div>
 
         <p class="pubc__pied">
-            Carte créée avec <a href="{{ route('home') }}">{{ config('app.name') }}</a>
+            {{ __('card.publique.pied') }} <a href="{{ route('home') }}">{{ config('app.name') }}</a>
         </p>
     </article>
 </div>

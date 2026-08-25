@@ -1,27 +1,28 @@
 {{-- ÉTAPE 1 — Qui êtes-vous.
      Trois champs obligatoires, deux optionnels. Rien d'autre. --}}
-<x-app-layout title="Créer mon profil — étape 1">
+<x-app-layout :title="__('profile.wizard.titre_1')">
     <x-step-shell
         :step="1"
-        title="Qui êtes-vous ?"
-        subtitle="Ces informations apparaissent en haut de votre profil."
+        :title="__('profile.wizard.entete_1')"
+        :subtitle="__('profile.wizard.sous_1')"
         :action="route('profile.store.step1')"
         :back="route('dashboard')"
-        back-label="Tableau de bord"
+        :back-label="__('profile.wizard.retour_tableau')"
         :multipart="true"
     >
         <div class="f-row">
-            <x-field name="first_name" label="Prénom" autocomplete="given-name"
+            <x-field name="first_name" :label="__('common.champs.prenom')" autocomplete="given-name"
                      :value="$wizard->field('first_name')" autofocus />
 
-            <x-field name="last_name" label="Nom" autocomplete="family-name"
+            <x-field name="last_name" :label="__('common.champs.nom')" autocomplete="family-name"
                      :value="$wizard->field('last_name')" />
         </div>
 
-        <x-field name="job_title" label="Fonction" placeholder="Commercial, avocate, gérant…"
+        <x-field name="job_title" :label="__('common.champs.fonction')"
+                 :placeholder="__('profile.wizard.fonction_exemple')"
                  autocomplete="organization-title" :value="$wizard->field('job_title')" />
 
-        <x-field name="company" label="Entreprise" optional autocomplete="organization"
+        <x-field name="company" :label="__('common.champs.entreprise')" optional autocomplete="organization"
                  :value="$wizard->field('company')" />
 
         {{-- PHOTO ------------------------------------------------------------
@@ -47,14 +48,14 @@
              s'y affiche de la même façon. --}}
         <div class="f">
             <span class="f__label">
-                Image de couverture
-                <span class="f__opt">optionnel</span>
+                {{ __('profile.wizard.couverture') }}
+                <span class="f__opt">{{ __('common.champs.optionnel') }}</span>
             </span>
 
             <label class="drop drop--banniere" data-cover-drop>
                 <span class="drop__thumb drop__thumb--banniere" data-cover-thumb>
                     @if ($couverture)
-                        <img src="{{ Storage::url($couverture) }}" alt="Bannière actuelle">
+                        <img src="{{ Storage::url($couverture) }}" alt="{{ __('profile.wizard.couverture_actuelle') }}">
                     @else
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -66,9 +67,9 @@
 
                 <span>
                     <span class="drop__text" data-cover-label>
-                        {{ $couverture ? "Changer l'image" : 'Ajouter une image' }}
+                        {{ $couverture ? __('profile.wizard.couverture_changer') : __('profile.wizard.couverture_ajouter') }}
                     </span>
-                    <span class="drop__hint">JPG, PNG ou WEBP — 2 Mo maximum</span>
+                    <span class="drop__hint">{{ __('profile.wizard.couverture_formats') }}</span>
                 </span>
 
                 <input type="file" name="cover" accept="image/jpeg,image/png,image/webp"
@@ -80,10 +81,7 @@
             @enderror
 
             <p class="f__help">
-                Format paysage, idéalement 1200 × 800 pixels. Elle est recadrée
-                pour remplir le haut de votre carte, et votre nom s'affiche
-                dessus. Sans image, votre carte porte le décor de
-                {{ config('app.name') }}.
+                {{ __('profile.wizard.couverture_aide', ['marque' => config('app.name')]) }}
             </p>
         </div>
     </x-step-shell>

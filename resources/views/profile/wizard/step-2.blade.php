@@ -9,39 +9,39 @@
     }
 @endphp
 
-<x-app-layout title="Créer mon profil — étape 2">
+<x-app-layout :title="__('profile.wizard.titre_2')">
     <x-step-shell
         :step="2"
-        title="Comment vous joindre ?"
-        subtitle="Seul le téléphone est nécessaire. Vous compléterez le reste plus tard."
+        :title="__('profile.wizard.entete_2')"
+        :subtitle="__('profile.wizard.sous_2')"
         :action="route('profile.store.step2')"
         :back="route('profile.create.step1')"
     >
         {{-- L'indicatif suit le pays choisi : le numéro est enregistré au
              format international complet, quel qu'il soit. --}}
-        <x-phone-field name="phone" label="Téléphone"
+        <x-phone-field name="phone" :label="__('common.champs.telephone')"
                        :value="$wizard->field('phone')" />
 
-        <x-phone-field name="whatsapp" label="WhatsApp" optional
+        <x-phone-field name="whatsapp" :label="__('profile.fiche.whatsapp')" optional
                        :value="$wizard->field('whatsapp')" />
 
         {{-- Le lien exact plutôt qu'une recherche devinée : « Sacré-Cœur 3 »
              tombe dans un quartier, pas devant la boutique. --}}
-        <x-field name="maps_url" label="Lien de localisation" type="url" optional
+        <x-field name="maps_url" :label="__('profile.wizard.localisation')" type="url" optional
                  placeholder="https://maps.app.goo.gl/..."
-                 hint="Collez le lien de votre fiche Google Maps pour un repérage exact."
+                 :hint="__('profile.wizard.localisation_aide')"
                  :value="$wizard->field('maps_url')" />
 
-        <x-field name="public_email" label="E-mail public" type="email" optional
-                 placeholder="contact@exemple.sn" autocomplete="email"
-                 hint="Affiché sur votre profil. Différent de votre e-mail de connexion."
+        <x-field name="public_email" :label="__('profile.wizard.email_public')" type="email" optional
+                 :placeholder="__('profile.wizard.email_public_exemple')" autocomplete="email"
+                 :hint="__('profile.wizard.email_public_aide')"
                  :value="$wizard->field('public_email')" />
 
-        <x-field name="website" label="Site web" type="url" optional
+        <x-field name="website" :label="__('common.champs.site_web')" type="url" optional
                  placeholder="exemple.sn" :value="$wizard->field('website')" />
 
-        <x-field name="address" label="Adresse" optional maxlength="160"
-                 placeholder="Sacré-Cœur 3, Dakar" :value="$wizard->field('address')" />
+        <x-field name="address" :label="__('common.champs.adresse')" optional maxlength="160"
+                 :placeholder="__('profile.wizard.adresse_exemple')" :value="$wizard->field('address')" />
 
         {{-- RÉSEAUX SOCIAUX --------------------------------------------------
              Sans JavaScript : « Ajouter un réseau » soumet le formulaire, le
@@ -50,8 +50,8 @@
              Avec JavaScript : lignes ajoutées et retirées sur place. --}}
         <div class="f">
             <span class="f__label">
-                Réseaux sociaux
-                <span class="f__opt">optionnel</span>
+                {{ __('profile.wizard.reseaux') }}
+                <span class="f__opt">{{ __('common.champs.optionnel') }}</span>
             </span>
 
             <div class="socials" data-socials data-max="6">
@@ -59,8 +59,8 @@
                     <div class="social-row" data-social-row>
                         <select name="socials[{{ $i }}][platform]"
                                 class="f__control social-row__platform"
-                                aria-label="Réseau social {{ $i + 1 }}">
-                            <option value="">Choisir…</option>
+                                aria-label="{{ __('profile.wizard.reseau_aria', ['n' => $i + 1]) }}">
+                            <option value="">{{ __('profile.wizard.reseau_choisir') }}</option>
                             @foreach ($platforms as $key => $name)
                                 <option value="{{ $key }}"
                                     @selected(($social['platform'] ?? '') === $key)>{{ $name }}</option>
@@ -70,14 +70,14 @@
                         <input type="url" name="socials[{{ $i }}][url]"
                                value="{{ $social['url'] ?? '' }}"
                                class="f__control social-row__url"
-                               placeholder="Lien vers votre page"
-                               aria-label="Lien du réseau {{ $i + 1 }}">
+                               placeholder="{{ __('profile.wizard.reseau_lien') }}"
+                               aria-label="{{ __('profile.wizard.reseau_lien_aria', ['n' => $i + 1]) }}">
 
                         {{-- type="button" : ce bouton ne soumet jamais le formulaire.
                              Sans JavaScript il reste inerte ; vider les deux champs
                              suffit à retirer la ligne. --}}
                         <button type="button" class="social-row__del"
-                                data-social-remove aria-label="Retirer ce réseau">
+                                data-social-remove aria-label="{{ __('profile.wizard.reseau_retirer') }}">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                  stroke-width="2" stroke-linecap="round" aria-hidden="true">
                                 <path d="M6 6l12 12M18 6L6 18"/>
@@ -99,7 +99,7 @@
                      stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
                     <path d="M12 5v14M5 12h14"/>
                 </svg>
-                Ajouter un réseau
+                {{ __('profile.wizard.reseau_ajouter') }}
             </button>
         </div>
 
@@ -107,16 +107,17 @@
         <template data-social-template>
             <div class="social-row" data-social-row>
                 <select name="socials[__i__][platform]" class="f__control social-row__platform"
-                        aria-label="Réseau social">
-                    <option value="">Choisir…</option>
+                        aria-label="{{ __('profile.wizard.reseau_aria_nu') }}">
+                    <option value="">{{ __('profile.wizard.reseau_choisir') }}</option>
                     @foreach ($platforms as $key => $name)
                         <option value="{{ $key }}">{{ $name }}</option>
                     @endforeach
                 </select>
                 <input type="url" name="socials[__i__][url]" class="f__control social-row__url"
-                       placeholder="Lien vers votre page" aria-label="Lien du réseau">
+                       placeholder="{{ __('profile.wizard.reseau_lien') }}"
+                       aria-label="{{ __('profile.wizard.reseau_lien_aria_nu') }}">
                 <button type="button" class="social-row__del" data-social-remove
-                        aria-label="Retirer ce réseau">
+                        aria-label="{{ __('profile.wizard.reseau_retirer') }}">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2" stroke-linecap="round" aria-hidden="true">
                         <path d="M6 6l12 12M18 6L6 18"/>

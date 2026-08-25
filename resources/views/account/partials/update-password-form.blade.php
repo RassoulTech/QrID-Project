@@ -21,11 +21,7 @@
             <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
             </svg>
-            <span>
-                Vous vous connectez avec Google, sans mot de passe.
-                En définir un ici vous donnera un <strong>second moyen d'accès</strong> :
-                la connexion par Google continuera de fonctionner.
-            </span>
+            <span>{!! __('profile.compte.sans_mot_de_passe') !!}</span>
         </div>
     @endunless
 
@@ -39,7 +35,7 @@
             <x-password
                 name="current_password"
                 id="update_password_current_password"
-                label="Mot de passe actuel"
+                :label="__('profile.compte.actuel')"
                 autocomplete="current-password"
                 errorBag="updatePassword"
             />
@@ -48,7 +44,7 @@
         <x-password
             name="password"
             id="update_password_password"
-            label="{{ $aUnMotDePasse ? 'Nouveau mot de passe' : 'Mot de passe' }}"
+            :label="$aUnMotDePasse ? __('profile.compte.nouveau') : __('profile.compte.mot_de_passe')"
             autocomplete="new-password"
             errorBag="updatePassword"
             help="Au moins 8 caractères."
@@ -57,7 +53,7 @@
         <x-password
             name="password_confirmation"
             id="update_password_password_confirmation"
-            label="Confirmer le mot de passe"
+            :label="__('auth.champs.confirmer_mot_de_passe')"
             autocomplete="new-password"
             errorBag="updatePassword"
         />
@@ -66,7 +62,7 @@
             <x-button>{{ $aUnMotDePasse ? 'Enregistrer' : 'Définir mon mot de passe' }}</x-button>
 
             @if (session('status') === 'password-updated')
-                <span class="text-success small">Enregistré.</span>
+                <span class="text-success small">{{ __('profile.compte.enregistre') }}</span>
             @endif
         </div>
     </form>

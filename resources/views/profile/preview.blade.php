@@ -11,40 +11,37 @@
 
   Aucune autre action sur cette page. Un bouton, un lien de retour.
 --}}
-<x-app-layout title="Votre carte est prête">
+<x-app-layout :title="__('profile.apercu.titre')">
     <div class="preview">
-        <h1 class="preview__title">Votre carte est prête</h1>
-        <p class="preview__sub">
-            Regardez-la avant de l'activer&nbsp;: rien n'est publié, rien n'est
-            débité tant que vous n'avez pas décidé.
-        </p>
+        <h1 class="preview__title">{{ __('profile.apercu.titre') }}</h1>
+        <p class="preview__sub">{!! __('profile.apercu.sous') !!}</p>
 
         <div class="preview__duo">
 
             {{-- ================= VISUEL 1 — LA CARTE PVC ================= --}}
             <section class="preview__col">
-                <h2 class="preview__legend">Votre carte physique</h2>
+                <h2 class="preview__legend">{{ __('profile.apercu.physique') }}</h2>
 
                 <x-card-duo :profile="$profile" />
 
-                <p class="preview__note">Format carte bancaire, prête à imprimer.</p>
+                <p class="preview__note">{{ __('profile.apercu.physique_note') }}</p>
             </section>
 
             {{-- ============ VISUEL 2 — CE QUE VERRONT LES CONTACTS ======== --}}
             <section class="preview__col">
-                <h2 class="preview__legend">Ce que verront vos contacts</h2>
+                <h2 class="preview__legend">{{ __('profile.apercu.contacts') }}</h2>
 
                 <x-phone :profile="$profile" size="lg" :animate="false" />
 
-                <p class="preview__note">La page qui s'ouvre après un scan.</p>
+                <p class="preview__note">{{ __('profile.apercu.contacts_note') }}</p>
             </section>
         </div>
 
         <form method="POST" action="{{ route('abonnement.checkout') }}" class="preview__action">
             @csrf
-            <x-button>Activer ma carte</x-button>
+            <x-button>{{ __('profile.apercu.activer') }}</x-button>
         </form>
 
-        <a href="{{ route('profile.edit') }}" class="preview__edit">Modifier mes informations</a>
+        <a href="{{ route('profile.edit') }}" class="preview__edit">{{ __('profile.apercu.modifier') }}</a>
     </div>
 </x-app-layout>

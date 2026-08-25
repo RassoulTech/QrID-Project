@@ -1,11 +1,13 @@
 {{-- Profil public de démonstration.
      ACTION PRINCIPALE : comprendre à quoi ressemble un profil, puis créer le sien. --}}
 <x-public-profile-layout
-    :title="$profile ? $profile->full_name.' — exemple de profil' : 'Exemple de profil'"
-    description="Exemple de profil professionnel numérique. Créez le vôtre en trois minutes.">
+    :title="$profile
+        ? __('card.demo.titre', ['nom' => $profile->full_name])
+        : __('card.demo.titre_nu')"
+    :description="__('card.demo.description')">
 
     <div class="alert alert-warning small mb-3" role="status">
-        Exemple de démonstration.
+        {{ __('card.demo.bandeau') }}
     </div>
 
     <x-card class="text-center">
@@ -30,11 +32,11 @@
                      parcours : garder le contact. L'omettre ici donnerait à
                      voir un produit plus pauvre qu'il n'est. --}}
                 <a href="{{ route('profile.vcard', $profile->slug) }}" class="btn btn-primary">
-                    Enregistrer le contact
+                    {{ __('card.demo.enregistrer') }}
                 </a>
 
                 @if ($profile->phone)
-                    <a href="{{ $profile->tel_href }}" class="btn btn-outline-secondary">Appeler</a>
+                    <a href="{{ $profile->tel_href }}" class="btn btn-outline-secondary">{{ __('card.demo.appeler') }}</a>
                 @endif
                 @if ($profile->whatsapp_href)
                     <a href="{{ $profile->whatsapp_href }}" target="_blank" rel="noopener"

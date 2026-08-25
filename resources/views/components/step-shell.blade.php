@@ -12,8 +12,8 @@
     'subtitle',
     'action',
     'back' => null,
-    'backLabel' => 'Retour',
-    'submit' => 'Continuer',
+    'backLabel' => null,
+    'submit' => null,
     'multipart' => false,
 ])
 
@@ -33,11 +33,20 @@
             style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);border:0"></button>
 
     <div class="step-card">
-        <p class="step-card__kicker">Étape {{ $step }} sur 3</p>
+        @php
+            /* Résolus ICI et non dans @props : une valeur par défaut de
+               @props est une expression évaluée à la compilation du
+               composant, et __() y figerait la langue du premier rendu. */
+            $intituleRetour = $backLabel ?? __('profile.wizard.retour');
+            $intituleEnvoi = $submit ?? __('profile.wizard.continuer');
+            $rang = __('profile.wizard.etape_sur', ['n' => $step, 'total' => 3]);
+        @endphp
+
+        <p class="step-card__kicker">{{ $rang }}</p>
 
         <div class="step-bar" role="progressbar" aria-valuenow="{{ $step }}"
              aria-valuemin="1" aria-valuemax="3"
-             aria-label="Étape {{ $step }} sur 3">
+             aria-label="{{ $rang }}">
             @for ($i = 1; $i <= 3; $i++)
                 <span @class(['step-bar__seg', 'is-done' => $i <= $step])></span>
             @endfor
@@ -52,12 +61,12 @@
 
         <div class="step-card__foot">
             @if ($back)
-                <a href="{{ $back }}" class="step-back">&larr; {{ $backLabel }}</a>
+                <a href="{{ $back }}" class="step-back">&larr; {{ $intituleRetour }}</a>
             @else
                 <span></span>
             @endif
 
-            <button type="submit" class="btn-pill btn-dark">{{ $submit }}</button>
+            <button type="submit" class="btn-pill btn-dark">{{ $intituleEnvoi }}</button>
         </div>
     </div>
 </form>
