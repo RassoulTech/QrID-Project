@@ -5,28 +5,28 @@
     <div>
       <x-brand tone="light" :link="false" class="site-footer__brand" />
       <p class="site-footer__about">
-        &copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('Excellence Professionnelle Sénégalaise.') }}
-        {{ __('La référence pour votre présence digitale sécurisée.') }}
+        &copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('navigation.pied.about') }}
+        {{ __('navigation.pied.about_suite') }}
       </p>
     </div>
 
     <div>
-      <p class="site-footer__title">{{ __('Plateforme') }}</p>
-      <a href="{{ route('home') }}#produits">{{ __('Produits') }}</a>
-      <a href="{{ route('home') }}#ressources">{{ __('Ressources') }}</a>
-      <a href="{{ route('home') }}#tarifs">{{ __('Tarifs') }}</a>
+      <p class="site-footer__title">{{ __('navigation.pied.plateforme') }}</p>
+      <a href="{{ route('home') }}#produits">{{ __('navigation.public.produits') }}</a>
+      <a href="{{ route('home') }}#ressources">{{ __('navigation.public.ressources') }}</a>
+      <a href="{{ route('home') }}#tarifs">{{ __('navigation.public.tarifs') }}</a>
     </div>
 
     <div>
-      <p class="site-footer__title">{{ __('Légal') }}</p>
-      <a href="{{ route('legal.conditions') }}">{{ __('CGU') }}</a>
-      <a href="{{ route('legal.confidentialite') }}">{{ __('Confidentialité') }}</a>
+      <p class="site-footer__title">{{ __('navigation.pied.legal') }}</p>
+      <a href="{{ route('legal.conditions') }}">{{ __('navigation.pied.cgu') }}</a>
+      <a href="{{ route('legal.confidentialite') }}">{{ __('navigation.pied.confidentialite') }}</a>
     </div>
 
     <div>
-      <p class="site-footer__title">{{ __('Support') }}</p>
-      <a href="{{ route('legal.mentions') }}">{{ __('Aide') }}</a>
-      <a href="{{ config('registration.support_whatsapp') }}" target="_blank" rel="noopener">{{ __('Contact') }}</a>
+      <p class="site-footer__title">{{ __('navigation.pied.support') }}</p>
+      <a href="{{ route('legal.mentions') }}">{{ __('navigation.coque.aide') }}</a>
+      <a href="{{ config('registration.support_whatsapp') }}" target="_blank" rel="noopener">{{ __('navigation.public.contact') }}</a>
     </div>
 
   </div>

@@ -35,10 +35,19 @@ class ContactMail extends BaseMailable
         $this->recipient = $recipient;
     }
 
-    /** Le libellé lisible du motif, pour le sujet comme pour le corps. */
+    /**
+     * Le libellé lisible du motif, pour le sujet comme pour le corps.
+     *
+     * IL SUIT LA LANGUE DE L'ÉQUIPE, pas celle du visiteur. Ce message part
+     * vers la boîte de support : c'est elle qui doit pouvoir le trier, et un
+     * sujet qui change de langue selon l'expéditeur rend ce tri impossible.
+     * Le corps, lui, reprend le message tel qu'il a été écrit.
+     */
     public function motif(): string
     {
-        return ContactRequest::SUJETS[$this->contact->subject] ?? 'Message';
+        return in_array($this->contact->subject, ContactRequest::SUJETS, true)
+            ? __('landing.contact.motifs.'.$this->contact->subject, [], config('app.locale'))
+            : __('common.champs.message', [], config('app.locale'));
     }
 
     public function envelope(): Envelope

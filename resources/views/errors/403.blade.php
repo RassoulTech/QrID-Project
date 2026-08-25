@@ -1,15 +1,15 @@
 @extends('errors.layout')
 
-@section('code', 'Erreur 403')
-@section('title', 'Accès refusé')
-@section('message', 'Vous n\'avez pas les droits nécessaires pour consulter cette page.')
+@section('code', __('errors.403.code'))
+@section('title', __('errors.403.titre'))
+@section('message', __('errors.403.message'))
 
 @section('action')
     <div class="d-grid gap-2">
         @auth
-            <a href="{{ route('dashboard') }}" class="btn btn-primary">Retour à mon espace</a>
+            <a href="{{ route('dashboard') }}" class="btn btn-primary">{{ __('errors.retour_espace') }}</a>
         @else
-            <a href="{{ route('login') }}" class="btn btn-primary">Se connecter</a>
+            <a href="{{ route('login') }}" class="btn btn-primary">{{ __('errors.se_connecter') }}</a>
         @endauth
     </div>
 @endsection

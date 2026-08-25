@@ -17,7 +17,7 @@
     @include('layouts.partials.head')
 </head>
 <body>
-<a href="#contenu" class="skip-link">Aller au contenu</a>
+<a href="#contenu" class="skip-link">{{ __('navigation.aller_au_contenu') }}</a>
 
 <div class="adm">
 
@@ -29,7 +29,7 @@
 
         <div class="adm-side__marque" id="menuAdminTitre">
             <x-brand size="sm" tone="light" :href="route('admin.overview')" />
-            <span class="adm-side__portail">Portail Admin</span>
+            <span class="adm-side__portail">{{ __('navigation.coque.portail_admin') }}</span>
         </div>
 
         @include('layouts.partials.admin-links')
@@ -41,26 +41,26 @@
         <header class="adm-top">
             <button type="button" class="adm-top__burger"
                     data-bs-toggle="offcanvas" data-bs-target="#menuAdmin"
-                    aria-controls="menuAdmin" aria-label="Ouvrir le menu">
+                    aria-controls="menuAdmin" aria-label="{{ __('navigation.ouvrir_menu') }}">
                 <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
                 </svg>
             </button>
 
-            <span class="adm-top__section">Administration</span>
+            <span class="adm-top__section">{{ __('navigation.coque.section_admin') }}</span>
 
             {{-- Recherche globale : GET, terme en query string. Partageable,
                  rechargeable, sans JavaScript. Elle mène à la liste des
                  clients, seule liste où une recherche libre a un sens. --}}
             <form method="GET" action="{{ route('admin.clients.index') }}"
                   class="adm-search" role="search">
-                <label for="rechercheAdmin" class="visually-hidden">Rechercher un client</label>
+                <label for="rechercheAdmin" class="visually-hidden">{{ __('navigation.coque.rechercher_client') }}</label>
                 <svg class="adm-search__icone" width="15" height="15" viewBox="0 0 16 16"
                      fill="currentColor" aria-hidden="true">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                 </svg>
                 <input type="search" id="rechercheAdmin" name="q" class="adm-search__champ"
-                       value="{{ request('q') }}" placeholder="Rechercher un client" autocomplete="off">
+                       value="{{ request('q') }}" placeholder="{{ __('navigation.coque.rechercher_client') }}" autocomplete="off">
             </form>
 
             <div class="adm-top__actions">
@@ -87,13 +87,13 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuAdminCompte">
                         <li><span class="dropdown-item-text small text-secondary">{{ $admin->email }}</span></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ route('dashboard') }}">Retour à mon espace client</a></li>
-                        <li><a class="dropdown-item" href="{{ route('compte.edit') }}">Mon compte</a></li>
+                        <li><a class="dropdown-item" href="{{ route('dashboard') }}">{{ __('navigation.coque.retour_espace_client') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('compte.edit') }}">{{ __('navigation.coque.mon_compte') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item text-danger">Se déconnecter</button>
+                                <button type="submit" class="dropdown-item text-danger">{{ __('navigation.coque.se_deconnecter') }}</button>
                             </form>
                         </li>
                     </ul>

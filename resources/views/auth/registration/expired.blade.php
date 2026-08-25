@@ -6,10 +6,10 @@
   donc rien ne justifierait un POST.
 --}}
 <x-auth-layout
-    title="Lien expiré"
+    :title="__('auth.expired.titre')"
     aside-tone="light"
-    aside-title="Un lien expire, pas votre place."
-    aside-text="Les liens de confirmation ne vivent qu'une heure, pour que personne d'autre ne puisse s'en servir. En relancer un prend cinq secondes."
+    :aside-title="__('auth.expired.aside_titre')"
+    :aside-text="__('auth.expired.aside_texte')"
     :aside-step="1">
 
     {{-- Visuel de CETTE page : carte verte à horloge. Aucune maquette ne m'a
@@ -18,8 +18,8 @@
         <div class="av-pile">
             <x-visual.badge-card
                 icon="horloge"
-                title="Les liens ont une durée de vie"
-                text="Une heure, pas plus : c'est ce qui les rend sûrs." />
+                :title="__('auth.expired.visuel_titre')"
+                :text="__('auth.expired.visuel_texte')" />
 
             <x-visual.profile-card :lines="2" :cta="false" />
         </div>
@@ -32,30 +32,27 @@
         </svg>
     </span>
 
-    <h1 class="auth__title">Ce lien a expiré</h1>
-    <p class="auth__lead">
-        Aucun compte n'a été créé. Saisissez votre adresse e-mail&nbsp;: nous
-        repartons du début, et vous recevez un nouveau lien.
-    </p>
+    <h1 class="auth__title">{{ __('auth.expired.entete') }}</h1>
+    <p class="auth__lead">{!! __('auth.expired.accroche') !!}</p>
 
     <form method="GET" action="{{ route('register') }}" novalidate class="mt-4">
         <div class="auth-fields">
             <x-auth-field
                 name="email"
                 type="email"
-                label="Adresse e-mail"
-                placeholder="vous@exemple.sn"
+                :label="__('auth.champs.email')"
+                :placeholder="__('auth.champs.email_exemple')"
                 autocomplete="username"
                 inputmode="email"
                 :value="$email ?? null"
                 autofocus
             />
 
-            <x-button :block="true">Relancer l'inscription</x-button>
+            <x-button :block="true">{{ __('auth.expired.bouton') }}</x-button>
         </div>
     </form>
 
     <p class="f__hint text-center mt-4 mb-0">
-        <a href="{{ route('login') }}">Retour à la connexion</a>
+        <a href="{{ route('login') }}">{{ __('auth.liens.retour_connexion') }}</a>
     </p>
 </x-auth-layout>

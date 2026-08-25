@@ -12,7 +12,7 @@
 --}}
 <section class="db-card">
     <div class="db-card__tete">
-        <h2 class="db-card__titre">Ma carte</h2>
+        <h2 class="db-card__titre">{{ __('dashboard.carte.titre') }}</h2>
         <x-badge :status="$profile->is_active ? 'published' : 'draft'" />
     </div>
 
@@ -25,14 +25,14 @@
 
         <div class="db-carte__cote">
             <label class="board-link">
-                <span class="board-link__label">Lien public</span>
+                <span class="board-link__label">{{ __('dashboard.carte.lien_public') }}</span>
                 <span class="board-link__row">
                     <input type="text" class="board-link__input" readonly
                            id="lienPublic" value="{{ $publicUrl }}"
-                           aria-label="Lien public de votre carte">
+                           aria-label="{{ __('dashboard.carte.lien_aria') }}">
                     <button type="button" class="board-link__copy"
-                            data-copy="lienPublic" data-copy-done="Copié">
-                        Copier
+                            data-copy="lienPublic" data-copy-done="{{ __('dashboard.carte.copie') }}">
+                        {{ __('dashboard.carte.copier') }}
                     </button>
                 </span>
             </label>
@@ -49,40 +49,45 @@
                  Cette ligne dit ce que la BASE contient, pas ce que le
                  formulaire a affiché. C'est la seule chose qui compte. --}}
             <div class="board-medias">
+                {{-- La phrase entière vient du fichier de langue, en deux clés
+                     par média. « Photo enregistrée » / « Aucune photo » se
+                     construisaient par concaténation : l'accord de l'adjectif y
+                     était figé au féminin, et l'anglais n'y aurait rien accordé
+                     du tout. --}}
                 @foreach ([
-                    ['Photo', $profile->aUnePhoto(), 'photo'],
-                    ['Bannière', $profile->aUneCouverture(), 'couverture'],
-                ] as [$libelle, $presente, $genre])
+                    ['photo', $profile->aUnePhoto()],
+                    ['banniere', $profile->aUneCouverture()],
+                ] as [$genre, $presente])
                     <span @class(['board-media', 'board-media--absente' => ! $presente])>
                         @if ($presente)
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                  stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M20 6 9 17l-5-5"/>
                             </svg>
-                            {{ $libelle }} enregistrée
+                            {{ __('dashboard.carte.'.$genre.'_ok') }}
                         @else
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                  stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
                                 <circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/>
                             </svg>
-                            Aucune {{ mb_strtolower($libelle) }}
+                            {{ __('dashboard.carte.'.$genre.'_absente') }}
                         @endif
                     </span>
                 @endforeach
             </div>
 
             <div class="board-downloads">
-                <x-button :href="route('carte.qr.png')" variant="outline" size="sm">QR en PNG</x-button>
-                <x-button :href="route('carte.qr.svg')" variant="outline" size="sm">QR en SVG</x-button>
+                <x-button :href="route('carte.qr.png')" variant="outline" size="sm">{{ __('dashboard.carte.qr_png') }}</x-button>
+                <x-button :href="route('carte.qr.svg')" variant="outline" size="sm">{{ __('dashboard.carte.qr_svg') }}</x-button>
 
                 @if ($profile->isPubliclyVisible())
                     <x-button :href="route('carte.imprimable')" variant="outline" size="sm">
-                        Carte imprimable
+                        {{ __('dashboard.carte.imprimable') }}
                     </x-button>
                 @endif
 
                 <x-button :href="route('profile.edit')" variant="outline" size="sm">
-                    Modifier ma carte
+                    {{ __('dashboard.carte.modifier') }}
                 </x-button>
             </div>
         </div>

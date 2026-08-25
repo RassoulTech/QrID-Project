@@ -4,12 +4,12 @@
   Sans aucune donnée, on n'affiche PAS un graphique vide : on explique quoi
   faire pour qu'il se remplisse.
 --}}
-<x-app-layout title="Statistiques">
+<x-app-layout :title="__('dashboard.stats.titre')">
 
     <div class="db-tete">
         <div>
-            <h1 class="db-tete__titre">Statistiques</h1>
-            <p class="db-tete__sous">L'audience de votre carte, jour par jour.</p>
+            <h1 class="db-tete__titre">{{ __('dashboard.stats.titre') }}</h1>
+            <p class="db-tete__sous">{{ __('dashboard.stats.sous') }}</p>
         </div>
 
         {{-- MÊME CONTRÔLE QUE DANS L'ADMINISTRATION. Les segments d'origine
@@ -21,15 +21,15 @@
              Sans JavaScript, le bouton du <noscript> prend le relais. --}}
         <form method="GET" action="{{ route('statistiques') }}" class="adm-filtres adm-filtres--nu">
             <div class="adm-filtre">
-                <label for="periode">Période affichée</label>
+                <label for="periode">{{ __('dashboard.stats.periode') }}</label>
                 <select id="periode" name="periode" class="adm-select" onchange="this.form.submit()">
                     @foreach ($periodes as $p)
-                        <option value="{{ $p }}" @selected($p === $periode)>{{ $p }} derniers jours</option>
+                        <option value="{{ $p }}" @selected($p === $periode)>{{ __('dashboard.stats.derniers_jours', ['compte' => $p]) }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <noscript><button type="submit" class="adm-btn adm-btn--vert">Appliquer</button></noscript>
+            <noscript><button type="submit" class="adm-btn adm-btn--vert">{{ __('common.actions.appliquer') }}</button></noscript>
         </form>
     </div>
 
@@ -38,31 +38,31 @@
 
             {{-- ===================== TOTAUX ===================== --}}
             <section class="db-card">
-                <h2 class="db-card__titre">Sur {{ $periode }} jours</h2>
+                <h2 class="db-card__titre">{{ __('dashboard.stats.sur_jours', ['compte' => $periode]) }}</h2>
 
                 <div class="stat-grid">
                     <div class="stat-tuile stat-tuile--1">
                         <span class="stat-tuile__n">{{ number_format($totaux['views'], 0, ',', ' ') }}</span>
-                        <span class="stat-tuile__l">Vues directes</span>
+                        <span class="stat-tuile__l">{{ __('dashboard.stats.vues_directes') }}</span>
                     </div>
                     <div class="stat-tuile stat-tuile--2">
                         <span class="stat-tuile__n">{{ number_format($totaux['scans'], 0, ',', ' ') }}</span>
-                        <span class="stat-tuile__l">Scans du QR Code</span>
+                        <span class="stat-tuile__l">{{ __('dashboard.stats.scans') }}</span>
                     </div>
                     <div class="stat-tuile stat-tuile--3">
                         <span class="stat-tuile__n">{{ number_format($totaux['saves'], 0, ',', ' ') }}</span>
-                        <span class="stat-tuile__l">Contacts enregistrés</span>
+                        <span class="stat-tuile__l">{{ __('dashboard.stats.contacts') }}</span>
                     </div>
                     <div class="stat-tuile stat-tuile--4">
                         <span class="stat-tuile__n">{{ number_format($totaux['total'], 0, ',', ' ') }}</span>
-                        <span class="stat-tuile__l">Total des événements</span>
+                        <span class="stat-tuile__l">{{ __('dashboard.stats.total') }}</span>
                     </div>
                 </div>
             </section>
 
             {{-- ===================== ÉVOLUTION ===================== --}}
             <section class="db-card">
-                <h2 class="db-card__titre">Évolution</h2>
+                <h2 class="db-card__titre">{{ __('dashboard.stats.evolution') }}</h2>
 
                 @if ($serie)
                     @php
@@ -70,10 +70,10 @@
                     @endphp
 
                     <div class="chart" role="img"
-                         aria-label="Vues et scans sur les {{ $periode }} derniers jours">
+                         aria-label="{{ __('dashboard.stats.evolution_aria', ['compte' => $periode]) }}">
                         @foreach ($serie as $jour)
                             <span class="chart__col"
-                                  title="{{ $jour['jour'] }} · {{ $jour['vues'] }} vue(s), {{ $jour['scans'] }} scan(s)">
+                                  title="{{ __('dashboard.stats.infobulle', ['jour' => $jour['jour'], 'vues' => $jour['vues'], 'scans' => $jour['scans']]) }}">
                                 <span class="chart__pile">
                                     @if ($jour['scans'] > 0)
                                         <span class="chart__barre chart__barre--scan"
@@ -90,16 +90,16 @@
                     </div>
 
                     <div class="chart-legende">
-                        <span><span class="chart-legende__puce"></span> Vues directes</span>
-                        <span><span class="chart-legende__puce chart-legende__puce--scan"></span> Scans</span>
+                        <span><span class="chart-legende__puce"></span> {{ __('dashboard.stats.legende_vues') }}</span>
+                        <span><span class="chart-legende__puce chart-legende__puce--scan"></span> {{ __('dashboard.stats.legende_scans') }}</span>
                     </div>
 
                     {{-- Voir dashboard/partials/activity-chart :
                          « height:1px » ne borne pas un <table>. --}}
                     <div class="visually-hidden">
                     <table>
-                        <caption>Vues et scans par jour</caption>
-                        <thead><tr><th>Jour</th><th>Vues</th><th>Scans</th></tr></thead>
+                        <caption>{{ __('dashboard.stats.tableau_titre') }}</caption>
+                        <thead><tr><th>{{ __('dashboard.stats.colonne_jour') }}</th><th>{{ __('dashboard.stats.colonne_vues') }}</th><th>{{ __('dashboard.stats.colonne_scans') }}</th></tr></thead>
                         <tbody>
                             @foreach ($serie as $jour)
                                 <tr>
@@ -119,13 +119,10 @@
                             <path d="M6 10v6H0v-6zm-5 1v4h4v-4zm11-9h2v2h-2z"/>
                             <path d="M10 0v6h6V0zm5 1v4h-4V1zM8 8v2H6V8zm2 2V8h2v2zm-2 2v-2H6v2zm2 0h2v-2h-2zm4 0v2h-2v-2z"/>
                         </svg>
-                        <p class="db-vide__titre">Aucun événement sur cette période</p>
-                        <p class="db-vide__texte">
-                            Partagez votre QR Code ou votre lien&nbsp;: chaque
-                            consultation apparaîtra ici.
-                        </p>
+                        <p class="db-vide__titre">{{ __('dashboard.stats.vide_titre') }}</p>
+                        <p class="db-vide__texte">{!! __('dashboard.stats.vide_texte') !!}</p>
                         <p class="mt-3">
-                            <x-button :href="route('carte.qr')" size="sm">Voir mon QR Code</x-button>
+                            <x-button :href="route('carte.qr')" size="sm">{{ __('dashboard.stats.voir_qr') }}</x-button>
                         </p>
                     </div>
                 @endif
@@ -133,7 +130,7 @@
 
             {{-- ===================== DERNIERS ÉVÉNEMENTS ===================== --}}
             <section class="db-card">
-                <h2 class="db-card__titre">Derniers événements</h2>
+                <h2 class="db-card__titre">{{ __('dashboard.stats.derniers') }}</h2>
 
                 @forelse ($derniers as $evenement)
                     <div class="visite">
@@ -153,9 +150,9 @@
                         <span class="visite__texte">
                             <span class="visite__type">
                                 @switch($evenement->type)
-                                    @case('scan') Scan du QR Code @break
-                                    @case('save') Contact enregistré @break
-                                    @default Consultation directe
+                                    @case('scan') {{ __('dashboard.rail.scan') }} @break
+                                    @case('save') {{ __('dashboard.rail.enregistrement') }} @break
+                                    @default {{ __('dashboard.rail.consultation') }}
                                 @endswitch
                             </span>
                             <span class="visite__date">{{ $evenement->created_at?->diffForHumans() }}</span>
@@ -163,7 +160,7 @@
                     </div>
                 @empty
                     <p class="db-vide__texte db-vide__texte--serre">
-                        Aucun événement enregistré pour l'instant.
+                        {{ __('dashboard.stats.aucun_evenement') }}
                     </p>
                 @endforelse
             </section>

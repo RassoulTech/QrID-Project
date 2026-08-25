@@ -32,13 +32,20 @@ use Illuminate\Validation\Rule;
  */
 class ContactRequest extends FormRequest
 {
-    /** Les motifs proposés. La vue les lit ici : une seule source. */
-    public const SUJETS = [
-        'information' => 'Une question sur le service',
-        'commande' => 'Commander des cartes imprimées',
-        'assistance' => 'J\'ai besoin d\'aide sur mon compte',
-        'partenariat' => 'Partenariat ou revente',
-    ];
+    /**
+     * Les motifs proposés — DES CLÉS, PLUS DES LIBELLÉS.
+     *
+     * La constante portait le texte français, que la vue passait à __(). La
+     * phrase française servait donc de clé de traduction : reformuler
+     * « Partenariat ou revente » aurait fait disparaître l'anglais sans
+     * erreur, sans test rouge, et sans que personne ne le remarque avant de
+     * basculer la langue.
+     *
+     * Les libellés vivent dans lang/*\/landing.php, sous
+     * landing.contact.motifs.*. Cette liste garde ce qu'elle doit garder :
+     * l'ensemble fermé des valeurs acceptées, et leur ordre d'affichage.
+     */
+    public const SUJETS = ['information', 'commande', 'assistance', 'partenariat'];
 
     public function authorize(): bool
     {
@@ -56,7 +63,7 @@ class ContactRequest extends FormRequest
             // on n'a pas besoin pour répondre.
             'phone' => ['nullable', 'string', 'max:30'],
 
-            'subject' => ['required', Rule::in(array_keys(self::SUJETS))],
+            'subject' => ['required', Rule::in(self::SUJETS)],
 
             /*
              | 20 caractères au minimum. En dessous — « rappelez-moi », « info »
@@ -74,16 +81,16 @@ class ContactRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Indiquez votre nom, pour qu\'on sache à qui répondre.',
-            'name.min' => 'Ce nom paraît trop court.',
-            'email.required' => 'Sans adresse e-mail, nous ne pourrons pas vous répondre.',
-            'email.email' => 'Cette adresse e-mail ne semble pas valide.',
-            'subject.required' => 'Choisissez un motif.',
-            'subject.in' => 'Ce motif n\'est pas proposé.',
-            'message.required' => 'Écrivez votre message.',
-            'message.min' => 'Dites-nous-en un peu plus : au moins vingt caractères.',
-            'message.max' => 'Votre message est trop long. Résumez l\'essentiel, nous vous rappellerons.',
-            'site_web.size' => 'Votre message n\'a pas pu être envoyé.',
+            'name.required' => __('landing.contact.validation.nom_requis'),
+            'name.min' => __('landing.contact.validation.nom_court'),
+            'email.required' => __('landing.contact.validation.email_requis'),
+            'email.email' => __('landing.contact.validation.email_invalide'),
+            'subject.required' => __('landing.contact.validation.motif_requis'),
+            'subject.in' => __('landing.contact.validation.motif_inconnu'),
+            'message.required' => __('landing.contact.validation.message_requis'),
+            'message.min' => __('landing.contact.validation.message_court'),
+            'message.max' => __('landing.contact.validation.message_long'),
+            'site_web.size' => __('landing.contact.validation.piege'),
         ];
     }
 

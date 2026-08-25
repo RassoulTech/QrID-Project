@@ -41,7 +41,12 @@
   navigation en GET. Un bouton de formulaire aurait exigé un jeton CSRF pour
   une requête qui n'écrit rien.
 --}}
-@props(['label' => 'Continuer avec Google'])
+{{-- Le libellé par défaut est calculé à l'appel, pas figé dans la
+     signature : une valeur par défaut de @props est évaluée une fois, et
+     __() y renverrait la langue de la première évaluation. --}}
+@props(['label' => null])
+
+@php $intitule = $label ?? __('auth.google.continuer'); @endphp
 
 @if (\App\Http\Controllers\Auth\GoogleController::estDisponible())
     <div class="oauth">
@@ -53,12 +58,12 @@
                 <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58"/>
             </svg>
 
-            <span>{{ $label }}</span>
+            <span>{{ $intitule }}</span>
         </a>
 
         {{-- Le séparateur est SOUS le bouton : c'est lui qui introduit le
              formulaire qui suit, pas l'inverse. --}}
-        <div class="oauth__ou"><span>ou avec votre adresse e-mail</span></div>
+        <div class="oauth__ou"><span>{{ __('auth.google.ou') }}</span></div>
     </div>
 @elseif (app()->environment('local'))
     {{-- REPÈRE DE DÉVELOPPEMENT, jamais servi ailleurs qu'en local.

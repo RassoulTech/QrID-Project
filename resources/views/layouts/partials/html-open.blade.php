@@ -9,4 +9,7 @@
   un visiteur de la landing ou du formulaire de connexion peut donc basculer
   lui aussi. Un seul endroit décide — voir App\Support\Theme.
 --}}
-<html lang="fr" @class(['theme-dark' => App\Support\Theme::estSombre()])>
+{{-- `lang` était figé sur « fr ». Un lecteur d'écran s'y fie pour choisir sa
+     voix : il lisait donc l'anglais avec une prononciation française, mot à
+     mot. Et Chrome proposait de traduire une page déjà traduite. --}}
+<html lang="{{ App\Support\Langue::active() }}" @class(['theme-dark' => App\Support\Theme::estSombre()])>

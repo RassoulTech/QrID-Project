@@ -20,5 +20,5 @@
 
 <p {{ $attributes->merge(['class' => 'f__legende']) }}>
     <span class="f__requis" aria-hidden="true">*</span>
-    {{ $texte ?? 'Les champs marqués d\'un astérisque sont obligatoires.' }}
+    {{ $texte ?? __('common.champs.astensque') }}
 </p>

@@ -13,16 +13,16 @@
 --}}
 @props(['active' => 'login'])
 
-<nav class="auth-tabs" aria-label="Connexion ou création de compte">
+<nav class="auth-tabs" aria-label="{{ __('auth.onglets.aria') }}">
     <a href="{{ route('login') }}"
        @class(['auth-tabs__item', 'is-active' => $active === 'login'])
        @if ($active === 'login') aria-current="page" @endif>
-        Connexion
+        {{ __('auth.onglets.connexion') }}
     </a>
 
     <a href="{{ route('register') }}"
        @class(['auth-tabs__item', 'is-active' => $active === 'register'])
        @if ($active === 'register') aria-current="page" @endif>
-        Créer un compte
+        {{ __('auth.onglets.inscription') }}
     </a>
 </nav>

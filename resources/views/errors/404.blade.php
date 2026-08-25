@@ -1,5 +1,5 @@
 @extends('errors.layout')
 
-@section('code', 'Erreur 404')
-@section('title', 'Page introuvable')
-@section('message', 'Cette page n\'existe pas ou a été déplacée. Vérifiez le lien, il contient peut-être une erreur.')
+@section('code', __('errors.404.code'))
+@section('title', __('errors.404.titre'))
+@section('message', __('errors.404.message'))

@@ -1,22 +1,22 @@
 {{-- ACTION PRINCIPALE : se connecter. --}}
 <x-auth-layout
-    title="Connexion"
-    description="Connectez-vous à votre espace {{ config('app.name') }}."
+    :title="__('auth.login.titre')"
+    :description="__('auth.login.description', ['marque' => config('app.name')])"
     aside-tone="dark"
-    aside-title="Votre identité pro, partout avec vous."
-    aside-text="Un lien, un QR code, et vos contacts ont tout : coordonnées, réseaux, présentation. Plus jamais de carte oubliée au bureau."
+    :aside-title="__('auth.login.aside_titre')"
+    :aside-text="__('auth.login.aside_texte')"
     :aside-step="1">
 
     {{-- Visuel de CETTE page : carte professionnelle, pastille QR et carte de
          statistiques, sur fond vert foncé. --}}
     <x-slot:aside>
-        <x-visual.chip icon="qr" label="QR Code généré" position="haut-gauche" />
+        <x-visual.chip icon="qr" :label="__('auth.login.visuel_qr')" position="haut-gauche" />
         <x-visual.profile-card />
-        <x-visual.stat-card value="1.2k" label="Vues du mois" position="bas-droite" />
+        <x-visual.stat-card value="1.2k" :label="__('auth.login.visuel_vues')" position="bas-droite" />
     </x-slot:aside>
 
-    <h1 class="auth__title">Bienvenue sur {{ config('app.name') }}</h1>
-    <p class="auth__lead">Connectez-vous pour retrouver votre espace.</p>
+    <h1 class="auth__title">{{ __('auth.login.bienvenue', ['marque' => config('app.name')]) }}</h1>
+    <p class="auth__lead">{{ __('auth.login.accroche') }}</p>
 
     <x-auth-tabs active="login" />
 
@@ -32,8 +32,8 @@
             <x-auth-field
                 name="email"
                 type="email"
-                label="Adresse e-mail"
-                placeholder="vous@exemple.sn"
+                :label="__('auth.champs.email')"
+                :placeholder="__('auth.champs.email_exemple')"
                 autocomplete="username"
                 inputmode="email"
                 autofocus
@@ -57,11 +57,11 @@
                     <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                         <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
                     </svg>
-                    <span>
-                        Mot de passe oublié&nbsp;?
-                            <a href="{{ route('password.request') }}">Réinitialisez-le en une minute</a>.
-                        Inutile de recréer un compte&nbsp;: vos informations sont conservées.
-                    </span>
+                    {{-- Le lien est DANS la traduction : l'anglais ne place pas
+                         la proposition relative au même endroit de la phrase.
+                         Découper en trois morceaux imposerait l'ordre français
+                         à toutes les langues. --}}
+                    <span>{!! __('auth.login.secours', ['lien' => route('password.request')]) !!}</span>
                 </div>
             @enderror
 
@@ -72,18 +72,18 @@
                     <input type="hidden" name="remember" value="0">
                     <input class="form-check-input" type="checkbox" name="remember"
                            id="remember" value="1" @checked(old('remember'))>
-                    <label class="form-check-label f__hint" for="remember">Se souvenir de moi</label>
+                    <label class="form-check-label f__hint" for="remember">{{ __('auth.champs.se_souvenir') }}</label>
                 </div>
 
-                <a href="{{ route('password.request') }}" class="f__hint">Mot de passe oublié&nbsp;?</a>
+                <a href="{{ route('password.request') }}" class="f__hint">{!! __('auth.liens.mot_de_passe_oublie') !!}</a>
             </div>
 
-            <x-button :block="true">Se connecter</x-button>
+            <x-button :block="true">{{ __('auth.login.bouton') }}</x-button>
         </div>
     </form>
 
     <p class="f__hint text-center mt-4 mb-0">
-        Pas encore de compte&nbsp;?
-        <a href="{{ route('register') }}">Créer un compte</a>
+        {!! __('auth.liens.pas_de_compte') !!}
+        <a href="{{ route('register') }}">{{ __('auth.liens.creer_compte') }}</a>
     </p>
 </x-auth-layout>

@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Concerns\FormatsSenegalPhone;
 use App\Mail\ResetPasswordMail;
+use App\Support\Langue;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -14,7 +16,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use FormatsSenegalPhone, HasFactory, Notifiable;
@@ -111,6 +113,31 @@ class User extends Authenticatable implements MustVerifyEmail
     public function prefersDark(): bool
     {
         return $this->theme === 'dark';
+    }
+
+    /**
+     * LA LANGUE DES E-MAILS ADRESSÉS À CETTE PERSONNE.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * CETTE MÉTHODE N'EST JAMAIS APPELÉE PAR NOTRE CODE, ET C'EST LE POINT
+     * ═══════════════════════════════════════════════════════════════════
+     * Elle vient du contrat HasLocalePreference. Dès qu'un modèle le porte,
+     * `Mail::to($user)` lit lui-même cette valeur et rend le message dans
+     * cette langue — sans qu'aucun appelant ait à y penser.
+     *
+     * C'est ce qui répond au vrai piège des e-mails : un envoi DÉCLENCHÉ par
+     * l'administrateur — une prolongation d'abonnement, un déblocage de
+     * compte — s'exécute dans la requête de l'administrateur, donc avec SA
+     * langue posée par le middleware. Sans ce contrat, un client anglophone
+     * recevrait un message en français parce que quelqu'un d'autre a cliqué.
+     *
+     * Le mécanisme vaut aussi EN FILE : Laravel range la locale dans la
+     * charge utile du job. Le worker, qui n'a ni session ni cookie ni
+     * requête, restitue donc la bonne langue.
+     */
+    public function preferredLocale(): string
+    {
+        return Langue::valide($this->locale) ? $this->locale : Langue::FRANCAIS;
     }
 
     // -----------------------------------------------------------------------

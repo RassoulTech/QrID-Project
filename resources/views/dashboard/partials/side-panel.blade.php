@@ -13,7 +13,7 @@
 
     {{-- ===================== DERNIERS VISITEURS ===================== --}}
     <section class="db-card">
-        <h2 class="db-card__titre">Derniers visiteurs</h2>
+        <h2 class="db-card__titre">{{ __('dashboard.rail.visiteurs') }}</h2>
 
         @forelse ($visiteurs as $visite)
             <div class="visite">
@@ -28,21 +28,21 @@
 
                 <span class="visite__texte">
                     <span class="visite__type">
-                        {{ $visite->type === 'scan' ? 'Scan du QR Code' : 'Consultation directe' }}
+                        {{ $visite->type === 'scan' ? __('dashboard.rail.scan') : __('dashboard.rail.consultation') }}
                     </span>
                     <span class="visite__date">{{ $visite->created_at?->diffForHumans() }}</span>
                 </span>
             </div>
         @empty
             <p class="db-vide__texte db-vide__texte--serre">
-                Personne n'a encore ouvert votre carte.
+                {{ __('dashboard.rail.aucun_visiteur') }}
             </p>
         @endforelse
     </section>
 
     {{-- ===================== JOURNAL DU COMPTE ===================== --}}
     <section class="db-card">
-        <h2 class="db-card__titre">Activité du compte</h2>
+        <h2 class="db-card__titre">{{ __('dashboard.rail.journal') }}</h2>
 
         @forelse ($journal as $entree)
             <div class="journal">
@@ -56,7 +56,7 @@
                 </span>
             </div>
         @empty
-            <p class="db-vide__texte db-vide__texte--serre">Aucune activité enregistrée.</p>
+            <p class="db-vide__texte db-vide__texte--serre">{{ __('dashboard.rail.aucune_activite') }}</p>
         @endforelse
     </section>
 
@@ -75,11 +75,10 @@
          d'aide, lui, arrive plus tard. --}}
     @if ($groupeUrl = config('automation.whatsapp_groupe'))
         <section class="db-card db-groupe">
-            <h2 class="db-card__titre">Besoin d'un coup de main&nbsp;?</h2>
+            <h2 class="db-card__titre">{!! __('dashboard.rail.groupe_titre') !!}</h2>
 
             <p class="db-groupe__texte">
-                Un groupe WhatsApp réunit les clients {{ config('app.name') }}.
-                Questions, entraide, et réponses de notre équipe.
+                {{ __('dashboard.rail.groupe_texte', ['marque' => config('app.name')]) }}
             </p>
 
             <a href="{{ $groupeUrl }}" class="db-groupe__lien"
@@ -88,7 +87,7 @@
                     <path d="M12.04 2a9.9 9.9 0 0 0-8.5 15.02L2 22.5l5.62-1.47A9.9 9.9 0 1 0 12.04 2m0 1.67a8.23 8.23 0 1 1-4.19 15.31l-.3-.18-3.34.87.89-3.25-.2-.31A8.23 8.23 0 0 1 12.04 3.67"/>
                     <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.65.07a8.1 8.1 0 0 1-2.39-1.47 9 9 0 0 1-1.65-2.06c-.17-.3-.02-.46.13-.61s.3-.35.45-.52.2-.3.3-.5.05-.37-.02-.52-.67-1.61-.92-2.21c-.24-.58-.49-.5-.67-.51h-.57a1.1 1.1 0 0 0-.8.37 3.35 3.35 0 0 0-1.04 2.48 5.8 5.8 0 0 0 1.22 3.09 13.3 13.3 0 0 0 5.09 4.5c.71.3 1.27.49 1.7.63a4.1 4.1 0 0 0 1.88.12 3.07 3.07 0 0 0 2.01-1.42 2.5 2.5 0 0 0 .17-1.42c-.07-.12-.27-.2-.57-.35z"/>
                 </svg>
-                Rejoindre le groupe
+                {{ __('dashboard.rail.groupe_rejoindre') }}
             </a>
         </section>
     @endif

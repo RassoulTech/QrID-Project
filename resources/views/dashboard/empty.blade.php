@@ -2,7 +2,7 @@
 
      UNE seule action possible : créer son profil. Aucun bloc de statistiques
      à zéro, aucune carte vide, aucun conseil à lire. --}}
-<x-app-layout title="Tableau de bord">
+<x-app-layout :title="__('dashboard.titre')">
     <div class="board-empty">
         <div class="board-empty__card">
             <span class="board-empty__icon" aria-hidden="true">
@@ -13,13 +13,11 @@
                 </svg>
             </span>
 
-            <h1 class="board-empty__title">Bienvenue {{ $user->name }}</h1>
-            <p class="board-empty__text">
-                Créez votre profil professionnel pour le partager par lien ou QR Code.
-            </p>
+            <h1 class="board-empty__title">{{ __('dashboard.vide.bienvenue', ['nom' => $user->name]) }}</h1>
+            <p class="board-empty__text">{{ __('dashboard.vide.texte') }}</p>
 
             <x-button :href="route('profile.create.step1')" size="lg">
-                Créer mon profil
+                {{ __('dashboard.vide.creer') }}
             </x-button>
         </div>
     </div>

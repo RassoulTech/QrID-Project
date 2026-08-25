@@ -1,19 +1,19 @@
 {{-- ACTION PRINCIPALE : définir le nouveau mot de passe. --}}
 <x-auth-layout
-    title="Nouveau mot de passe"
+    :title="__('auth.reset.titre')"
     aside-tone="light"
-    aside-title="Un mot de passe, et vous repartez."
-    aside-text="Choisissez-en un que vous seul connaissez. L'indicateur vous dit où vous en êtes ; il ne vous impose rien que le formulaire n'accepte déjà."
+    :aside-title="__('auth.reset.aside_titre')"
+    :aside-text="__('auth.reset.aside_texte')"
     :aside-step="2">
 
     {{-- Visuel de CETTE page : portrait illustré et pastille de validation. --}}
     <x-slot:aside>
-        <x-visual.portrait name="Awa Ndiaye" role="Architecte · Atelier Teranga" />
-        <x-visual.chip icon="bouclier" label="Compte protégé" position="bas-droite" />
+        <x-visual.portrait name="Awa Ndiaye" :role="__('auth.forgot.visuel_role')" />
+        <x-visual.chip icon="bouclier" :label="__('auth.reset.visuel_protege')" position="bas-droite" />
     </x-slot:aside>
 
-    <h1 class="auth__title">Nouveau mot de passe</h1>
-    <p class="auth__lead">Choisissez un nouveau mot de passe pour votre compte.</p>
+    <h1 class="auth__title">{{ __('auth.reset.titre') }}</h1>
+    <p class="auth__lead">{{ __('auth.reset.accroche') }}</p>
 
     <form method="POST" action="{{ route('password.store') }}" novalidate class="mt-4">
         @csrf
@@ -25,7 +25,7 @@
             <x-auth-field
                 name="email"
                 type="email"
-                label="Adresse e-mail"
+                :label="__('auth.champs.email')"
                 :value="$request->email"
                 autocomplete="username"
                 inputmode="email"
@@ -34,23 +34,23 @@
 
             <x-auth-password
                 name="password"
-                label="Nouveau mot de passe"
+                :label="__('auth.champs.nouveau_mot_de_passe')"
                 autocomplete="new-password"
-                hint="Au moins 8 caractères."
+                :hint="__('auth.champs.huit_caracteres')"
                 :meter="true"
             />
 
             <x-auth-password
                 name="password_confirmation"
-                label="Confirmer le mot de passe"
+                :label="__('auth.champs.confirmer_mot_de_passe')"
                 autocomplete="new-password"
             />
 
-            <x-button :block="true">Réinitialiser mon mot de passe</x-button>
+            <x-button :block="true">{{ __('auth.reset.bouton') }}</x-button>
         </div>
     </form>
 
     <p class="f__hint text-center mt-4 mb-0">
-        <a href="{{ route('login') }}">Retour à la connexion</a>
+        <a href="{{ route('login') }}">{{ __('auth.liens.retour_connexion') }}</a>
     </p>
 </x-auth-layout>

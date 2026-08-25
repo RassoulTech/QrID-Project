@@ -23,27 +23,29 @@
         || request()->routeIs('profile.preview');
 
     $sections = [
-        'Pilotage' => [
-            ['Tableau de bord', route('dashboard'), request()->routeIs('dashboard'), 'grille'],
-            ['Statistiques', route('statistiques'), request()->routeIs('statistiques'), 'courbe'],
+        'pilotage' => [
+            [__('navigation.client.tableau_de_bord'), route('dashboard'), request()->routeIs('dashboard'), 'grille'],
+            [__('navigation.client.statistiques'), route('statistiques'), request()->routeIs('statistiques'), 'courbe'],
         ],
-        'Ma carte' => [
+        'ma_carte' => [
             // Sans profil, l'entrée mène à la première étape de création :
             // consulter un profil inexistant n'aurait rien à montrer.
-            ['Mon profil', $aProfil ? route('profil.index') : route('profile.create.step1'), $profilActif, 'personne'],
-            ['Mon QR Code', route('carte.qr'), request()->routeIs('carte.qr'), 'qr'],
+            [__('navigation.client.mon_profil'), $aProfil ? route('profil.index') : route('profile.create.step1'), $profilActif, 'personne'],
+            [__('navigation.client.mon_qr'), route('carte.qr'), request()->routeIs('carte.qr'), 'qr'],
         ],
-        'Compte' => [
+        'compte' => [
             // Mène à l'écran des formules, qui sert aussi bien la première
             // souscription que le renouvellement, selon l'état du compte.
-            ['Mon abonnement', route('abonnement.paiement'), request()->routeIs('abonnement.*'), 'carte-bancaire'],
+            [__('navigation.client.mon_abonnement'), route('abonnement.paiement'), request()->routeIs('abonnement.*'), 'carte-bancaire'],
         ],
     ];
 @endphp
 
-<nav class="adm-nav" aria-label="Navigation principale">
-    @foreach ($sections as $titre => $entrees)
-        <p class="adm-nav__titre">{{ $titre }}</p>
+{{-- x-client-icon reçoit un identifiant propre (« grille », « qr »), pas le
+     libellé : le menu peut être traduit sans que les icônes ne bougent. --}}
+<nav class="adm-nav" aria-label="{{ __('navigation.principale') }}">
+    @foreach ($sections as $section => $entrees)
+        <p class="adm-nav__titre">{{ __('navigation.sections.'.$section) }}</p>
 
         <ul class="adm-nav__liste">
             @foreach ($entrees as [$libelle, $url, $actif, $icone])
@@ -65,7 +67,7 @@
         <a class="adm-nav__lien" href="{{ config('registration.support_whatsapp') }}"
            target="_blank" rel="noopener">
             <x-client-icon name="aide" />
-            <span>Aide</span>
+            <span>{{ __('navigation.coque.aide') }}</span>
         </a>
 
         {{-- Formulaire POST : en GET, une simple image distante suffirait à
@@ -74,7 +76,7 @@
             @csrf
             <button type="submit" class="adm-nav__lien adm-nav__lien--action">
                 <x-client-icon name="sortie" />
-                <span>Déconnexion</span>
+                <span>{{ __('navigation.coque.deconnexion') }}</span>
             </button>
         </form>
     </div>

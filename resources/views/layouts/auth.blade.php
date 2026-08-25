@@ -41,9 +41,9 @@
 
             <p class="auth__legal">
                 <span>&copy; {{ date('Y') }} {{ config('app.name') }}</span>
-                <a href="{{ route('legal.conditions') }}">Conditions générales</a>
-                <a href="{{ route('legal.confidentialite') }}">Confidentialité</a>
-                <a href="{{ route('legal.mentions') }}">Mentions légales</a>
+                <a href="{{ route('legal.conditions') }}">{{ __('navigation.pied.conditions') }}</a>
+                <a href="{{ route('legal.confidentialite') }}">{{ __('navigation.pied.confidentialite') }}</a>
+                <a href="{{ route('legal.mentions') }}">{{ __('navigation.pied.mentions') }}</a>
             </p>
         </div>
 

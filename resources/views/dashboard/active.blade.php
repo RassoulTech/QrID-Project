@@ -8,32 +8,34 @@
   Ordre imposé : ce qui alarme d'abord (abonnement échu), puis les chiffres,
   puis la carte, puis l'activité.
 --}}
-<x-app-layout title="Tableau de bord">
+<x-app-layout :title="__('dashboard.titre')">
 
     <div class="db-tete">
         <div>
+            {{-- Le PRÉNOM est du contenu saisi : il n'est jamais traduit.
+                 Seule la formule d'accueil qui l'entoure l'est. --}}
             <h1 class="db-tete__titre">
-                Bonjour {{ Str::before($profile->first_name ?: Auth::user()->name, ' ') }}
+                {{ __('dashboard.tete.bonjour', [
+                    'prenom' => Str::before($profile->first_name ?: Auth::user()->name, ' '),
+                ]) }}
             </h1>
-            <p class="db-tete__sous">Suivez votre carte et son audience.</p>
+            <p class="db-tete__sous">{{ __('dashboard.tete.sous') }}</p>
         </div>
 
         @if ($profile->isPubliclyVisible())
             <x-button :href="$publicUrl" variant="outline" size="sm" target="_blank" rel="noopener">
-                Voir ma carte publique
+                {{ __('dashboard.tete.voir_carte') }}
             </x-button>
         @else
-            <x-button :href="route('abonnement.paiement')" size="sm">Activer ma carte</x-button>
+            <x-button :href="route('abonnement.paiement')" size="sm">{{ __('dashboard.tete.activer_carte') }}</x-button>
         @endif
     </div>
 
     @if ($expired)
-        <x-alert type="danger" :dismissible="false" title="Votre abonnement a expiré">
-            Votre carte n'est plus consultable par vos contacts&nbsp;: le lien public
-            ne répond plus. Rien n'est perdu — un paiement la remet en ligne
-            immédiatement.
+        <x-alert type="danger" :dismissible="false" :title="__('dashboard.expire.titre')">
+            {!! __('dashboard.expire.texte') !!}
             <span class="d-block mt-2">
-                <x-button :href="route('abonnement.paiement')" size="sm">Réactiver ma carte</x-button>
+                <x-button :href="route('abonnement.paiement')" size="sm">{{ __('dashboard.expire.reactiver') }}</x-button>
             </span>
         </x-alert>
     @endif

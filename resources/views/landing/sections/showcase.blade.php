@@ -6,10 +6,10 @@
   <div class="wrap showcase__grid" data-reveal="scale">
 
     <div>
-      <h2 class="showcase__title">{{ __('Voyez votre profil terminé avant de payer.') }}</h2>
+      <h2 class="showcase__title">{{ __('landing.demo.titre') }}</h2>
 
       <p class="showcase__text">
-        {{ __("Notre technologie vous permet de visualiser instantanément le rendu de votre identité numérique. Pas de frais cachés, pas d'engagement immédiat. Testez la puissance de :marque gratuitement.", ['marque' => config('app.name')]) }}
+        {{ __('landing.demo.texte', ['marque' => config('app.name')]) }}
       </p>
 
       <div class="showcase__meta">
@@ -22,10 +22,10 @@
               <path d="M10 0v6h6V0zm5 1v4h-4V1zM8 8v2H6V8zm2 2V8h2v2zm-2 2v-2H6v2zm2 0h2v-2h-2zm4 0v2h-2v-2z"/>
             </svg>
           </span>
-          <div class="scan-badge__label">{!! __('Scanner &amp; Voir') !!}</div>
+          <div class="scan-badge__label">{!! __('landing.demo.scanner') !!}</div>
         </div>
 
-        <div class="avatars" aria-label="{{ __('Plus de 500 professionnels') }}">
+        <div class="avatars" aria-label="{{ __('landing.demo.professionnels') }}">
           <span class="avatars__item">AD</span>
           <span class="avatars__item">MF</span>
           <span class="avatars__item">FS</span>

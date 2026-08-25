@@ -4,11 +4,11 @@
      La liste est dupliquée : la seconde copie prend la place de la première
      à -50 %, ce qui rend la boucle continue et invisible.
      Props : $trades --}}
-<section class="trades" id="produits" aria-label="{{ __('Métiers concernés') }}">
+<section class="trades" id="produits" aria-label="{{ __('landing.metiers.aria') }}">
   <div class="trades__row">
     @foreach ($trades as $trade)
       <span class="trades__item{{ in_array($loop->index, [1, 3]) ? ' trades__item--strong' : '' }}">
-        {{ __($trade) }}
+        {{ __('landing.metiers.'.$trade) }}
       </span>
     @endforeach
 
@@ -16,7 +16,7 @@
     @foreach ($trades as $trade)
       <span class="trades__item{{ in_array($loop->index, [1, 3]) ? ' trades__item--strong' : '' }}"
             aria-hidden="true">
-        {{ __($trade) }}
+        {{ __('landing.metiers.'.$trade) }}
       </span>
     @endforeach
   </div>

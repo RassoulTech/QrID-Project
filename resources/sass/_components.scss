@@ -735,3 +735,27 @@
   .langue__declencheur{padding:0 10px}
 }
 
+// -----------------------------------------------------------------------------
+// LES PRÉFÉRENCES SUR LES PAGES D'ERREUR
+// -----------------------------------------------------------------------------
+//
+// Une page d'erreur n'a ni barre de navigation ni pied de page : elle est
+// volontairement nue, pour que le message soit la seule chose à lire. Les deux
+// commandes de confort s'y posent donc seules, dans le coin, sans rien autour.
+//
+// Elles ne sont pas décoratives. Une 419 arrive au milieu d'un formulaire, une
+// 429 après un envoi de trop : ce sont les pages où quelqu'un est déjà
+// contrarié, et où retirer la commande qu'il a partout ailleurs ajouterait une
+// petite panne à un incident.
+.erreur__prefs{
+  position:absolute;
+  top:16px;right:16px;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+// Le corps de la page d'erreur est le seul ancêtre positionné disponible.
+.auth-wrapper{position:relative}
+

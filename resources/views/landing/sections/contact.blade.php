@@ -41,10 +41,10 @@
 
       {{-- ================= COLONNE GAUCHE ================= --}}
       <div class="contact__intro">
-        <h2 class="section-title">{!! __('Une question&nbsp;? Écrivez-nous.') !!}</h2>
+        <h2 class="section-title">{!! __('landing.contact.titre') !!}</h2>
 
         <p class="section-sub">
-          {!! __('Une demande sur le service, une commande de cartes imprimées, ou simplement un doute&nbsp;: nous répondons sous 24&nbsp;heures ouvrées.') !!}
+          {!! __('landing.contact.sous_titre') !!}
         </p>
 
         @if (config('landing.support.whatsapp'))
@@ -55,8 +55,8 @@
               <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.65.07a8.1 8.1 0 0 1-2.39-1.47 9 9 0 0 1-1.65-2.06c-.17-.3-.02-.46.13-.61s.3-.35.45-.52.2-.3.3-.5.05-.37-.02-.52-.67-1.61-.92-2.21c-.24-.58-.49-.5-.67-.51h-.57a1.1 1.1 0 0 0-.8.37 3.35 3.35 0 0 0-1.04 2.48 5.8 5.8 0 0 0 1.22 3.09 13.3 13.3 0 0 0 5.09 4.5c.71.3 1.27.49 1.7.63a4.1 4.1 0 0 0 1.88.12 3.07 3.07 0 0 0 2.01-1.42 2.5 2.5 0 0 0 .17-1.42c-.07-.12-.27-.2-.57-.35z"/>
             </svg>
             <span>
-              <strong>{!! __('Répondre plus vite&nbsp;: WhatsApp') !!}</strong>
-              <small>{{ __('Le canal le plus rapide, du lundi au samedi.') }}</small>
+              <strong>{!! __('landing.contact.whatsapp_titre') !!}</strong>
+              <small>{{ __('landing.contact.whatsapp_texte') }}</small>
             </span>
           </a>
         @endif
@@ -75,8 +75,8 @@
               <path d="M20 6L9 17l-5-5"/>
             </svg>
             <span>
-              <strong>{{ __('Message reçu.') }}</strong>
-              {!! __('Nous vous répondons à l\'adresse indiquée, sous 24&nbsp;heures ouvrées.') !!}
+              <strong>{{ __('landing.contact.recu_titre') }}</strong>
+              {!! __('landing.contact.recu_texte') !!}
             </span>
           </div>
         @endif
@@ -93,22 +93,22 @@
                tabulation et de l'arbre d'accessibilité : aucun humain ne peut
                le remplir, les robots remplissent tout. --}}
           <div class="contact__piege" aria-hidden="true">
-            <label for="site_web">{{ __('Ne remplissez pas ce champ') }}</label>
+            <label for="site_web">{{ __('common.champs.piege') }}</label>
             <input type="text" name="site_web" id="site_web" tabindex="-1" autocomplete="off">
           </div>
 
           <div class="contact__paire">
             <x-input name="name"
-                     :label="__('Votre nom')"
+                     :label="__('landing.contact.votre_nom')"
                      :value="old('name', auth()->user()?->name)"
-                     :placeholder="__('Awa Ndiaye')"
+                     :placeholder="__('landing.contact.nom_exemple')"
                      autocomplete="name"
                      :required="true" />
 
             <x-input name="email" type="email"
-                     :label="__('Adresse e-mail')"
+                     :label="__('common.champs.email')"
                      :value="old('email', auth()->user()?->email)"
-                     placeholder="vous@exemple.sn"
+                     :placeholder="__('auth.champs.email_exemple')"
                      inputmode="email" autocomplete="email"
                      :required="true" />
           </div>
@@ -118,7 +118,7 @@
                  renoncer ceux qui ne veulent pas être appelés, pour une
                  information dont on n'a pas besoin pour répondre. --}}
             <x-input name="phone" type="tel"
-                     :label="__('Téléphone')"
+                     :label="__('common.champs.telephone')"
                      :value="old('phone', auth()->user()?->phone)"
                      placeholder="77 000 00 00"
                      inputmode="numeric" autocomplete="tel"
@@ -134,35 +134,37 @@
             @php
               $motifDemande = request()->query('motif');
               $motifChoisi = old('subject')
-                  ?? (array_key_exists($motifDemande, \App\Http\Requests\ContactRequest::SUJETS)
+                  ?? (in_array($motifDemande, \App\Http\Requests\ContactRequest::SUJETS, true)
                       ? $motifDemande
-                      : array_key_first(\App\Http\Requests\ContactRequest::SUJETS));
+                      : \App\Http\Requests\ContactRequest::SUJETS[0]);
 
-              // Les libellés passent par __() : la liste vit dans une classe
-              // PHP, elle n'est pas traduite à la source.
+              /* SUJETS ne porte plus que des CLÉS. Il portait les libellés
+                 français, que la vue passait à __() : la phrase française
+                 servait donc de clé de traduction, et la reformuler aurait
+                 fait disparaître l'anglais sans le moindre signal. */
               $motifs = collect(\App\Http\Requests\ContactRequest::SUJETS)
-                  ->map(fn (string $libelle) => __($libelle))
+                  ->mapWithKeys(fn (string $cle) => [$cle => __('landing.contact.motifs.'.$cle)])
                   ->all();
             @endphp
 
             <x-select name="subject"
-                      :label="__('Motif')"
+                      :label="__('common.champs.motif')"
                       :options="$motifs"
                       :selected="$motifChoisi"
                       :required="true" />
           </div>
 
           <x-textarea name="message"
-                      :label="__('Votre message')"
+                      :label="__('landing.contact.votre_message')"
                       :value="old('message')"
                       :rows="5"
-                      :placeholder="__('Dites-nous en quelques lignes ce dont vous avez besoin.')"
+                      :placeholder="__('landing.contact.message_exemple')"
                       :required="true" />
 
-          <x-button :block="true">{{ __('Envoyer mon message') }}</x-button>
+          <x-button :block="true">{{ __('landing.contact.envoyer') }}</x-button>
 
           <p class="contact__legal">
-            {{ __('Vos coordonnées servent uniquement à vous répondre. Elles ne sont ni revendues, ni utilisées pour de la prospection.') }}
+            {{ __('landing.contact.legal') }}
           </p>
         </form>
       </div>

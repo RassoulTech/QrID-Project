@@ -1,8 +1,8 @@
 {{-- LANDING PAGE — reproduction de la maquette validée.
      ACTION PRINCIPALE : créer un compte. --}}
 <x-public-layout
-    :title="config('app.name').' | Votre Identité Professionnelle Numérique'"
-    description="La plateforme d'identité numérique sécurisée pour l'élite professionnelle du Sénégal. Centralisez votre expertise et rayonnez avec élégance.">
+    :title="__('landing.meta.titre', ['marque' => config('app.name')])"
+    :description="__('landing.meta.description')">
 
     @include('landing.sections.hero')
     @include('landing.sections.trades')

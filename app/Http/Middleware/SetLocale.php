@@ -25,7 +25,14 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        app()->setLocale(Langue::courante());
+        /*
+         | LA REQUÊTE EST PASSÉE EXPLICITEMENT, et c'est le seul endroit du
+         | produit où elle l'est. Voir App\Support\Langue : la négociation sur
+         | Accept-Language n'a lieu que si on lui tend une requête, parce que
+         | `SetRequestForConsole` en fabrique une factice — annonçant l'anglais —
+         | au démarrage de chaque commande artisan.
+         */
+        app()->setLocale(Langue::courante($request));
 
         return $next($request);
     }

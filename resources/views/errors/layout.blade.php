@@ -12,6 +12,20 @@
     @vite(['resources/sass/app.scss'])
 </head>
 <body>
+    {{-- LE SÉLECTEUR EST SUR LES PAGES D'ERREUR AUSSI, ET CE N'EST PAS DU ZÈLE.
+
+         Une 419 arrive au milieu d'un formulaire, une 429 après un envoi de
+         trop, une 404 sur un lien partagé. Ce sont les pages où quelqu'un est
+         déjà contrarié : lui retirer là, et là seulement, la commande qu'il a
+         sur toutes les autres, c'est ajouter une petite panne à un incident.
+
+         Il vit hors de la carte, en haut à droite, pour ne pas concurrencer
+         le message d'erreur — qui reste la seule chose à lire. --}}
+    <div class="erreur__prefs">
+        <x-language-toggle />
+        <x-theme-toggle />
+    </div>
+
     <main class="auth-wrapper">
         <div class="container">
             <div class="auth-card mx-auto text-center">
@@ -29,15 +43,15 @@
                         @hasSection('action')
                             @yield('action')
                         @else
-                            <a href="{{ url('/') }}" class="btn btn-primary">Retour à l'accueil</a>
+                            <a href="{{ url('/') }}" class="btn btn-primary">{{ __('errors.retour_accueil') }}</a>
                         @endif
                     </div>
                 </div>
 
                 <p class="text-secondary small mt-4 mb-0">
-                    Besoin d'aide&nbsp;?
+                    {!! __('errors.aide.question') !!}
                     <a href="{{ config('registration.support_whatsapp') }}" target="_blank" rel="noopener">
-                        Contactez le support
+                        {{ __('errors.aide.contact') }}
                     </a>
                 </p>
             </div>

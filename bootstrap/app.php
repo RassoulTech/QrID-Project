@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureUserIsNotBlocked;
 use App\Http\Middleware\EnsureWizardStepIsAvailable;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SetLocale;
+use App\Support\Langue;
 use App\Support\Theme;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -83,7 +84,7 @@ return Application::configure(basePath: dirname(__DIR__))
          | serait rejeté après rotation de APP_KEY, renvoyant silencieusement
          | des visiteurs en thème clair.
          */
-        $middleware->encryptCookies(except: [Theme::nomDuCookie()]);
+        $middleware->encryptCookies(except: [Theme::nomDuCookie(), Langue::nomDuCookie()]);
 
         // Un compte suspendu est éjecté dès la requête suivante, sans attendre
         // l'expiration de sa session. Placé sur le groupe web : il doit
@@ -96,6 +97,28 @@ return Application::configure(basePath: dirname(__DIR__))
          | dans l'ancienne langue puis la retraduit sous les yeux — une seconde
          | entière sur une 3G. Le HTML servi est donc déjà dans la bonne.
          */
+        /*
+         | IL EST DANS LES DEUX PILES, ET CE N'EST PAS UN DOUBLON.
+         |
+         | ── La pile GLOBALE tourne AVANT le routage. C'est la seule qui
+         |    s'exécute quand AUCUNE ROUTE NE CORRESPOND — donc sur toutes les
+         |    pages 404. Sans elle, le 404 était la seule page du produit qui
+         |    restait en français quoi qu'on choisisse : le groupe « web » n'est
+         |    jamais atteint quand le routeur lève l'exception avant de l'entrer.
+         |
+         |    À ce stade, ni la session ni l'authentification n'existent encore.
+         |    La langue est donc lue du cookie et de l'en-tête, ce qui suffit
+         |    exactement pour une page d'erreur.
+         |
+         | ── Le groupe WEB tourne après StartSession et l'authentification. Il
+         |    reprend la décision avec les deux sources que la pile globale ne
+         |    pouvait pas consulter : la préférence du compte, puis la session.
+         |
+         | Le second passage écrase le premier avec une meilleure réponse. Deux
+         | lectures en mémoire : le coût est nul, et la 404 cesse d'être une
+         | exception à la règle.
+         */
+        $middleware->append(SetLocale::class);
         $middleware->appendToGroup('web', SetLocale::class);
 
         $middleware->appendToGroup('web', EnsureUserIsNotBlocked::class);
@@ -132,7 +155,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             if ($request->expectsJson()) {
                 return response()->json(
-                    ['message' => 'Votre session a expiré. Rechargez la page.'],
+                    ['message' => __('errors.419.json')],
                     419
                 );
             }
@@ -148,8 +171,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->withInput($request->except([
                     'password', 'password_confirmation', 'current_password', '_token',
                 ]))
-                ->with('warning', 'Votre page est restée ouverte trop longtemps. '
-                    .'Vos informations sont conservées : validez à nouveau pour continuer.');
+                ->with('warning', __('errors.419.saisies_conservees'));
         });
 
         /*
@@ -162,12 +184,11 @@ return Application::configure(basePath: dirname(__DIR__))
          */
         $exceptions->render(function (PostTooLargeException $e, Request $request) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Fichier trop volumineux.'], 413);
+                return response()->json(['message' => __('errors.trop_volumineux.json')], 413);
             }
 
             return redirect()->to(url()->previous() ?: url('/'))
                 ->withInput($request->except(['photo', 'password', '_token']))
-                ->withErrors(['photo' => 'Votre photo est trop lourde pour être envoyée. '
-                    .'Choisissez une image de moins de 2 Mo.']);
+                ->withErrors(['photo' => __('errors.trop_volumineux.photo')]);
         });
     })->create();

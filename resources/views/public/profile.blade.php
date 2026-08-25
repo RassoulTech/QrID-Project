@@ -24,9 +24,21 @@
 >
 
     <main class="pubc-page">
-        {{-- La bascule de thème flotte hors de la carte : elle appartient au
-             confort du visiteur, pas à l'identité du porteur. --}}
-        <div class="pubc__theme"><x-theme-toggle /></div>
+        {{-- LES DEUX PRÉFÉRENCES DU VISITEUR, ET RIEN D'AUTRE.
+
+             Langue et thème appartiennent au confort de qui LIT la carte, pas
+             à l'identité de qui la porte. Elles flottent donc au-dessus de la
+             couverture, ensemble : un visiteur qui cherche à changer de langue
+             regarde là où il a déjà vu la bascule de thème.
+
+             La page publique suit la langue du VISITEUR, jamais celle du
+             propriétaire du profil. Aucun code n'est nécessaire pour cela —
+             Langue::courante() ne consulte que le visiteur. Le contenu saisi
+             (nom, fonction, entreprise) n'est évidemment jamais traduit. --}}
+        <div class="pubc__prefs">
+            <x-language-toggle />
+            <x-theme-toggle />
+        </div>
 
         <x-carte-publique
             :profile="$profile"

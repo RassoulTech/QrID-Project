@@ -21,6 +21,21 @@ use Illuminate\Validation\Rule;
  * Le formulaire fonctionne sans JavaScript : c'est la règle du projet.
  *
  * ═══════════════════════════════════════════════════════════════════════
+ * LES TROIS MÉMOIRES SONT ÉCRITES D'UN SEUL COUP
+ * ═══════════════════════════════════════════════════════════════════════
+ * Elles ne font pas double emploi — chacune couvre ce que les deux autres
+ * ne savent pas faire :
+ *
+ *   · LA BASE suit la personne d'un appareil à l'autre, et c'est la seule
+ *     que liront les E-MAILS : un rappel d'échéance part hors session, sans
+ *     aucun cookie à consulter ;
+ *   · LA SESSION répond sans toucher au disque, et sert au visiteur qui n'a
+ *     pas de compte ;
+ *   · LE COOKIE survit à l'expiration de la session. Sans lui, revenir le
+ *     lendemain suffirait à retomber en français — précisément ce qu'on
+ *     cherche à ne plus jamais imposer.
+ *
+ * ═══════════════════════════════════════════════════════════════════════
  * ON REVIENT D'OÙ L'ON VENAIT
  * ═══════════════════════════════════════════════════════════════════════
  * Basculer la langue depuis le milieu d'un parcours ne doit pas ramener à
@@ -34,18 +49,14 @@ class LanguePreferenceController extends Controller
             'langue' => ['required', Rule::in(Langue::disponibles())],
         ]);
 
-        // Pour un compte, la préférence suit la personne — et sert aussi aux
-        // e-mails, qui partent hors session et n'ont aucun cookie à lire.
-        $request->user()?->forceFill(['locale' => $valide['langue']])->save();
+        $choix = $valide['langue'];
 
-        /*
-         | LE COOKIE EST POSÉ MÊME POUR UN COMPTE.
-         |
-         | C'est lui qui rend le tout premier rendu après connexion déjà dans
-         | la bonne langue, avant que la session ne soit lue.
-         */
+        $request->user()?->forceFill(['locale' => $choix])->save();
+
+        Langue::memoriserEnSession($choix);
+
         return back()->withCookie(
-            cookie(Langue::nomDuCookie(), $valide['langue'], Langue::DUREE_COOKIE)
+            cookie(Langue::nomDuCookie(), $choix, Langue::DUREE_COOKIE)
         );
     }
 }

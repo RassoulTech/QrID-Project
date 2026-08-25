@@ -25,7 +25,7 @@
     @include('layouts.partials.head')
 </head>
 <body>
-<a href="#contenu" class="skip-link">Aller au contenu</a>
+<a href="#contenu" class="skip-link">{{ __('navigation.aller_au_contenu') }}</a>
 
 <div class="adm">
 
@@ -35,7 +35,7 @@
 
         <div class="adm-side__marque" id="menuLateralTitre">
             <x-brand size="sm" tone="light" :href="route('dashboard')" />
-            <span class="adm-side__portail">Espace client</span>
+            <span class="adm-side__portail">{{ __('navigation.coque.espace_client') }}</span>
         </div>
 
         @include('layouts.partials.sidebar-links')
@@ -55,24 +55,24 @@
         <header class="adm-top">
             <button type="button" class="adm-top__burger"
                     data-bs-toggle="offcanvas" data-bs-target="#menuLateral"
-                    aria-controls="menuLateral" aria-label="Ouvrir le menu">
+                    aria-controls="menuLateral" aria-label="{{ __('navigation.ouvrir_menu') }}">
                 <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
                 </svg>
             </button>
 
-            <span class="adm-top__section">Mon espace</span>
+            <span class="adm-top__section">{{ __('navigation.coque.section_client') }}</span>
 
             {{-- Recherche : formulaire GET, terme en query string.
                  Partageable, rechargeable, sans JavaScript. --}}
             <form method="GET" action="{{ route('recherche') }}" class="adm-search" role="search">
-                <label for="rechercheGlobale" class="visually-hidden">Rechercher</label>
+                <label for="rechercheGlobale" class="visually-hidden">{{ __('navigation.coque.rechercher') }}</label>
                 <svg class="adm-search__icone" width="15" height="15" viewBox="0 0 16 16"
                      fill="currentColor" aria-hidden="true">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                 </svg>
                 <input type="search" id="rechercheGlobale" name="q" class="adm-search__champ"
-                       value="{{ request('q') }}" placeholder="Rechercher" autocomplete="off">
+                       value="{{ request('q') }}" placeholder="{{ __('navigation.coque.rechercher') }}" autocomplete="off">
             </form>
 
             <div class="adm-top__actions">
@@ -91,21 +91,21 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuCompte">
                         <li><span class="dropdown-item-text small text-secondary">{{ $u->email }}</span></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ route('compte.edit') }}">Mon compte</a></li>
+                        <li><a class="dropdown-item" href="{{ route('compte.edit') }}">{{ __('navigation.coque.mon_compte') }}</a></li>
 
                         {{-- Passerelle vers l'administration, pour les seuls
                              comptes qui en ont une. Elle n'apparaît pas
                              ailleurs : un client ne doit pas deviner qu'un
                              back-office existe. --}}
                         @if ($u->isAdmin())
-                            <li><a class="dropdown-item" href="{{ route('admin.home') }}">Administration</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.home') }}">{{ __('navigation.coque.administration') }}</a></li>
                         @endif
 
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item text-danger">Se déconnecter</button>
+                                <button type="submit" class="dropdown-item text-danger">{{ __('navigation.coque.se_deconnecter') }}</button>
                             </form>
                         </li>
                     </ul>
@@ -118,8 +118,10 @@
         @php $sub = $u->activeSubscription(); @endphp
         @if ($sub && $sub->isTrial() && ($restants = $sub->daysRemaining()) !== null)
             <div class="app-trial {{ $restants <= 3 ? 'is-urgent' : '' }}">
-                <span>Il vous reste {{ $restants }} jour{{ $restants > 1 ? 's' : '' }} d'essai gratuit</span>
-                <a href="{{ route('abonnement.paiement') }}">Mettre à jour mon plan</a>
+                {{-- trans_choice et non une concaténation : l'anglais ne place
+                     ni le pluriel ni les mots dans le même ordre. --}}
+                <span>{{ trans_choice('navigation.essai.restants', $restants, ['compte' => $restants]) }}</span>
+                <a href="{{ route('abonnement.paiement') }}">{{ __('navigation.essai.mettre_a_jour') }}</a>
             </div>
         @endif
 

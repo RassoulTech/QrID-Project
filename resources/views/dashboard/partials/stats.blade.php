@@ -12,20 +12,19 @@
   quand la valeur est nulle : elle indique alors quoi faire.
 --}}
 @php
+    /* Le libellé et la phrase d'attente sont DÉRIVÉS de la clé : « views »
+       donne dashboard.apercu.views_libelle et views_attente. Une seule
+       source, et rien à tenir en double. */
     $cartes = [
-        ['cle' => 'views', 'libelle' => 'Vues de la carte', 'pastel' => 1, 'icone' => 'oeil',
-         'attente' => 'Partagez votre lien pour voir arriver vos premières vues.'],
-        ['cle' => 'scans', 'libelle' => 'Scans du QR Code', 'pastel' => 2, 'icone' => 'qr',
-         'attente' => 'Aucun scan pour l\'instant.'],
-        ['cle' => 'saves', 'libelle' => 'Contacts enregistrés', 'pastel' => 3, 'icone' => 'contact',
-         'attente' => 'Personne ne vous a encore enregistré.'],
-        ['cle' => 'days', 'libelle' => 'Jours d\'abonnement', 'pastel' => 4, 'icone' => 'horloge',
-         'attente' => 'Aucun abonnement en cours.'],
+        ['cle' => 'views', 'pastel' => 1, 'icone' => 'oeil'],
+        ['cle' => 'scans', 'pastel' => 2, 'icone' => 'qr'],
+        ['cle' => 'saves', 'pastel' => 3, 'icone' => 'contact'],
+        ['cle' => 'days', 'pastel' => 4, 'icone' => 'horloge'],
     ];
 @endphp
 
 <section class="db-card">
-    <h2 class="db-card__titre">Vue d'ensemble</h2>
+    <h2 class="db-card__titre">{{ __('dashboard.apercu.titre') }}</h2>
 
     <div class="stat-grid">
         @foreach ($cartes as $carte)
@@ -49,10 +48,10 @@
                 </span>
 
                 <span class="stat-tuile__n">{{ number_format((int) $valeur, 0, ',', ' ') }}</span>
-                <span class="stat-tuile__l">{{ $carte['libelle'] }}</span>
+                <span class="stat-tuile__l">{{ __('dashboard.apercu.'.$carte['cle'].'_libelle') }}</span>
 
                 @if ($valeur === null || $valeur === 0)
-                    <span class="stat-tuile__attente">{{ $carte['attente'] }}</span>
+                    <span class="stat-tuile__attente">{{ __('dashboard.apercu.'.$carte['cle'].'_attente') }}</span>
                 @endif
             </div>
         @endforeach

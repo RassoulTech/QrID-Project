@@ -89,10 +89,22 @@ class DashboardTest extends TestCase
             'Un compteur à zéro n\'affiche pas son chiffre : la carte paraît cassée.'
         );
 
-        // Et l'aide contextuelle accompagne le zéro, sans le remplacer.
-        $this->assertStringContainsString('Partagez votre lien', $html);
-        $this->assertStringContainsString('Aucune vue pour l\'instant', $html);
-        $this->assertStringContainsString('Personne n\'a encore ouvert votre carte', $html);
+        /*
+         | L'AIDE CONTEXTUELLE ACCOMPAGNE LE ZÉRO, sans le remplacer.
+         |
+         | On compare au HTML ÉCHAPPÉ. Ces phrases étaient écrites en clair
+         | dans le gabarit ; elles passent maintenant par __() et donc par
+         | {{ }}, qui échappe l'apostrophe en « &#039; ». Le navigateur rend
+         | exactement le même texte — mais assertStringContainsString compare
+         | des octets, pas ce qui s'affiche.
+         |
+         | e() plutôt que la forme échappée recopiée à la main : celle-ci
+         | figerait une décision de Blade dans un test, et deviendrait fausse
+         | le jour où cette décision change.
+         */
+        $this->assertStringContainsString(e('Partagez votre lien'), $html);
+        $this->assertStringContainsString(e('Aucune vue pour l\'instant'), $html);
+        $this->assertStringContainsString(e('Personne n\'a encore ouvert votre carte'), $html);
     }
 
     public function test_real_figures_replace_the_guidance_once_data_exists(): void

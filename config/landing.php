@@ -8,13 +8,24 @@ return [
     |--------------------------------------------------------------------------
     */
 
+    /*
+     | DES CLÉS, PAS DES PHRASES.
+     |
+     | Cette liste portait le texte français, que la vue passait à __(). La
+     | phrase française servait donc de clé de traduction — ce que la
+     | structure des fichiers de langue interdit : renommer « Médecin » en
+     | « Docteur » ferait silencieusement disparaître la traduction anglaise,
+     | sans erreur et sans test rouge.
+     |
+     | Les libellés vivent dans les fichiers de langue, sous landing.metiers.*.
+     */
     'trades' => [
-        'Architecte',
-        'Consultant',
-        'Avocat',
-        'Médecin',
-        'Ingénieur',
-        'Freelance',
+        'architecte',
+        'consultant',
+        'avocat',
+        'medecin',
+        'ingenieur',
+        'freelance',
     ],
 
     /*
@@ -25,9 +36,11 @@ return [
     */
 
     'figures' => [
-        ['number' => '3',  'word' => 'Minutes', 'label' => 'Pour créer'],
-        ['number' => '1',  'word' => 'Lien',    'label' => 'Pour tout partager'],
-        ['number' => '15', 'word' => 'Jours',   'label' => "D'essai gratuit"],
+        // Le CHIFFRE reste ici : c'est une valeur, pas du texte. Le mot et le
+        // libellé sont des clés vers landing.chiffres.*.
+        ['number' => '3',  'cle' => 'minutes'],
+        ['number' => '1',  'cle' => 'lien'],
+        ['number' => '15', 'cle' => 'jours'],
     ],
 
     /*
@@ -36,20 +49,8 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'steps' => [
-        [
-            'title' => 'Créez votre profil',
-            'text' => 'Remplissez vos informations professionnelles en quelques clics grâce à notre interface intuitive.',
-        ],
-        [
-            'title' => 'Personnalisez vos liens',
-            'text' => 'Ajoutez vos réseaux sociaux, votre portfolio et vos moyens de contact favoris.',
-        ],
-        [
-            'title' => 'Partagez sans limite',
-            'text' => 'Un seul lien unique ou un QR code élégant pour toutes vos interactions professionnelles.',
-        ],
-    ],
+    // Trois clés vers landing.etapes.* — l'ordre EST celui de l'affichage.
+    'steps' => ['profil', 'liens', 'partage'],
 
     /*
     |--------------------------------------------------------------------------

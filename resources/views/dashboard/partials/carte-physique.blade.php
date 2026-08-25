@@ -23,7 +23,7 @@
 @if ($commandeCarte)
     <section class="db-card">
         <div class="db-card__tete">
-            <h2 class="db-card__titre">Ma carte physique</h2>
+            <h2 class="db-card__titre">{{ __('dashboard.physique.titre') }}</h2>
             <span class="carte-etat__pastille">{{ $commandeCarte->statutLibelle() }}</span>
         </div>
 
@@ -31,32 +31,32 @@
             {{-- LA SEULE CHOSE QUI BLOQUE VRAIMENT. Sans adresse, la carte ne
                  peut pas partir — et le client ne le sait pas : pour lui, il a
                  payé et il attend. --}}
-            <p class="db-card__texte">
-                Votre carte PVC est <strong>offerte</strong> et vous attend.
-                Il nous manque seulement l'adresse où la livrer.
-            </p>
+            <p class="db-card__texte">{!! __('dashboard.physique.sans_adresse') !!}</p>
 
             <a href="{{ route('carte.physique') }}" class="btn-pill btn-dark btn-sm-pill">
-                Indiquer mon adresse
+                {{ __('dashboard.physique.indiquer_adresse') }}
             </a>
         @else
             <p class="db-card__texte">
-                Livraison à <strong>{{ $commandeCarte->city }}</strong>, pour
-                {{ $commandeCarte->recipient_name }}.
+                {{-- La ville et le destinataire sont du contenu saisi : ils ne
+                     sont pas traduits, seulement insérés dans la phrase. --}}
+                {!! __('dashboard.physique.livraison', [
+                    'ville' => e($commandeCarte->city),
+                    'destinataire' => e($commandeCarte->recipient_name),
+                ]) !!}
 
                 @if ($commandeCarte->delivered_at)
-                    Livrée le {{ $commandeCarte->delivered_at->format('d/m/Y') }}.
+                    {{ __('dashboard.physique.livree_le', ['date' => $commandeCarte->delivered_at->format('d/m/Y')]) }}
                 @elseif ($commandeCarte->shipped_at)
-                    Expédiée le {{ $commandeCarte->shipped_at->format('d/m/Y') }}.
+                    {{ __('dashboard.physique.expediee_le', ['date' => $commandeCarte->shipped_at->format('d/m/Y')]) }}
                 @elseif ($commandeCarte->adresseModifiable())
-                    Départ à la prochaine production, sous environ
-                    {{ config('cartes.delai_jours') }} jours.
+                    {{ __('dashboard.physique.depart_prochain', ['jours' => config('cartes.delai_jours')]) }}
                 @endif
             </p>
 
             @if ($commandeCarte->adresseModifiable())
                 <a href="{{ route('carte.physique') }}" class="board-link__label">
-                    Corriger l'adresse
+                    {{ __('dashboard.physique.corriger_adresse') }}
                 </a>
             @endif
         @endif

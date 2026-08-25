@@ -13,14 +13,14 @@
 --}}
 <section class="db-card">
     <div class="db-card__tete">
-        <h2 class="db-card__titre">Activité récente</h2>
+        <h2 class="db-card__titre">{{ __('dashboard.activite.titre') }}</h2>
 
-        <div class="periode" role="group" aria-label="Période affichée">
+        <div class="periode" role="group" aria-label="{{ __('dashboard.activite.periode_aria') }}">
             @foreach ($periodes as $p)
                 <a href="{{ route('dashboard', ['periode' => $p]) }}"
                    @class(['periode__item', 'is-active' => $p === $periode])
                    @if ($p === $periode) aria-current="true" @endif>
-                    {{ $p }} jours
+                    {{ __('dashboard.activite.periode_jours', ['compte' => $p]) }}
                 </a>
             @endforeach
         </div>
@@ -30,9 +30,11 @@
         @php $max = max(array_column($serie, 'total')) ?: 1; @endphp
 
         <div class="chart" role="img"
-             aria-label="Vues de la carte sur les {{ $periode }} derniers jours">
+             aria-label="{{ __('dashboard.activite.graphique_aria', ['compte' => $periode]) }}">
             @foreach ($serie as $jour)
-                <span class="chart__col" title="{{ $jour['jour'] }} · {{ $jour['total'] }} vue{{ $jour['total'] > 1 ? 's' : '' }}">
+                {{-- trans_choice : le « s » ajouté à la main n'existe pas dans
+                     toutes les langues, et n'y suit pas la même règle. --}}
+                <span class="chart__col" title="{{ trans_choice('dashboard.activite.infobulle', $jour['total'], ['jour' => $jour['jour'], 'compte' => $jour['total']]) }}">
                     <span class="chart__barre" style="height:{{ max(3, round($jour['total'] / $max * 100)) }}%"></span>
                     <span class="chart__jour">{{ $jour['libelle'] }}</span>
                 </span>
@@ -50,8 +52,8 @@
              Un <div> obéit, lui. --}}
         <div class="visually-hidden">
         <table>
-            <caption>Vues par jour</caption>
-            <thead><tr><th>Jour</th><th>Vues</th></tr></thead>
+            <caption>{{ __('dashboard.activite.tableau_titre') }}</caption>
+            <thead><tr><th>{{ __('dashboard.activite.colonne_jour') }}</th><th>{{ __('dashboard.activite.colonne_vues') }}</th></tr></thead>
             <tbody>
                 @foreach ($serie as $jour)
                     <tr><td>{{ $jour['jour'] }}</td><td>{{ $jour['total'] }}</td></tr>
@@ -67,11 +69,8 @@
                 <path d="M6 10v6H0v-6zm-5 1v4h4v-4zm11-9h2v2h-2z"/>
                 <path d="M10 0v6h6V0zm5 1v4h-4V1zM8 8v2H6V8zm2 2V8h2v2zm-2 2v-2H6v2zm2 0h2v-2h-2zm4 0v2h-2v-2z"/>
             </svg>
-            <p class="db-vide__titre">Aucune vue pour l'instant</p>
-            <p class="db-vide__texte">
-                Partagez votre QR Code ou votre lien&nbsp;: les consultations
-                apparaîtront ici, jour par jour.
-            </p>
+            <p class="db-vide__titre">{{ __('dashboard.activite.vide_titre') }}</p>
+            <p class="db-vide__texte">{!! __('dashboard.activite.vide_texte') !!}</p>
         </div>
     @endif
 </section>

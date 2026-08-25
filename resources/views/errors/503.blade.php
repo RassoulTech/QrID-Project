@@ -1,9 +1,9 @@
 @extends('errors.layout')
 
-@section('code', 'Maintenance')
-@section('title', 'Service temporairement indisponible')
-@section('message', 'Nous effectuons une mise à jour. Le service revient dans quelques minutes.')
+@section('code', __('errors.503.code'))
+@section('title', __('errors.503.titre'))
+@section('message', __('errors.503.message'))
 
 @section('action')
-    <a href="{{ url('/') }}" class="btn btn-outline-secondary">Réessayer</a>
+    <a href="{{ url('/') }}" class="btn btn-outline-secondary">{{ __('common.actions.reessayer') }}</a>
 @endsection

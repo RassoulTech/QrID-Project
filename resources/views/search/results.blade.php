@@ -4,16 +4,16 @@
   Le périmètre est celui du COMPTE CONNECTÉ : sa carte, ses paiements, ses
   notifications. Il n'existe aucun chemin permettant de chercher ailleurs.
 --}}
-<x-app-layout title="Recherche">
+<x-app-layout :title="__('dashboard.recherche.titre')">
 
     <div class="db-tete">
         <div>
-            <h1 class="db-tete__titre">Recherche</h1>
+            <h1 class="db-tete__titre">{{ __('dashboard.recherche.titre') }}</h1>
             <p class="db-tete__sous">
                 @if ($terme !== '')
-                    Résultats pour «&nbsp;{{ $terme }}&nbsp;»
+                    {!! __('dashboard.recherche.resultats_pour', ['terme' => e($terme)]) !!}
                 @else
-                    Saisissez un terme dans la barre de recherche.
+                    {{ __('dashboard.recherche.invite') }}
                 @endif
             </p>
         </div>
@@ -21,7 +21,7 @@
 
     @if ($tropCourt)
         <x-alert type="info" :dismissible="false">
-            Saisissez au moins deux caractères.
+            {{ __('dashboard.recherche.trop_court') }}
         </x-alert>
     @endif
 
@@ -32,10 +32,9 @@
     @if ($terme !== '' && ! $tropCourt && $total === 0)
         <section class="db-card">
             <div class="db-vide">
-                <p class="db-vide__titre">Aucun résultat</p>
+                <p class="db-vide__titre">{{ __('dashboard.recherche.aucun_titre') }}</p>
                 <p class="db-vide__texte">
-                    Rien ne correspond à «&nbsp;{{ $terme }}&nbsp;» dans votre carte,
-                    vos paiements ou vos notifications.
+                    {!! __('dashboard.recherche.aucun_texte', ['terme' => e($terme)]) !!}
                 </p>
             </div>
         </section>
@@ -43,7 +42,7 @@
 
     @if ($profil)
         <section class="db-card mb-3">
-            <h2 class="db-card__titre">Ma carte</h2>
+            <h2 class="db-card__titre">{{ __('dashboard.recherche.ma_carte') }}</h2>
             <a class="notif-item" href="{{ route('profile.edit') }}">
                 <span class="notif-item__titre">{{ $profil->full_name }}</span>
                 <span class="notif-item__corps">
@@ -55,7 +54,7 @@
 
     @if ($paiements->isNotEmpty())
         <section class="db-card mb-3">
-            <h2 class="db-card__titre">Paiements</h2>
+            <h2 class="db-card__titre">{{ __('dashboard.recherche.paiements') }}</h2>
             @foreach ($paiements as $paiement)
                 <div class="notif-item">
                     <span class="notif-item__titre">{{ $paiement->formattedAmount() }}</span>

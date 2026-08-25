@@ -13,9 +13,12 @@
   La valeur n'est JAMAIS repositionnée : un mot de passe ne revient pas dans
   le HTML, même après une erreur de validation sur un autre champ.
 --}}
+{{-- Le libellé par défaut est résolu dans le corps, pas dans @props :
+     une valeur par défaut de @props n'est évaluée qu'une fois par requête,
+     ce qui suffit ici, mais la règle vaut pour tout le fichier. --}}
 @props([
     'name' => 'password',
-    'label' => 'Mot de passe',
+    'label' => null,
 
     /*
      | AUCUN marque-place par défaut, et surtout pas « •••••••• ».
@@ -37,6 +40,7 @@
 ])
 
 @php
+    $intitule = $label ?? __('auth.champs.mot_de_passe');
     $fieldId = $id ?? 'a-'.str_replace(['[', ']', '.'], '-', $name);
     $enErreur = $errors->has($name);
     $decritPar = $enErreur ? $fieldId.'-err' : ($hint ? $fieldId.'-hint' : null);
@@ -44,7 +48,7 @@
 
 <div class="f">
     <label class="f__label" for="{{ $fieldId }}">
-        {{ $label }}
+        {{ $intitule }}
         @if ($required)
             <span class="f__requis" aria-hidden="true">*</span>
         @endif
@@ -80,7 +84,7 @@
         <button type="button"
                 class="f__eye"
                 data-password-toggle="{{ $fieldId }}"
-                aria-label="Afficher le mot de passe"
+                aria-label="{{ __('auth.champs.afficher_mot_de_passe') }}"
                 aria-pressed="false"
                 tabindex="-1">
             <svg data-icon-show width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">

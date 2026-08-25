@@ -44,7 +44,7 @@ class SelecteurLangueTest extends TestCase
         $this->from(route('home'))
             ->post(route('preferences.langue'), ['langue' => Langue::ANGLAIS])
             ->assertRedirect(route('home'))
-            ->assertCookie(Langue::nomDuCookie(), Langue::ANGLAIS);
+            ->assertCookie(Langue::nomDuCookie(), Langue::ANGLAIS, encrypted: false);
     }
 
     /** Une langue inconnue est refusée, pas appliquée en silence. */
@@ -71,7 +71,7 @@ class SelecteurLangueTest extends TestCase
         $this->actingAs($user)
             ->from(route('dashboard'))
             ->post(route('preferences.langue'), ['langue' => Langue::ANGLAIS])
-            ->assertCookie(Langue::nomDuCookie(), Langue::ANGLAIS);
+            ->assertCookie(Langue::nomDuCookie(), Langue::ANGLAIS, encrypted: false);
 
         $this->assertSame(Langue::ANGLAIS, $user->fresh()->locale);
     }

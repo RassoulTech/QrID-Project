@@ -39,13 +39,18 @@
   lire ; pour un invité, dans un cookie d'un an.
 --}}
 @php
-    $courante = App\Support\Langue::courante();
+    /* LA LANGUE APPLIQUÉE, pas la chaîne de décision. Le middleware a déjà
+       tranché ; refaire le calcul ici donnerait une AUTRE réponse — la vue
+       n'a pas la requête sous la main, donc pas la négociation sur
+       Accept-Language. Le menu cocherait « Français » sur une page rendue
+       en anglais. */
+    $courante = App\Support\Langue::active();
 @endphp
 
 <details {{ $attributes->merge(['class' => 'langue']) }} data-langue>
     <summary class="langue__declencheur"
-             title="{{ __('Changer de langue') }}"
-             aria-label="{{ __('Langue : :langue', ['langue' => App\Support\Langue::libelle($courante)]) }}">
+             title="{{ __('navigation.langue.changer') }}"
+             aria-label="{{ __('navigation.langue.courante', ['langue' => App\Support\Langue::libelle($courante)]) }}">
         <svg class="langue__globe" width="15" height="15" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
              aria-hidden="true">

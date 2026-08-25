@@ -39,13 +39,31 @@
   overflow-x:hidden;
 }
 
-// La bascule de thème appartient au confort du VISITEUR, pas à l'identité du
-// porteur : elle flotte donc au-dessus de la couverture.
-.pubc__theme{
+// LES PRÉFÉRENCES DU VISITEUR — langue et thème — flottent au-dessus de la
+// couverture. Elles appartiennent au confort de qui LIT la carte, pas à
+// l'identité de qui la porte.
+.pubc__prefs{
   position:absolute;
   top:14px;right:14px;
   z-index:5;
   display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+// LE SÉLECTEUR DE LANGUE EST TRANSPARENT PARTOUT AILLEURS. ICI, IL POSE SUR
+// UNE PHOTOGRAPHIE.
+//
+// Sa bordure et son texte suivent les jetons du thème : sur une couverture
+// claire en thème clair, le contraste tombe à moins de 2:1 et la pastille
+// disparaît dans l'image. La bascule de thème n'avait pas ce défaut — elle
+// porte un fond opaque depuis toujours.
+//
+// On lui donne donc le même fond. Ce n'est pas un ornement : c'est la seule
+// façon de garantir un contraste connu au-dessus d'une image inconnue.
+.pubc__prefs .langue__declencheur{
+  background:var(--surface);
+  border-color:var(--bord);
 }
 
 .pubc{position:relative}
@@ -359,7 +377,25 @@
     box-shadow:var(--ombre-2);
   }
 
-  .pubc__theme{top:34px;right:auto;left:50%;transform:translateX(258px)}
+  /*
+   | LE GROUPE REVIENT DANS LE COIN DE LA CARTE.
+   |
+   | La bascule de thème vivait seule ici, DANS LA GOUTTIÈRE, à 18px du bord
+   | droit de la carte. À 640px pile, cette gouttière ne mesure que
+   | (640 - 480) / 2 = 80px. Le sélecteur de langue en réclame 110 à lui seul :
+   | le groupe déborderait de la fenêtre à l'endroit exact où la règle
+   | s'active.
+   |
+   | Il rejoint donc le coin supérieur droit de la couverture — précisément là
+   | où il se trouve sur téléphone. Un seul emplacement à toutes les largeurs,
+   | et plus aucune largeur où il ne tient pas.
+   */
+  .pubc__prefs{
+    top:34px;
+    right:auto;
+    left:50%;
+    transform:translateX(226px) translateX(-100%);
+  }
 
   // 340px au-delà du téléphone, comme demandé.
   .pubc__couverture{height:340px}

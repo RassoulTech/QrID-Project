@@ -6,11 +6,11 @@
   appartiennent à la carte professionnelle, pas aux identifiants d'accès.
 --}}
 <x-auth-layout
-    title="Créer un compte"
-    description="Créez votre compte {{ config('app.name') }} en moins de trois minutes."
+    :title="__('auth.register.titre')"
+    :description="__('auth.register.description', ['marque' => config('app.name')])"
     aside-tone="light"
-    aside-title="Protégez votre identité professionnelle."
-    aside-text="Vos coordonnées restent à vous. Vous choisissez ce qui s'affiche, vous le modifiez quand vous voulez, et vous le partagez d'un seul geste."
+    :aside-title="__('auth.register.aside_titre')"
+    :aside-text="__('auth.register.aside_texte')"
     :aside-step="2">
 
     {{-- Visuel de CETTE page : cartes empilées sur fond clair. --}}
@@ -18,17 +18,17 @@
         <div class="av-pile">
             <x-visual.badge-card
                 icon="bouclier"
-                title="Vos données vous appartiennent"
-                text="Rien n'est publié sans votre accord, rien n'est revendu." />
+                :title="__('auth.register.visuel_titre')"
+                :text="__('auth.register.visuel_texte')" />
 
             <x-visual.profile-card :lines="2" :cta="false" />
         </div>
 
-        <x-visual.chip icon="check" label="Compte sécurisé" position="bas-droite" />
+        <x-visual.chip icon="check" :label="__('auth.register.visuel_securise')" position="bas-droite" />
     </x-slot:aside>
 
-    <h1 class="auth__title">Créer un compte</h1>
-    <p class="auth__lead">Quinze jours d'essai gratuit, sans carte bancaire.</p>
+    <h1 class="auth__title">{{ __('auth.register.titre') }}</h1>
+    <p class="auth__lead">{{ __('auth.register.accroche') }}</p>
 
     <x-auth-tabs active="register" />
 
@@ -36,7 +36,7 @@
          le lien de confirmation, donc l'attente devant une boîte de réception,
          donc la dépendance à une messagerie qui doit fonctionner. Proposer ce
          raccourci APRÈS six champs déjà remplis n'a aucun sens. --}}
-    <x-google-button label="S'inscrire avec Google" />
+    <x-google-button :label="__('auth.google.inscrire')" />
 
     <form method="POST" action="{{ route('register.store') }}" novalidate>
         @csrf
@@ -49,8 +49,8 @@
         <div class="auth-fields">
             <x-auth-field
                 name="name"
-                label="Nom complet"
-                placeholder="Awa Ndiaye"
+                :label="__('auth.champs.nom_complet')"
+                :placeholder="__('auth.champs.nom_exemple')"
                 autocomplete="name"
                 maxlength="255"
                 autofocus
@@ -59,8 +59,8 @@
             <x-auth-field
                 name="email"
                 type="email"
-                label="Adresse e-mail"
-                placeholder="vous@exemple.sn"
+                :label="__('auth.champs.email')"
+                :placeholder="__('auth.champs.email_exemple')"
                 autocomplete="username"
                 inputmode="email"
                 :value="$prefillEmail ?? null"
@@ -70,26 +70,26 @@
                  rendait l'inscription impossible à un client ivoirien ou à un
                  Sénégalais de la diaspora. Toute saisie raisonnable est
                  acceptée puis normalisée au format international complet. --}}
-            <x-phone-field name="phone" label="Téléphone" :value="old('phone')" />
+            <x-phone-field name="phone" :label="__('auth.champs.telephone')" :value="old('phone')" />
 
             <x-auth-password
                 name="password"
                 autocomplete="new-password"
-                hint="Au moins 8 caractères."
+                :hint="__('auth.champs.huit_caracteres')"
                 :meter="true"
             />
 
             <x-auth-password
                 name="password_confirmation"
-                label="Confirmer le mot de passe"
+                :label="__('auth.champs.confirmer_mot_de_passe')"
                 autocomplete="new-password"
             />
 
-            <x-button :block="true">Recevoir mon lien de confirmation</x-button>
+            <x-button :block="true">{{ __('auth.register.bouton') }}</x-button>
         </div>
     </form>
 
     <p class="f__hint text-center mt-4 mb-0">
-        Déjà inscrit&nbsp;? <a href="{{ route('login') }}">Se connecter</a>
+        {!! __('auth.liens.deja_inscrit') !!} <a href="{{ route('login') }}">{{ __('auth.liens.se_connecter') }}</a>
     </p>
 </x-auth-layout>

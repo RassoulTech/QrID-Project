@@ -11,36 +11,52 @@
   d'elle-même à la livraison de l'écran, sans rien à modifier ici.
 --}}
 @php
-    // [libellé, route, motif d'activation, vue attendue]
+    /*
+     | [identifiant, route, motif d'activation, vue attendue]
+     |
+     | L'IDENTIFIANT N'EST PLUS LE LIBELLÉ. Il servait aux deux : à écrire
+     | l'intitulé du menu ET à choisir l'icône. Traduire l'intitulé aurait
+     | donc fait retomber les onze icônes sur celle par défaut — sans
+     | erreur, sans test rouge, onze entrées portant le même dessin.
+     |
+     | Le libellé vient maintenant de navigation.admin.*, l'icône de
+     | l'identifiant. Les deux peuvent diverger sans se casser.
+     */
     $sections = [
-        'Pilotage' => [
-            ["Vue d'ensemble", 'admin.overview',        'admin.overview',      'admin.overview'],
-            ['Statistiques',   'admin.statistics',      'admin.statistics',    'admin.statistics'],
+        'pilotage' => [
+            ['vue-ensemble',  'admin.overview',        'admin.overview',      'admin.overview'],
+            ['statistiques',  'admin.statistics',      'admin.statistics',    'admin.statistics'],
         ],
-        'Gestion' => [
-            ['Clients',        'admin.clients.index',   'admin.clients.*',     'admin.clients.index'],
-            ['Profils',        'admin.profiles.index',  'admin.profiles.*',    'admin.profiles.index'],
-            ['Paiements',      'admin.payments.index',  'admin.payments.*',    'admin.payments.index'],
-            ['Abonnements',    'admin.subscriptions',   'admin.subscriptions', 'admin.subscriptions'],
-            ['Cartes',         'admin.cards.index',     'admin.cards.*',       'admin.cards.index'],
+        'gestion' => [
+            ['clients',       'admin.clients.index',   'admin.clients.*',     'admin.clients.index'],
+            ['profils',       'admin.profiles.index',  'admin.profiles.*',    'admin.profiles.index'],
+            ['paiements',     'admin.payments.index',  'admin.payments.*',    'admin.payments.index'],
+            ['abonnements',   'admin.subscriptions',   'admin.subscriptions', 'admin.subscriptions'],
+            ['cartes',        'admin.cards.index',     'admin.cards.*',       'admin.cards.index'],
         ],
-        'Configuration' => [
-            ['Modèles',        'admin.templates.index', 'admin.templates.*',   'admin.templates.index'],
-            ['Paramètres',     'admin.settings',        'admin.settings*',     'admin.settings.index'],
-            ['Journal',        'admin.audit.index',     'admin.audit.*',       'admin.audit.index'],
+        'configuration' => [
+            ['modeles',       'admin.templates.index', 'admin.templates.*',   'admin.templates.index'],
+            ['parametres',    'admin.settings',        'admin.settings*',     'admin.settings.index'],
+            ['journal',       'admin.audit.index',     'admin.audit.*',       'admin.audit.index'],
         ],
-        'Système' => [
-            ['État système',   'admin.system.health',   'admin.system.health', 'admin.system-health'],
+        'systeme' => [
+            ['etat-systeme',  'admin.system.health',   'admin.system.health', 'admin.system-health'],
         ],
     ];
+
+    /* La correspondance identifiant → clé de traduction. Les tirets ne
+       passent pas dans une clé de tableau PHP imbriquée : on les convertit
+       une fois ici plutôt qu'à chaque ligne. */
+    $cle = fn (string $id) => 'navigation.admin.'.str_replace('-', '_', $id);
 @endphp
 
-<nav class="adm-nav" aria-label="Navigation de l'administration">
-    @foreach ($sections as $titre => $entrees)
-        <p class="adm-nav__titre">{{ $titre }}</p>
+<nav class="adm-nav" aria-label="{{ __('navigation.administration') }}">
+    @foreach ($sections as $section => $entrees)
+        <p class="adm-nav__titre">{{ __('navigation.sections.'.$section) }}</p>
 
         <ul class="adm-nav__liste">
-            @foreach ($entrees as [$libelle, $route, $motif, $vue])
+            @foreach ($entrees as [$id, $route, $motif, $vue])
+                @php $libelle = __($cle($id)); @endphp
                 @php
                     $existe = Route::has($route) && View::exists($vue);
                     $actif = $existe && request()->routeIs($motif);
@@ -51,13 +67,13 @@
                         <a href="{{ route($route) }}"
                            @class(['adm-nav__lien', 'is-active' => $actif])
                            @if ($actif) aria-current="page" @endif>
-                            <x-admin-icon :name="$libelle" />
+                            <x-admin-icon :name="$id" />
                             <span>{{ $libelle }}</span>
                         </a>
                     @else
                         <span class="adm-nav__lien is-muted" aria-disabled="true"
-                              title="Écran en cours de construction">
-                            <x-admin-icon :name="$libelle" />
+                              title="{{ __('navigation.admin.en_construction') }}">
+                            <x-admin-icon :name="$id" />
                             <span>{{ $libelle }}</span>
                         </span>
                     @endif
@@ -71,15 +87,15 @@
          distante suffirait à déconnecter l'administrateur. --}}
     <div class="adm-nav__bas">
         <a class="adm-nav__lien" href="{{ route('dashboard') }}">
-            <x-admin-icon name="Retour" />
-            <span>Retour à mon espace client</span>
+            <x-admin-icon name="retour" />
+            <span>{{ __('navigation.coque.retour_espace_client') }}</span>
         </a>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="adm-nav__lien adm-nav__lien--action">
-                <x-admin-icon name="Déconnexion" />
-                <span>Déconnexion</span>
+                <x-admin-icon name="deconnexion" />
+                <span>{{ __('navigation.coque.deconnexion') }}</span>
             </button>
         </form>
     </div>

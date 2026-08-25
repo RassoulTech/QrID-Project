@@ -60,7 +60,7 @@
     @endif
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:site_name" content="{{ config('app.name') }}">
-    <meta property="og:locale" content="fr_SN">
+    <meta property="og:locale" content="{{ App\Support\Langue::etiquetteOuverte() }}">
 
     @if ($apercuUrl)
         <meta property="og:image" content="{{ $apercuUrl }}">
