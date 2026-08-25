@@ -33,6 +33,28 @@ Schedule::command('queue:monitor database:mail --max=50')->everyMinute();
 | Ne pas les déclarer ici aurait été pire : le jour où le cron est créé, une
 | seule ligne de configuration suffit et rien d'autre n'est à écrire.
 */
+/*
+ | ═══════════════════════════════════════════════════════════════════════
+ | L'AGRÉGATION DES STATISTIQUES — 02:30, avant tout le reste
+ | ═══════════════════════════════════════════════════════════════════════
+ | Elle passe AVANT les rappels et le récapitulatif : ces deux-là lisent des
+ | chiffres, et les lire avant l'agrégation donnerait le compte de l'avant-
+ | veille sans que rien ne le signale.
+ |
+ | --purger supprime dans la foulée les événements bruts au-delà de la
+ | rétention. La purge ne part QUE derrière une agrégation réussie : sans
+ | elle, on supprimerait une source qu'on n'a pas encore résumée.
+ |
+ | withoutOverlapping : une agrégation qui déborde sur la suivante
+ | travaillerait sur la même journée deux fois. L'upsert le supporterait —
+ | il est rejouable — mais deux balayages simultanés de la table
+ | d'événements se disputeraient les mêmes pages de disque pour rien.
+ */
+Schedule::command('app:agreger-statistiques --purger')
+    ->dailyAt('02:30')
+    ->timezone('Africa/Dakar')
+    ->withoutOverlapping();
+
 Schedule::command('profiles:remind')->dailyAt('09:00')->timezone('Africa/Dakar');
 Schedule::command('subscriptions:notify')->dailyAt('09:15')->timezone('Africa/Dakar');
 

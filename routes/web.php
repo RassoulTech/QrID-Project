@@ -270,11 +270,32 @@ require __DIR__.'/auth.php';
  | liens déjà partagés : une adresse publique ne se retire pas parce qu'on
  | en a trouvé une meilleure. Elle mène au même endroit.
  */
-Route::get('/p/{slug}/contact', [PublicProfileController::class, 'vcard'])
-    ->name('profile.vcard');
 
-Route::get('/p/{slug}/contact.vcf', [PublicProfileController::class, 'vcard'])
-    ->name('profile.vcard.fichier');
+/*
+ | ═══════════════════════════════════════════════════════════════════════
+ | LIMITATION DE DÉBIT SUR LES PAGES PUBLIQUES
+ | ═══════════════════════════════════════════════════════════════════════
+ | Ces trois routes sont les seules ouvertes à tout le monde, et chaque
+ | visite écrit une ligne dans profile_events. Un aspirateur d'annuaire qui
+ | les parcourt en boucle gonfle donc la table la plus volumineuse du
+ | produit, en plus de consommer les connexions à la base.
+ |
+ | 60 requêtes par minute et par adresse : c'est très large pour un humain —
+ | il faudrait ouvrir une carte par seconde pendant une minute entière —
+ | et très serré pour un script. Le seuil ne gêne personne de légitime,
+ | ce qui est la seule façon de le garder en place.
+ |
+ | Il s'applique par ADRESSE, donc un même bureau derrière une seule sortie
+ | Internet partage le compteur. 60 reste confortable même à vingt
+ | personnes.
+ */
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/p/{slug}/contact', [PublicProfileController::class, 'vcard'])
+        ->name('profile.vcard');
 
-Route::get('/p/{slug}', [PublicProfileController::class, 'show'])
-    ->name('profile.public');
+    Route::get('/p/{slug}/contact.vcf', [PublicProfileController::class, 'vcard'])
+        ->name('profile.vcard.fichier');
+
+    Route::get('/p/{slug}', [PublicProfileController::class, 'show'])
+        ->name('profile.public');
+});

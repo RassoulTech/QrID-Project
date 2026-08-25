@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Profile;
 use App\Support\NomSurCarte;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Le PDF de la carte, prêt pour l'imprimeur.
@@ -60,7 +61,58 @@ class PrintableCardService
      */
     private const CARTE_L = 85.6;
 
+    /**
+     * LE PDF EST MIS EN CACHE, ET LA CLÉ PORTE L'EMPREINTE DU PROFIL.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI IL NE PEUT PAS RESTER DANS LE CYCLE DE LA REQUÊTE
+     * ═══════════════════════════════════════════════════════════════════
+     * Composer un PDF de deux pages — deux QR Codes vectoriels, une police
+     * embarquée, des tracés au millimètre — occupe un processus PHP pendant
+     * tout son calcul. Le plan d'hébergement n'en fait tourner que quelques-
+     * uns : trois clients qui téléchargent leur carte en même temps
+     * immobilisent la moitié de la capacité du site.
+     *
+     * Or ce fichier ne change QUE si le profil change. Le recalculer à
+     * chaque téléchargement, c'est refaire exactement le même travail.
+     *
+     * L'EMPREINTE PORTE LES CHAMPS IMPRIMÉS, plus la date de modification :
+     * un profil retouché produit une clé différente, donc un PDF neuf, sans
+     * qu'aucune purge n'ait à être pensée. Deux cartes déjà imprimées ne
+     * peuvent pas diverger d'un fichier servi depuis le cache, puisque le
+     * cache est invalidé par le contenu lui-même.
+     */
     public function render(Profile $profile): string
+    {
+        return Cache::remember(
+            $this->cleDeCache($profile),
+            now()->addDays(30),
+            fn () => $this->composer($profile)
+        );
+    }
+
+    /**
+     * La clé : le slug, la variante, et l'empreinte des champs imprimés.
+     *
+     * On n'utilise PAS updated_at seul. Il bouge à chaque écriture, y
+     * compris pour un champ qui ne figure pas sur la carte — un compteur de
+     * vues, une préférence — et régénérerait le PDF sans raison.
+     */
+    private function cleDeCache(Profile $profile): string
+    {
+        $empreinte = md5(implode('|', [
+            $profile->first_name,
+            $profile->last_name,
+            $profile->job_title,
+            $profile->company,
+            $profile->slug,
+            $profile->primary_color,
+        ]));
+
+        return "carte-pdf:{$profile->id}:{$empreinte}";
+    }
+
+    private function composer(Profile $profile): string
     {
         $variante = $profile->variante();
 

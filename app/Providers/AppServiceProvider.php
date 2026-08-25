@@ -4,7 +4,11 @@ namespace App\Providers;
 
 use App\Services\Payment\FakeGateway;
 use App\Services\Payment\PaymentGateway;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->surveillerLesRequetesLentes();
+
         /*
          * PAGINATION — gabarit propre au produit.
          *
@@ -58,6 +64,47 @@ class AppServiceProvider extends ServiceProvider
          */
         View::composer(['welcome', 'landing.*', 'public.*', 'layouts.public'], function ($view) {
             $view->with('ctaUrl', auth()->check() ? route('dashboard') : route('register'));
+        });
+    }
+
+    /**
+     * TOUTE REQUÊTE LENTE EST JOURNALISÉE, AVEC CE QUI L'A DÉCLENCHÉE.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * SANS MESURE, AUCUNE DÉCISION DE MONTÉE EN CHARGE N'EST POSSIBLE
+     * ═══════════════════════════════════════════════════════════════════
+     * L'audit a trouvé une requête à 28,6 secondes. Elle existait depuis des
+     * mois. Rien, à aucun moment, ne l'avait signalée — parce que rien ne
+     * regardait.
+     *
+     * Le seuil vaut le budget d'une page entière : 300 ms. Une SEULE requête
+     * qui le consomme est déjà une anomalie, même si la page répond encore.
+     *
+     * ON JOURNALISE L'ADRESSE, PAS SEULEMENT LE SQL. Une requête lente sans
+     * son contexte oblige à la chercher dans le code ; avec la route, on sait
+     * immédiatement quel écran la déclenche et qui l'a ouvert.
+     *
+     * Le seuil à 0 désactive la surveillance — utile pendant les tests, où
+     * chaque requête paie le prix d'une base fraîchement migrée.
+     */
+    private function surveillerLesRequetesLentes(): void
+    {
+        $seuil = (int) config('statistiques.seuil_requete_lente_ms', 300);
+
+        if ($seuil <= 0 || app()->runningUnitTests()) {
+            return;
+        }
+
+        DB::listen(function (QueryExecuted $requete) use ($seuil) {
+            if ($requete->time < $seuil) {
+                return;
+            }
+
+            Log::warning('Requête lente', [
+                'ms' => round($requete->time, 1),
+                'sql' => Str::limit(preg_replace('/\s+/', ' ', $requete->sql), 300),
+                'route' => request()->path(),
+            ]);
         });
     }
 }
