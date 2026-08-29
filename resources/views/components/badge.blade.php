@@ -18,15 +18,15 @@
 
 @php
     $map = [
-        'active'    => ['success', 'Actif'],
-        'trial'     => ['info',    'Essai'],
-        'expired'   => ['danger',  'Expiré'],
-        'pending'   => ['warning', 'En attente'],
-        'failed'    => ['danger',  'Échoué'],
-        'refunded'  => ['secondary', 'Remboursé'],
-        'published' => ['success', 'Publié'],
-        'draft'     => ['secondary', 'Brouillon'],
-        'suspended' => ['danger',  'Suspendu'],
+        'active'    => ['success', __('common.etats.actif')],
+        'trial'     => ['info',    __('common.etats.essai')],
+        'expired'   => ['danger',  __('common.etats.expire')],
+        'pending'   => ['warning', __('common.etats.en_attente')],
+        'failed'    => ['danger',  __('common.etats.echoue')],
+        'refunded'  => ['secondary', __('common.etats.rembourse')],
+        'published' => ['success', __('common.etats.publie')],
+        'draft'     => ['secondary', __('common.etats.brouillon')],
+        'suspended' => ['danger',  __('common.etats.suspendu')],
     ];
 
     [$mappedVariant, $mappedLabel] = $map[$status] ?? ['secondary', $status];

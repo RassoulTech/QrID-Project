@@ -1,13 +1,13 @@
-Bonjour {{ $name }},
+{{ __('emails.commun.bonjour', ['nom' => $name]) }}
 
-Plus qu'une etape pour activer votre presence professionnelle numerique
-et demarrer votre essai gratuit de 15 jours : confirmez votre adresse e-mail
-en ouvrant ce lien (valable {{ $ttlMinutes }} minutes) :
+{{ __('emails.confirmation.intro', ['jours' => $trialDays ?? 15]) }}
 
+{{ __('emails.confirmation.bouton') }} :
 {{ $verifyUrl }}
 
-Tant que ce lien n'est pas ouvert, aucun compte n'est cree.
+{{ __('emails.confirmation.validite', ['minutes' => $ttlMinutes]) }}
 
-Si vous n'etes pas a l'origine de cette demande, ignorez ce message.
+{{ __('emails.commun.ignorer') }}
 
--- {{ config('app.name') }}
+—
+{{ config('app.name') }}

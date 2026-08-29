@@ -10,13 +10,13 @@
   UNE requête à trois sous-agrégats, pas une par ligne.
 --}}
 <x-admin-layout
-    title="Statistiques d'usage"
-    subtitle="Ce que les cartes produisent réellement : consultations, scans et enregistrements."
+    :title="__('admin.statistiques.titre')"
+    :subtitle="__('admin.statistiques.sous_titre')"
 >
     <x-slot:actions>
         <form method="GET" action="{{ route('admin.statistics') }}" class="adm-filtres adm-filtres--nu">
             <div class="adm-filtre">
-            <label for="periode">Période</label>
+            <label for="periode">{{ __('admin.commun.periode') }}</label>
             <select id="periode" name="periode" class="adm-select" onchange="this.form.submit()">
                 @foreach ($periodes as $cle)
                     <option value="{{ $cle }}" @selected($cle === $periode)>{{ $libellesPeriode[$cle] }}</option>
@@ -30,16 +30,16 @@
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M8 1v8.6l2.3-2.3 1 1L8 11.7 4.7 8.3l1-1L8 9.6zM2 12h12v2H2z"/>
             </svg>
-            Exporter CSV
+            {{ __('admin.commun.exporter_csv') }}
         </a>
     </x-slot:actions>
 
     {{-- ==================== LES QUATRE COMPTEURS ==================== --}}
     @php
         $cartes = [
-            ['Interactions totales', $totaux['total'], true],
+            [__('admin.statistiques.interactions_totales'), $totaux['total'], true],
             ['Consultations', $totaux['vues'], false],
-            ['Scans de QR Code', $totaux['scans'], false],
+            [__('admin.statistiques.scans_qr'), $totaux['scans'], false],
             ['Enregistrements', $totaux['saves'], false],
         ];
     @endphp
@@ -54,7 +54,7 @@
 
                 @if (! $vedette && $totaux['total'] > 0)
                     <span class="adm-stat__var is-neutre">
-                        {{ round($valeur / $totaux['total'] * 100) }} % des interactions
+                        {{ round($valeur / $totaux['total'] * 100) }} {{ __('admin.statistiques.part_interactions') }}
                     </span>
                 @endif
             </div>
@@ -64,14 +64,14 @@
     {{-- ==================== SÉRIE JOURNALIÈRE ==================== --}}
     <div class="adm-bloc" style="margin-bottom:14px">
         <div class="adm-bloc__tete">
-            <h2 class="adm-bloc__titre">Interactions par jour</h2>
-            <p class="adm-legende"><span class="adm-legende__puce"></span>Toutes interactions</p>
+            <h2 class="adm-bloc__titre">{{ __('admin.statistiques.interactions_par_jour') }}</h2>
+            <p class="adm-legende"><span class="adm-legende__puce"></span>{{ __('admin.statistiques.toutes_interactions') }}</p>
         </div>
 
         @if ($serie->sum('valeur') === 0)
             <x-empty-state icon="search"
-                title="Aucune interaction sur la période"
-                message="Aucune carte n'a été consultée ni scannée. Changez de période, ou vérifiez que des profils sont bien publiés." />
+                :title="__('admin.statistiques.aucune_interaction_titre')"
+                :message="__('admin.statistiques.aucune_interaction_message')" />
         @else
             @php $max = max(1, $serie->max('valeur')); @endphp
 
@@ -94,14 +94,14 @@
         {{-- ==================== CLASSEMENT DES PROFILS ==================== --}}
         <section class="adm-bloc">
             <div class="adm-bloc__tete">
-                <h2 class="adm-bloc__titre">Cartes les plus consultées</h2>
-                <a class="adm-card__lien" href="{{ route('admin.profiles.index') }}">Tous les profils</a>
+                <h2 class="adm-bloc__titre">{{ __('admin.statistiques.cartes_plus_consultees') }}</h2>
+                <a class="adm-card__lien" href="{{ route('admin.profiles.index') }}">{{ __('admin.statistiques.tous_profils') }}</a>
             </div>
 
             @if ($classement->isEmpty())
                 <x-empty-state icon="profile"
-                    title="Aucune carte consultée"
-                    message="Le classement apparaîtra dès la première consultation." />
+                    :title="__('admin.statistiques.aucune_carte_consultee_titre')"
+                    :message="__('admin.statistiques.aucune_carte_consultee_message')" />
             @else
                 <div class="table-scroll">
                     <table class="adm-table" style="min-width:520px">
@@ -143,13 +143,13 @@
 
             {{-- ==================== ÉTAT DE PUBLICATION ==================== --}}
             <section class="adm-bloc">
-                <h2 class="adm-bloc__titre" style="margin-bottom:12px">État des profils</h2>
+                <h2 class="adm-bloc__titre" style="margin-bottom:12px">{{ __('admin.statistiques.etat_profils') }}</h2>
 
                 @php
                     $etats = [
-                        ['Publiés', $publication['publies'], 'success'],
+                        [__('admin.statistiques.publies'), $publication['publies'], 'success'],
                         ['Brouillons', $publication['brouillons'], 'secondary'],
-                        ['Désactivés', $publication['desactives'], 'danger'],
+                        [__('admin.statistiques.desactives'), $publication['desactives'], 'danger'],
                     ];
                     $totalProfils = max(1, $publication['tous']);
                 @endphp
@@ -170,12 +170,12 @@
 
             {{-- ==================== RÉPARTITION PAR MODÈLE ==================== --}}
             <section class="adm-bloc">
-                <h2 class="adm-bloc__titre" style="margin-bottom:12px">Modèles utilisés</h2>
+                <h2 class="adm-bloc__titre" style="margin-bottom:12px">{{ __('admin.statistiques.modeles_utilises') }}</h2>
 
                 @if ($parModele->isEmpty())
                     <x-empty-state icon="document"
-                        title="Aucune carte publiée"
-                        message="La répartition apparaîtra à la première publication." />
+                        :title="__('admin.statistiques.aucune_carte_publiee_titre')"
+                        :message="__('admin.statistiques.aucune_carte_publiee_message')" />
                 @else
                     @php $totalModeles = max(1, $parModele->sum('total')); @endphp
 

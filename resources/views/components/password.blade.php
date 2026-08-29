@@ -42,7 +42,7 @@
             type="button"
             class="btn btn-outline-secondary"
             data-password-toggle="{{ $fieldId }}"
-            aria-label="Afficher le mot de passe"
+            aria-label="{{ __('common.champs.afficher_mot_de_passe') }}"
             aria-pressed="false"
             tabindex="-1"
         >

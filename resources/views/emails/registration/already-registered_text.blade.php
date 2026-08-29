@@ -1,16 +1,14 @@
-Vous avez deja un compte
+{{ __('emails.deja_inscrit.titre') }}
 
-Une demande d'inscription vient d'etre faite avec cette adresse e-mail,
-mais elle est deja associee a un compte {{ config('app.name') }}.
-Aucun nouveau compte n'a ete cree.
+{{ __('emails.deja_inscrit.intro_texte', ['marque' => config('app.name')]) }}
 
-Si c'etait vous, connectez-vous simplement :
+{{ __('emails.deja_inscrit.si_vous') }}
 {{ $loginUrl }}
 
-Mot de passe oublie ? Reinitialisez-le ici :
+{{ __('emails.deja_inscrit.oubli') }} {{ __('emails.deja_inscrit.oubli_lien') }} :
 {{ $resetUrl }}
 
-Si vous n'etes pas a l'origine de cette demande, ignorez ce message :
-votre compte reste inchange.
+{{ __('emails.deja_inscrit.ignorer') }}
 
--- {{ config('app.name') }}
+—
+{{ config('app.name') }}

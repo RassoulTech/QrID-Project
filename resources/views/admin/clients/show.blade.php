@@ -12,51 +12,51 @@
 --}}
 @php use App\Support\AdminActionType; @endphp
 
-<x-admin-layout :title="$client->name" subtitle="Fiche client">
+<x-admin-layout :title="$client->name" :subtitle="__('admin.fiche.titre')">
     <x-slot:actions>
         @if ($profil && ! $profil->isDeactivated())
             <x-admin-action-form
                 :action="route('admin.profiles.deactivate', $profil)"
-                libelle="Désactiver le profil"
-                confirmation="Désactiver"
+                :libelle="__('admin.fiche.desactiver_profil')"
+                :confirmation="__('admin.profils.desactiver')"
                 ton="danger"
                 id="fiche-desact"
-                titre="Désactiver ce profil"
-                texte="La carte cesse immédiatement d'être accessible publiquement. Le contenu n'est ni modifié ni supprimé, et le client garde son accès." />
+                :titre="__('admin.profils.desactiver_ce_profil')"
+                :texte="__('admin.fiche.desactiver_texte')" />
         @elseif ($profil)
             <x-admin-action-form
                 :action="route('admin.profiles.reactivate', $profil)"
                 methode="DELETE"
-                libelle="Réactiver le profil"
-                confirmation="Lever la désactivation"
+                :libelle="__('admin.fiche.reactiver_profil')"
+                :confirmation="__('admin.fiche.lever_desactivation')"
                 id="fiche-react"
-                titre="Lever la désactivation"
-                texte="Le profil restera en brouillon : c'est à son propriétaire de le republier." />
+                :titre="__('admin.fiche.lever_desactivation')"
+                :texte="__('admin.fiche.reactiver_texte')" />
         @endif
 
         @if ($client->isBlocked())
             <x-admin-action-form
                 :action="route('admin.clients.unblock', $client)"
                 methode="DELETE"
-                libelle="Débloquer le compte"
-                confirmation="Débloquer"
+                :libelle="__('admin.fiche.debloquer_compte')"
+                :confirmation="__('admin.fiche.debloquer')"
                 id="fiche-debloc"
-                titre="Débloquer ce compte"
-                :texte="'Motif du blocage en cours : '.($client->blocked_reason ?? 'non renseigné').'.'" />
+                :titre="__('admin.fiche.debloquer_titre')"
+                :texte="__('admin.fiche.debloquer_texte', ['motif' => $client->blocked_reason ?? __('admin.fiche.motif_non_renseigne')])" />
         @else
             <x-admin-action-form
                 :action="route('admin.clients.block', $client)"
-                libelle="Bloquer le compte"
+                :libelle="__('admin.fiche.bloquer_compte')"
                 confirmation="Bloquer"
                 ton="danger"
                 id="fiche-bloc"
-                titre="Bloquer ce compte"
-                texte="Le client ne pourra plus se connecter et ses sessions ouvertes seront fermées. Sa carte publiée reste en ligne tant que son profil n'est pas désactivé." />
+                :titre="__('admin.fiche.bloquer_titre')"
+                :texte="__('admin.fiche.bloquer_texte')" />
         @endif
     </x-slot:actions>
 
     {{-- FIL D'ARIANE — la liste, puis la fiche. Deux niveaux, pas plus. --}}
-    <nav class="adm-fil" aria-label="Fil d'ariane">
+    <nav class="adm-fil" aria-label="{{ __('admin.commun.fil_ariane') }}">
         <a href="{{ route('admin.clients.index') }}">Clients</a>
         <span aria-hidden="true">›</span>
         <span aria-current="page">{{ $client->name }}</span>
@@ -81,9 +81,9 @@
 
             <p class="adm-fiche__etats">
                 @if ($client->isBlocked())
-                    <x-badge variant="danger">Compte bloqué</x-badge>
+                    <x-badge variant="danger">{{ __('admin.clients.compte_bloque') }}</x-badge>
                 @else
-                    <x-badge variant="success">Compte actif</x-badge>
+                    <x-badge variant="success">{{ __('admin.clients.compte_actif') }}</x-badge>
                 @endif
 
                 @if ($prolongeable)
@@ -94,7 +94,7 @@
                 @endif
 
                 <span class="adm-table__second">
-                    Inscrit le {{ $client->created_at?->format('d/m/Y') ?? '—' }}
+                    {{ __('admin.fiche.inscrit_le') }} {{ $client->created_at ? \App\Support\Formats::date($client->created_at) : '—' }}
                 </span>
             </p>
 
@@ -102,7 +102,7 @@
                  journal : c'est la première question posée quand le client
                  appelle. --}}
             @if ($client->isBlocked() && $client->blocked_reason)
-                <p class="adm-fiche__motif">Motif du blocage : {{ $client->blocked_reason }}</p>
+                <p class="adm-fiche__motif">{{ __('admin.fiche.motif_blocage') }} {{ $client->blocked_reason }}</p>
             @endif
         </div>
     </div>
@@ -113,19 +113,19 @@
             {{-- ==================== COLONNE GAUCHE ==================== --}}
             <section class="adm-bloc">
                 <div class="adm-bloc__tete">
-                    <h2 class="adm-bloc__titre">Identité professionnelle</h2>
+                    <h2 class="adm-bloc__titre">{{ __('admin.fiche.identite_pro') }}</h2>
                 </div>
 
                 @if ($profil === null)
                     <x-empty-state icon="profile"
-                        title="Aucun profil créé"
-                        message="Ce compte existe mais son propriétaire n'a pas encore rempli sa carte." />
+                        :title="__('admin.fiche.aucun_profil_titre')"
+                        :message="__('admin.fiche.aucun_profil_message')" />
                 @else
                     <dl class="adm-defs">
-                        <dt>Nom complet</dt><dd>{{ $profil->full_name }}</dd>
+                        <dt>{{ __('admin.commun.nom_complet') }}</dt><dd>{{ $profil->full_name }}</dd>
                         <dt>Fonction</dt><dd>{{ $profil->job_title ?? '—' }}</dd>
                         <dt>Entreprise</dt><dd>{{ $profil->company ?? '—' }}</dd>
-                        <dt>Identifiant public</dt>
+                        <dt>{{ __('admin.commun.identifiant_public') }}</dt>
                         <dd>
                             @if ($profil->is_active)
                                 <a class="adm-lien" href="{{ route('profile.public', $profil) }}"
@@ -134,21 +134,21 @@
                                 /p/{{ $profil->slug }}
                             @endif
                         </dd>
-                        <dt>Modèle</dt><dd>{{ $profil->template?->name ?? '—' }}</dd>
-                        <dt>État</dt>
+                        <dt>{{ __('admin.commun.modele') }}</dt><dd>{{ $profil->template?->name ?? '—' }}</dd>
+                        <dt>{{ __('admin.commun.etat') }}</dt>
                         <dd>
                             @if ($profil->isDeactivated())
-                                <x-badge variant="danger">Désactivé</x-badge>
+                                <x-badge variant="danger">{{ __('admin.commun.desactive') }}</x-badge>
                             @elseif ($profil->is_active)
-                                <x-badge variant="success">Publié</x-badge>
+                                <x-badge variant="success">{{ __('admin.commun.publie') }}</x-badge>
                             @else
                                 <x-badge variant="secondary">Brouillon</x-badge>
                             @endif
                         </dd>
-                        <dt>Créé le</dt><dd>{{ $profil->created_at?->format('d/m/Y') ?? '—' }}</dd>
+                        <dt>{{ __('admin.commun.cree_le') }}</dt><dd>{{ $profil->created_at?->format('d/m/Y') ?? '—' }}</dd>
 
                         @if ($profil->deactivated_reason)
-                            <dt>Motif de désactivation</dt>
+                            <dt>{{ __('admin.fiche.motif_desactivation') }}</dt>
                             <dd>{{ $profil->deactivated_reason }}</dd>
                         @endif
                     </dl>
@@ -167,22 +167,20 @@
                             <x-admin-action-form
                                 :action="route('admin.clients.subscription.extend', $client)"
                                 libelle="Prolonger"
-                                confirmation="Prolonger l'abonnement"
+                                :confirmation="__('admin.fiche.prolonger')"
                                 id="fiche-prolong"
-                                titre="Prolonger manuellement l'abonnement"
+                                :titre="__('admin.fiche.prolonger_titre')"
                                 :texte="'Geste commercial, tracé au journal. La prolongation part de l\'échéance en cours lorsqu\'elle est future, de maintenant sinon : le client ne perd donc aucun jour déjà payé.'">
                                 <x-slot:champs>
                                     <label for="jours-prolong" class="adm-modale__label">
-                                        Nombre de jours
+                                        {{ __('admin.fiche.nombre_jours') }}
                                         <span class="adm-modale__obligatoire">obligatoire</span>
                                     </label>
                                     <input type="number" id="jours-prolong" name="jours"
                                            class="adm-modale__champ" required
                                            min="1" max="{{ $joursMax }}" value="{{ old('jours', 15) }}">
                                     <span class="adm-champ__aide">
-                                        Au-delà de {{ $joursMax }} jours, ce n'est plus un geste
-                                        commercial : passez par une formule, qui laisse une
-                                        trace comptable.
+                                        {{ __('admin.fiche.prolonger_aide', ['jours' => $joursMax]) }}
                                     </span>
                                     @error('jours')<span class="adm-modale__erreur">{{ $message }}</span>@enderror
                                 </x-slot:champs>
@@ -206,8 +204,8 @@
                         </div>
                     @empty
                         <x-empty-state icon="payment"
-                            title="Aucun abonnement"
-                            message="Ce client n'a jamais souscrit." />
+                            :title="__('admin.fiche.aucun_abonnement_titre')"
+                            :message="__('admin.fiche.aucun_abonnement_message')" />
                     @endforelse
                 </section>
 
@@ -239,15 +237,15 @@
                         </div>
                     @empty
                         <x-empty-state icon="payment"
-                            title="Aucune transaction"
-                            message="Ce client n'a jamais payé." />
+                            :title="__('admin.fiche.aucune_transaction_titre')"
+                            :message="__('admin.fiche.aucune_transaction_message')" />
                     @endforelse
                 </section>
 
                 {{-- --- JOURNAL D'ACTIVITÉ --- --}}
                 <section class="adm-bloc">
                     <div class="adm-bloc__tete">
-                        <h2 class="adm-bloc__titre">Journal d'activité</h2>
+                        <h2 class="adm-bloc__titre">{{ __('admin.fiche.journal_activite') }}</h2>
                     </div>
 
                     @forelse ($journal as $entree)
@@ -269,8 +267,8 @@
                         </div>
                     @empty
                         <x-empty-state icon="document"
-                            title="Aucune action administrative"
-                            message="Aucun blocage, aucune désactivation, aucune prolongation sur ce compte." />
+                            :title="__('admin.fiche.aucune_action_titre')"
+                            :message="__('admin.fiche.aucune_action_message')" />
                     @endforelse
                 </section>
             </div>

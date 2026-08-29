@@ -135,4 +135,18 @@ return [
             .'permanent deletion of your account.',
         'supprimer_definitivement' => 'Delete permanently',
     ],
+
+    'qr' => [
+        'scannent' => 'Your contacts scan, your profile opens.',
+        'en_preparation' => 'Generation is being set up. Your public link already works.',
+        'telecharger_png' => 'Download as PNG',
+        'version_svg' => 'SVG version',
+    ],
+
+    'flash' => [
+        'carte_avant_formule' => 'Create your card first; you will choose your plan next.',
+        'carte_avant_qr' => 'Create your card first: its QR code will be generated automatically.',
+        'carte_avant_stats' => 'Create your card first: its statistics will follow.',
+        'carte_physique_apres_paiement' => 'Your physical card will be offered from your first paid activation.',
+    ],
 ];

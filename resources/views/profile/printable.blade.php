@@ -265,7 +265,7 @@
     <div class="v-qr"><img src="{{ $qrVerso }}" alt=""></div>
     <div class="v-qr-mention">{{ mb_strtoupper(config('landing.brand.card_cta')) }}</div>
 
-    <div class="v-nature">PROTOCOLE D'IDENTITÉ NUMÉRIQUE</div>
+    <div class="v-nature">{{ mb_strtoupper(__('card.protocole')) }}</div>
     <div class="v-site">{{ mb_strtoupper(config('landing.brand.website')) }}</div>
 </div>
 

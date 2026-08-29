@@ -18,7 +18,7 @@ class ResetPasswordMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Réinitialisation de votre mot de passe — '.config('app.name'),
+            subject: __('emails.reinitialisation.sujet', ['marque' => config('app.name')]),
         );
     }
 

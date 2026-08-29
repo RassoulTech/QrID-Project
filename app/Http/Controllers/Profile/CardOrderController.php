@@ -30,7 +30,7 @@ class CardOrderController extends Controller
         if (! $commande) {
             return redirect()->route('dashboard')->with(
                 'info',
-                'Votre carte physique vous sera proposée dès votre première activation payée.'
+                __('profile.flash.carte_physique_apres_paiement')
             );
         }
 

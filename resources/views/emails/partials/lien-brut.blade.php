@@ -9,6 +9,6 @@
   word-break:break-all évite qu'une longue URL déborde de la carte sur mobile.
 --}}
 <p style="margin:0 0 16px;font-size:13px;color:#64748b;word-break:break-all;">
-    Si le bouton ne s'affiche pas, copiez ce lien dans votre navigateur :<br>
+    {{ __('emails.commun.lien_brut') }}<br>
     <a href="{{ $url }}" style="color:#0B5D3B;">{{ $url }}</a>
 </p>

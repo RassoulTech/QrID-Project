@@ -267,7 +267,29 @@ class Langue
             return;
         }
 
+        /*
+         | LA SESSION D'ABORD, LE COOKIE ENSUITE — ET LE COOKIE COMPTE.
+         |
+         | Ne lire que la session paraissait suffisant : le choix vient
+         | d'y être écrit. Mais la session est justement ce qui se perd.
+         | Elle expire, elle est vidée par une tentative de connexion
+         | refusée, elle disparaît au redémarrage du conteneur.
+         |
+         | Le scénario, observé dans un navigateur : un visiteur choisit
+         | l'anglais, une première connexion échoue — la session est
+         | vidée —, il se connecte pour de bon, et il n'y a plus rien à
+         | reporter. Le compte reste en français, et la préférence du
+         | compte l'emporte ensuite sur le cookie à CHAQUE requête.
+         |
+         | La langue disparaissait donc au moment précis où l'utilisateur
+         | se connectait. Le cookie est le niveau prévu pour survivre à
+         | la session : le report doit le consulter aussi.
+         */
         $choix = Session::get(self::SESSION);
+
+        if (! self::valide($choix)) {
+            $choix = Cookie::get(self::COOKIE);
+        }
 
         if (! self::valide($choix) || $choix === $utilisateur->locale) {
             return;   // rien à reporter, ou déjà à jour : pas d'écriture inutile

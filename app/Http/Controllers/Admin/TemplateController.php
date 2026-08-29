@@ -78,7 +78,7 @@ class TemplateController extends Controller
             return back()->withErrors(['modele' => $e->getMessage()]);
         }
 
-        return back()->with('status', "« {$template->name} » est désormais le modèle proposé par défaut.");
+        return back()->with('status', __('admin.flash.modele_par_defaut', ['nom' => $template->name]));
     }
 
     /** @return array<string, int> */

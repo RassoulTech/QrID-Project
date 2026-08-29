@@ -32,7 +32,7 @@ class SubscriptionExtensionService
         $abonnement = $this->abonnementAProlonger($client);
 
         if ($abonnement === null) {
-            throw new RuntimeException("Ce client n'a aucun abonnement à prolonger.");
+            throw new RuntimeException(__('admin.flash.aucun_abonnement_a_prolonger'));
         }
 
         return DB::transaction(function () use ($abonnement, $client, $jours, $motif) {

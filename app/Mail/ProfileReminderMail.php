@@ -32,9 +32,9 @@ class ProfileReminderMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->rang === 1
-                ? 'Votre carte est prête à être publiée'
-                : 'Un obstacle pour publier votre carte ?',
+            subject: __($this->rang === 1
+                ? 'emails.rappel_carte.sujet_1'
+                : 'emails.rappel_carte.sujet_2'),
         );
     }
 

@@ -39,10 +39,10 @@
         {{ $nom }}{{ $total > 1 ? 's' : '' }}
 
         @if ($filtre)
-            <span class="liste-compteur__filtre">après filtrage</span>
+            <span class="liste-compteur__filtre">{{ __('admin.commun.apres_filtrage') }}</span>
 
             @if ($reset)
-                <a href="{{ $reset }}" class="liste-compteur__reset">Réinitialiser</a>
+                <a href="{{ $reset }}" class="liste-compteur__reset">{{ __('admin.commun.reinitialiser') }}</a>
             @endif
         @endif
     </p>
@@ -55,7 +55,7 @@
 
         @if ($filtre && $reset)
             <x-slot name="action">
-                <x-button :href="$reset" size="sm">Réinitialiser les filtres</x-button>
+                <x-button :href="$reset" size="sm">{{ __('admin.commun.reinitialiser_filtres') }}</x-button>
             </x-slot>
         @endif
     </x-empty-state>

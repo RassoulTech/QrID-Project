@@ -83,7 +83,11 @@ class ThemeEverywhereTest extends TestCase
         foreach (['landing' => route('home'), 'connexion' => route('login')] as $nom => $url) {
             $this->get($url)
                 ->assertSee(route('preferences.theme'), escape: false)
-                ->assertSee('Passer en thème sombre');
+                // La CLE, pas la phrase. Exiger « Passer en theme sombre »
+                // en dur revenait a interdire de traduire le bouton : le
+                // test tombait des qu'on le faisait, alors que le bouton
+                // etait bien la. On verifie sa presence, pas sa langue.
+                ->assertSee(__('common.theme.vers_sombre'));
 
             $this->assertStringContainsString(
                 'class="theme-toggle"',

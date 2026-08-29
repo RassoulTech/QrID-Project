@@ -27,7 +27,7 @@ class NotificationService
     {
         $this->poser($user, [
             'type' => Notification::TYPE_PAIEMENT,
-            'title' => 'Paiement confirmé',
+            'title' => __('dashboard.notifs.paiement_confirme'),
             'body' => number_format($montantFcfa, 0, ',', ' ').' FCFA · votre carte est en ligne.',
             'url' => route('dashboard'),
             'cle_unicite' => Notification::TYPE_PAIEMENT.':'.now()->format('YmdHis'),
@@ -57,7 +57,7 @@ class NotificationService
     {
         $this->poser($user, [
             'type' => Notification::TYPE_PREMIERE_VUE,
-            'title' => 'Votre carte a été consultée',
+            'title' => __('dashboard.notifs.carte_consultee'),
             'body' => 'Quelqu\'un vient d\'ouvrir votre carte pour la première fois.',
             'url' => route('dashboard'),
             'cle_unicite' => Notification::TYPE_PREMIERE_VUE.':'.$profile->id,
@@ -69,7 +69,7 @@ class NotificationService
     {
         $this->poser($user, [
             'type' => Notification::TYPE_CONTACT,
-            'title' => 'Un contact vous a enregistré',
+            'title' => __('dashboard.notifs.contact_enregistre'),
             'body' => 'Vos coordonnées viennent d\'être ajoutées à un répertoire.',
             'url' => route('dashboard'),
             'cle_unicite' => Notification::TYPE_CONTACT.':'.$evenement->id,

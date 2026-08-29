@@ -109,4 +109,12 @@ return [
         'plus_tard' => 'Later',
         'enregistrer' => 'Save the address',
     ],
+
+    'voir_verso' => 'View the back',
+    'protocole' => 'Digital identity protocol',
+
+    'actions' => [
+        'appeler' => 'Call',
+        'localisation' => 'Location',
+    ],
 ];

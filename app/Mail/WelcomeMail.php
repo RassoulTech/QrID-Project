@@ -39,7 +39,7 @@ class WelcomeMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Votre compte est actif — '.config('app.name'),
+            subject: __('emails.bienvenue.sujet', ['marque' => config('app.name')]),
         );
     }
 

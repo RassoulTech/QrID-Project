@@ -164,4 +164,18 @@ return [
             .'pour confirmer la suppression définitive de votre compte.',
         'supprimer_definitivement' => 'Supprimer définitivement',
     ],
+
+    'qr' => [
+        'scannent' => 'Vos contacts scannent, votre profil s\'ouvre.',
+        'en_preparation' => 'Génération en cours de mise en place. Votre lien public fonctionne déjà.',
+        'telecharger_png' => 'Télécharger en PNG',
+        'version_svg' => 'Version SVG',
+    ],
+
+    'flash' => [
+        'carte_avant_formule' => 'Créez d\'abord votre carte, vous choisirez votre formule ensuite.',
+        'carte_avant_qr' => 'Créez d\'abord votre carte : son QR Code sera généré automatiquement.',
+        'carte_avant_stats' => 'Créez d\'abord votre carte : ses statistiques suivront.',
+        'carte_physique_apres_paiement' => 'Votre carte physique vous sera proposée dès votre première activation payée.',
+    ],
 ];

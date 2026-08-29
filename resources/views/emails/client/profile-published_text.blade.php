@@ -1,11 +1,11 @@
-Bonjour {{ $name }},
+{{ __('emails.commun.bonjour', ['nom' => $name]) }}
 
-Votre carte est publiée. Toute personne qui ouvre le lien ci-dessous voit vos coordonnées et peut les enregistrer dans son téléphone en un geste.
+{{ __('emails.carte_publiee.intro') }}
 
-Votre lien à partager :
+{{ __('emails.commun.lien_a_partager') }} :
 {{ $publicUrl }}
 
-Depuis votre espace, vous pouvez télécharger le QR Code de cette carte et le fichier prêt pour l'impression :
+{{ __('emails.carte_publiee.telechargements') }}
 {{ $dashboardUrl }}
 
 —

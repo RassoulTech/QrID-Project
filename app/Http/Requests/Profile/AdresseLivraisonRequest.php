@@ -44,10 +44,10 @@ class AdresseLivraisonRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'recipient_name' => 'nom du destinataire',
-            'phone' => 'téléphone',
-            'address_line' => 'adresse',
-            'city' => 'ville',
+            'recipient_name' => __('validation.attributs.destinataire'),
+            'phone' => __('validation.attributs.telephone'),
+            'address_line' => __('validation.attributs.adresse'),
+            'city' => __('validation.attributs.ville'),
         ];
     }
 

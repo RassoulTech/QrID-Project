@@ -55,12 +55,12 @@
         {{ $champs ?? '' }}
 
         <label for="motif-{{ $id }}" class="adm-modale__label">
-            Motif <span class="adm-modale__obligatoire">obligatoire</span>
+            {{ __('admin.commun.motif') }} <span class="adm-modale__obligatoire">{{ __('common.champs.obligatoire') }}</span>
         </label>
 
         <textarea id="motif-{{ $id }}" name="motif" rows="3" class="adm-modale__champ"
                   required minlength="10" maxlength="500"
-                  placeholder="Ce motif sera lu dans le journal d'audit dans six mois. Écrivez une phrase."></textarea>
+                  placeholder="{{ __('admin.commun.motif_journal') }}"></textarea>
 
         {{-- Les erreurs de validation reviennent ici : sans cela, un motif
              trop court renverrait sur la liste sans rien dire. --}}

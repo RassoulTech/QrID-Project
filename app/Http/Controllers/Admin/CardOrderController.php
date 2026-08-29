@@ -84,7 +84,7 @@ class CardOrderController extends Controller
             ->filter(fn (CardOrder $commande) => $commande->adresseComplete());
 
         if ($eligibles->isEmpty()) {
-            return back()->with('warning', 'Aucune commande sélectionnée n\'a d\'adresse complète.');
+            return back()->with('warning', __('admin.flash.aucune_adresse'));
         }
 
         CardOrder::whereIn('id', $eligibles->pluck('id'))->update([
@@ -98,7 +98,7 @@ class CardOrderController extends Controller
             "Lot {$lot} — {$eligibles->count()} carte(s) envoyées en production"
         );
 
-        return back()->with('success', "Lot {$lot} créé avec {$eligibles->count()} carte(s).");
+        return back()->with('success', __('admin.flash.lot_cree', ['lot' => $lot, 'compte' => $eligibles->count()]));
     }
 
     /** Fait avancer tout un lot d'un état au suivant. */
@@ -127,7 +127,7 @@ class CardOrderController extends Controller
             "Lot {$valide['batch_id']} → ".(CardOrder::STATUTS[$valide['statut']] ?? $valide['statut'])
         );
 
-        return back()->with('success', "{$touchees} carte(s) mises à jour.");
+        return back()->with('success', __('admin.flash.cartes_mises_a_jour', ['compte' => $touchees]));
     }
 
     /**

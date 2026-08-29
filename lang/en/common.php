@@ -28,6 +28,8 @@ return [
         'modifier' => 'Edit',
         'appliquer' => 'Apply',
         'reinitialiser' => 'Reset',
+        'activer' => 'Enable',
+        'desactiver' => 'Disable',
         'rechercher' => 'Search',
         'filtrer' => 'Filter',
         'exporter' => 'Export',
@@ -91,6 +93,8 @@ return [
         'obligatoire' => 'required',
         'astensque' => 'Fields marked with an asterisk are required.',
         'piege' => 'Do not fill in this field',
+        'indicatif' => 'Country code',
+        'afficher_mot_de_passe' => 'Show password',
     ],
 
     // -----------------------------------------------------------------
@@ -126,5 +130,45 @@ return [
         'ou' => 'or',
         'et' => 'and',
         'total' => 'Total',
+        'fil_ariane' => 'Breadcrumb',
+    ],
+
+    /*
+     | FORMATS — separators, dates, currency.
+     |
+     | They live here rather than in a match() on the locale: adding a third
+     | language will not require coming back to edit PHP code.
+     |
+     | Note the backslashes in `date_heure`: `a` and `t` are both date()
+     | format characters. Left unescaped, "at" would render as "pm31" —
+     | a bug that only shows up in one language, on one line.
+     */
+    'formats' => [
+        'separateur_milliers' => ',',
+        'separateur_decimal' => '.',
+        'devise' => 'FCFA',
+        'date_longue' => 'F j, Y',
+        'date_heure' => 'F j, Y \a\t g:i A',
+        'date_complete' => 'l F j, Y',
+        'date_courte' => 'm/d',
+        'mois_court' => 'M',
+    ],
+
+    /*
+     | THE PLURAL RULE LIVES HERE, NOT IN THE TEMPLATE.
+     | The template wrote « resultat{{ $n > 1 ? 's' : '' }} »: a French rule
+     | hard-coded in markup, which happened to be right in English and would
+     | be wrong in any language with three forms.
+     */
+    'pagination' => [
+        'sur' => 'of',
+        'resultat' => ':compte result|:compte results',
+    ],
+
+    'theme' => [
+        'clair' => 'Light theme',
+        'sombre' => 'Dark theme',
+        'vers_clair' => 'Switch to light theme',
+        'vers_sombre' => 'Switch to dark theme',
     ],
 ];

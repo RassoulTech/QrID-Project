@@ -183,4 +183,23 @@ return [
         'paiements' => 'Paiements',
         'notifications' => 'Notifications',
     ],
+
+    'flash' => [
+        'notifications_lues' => 'Toutes vos notifications sont marquées comme lues.',
+    ],
+
+    /*
+     | LES NOTIFICATIONS SONT ECRITES EN BASE, donc figees au moment de
+     | l'ecriture. Elles sont rendues dans la langue du DESTINATAIRE — pas
+     | dans celle de l'action : une consultation de carte vient d'un
+     | inconnu, dont la langue ne regarde pas le porteur.
+     |
+     | Consequence assumee : une notification ecrite avant un changement de
+     | langue reste dans l'ancienne.
+     */
+    'notifs' => [
+        'paiement_confirme' => 'Paiement confirmé',
+        'carte_consultee' => 'Votre carte a été consultée',
+        'contact_enregistre' => 'Un contact vous a enregistré',
+    ],
 ];

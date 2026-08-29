@@ -1,13 +1,13 @@
-Bonjour {{ $name }},
+{{ __('emails.commun.bonjour', ['nom' => $name]) }}
 
-AUCUNE SOMME N'A ÉTÉ PRÉLEVÉE. Votre paiement de {{ $montant }} FCFA pour la formule {{ $formule }} n'est pas allé à son terme, et votre abonnement n'a pas été modifié.
+{{ __('emails.paiement_echoue.rien_preleve_texte', ['montant' => $montant, 'formule' => $formule]) }}
 
-Cela arrive le plus souvent pour une raison simple : solde insuffisant au moment de l'opération, code de confirmation non saisi à temps, ou page fermée avant la fin. Vous pouvez réessayer immédiatement.
+{{ __('emails.paiement_echoue.causes') }}
 
-Réessayer le paiement :
+{{ __('emails.paiement_echoue.bouton') }} :
 {{ $retryUrl }}
 
-Si une somme apparaissait malgré tout sur votre compte, répondez à ce message : nous la retrouvons et nous la traitons.
+{{ __('emails.paiement_echoue.litige') }}
 
 —
 {{ config('app.name') }}

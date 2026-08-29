@@ -11,7 +11,7 @@
   (primaire #0B5D3B, gris #1E293B / #64748B / #E6EAF0).
 --}}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -41,9 +41,8 @@
                     {{-- Pied --}}
                     <tr>
                         <td style="padding:16px 24px;border-top:1px solid #E6EAF0;font-size:12px;color:#94A3B8;">
-                            &copy; {{ date('Y') }} {{ config('app.name') }} — plateforme d'identité
-                            professionnelle numérique.<br>
-                            Cet e-mail vous est envoyé car une action a été effectuée avec votre adresse.
+                            &copy; {{ date('Y') }} {{ config('app.name') }} — {{ __('emails.commun.pied_produit') }}<br>
+                            {{ __('emails.commun.pied_raison') }}
                         </td>
                     </tr>
                 </table>

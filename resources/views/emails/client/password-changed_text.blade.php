@@ -1,17 +1,17 @@
-Bonjour {{ $name }},
+{{ __('emails.commun.bonjour', ['nom' => $name]) }}
 
-Le mot de passe de votre compte a été modifié le {{ $date }}.
+{{ __('emails.mot_de_passe_change.intro_texte', ['date' => $date]) }}
 
-SI C'EST BIEN VOUS, il n'y a rien à faire : ce message est une simple confirmation.
+{{ __('emails.mot_de_passe_change.si_vous_texte') }}
 
-SI CE N'EST PAS VOUS, votre compte est en danger. Demandez immédiatement un nouveau mot de passe pour reprendre la main :
+{{ __('emails.mot_de_passe_change.sinon_texte') }}
 {{ $resetUrl }}
 @if ($ip)
 
-Adresse IP à l'origine de la modification : {{ $ip }}
+{{ __('emails.mot_de_passe_change.ip', ['ip' => $ip]) }}
 @endif
 
-Ce message de sécurité est envoyé à chaque changement de mot de passe et ne peut pas être désactivé.
+{{ __('emails.mot_de_passe_change.toujours_envoye') }}
 
 —
 {{ config('app.name') }}

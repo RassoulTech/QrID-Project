@@ -59,18 +59,18 @@ final class AdminActionType
     public static function libelles(): array
     {
         return [
-            self::BLOCAGE_COMPTE => 'Compte bloqué',
-            self::DEBLOCAGE_COMPTE => 'Compte débloqué',
-            self::DESACTIVATION_PROFIL => 'Profil désactivé',
-            self::REACTIVATION_PROFIL => 'Profil réactivé',
-            self::PROLONGATION_ABONNEMENT => 'Abonnement prolongé',
-            self::VERIFICATION_PAIEMENT => 'Paiement vérifié',
-            self::MODELE_ACTIVE => 'Modèle activé ou désactivé',
-            self::MODELE_DUPLIQUE => 'Modèle dupliqué',
-            self::MODELE_PAR_DEFAUT => 'Modèle défini par défaut',
-            self::PLAN_CREE => 'Plan créé',
-            self::PLAN_MODIFIE => 'Plan modifié',
-            self::LOT_CARTES => 'Lot de cartes',
+            self::BLOCAGE_COMPTE => __('admin.actions.compte_bloque'),
+            self::DEBLOCAGE_COMPTE => __('admin.actions.compte_debloque'),
+            self::DESACTIVATION_PROFIL => __('admin.actions.profil_desactive'),
+            self::REACTIVATION_PROFIL => __('admin.actions.profil_reactive'),
+            self::PROLONGATION_ABONNEMENT => __('admin.actions.abonnement_prolonge'),
+            self::VERIFICATION_PAIEMENT => __('admin.actions.paiement_verifie'),
+            self::MODELE_ACTIVE => __('admin.actions.modele_bascule'),
+            self::MODELE_DUPLIQUE => __('admin.actions.modele_duplique'),
+            self::MODELE_PAR_DEFAUT => __('admin.actions.modele_defaut'),
+            self::PLAN_CREE => __('admin.actions.plan_cree'),
+            self::PLAN_MODIFIE => __('admin.actions.plan_modifie'),
+            self::LOT_CARTES => __('admin.actions.lot_cartes'),
         ];
     }
 

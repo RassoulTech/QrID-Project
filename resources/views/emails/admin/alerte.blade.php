@@ -4,7 +4,7 @@
         <tr>
             <td style="padding:12px 14px;">
                 <span style="font-size:12px;font-weight:bold;letter-spacing:.04em;color:{{ $motif->estUrgent() ? '#B91C1C' : '#64748B' }};">
-                    {{ $motif->estUrgent() ? 'ACTION REQUISE' : 'POUR INFORMATION' }}
+                    {{ $motif->estUrgent() ? __('emails.alerte.action_requise') : __('emails.alerte.pour_information') }}
                 </span><br>
                 <span style="font-size:18px;font-weight:bold;color:#1E293B;">{{ $motif->titre() }}</span>
             </td>
@@ -16,12 +16,12 @@
     @if ($url)
         @include('emails.partials.bouton', [
             'url' => $url,
-            'libelle' => 'Ouvrir dans l\'administration',
+            'libelle' => __('emails.alerte.bouton'),
             'ton' => $motif->estUrgent() ? 'sombre' : 'vert',
         ])
     @endif
 
     <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
-        Message automatique destiné à l'équipe. Il n'a pas été envoyé au client.
+        {{ __('emails.alerte.automatique') }}
     </p>
 @endcomponent

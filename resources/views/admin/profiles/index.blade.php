@@ -12,15 +12,15 @@
 @php use App\Models\Profile; @endphp
 
 <x-admin-layout
-    title="Liste des profils"
-    subtitle="Suivre et contrôler les cartes numériques publiées par les clients."
+    :title="__('admin.profils.titre')"
+    :subtitle="__('admin.profils.sous_titre')"
 >
     <x-slot:actions>
         <a href="{{ route('admin.profiles.export', request()->query()) }}" class="adm-btn adm-btn--clair">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M8 1v8.6l2.3-2.3 1 1L8 11.7 4.7 8.3l1-1L8 9.6zM2 12h12v2H2z"/>
             </svg>
-            Exporter CSV
+            {{ __('admin.commun.exporter_csv') }}
         </a>
     </x-slot:actions>
 
@@ -32,13 +32,13 @@
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
             </svg>
             <input type="search" id="q" name="q" class="adm-filtres__champ"
-                   value="{{ $recherche }}" placeholder="Nom ou identifiant public…">
+                   value="{{ $recherche }}" placeholder="{{ __('admin.profils.recherche') }}">
         </div>
 
         <div class="adm-filtre">
-            <label for="etat">État du profil</label>
+            <label for="etat">{{ __('admin.profils.etat_profil') }}</label>
             <select id="etat" name="etat" class="adm-select">
-                <option value="">Tous les états</option>
+                <option value="">{{ __('admin.profils.tous_etats') }}</option>
                 @foreach ($etats as $cle => $libelle)
                     <option value="{{ $cle }}" @selected($etat === $cle)>{{ $libelle }}</option>
                 @endforeach
@@ -46,9 +46,9 @@
         </div>
 
         <div class="adm-filtre">
-            <label for="modele">Modèle utilisé</label>
+            <label for="modele">{{ __('admin.profils.modele_utilise') }}</label>
             <select id="modele" name="modele" class="adm-select">
-                <option value="">Tous les modèles</option>
+                <option value="">{{ __('admin.profils.tous_modeles') }}</option>
                 @foreach ($modeles as $m)
                     <option value="{{ $m->slug }}" @selected($modele === $m->slug)>{{ $m->name }}</option>
                 @endforeach
@@ -58,7 +58,7 @@
         <button type="submit" class="adm-btn adm-btn--vert" data-auto-filtre-bouton>Filtrer</button>
 
         @if ($recherche || $etat || $modele)
-            <a href="{{ route('admin.profiles.index') }}" class="adm-btn adm-btn--clair">Réinitialiser</a>
+            <a href="{{ route('admin.profiles.index') }}" class="adm-btn adm-btn--clair">{{ __('admin.commun.reinitialiser') }}</a>
         @endif
     </form>
 
@@ -69,7 +69,7 @@
                            :filtre="(bool) ($recherche || $etat || $modele)"
                            :reset="route('admin.profiles.index')"
                            nom="profil" icon="profile"
-                           vide="Les cartes créées par vos clients apparaîtront ici." />
+                           :vide="__('admin.profils.vide')" />
 
         @if (! $profils->isEmpty())
 
@@ -78,9 +78,9 @@
                     <thead>
                         <tr>
                             <th scope="col">Profil</th>
-                            <th scope="col">Identifiant public</th>
-                            <th scope="col">Modèle</th>
-                            <th scope="col">État</th>
+                            <th scope="col">{{ __('admin.commun.identifiant_public') }}</th>
+                            <th scope="col">{{ __('admin.commun.modele') }}</th>
+                            <th scope="col">{{ __('admin.commun.etat') }}</th>
                             <th scope="col">Vues</th>
                             <th scope="col">Publication</th>
                             <th scope="col" class="adm-table__actions">Actions</th>
@@ -119,10 +119,10 @@
                                 <td>
                                     @switch ($profil->etat())
                                         @case (Profile::ETAT_PUBLIE)
-                                            <x-badge variant="success">Publié</x-badge>
+                                            <x-badge variant="success">{{ __('admin.commun.publie') }}</x-badge>
                                             @break
                                         @case (Profile::ETAT_DESACTIVE)
-                                            <x-badge variant="danger">Désactivé</x-badge>
+                                            <x-badge variant="danger">{{ __('admin.commun.desactive') }}</x-badge>
                                             @break
                                         @default
                                             <x-badge variant="secondary">Brouillon</x-badge>
@@ -144,22 +144,22 @@
                                         <x-admin-action-form
                                             :action="route('admin.profiles.reactivate', $profil)"
                                             methode="DELETE"
-                                            libelle="Réactiver"
-                                            confirmation="Lever la désactivation"
+                                            :libelle="__('admin.profils.reactiver')"
+                                            :confirmation="__('admin.fiche.lever_desactivation')"
                                             :id="'react-'.$profil->id"
-                                            titre="Lever la désactivation"
+                                            :titre="__('admin.fiche.lever_desactivation')"
                                             :texte="'Motif de la désactivation en cours : '
                                                 .($profil->deactivated_reason ?? 'non renseigné')
                                                 .'. Le profil restera en brouillon : c\'est à son propriétaire de le republier.'" />
                                     @else
                                         <x-admin-action-form
                                             :action="route('admin.profiles.deactivate', $profil)"
-                                            libelle="Désactiver"
-                                            confirmation="Désactiver ce profil"
+                                            :libelle="__('admin.profils.desactiver')"
+                                            :confirmation="__('admin.profils.desactiver_ce_profil')"
                                             ton="danger"
                                             :id="'desact-'.$profil->id"
-                                            titre="Désactiver ce profil"
-                                            texte="La carte cesse immédiatement d'être accessible publiquement. Le contenu n'est ni modifié ni supprimé, et le client conserve son accès." />
+                                            :titre="__('admin.profils.desactiver_ce_profil')"
+                                            :texte="__('admin.profils.desactiver_texte')" />
                                     @endif
                                 </td>
                             </tr>
@@ -170,8 +170,13 @@
 
             <div class="adm-pied">
                 <p class="adm-pied__compte">
-                    Affichage {{ $profils->firstItem() }} à {{ $profils->lastItem() }}
-                    sur {{ number_format($profils->total(), 0, ',', ' ') }} profil{{ $profils->total() > 1 ? 's' : '' }}
+                    {{ __('admin.commun.affichage', [
+                        'debut' => $profils->firstItem(),
+                        'fin' => $profils->lastItem(),
+                    ]) }}
+                    {{ trans_choice('admin.commun.entites.profils', $profils->total(), [
+                        'compte' => \App\Support\Formats::nombre($profils->total()),
+                    ]) }}
                 </p>
                 {{ $profils->links() }}
             </div>

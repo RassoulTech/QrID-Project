@@ -39,7 +39,7 @@ class PaymentController extends Controller
 
         if (! $user->profile) {
             return redirect()->route('profile.create.step1')
-                ->with('info', 'Créez d\'abord votre carte, vous choisirez votre formule ensuite.');
+                ->with('info', __('profile.flash.carte_avant_formule'));
         }
 
         $abonnement = $user->activeSubscription();

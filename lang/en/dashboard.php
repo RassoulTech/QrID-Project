@@ -154,4 +154,23 @@ return [
         'paiements' => 'Payments',
         'notifications' => 'Notifications',
     ],
+
+    'flash' => [
+        'notifications_lues' => 'All your notifications are marked as read.',
+    ],
+
+    /*
+     | NOTIFICATIONS ARE WRITTEN TO THE DATABASE, so they are frozen at
+     | write time. They are rendered in the RECIPIENT'S language — not the
+     | language of the action: a card view comes from a stranger, whose
+     | language is no concern of the card's owner.
+     |
+     | Accepted consequence: a notification written before a language change
+     | stays in the old language.
+     */
+    'notifs' => [
+        'paiement_confirme' => 'Payment confirmed',
+        'carte_consultee' => 'Your card has been viewed',
+        'contact_enregistre' => 'A contact saved your details',
+    ],
 ];

@@ -82,25 +82,25 @@ class RapportQuotidien
 
         return [
             'comptes' => [
-                'libelle' => 'Nouveaux comptes',
+                'libelle' => __('admin.rapport.nouveaux_comptes'),
                 'valeur' => $comptes['jour'],
                 'veille' => $comptes['veille'],
                 'unite' => null,
             ],
             'cartes' => [
-                'libelle' => 'Cartes créées',
+                'libelle' => __('admin.rapport.cartes_creees'),
                 'valeur' => $cartes['jour'],
                 'veille' => $cartes['veille'],
                 'unite' => null,
             ],
             'publiees' => [
-                'libelle' => 'Cartes mises en ligne',
+                'libelle' => __('admin.rapport.cartes_publiees'),
                 'valeur' => $publiees['jour'],
                 'veille' => $publiees['veille'],
                 'unite' => null,
             ],
             'paiements' => [
-                'libelle' => 'Paiements encaissés',
+                'libelle' => __('admin.rapport.paiements'),
                 'valeur' => $paiements['nombre_jour'],
                 'veille' => $paiements['nombre_veille'],
                 'unite' => null,
@@ -112,7 +112,7 @@ class RapportQuotidien
                 'unite' => 'FCFA',
             ],
             'messages' => [
-                'libelle' => 'Messages reçus',
+                'libelle' => __('admin.rapport.messages'),
                 'valeur' => $messages['jour'],
                 'veille' => $messages['veille'],
                 'unite' => null,

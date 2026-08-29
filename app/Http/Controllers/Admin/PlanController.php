@@ -36,7 +36,7 @@ class PlanController extends Controller
 
         return redirect()
             ->route('admin.settings.plan', $plan)
-            ->with('status', "La formule « {$plan->name} » est créée.");
+            ->with('status', __('admin.flash.formule_creee', ['nom' => $plan->name]));
     }
 
     public function update(PlanRequest $request, Plan $plan): RedirectResponse

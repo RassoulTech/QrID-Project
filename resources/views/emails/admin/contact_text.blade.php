@@ -1,21 +1,18 @@
-FORMULAIRE DE CONTACT
+{{ __('emails.contact.bandeau') }}
 {{ $motif }}
 
-Nom : {{ $contact->name }}
-Adresse : {{ $contact->email }}
+{{ __('emails.contact.lignes.nom') }} : {{ $contact->name }}
+{{ __('emails.contact.lignes.adresse') }} : {{ $contact->email }}
 @if ($contact->phone)
-Téléphone : {{ $contact->phone }}
+{{ __('emails.contact.lignes.telephone') }} : {{ $contact->phone }}
 @endif
-Compte client : {{ $contact->user_id ? 'oui' : 'non' }}
-Reçu le : {{ $contact->created_at?->translatedFormat('j F Y à H:i') }}
+{{ __('emails.contact.lignes.compte') }} : {{ $contact->user_id ? __('emails.contact.oui') : __('emails.contact.non') }}
+{{ __('emails.contact.lignes.recu_le') }} : {{ $contact->created_at?->translatedFormat(__('common.formats.date_heure')) }}
 
---- MESSAGE ---
-
+{{ __('emails.contact_suite.message') }}
 {{ $contact->message }}
 
----
-
-Répondez directement à ce message : votre réponse partira vers {{ $contact->email }}.
+{{ __('emails.contact_suite.reponse_texte', ['adresse' => $contact->email]) }}
 
 —
 {{ config('app.name') }}

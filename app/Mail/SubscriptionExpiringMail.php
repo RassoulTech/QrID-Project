@@ -33,9 +33,9 @@ class SubscriptionExpiringMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(subject: match (true) {
-            $this->joursRestants <= 0 => 'Votre abonnement expire aujourd\'hui',
-            $this->joursRestants === 1 => 'Votre abonnement expire demain',
-            default => 'Votre abonnement expire dans '.$this->joursRestants.' jours',
+            $this->joursRestants <= 0 => __('emails.abonnement_expirant.sujet_aujourdhui'),
+            $this->joursRestants === 1 => __('emails.abonnement_expirant.sujet_demain'),
+            default => __('emails.abonnement_expirant.sujet'),
         });
     }
 

@@ -1,18 +1,18 @@
-Bonjour {{ $name }},
+{{ __('emails.commun.bonjour', ['nom' => $name]) }}
 
 @if ($joursRestants <= 0)
-Votre abonnement {{ $formule }} se termine AUJOURD'HUI.
+{{ __('emails.abonnement_expirant.aujourdhui_texte', ['formule' => $formule]) }}
 @elseif ($joursRestants === 1)
-Votre abonnement {{ $formule }} se termine DEMAIN, le {{ $echeance }}.
+{{ __('emails.abonnement_expirant.demain_texte', ['formule' => $formule, 'date' => $echeance]) }}
 @else
-Votre abonnement {{ $formule }} se termine dans {{ $joursRestants }} jours, le {{ $echeance }}.
+{{ __('emails.abonnement_expirant.dans_jours_texte', ['formule' => $formule, 'jours' => $joursRestants, 'date' => $echeance]) }}
 @endif
 
-Passé cette date, le lien public de votre carte cessera de répondre : les personnes qui l'ouvriront, ou qui scanneront votre QR Code, ne verront plus vos coordonnées.
+{{ __('emails.abonnement_expirant.consequence') }}
 
-RIEN N'EST SUPPRIMÉ. Votre carte, vos coordonnées et votre lien sont conservés en l'état. Un renouvellement les remet en ligne immédiatement, sans rien ressaisir et sans changer d'adresse — les cartes déjà imprimées restent valables.
+{{ __('emails.abonnement_expirant.rien_supprime_texte') }}
 
-Renouveler mon abonnement :
+{{ __('emails.abonnement_expirant.bouton') }} :
 {{ $renewUrl }}
 
 —

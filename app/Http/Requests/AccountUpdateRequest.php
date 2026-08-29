@@ -34,9 +34,9 @@ class AccountUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Votre nom est obligatoire.',
-            'email.required' => 'Votre adresse e-mail est obligatoire.',
-            'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
+            'name.required' => __('validation.messages.compte.nom_requis'),
+            'email.required' => __('validation.messages.compte.email_requis'),
+            'email.unique' => __('validation.messages.compte.email_pris'),
         ];
     }
 }

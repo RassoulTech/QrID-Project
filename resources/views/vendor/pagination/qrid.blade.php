@@ -21,7 +21,7 @@
   annonce « Précédent, indisponible » plutôt qu'un lien muet.
 --}}
 @if ($paginator->hasPages())
-    <nav class="pagin" role="navigation" aria-label="Pagination">
+    <nav class="pagin" role="navigation" aria-label="{{ __('pagination.libelle') }}">
 
         {{-- PRÉCÉDENT --}}
         @if ($paginator->onFirstPage())
@@ -29,14 +29,14 @@
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
                 </svg>
-                <span class="pagin__mot">Précédent</span>
+                <span class="pagin__mot">{{ __('pagination.precedent') }}</span>
             </span>
         @else
             <a class="pagin__lien" href="{{ $paginator->previousPageUrl() }}" rel="prev">
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
                 </svg>
-                <span class="pagin__mot">Précédent</span>
+                <span class="pagin__mot">{{ __('pagination.precedent') }}</span>
             </a>
         @endif
 
@@ -49,14 +49,14 @@
         {{-- SUIVANT --}}
         @if ($paginator->hasMorePages())
             <a class="pagin__lien" href="{{ $paginator->nextPageUrl() }}" rel="next">
-                <span class="pagin__mot">Suivant</span>
+                <span class="pagin__mot">{{ __('pagination.suivant') }}</span>
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
                 </svg>
             </a>
         @else
             <span class="pagin__lien is-muted" aria-disabled="true">
-                <span class="pagin__mot">Suivant</span>
+                <span class="pagin__mot">{{ __('pagination.suivant') }}</span>
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
                 </svg>

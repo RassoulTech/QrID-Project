@@ -23,18 +23,18 @@ class ProfileDeactivationController extends Controller
     public function store(MotifRequest $request, Profile $profile): RedirectResponse
     {
         if ($profile->isDeactivated()) {
-            return back()->with('status', 'Ce profil était déjà désactivé.');
+            return back()->with('status', __('admin.flash.profil_deja_desactive'));
         }
 
         $this->service->desactiver($profile, $request->motif());
 
-        return back()->with('status', "Le profil « {$profile->full_name} » n'est plus accessible publiquement.");
+        return back()->with('status', __('admin.flash.profil_desactive', ['nom' => $profile->full_name]));
     }
 
     public function destroy(MotifRequest $request, Profile $profile): RedirectResponse
     {
         if (! $profile->isDeactivated()) {
-            return back()->with('status', "Ce profil n'était pas désactivé.");
+            return back()->with('status', __('admin.flash.profil_pas_desactive'));
         }
 
         $this->service->reactiver($profile, $request->motif());

@@ -25,7 +25,7 @@ class AlreadyRegisteredMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Vous avez déjà un compte — '.config('app.name'),
+            subject: __('emails.deja_inscrit.sujet', ['marque' => config('app.name')]),
         );
     }
 

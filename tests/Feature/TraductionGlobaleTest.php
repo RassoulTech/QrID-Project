@@ -175,6 +175,57 @@ class TraductionGlobaleTest extends TestCase
      * La déconnexion vide la session. Sans la colonne en base, le choix
      * disparaîtrait avec elle.
      */
+    /**
+     * LE CHOIX ANONYME SURVIT À UNE CONNEXION, MÊME SESSION PERDUE.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * CE SCÉNARIO N'A PAS ÉTÉ IMAGINÉ : IL A ÉTÉ OBSERVÉ
+     * ═══════════════════════════════════════════════════════════════════
+     * Dans un navigateur, la langue choisie disparaissait au moment précis
+     * de la connexion. La chaîne était celle-ci :
+     *
+     *   1. visiteur anonyme choisit l'anglais → session ET cookie ;
+     *   2. une première connexion échoue      → la session est vidée ;
+     *   3. il se connecte pour de bon         → session vide, cookie intact ;
+     *   4. le report ne lisait que la SESSION → rien à reporter ;
+     *   5. le compte reste en français, et la préférence du compte
+     *      l'emporte ensuite sur le cookie à CHAQUE requête.
+     *
+     * Le choix était donc perdu définitivement, par la seule action de se
+     * connecter — et c'est irrattrapable pour l'utilisateur, qui doit
+     * rechoisir sa langue une fois connecté.
+     *
+     * Le cookie est le niveau prévu pour survivre à la session. Le report
+     * le consulte désormais en secours.
+     */
+    public function test_an_anonymous_choice_survives_login_even_without_a_session(): void
+    {
+        $user = User::factory()->create([
+            'email_verified_at' => now(),
+            'locale' => Langue::FRANCAIS,
+        ]);
+
+        // Le cookie porte le choix ; la session, elle, est vide — exactement
+        // l'état laissé par une tentative de connexion refusée.
+        // withUnencryptedCookie, et PAS withCookie : ce cookie figure dans la
+        // liste des non chiffres (bootstrap/app.php). withCookie l'aurait
+        // chiffre, EncryptCookies ne l'aurait pas dechiffre — puisqu'il est
+        // justement exclu — et le test aurait lu une chaine illisible en
+        // croyant tester le code.
+        $this->withUnencryptedCookie(Langue::nomDuCookie(), Langue::ANGLAIS);
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertSame(
+            Langue::ANGLAIS,
+            $user->fresh()->locale,
+            'Le choix anonyme porté par le cookie doit être reporté sur le compte.'
+        );
+    }
+
     public function test_the_language_survives_a_logout_and_a_new_session(): void
     {
         $user = User::factory()->create([
@@ -314,8 +365,20 @@ class TraductionGlobaleTest extends TestCase
 
         $groupes = implode('|', self::GROUPES);
 
+        /*
+         | UN SEUL SEGMENT SUFFIT — le motif exigeait deux.
+         |
+         | `admin.clients.titre` etait attrape, mais `auth.failed` passait
+         | au travers : deux segments etaient exiges apres le groupe. Or
+         | les cles les plus courtes sont justement celles des messages
+         | d'erreur, ceux qu'on lit au pire moment.
+         |
+         | Le filtre d'extensions plus bas ecarte `common.css` et consorts,
+         | qui sont la seule chose que ce relachement laisse passer.
+         */
+
         preg_match_all(
-            '/(?<![\w\/.-])((?:'.$groupes.')(?:\.[a-z0-9_]+){2,})(?![\w-])/',
+            '/(?<![\w\/.-])((?:'.$groupes.')(?:\.[a-z0-9_]+){1,})(?![\w-])/',
             $html,
             $trouves
         );

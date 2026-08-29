@@ -1,7 +1,7 @@
-<x-admin-layout title="État système">
+<x-admin-layout :title="__('admin.sante.titre')">
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
-            <h1 class="h4 fw-bold mb-0">État système</h1>
+            <h1 class="h4 fw-bold mb-0">{{ __('admin.sante.titre') }}</h1>
             {{-- Rafraîchissement 100 % serveur : simple rechargement de page, aucun JS. --}}
             <x-button :href="route('admin.system.health')" variant="outline-secondary" size="sm">Actualiser</x-button>
         </div>
@@ -9,37 +9,40 @@
 
     @if ($failedJobs > 0)
         <x-alert type="danger" :dismissible="false">
-            {{ $failedJobs }} job(s) en échec. Inspecte <code>failed_jobs</code> puis relance avec
-            <code>php artisan queue:retry all</code>.
+            {!! __('admin.sante.jobs_echec', [
+                'compte' => $failedJobs,
+                'table' => '<code>failed_jobs</code>',
+                'commande' => '<code>php artisan queue:retry all</code>',
+            ]) !!}
         </x-alert>
     @endif
 
     @if ($queueAlert)
         <x-alert type="warning" :dismissible="false">
-            File « mail » engorgée ({{ $mailQueue }} en attente). Vérifie que le worker tourne.
+            {{ __('admin.sante.file_engorgee', ['compte' => $mailQueue]) }}
         </x-alert>
     @endif
 
     <div class="row g-3">
         <div class="col-6 col-lg-3">
             <x-card>
-                <div class="text-secondary small">File « mail »</div>
+                <div class="text-secondary small">{{ __('admin.sante.file_mail') }}</div>
                 <div class="h3 fw-bold mb-0">{{ $mailQueue }}</div>
                 <div class="text-secondary small">en attente</div>
             </x-card>
         </div>
         <div class="col-6 col-lg-3">
             <x-card>
-                <div class="text-secondary small">Total jobs</div>
+                <div class="text-secondary small">{{ __('admin.sante.total_jobs') }}</div>
                 <div class="h3 fw-bold mb-0">{{ $totalJobs }}</div>
                 <div class="text-secondary small">toutes files</div>
             </x-card>
         </div>
         <div class="col-6 col-lg-3">
             <x-card>
-                <div class="text-secondary small">Jobs échoués</div>
+                <div class="text-secondary small">{{ __('admin.sante.jobs_echoues') }}</div>
                 <div class="h3 fw-bold mb-0 {{ $failedJobs > 0 ? 'text-danger' : '' }}">{{ $failedJobs }}</div>
-                <div class="text-secondary small">à relancer</div>
+                <div class="text-secondary small">{{ __('admin.sante.a_relancer') }}</div>
             </x-card>
         </div>
         <div class="col-6 col-lg-3">
@@ -59,16 +62,21 @@
          à l'utilisateur. --}}
     @if ($fileSansWorker)
         <x-alert type="danger" :dismissible="false">
-            <strong>Les e-mails ne partent probablement pas.</strong><br>
-            Le pilote de file est <code>{{ $pilote }}</code>, ce qui suppose un
-            worker exécutant <code>queue:work</code>. Le plan gratuit de Render
-            n'en fait pas tourner : les messages sont écrits dans la table
-            <code>jobs</code> et jamais repris — sans la moindre erreur.<br>
+            <strong>{{ __('admin.sante.mails_bloques_titre') }}</strong><br>
+            {{-- Les balises <code> sont passees EN PARAMETRE, pas ecrites
+                 dans la traduction : une phrase qui contient son propre
+                 balisage se traduit mal, et le traducteur casse le HTML
+                 sans s'en apercevoir. --}}
+            {!! __('admin.sante.mails_bloques_texte', [
+                'pilote' => '<code>'.e($pilote).'</code>',
+                'commande' => '<code>queue:work</code>',
+                'table' => '<code>jobs</code>',
+            ]) !!}<br>
             <span class="small">
-                Correction immédiate : passer <code>QUEUE_CONNECTION</code> à
-                <code>sync</code> dans les variables d'environnement, puis
-                redéployer. L'envoi se fera dans la requête — plus lent d'une
-                seconde ou deux, mais il aboutira.
+                {!! __('admin.sante.mails_bloques_correction', [
+                    'variable' => '<code>QUEUE_CONNECTION</code>',
+                    'valeur' => '<code>sync</code>',
+                ]) !!}
             </span>
         </x-alert>
     @endif
@@ -80,16 +88,16 @@
          l'application. --}}
     <div class="mt-4">
         <div class="d-flex align-items-baseline justify-content-between mb-2">
-            <h2 class="h6 fw-bold mb-0">Derniers e-mails envoyés</h2>
+            <h2 class="h6 fw-bold mb-0">{{ __('admin.sante.derniers_mails') }}</h2>
             <span class="text-secondary small">
                 Pilote : <code>{{ $pilote }}</code> ·
-                {{ $mailsDuJour }} aujourd'hui
+                {{ $mailsDuJour }} {{ __('admin.sante.aujourdhui') }}
             </span>
         </div>
 
         @if ($derniersMails->isEmpty())
             <x-empty-state
-                title="Aucun e-mail enregistré"
+                :title="__('admin.sante.aucun_mail')"
                 message="Si vous venez de demander un lien de réinitialisation et que rien n'apparaît ici, le message n'a pas quitté l'application — cherchez du côté du pilote de file, pas du côté de votre boîte de réception." />
         @else
             <div class="table-scroll">
@@ -99,7 +107,7 @@
                             <th scope="col">Date</th>
                             <th scope="col">Destinataire</th>
                             <th scope="col">Objet</th>
-                            <th scope="col">Statut</th>
+                            <th scope="col">{{ __('admin.commun.statut') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -112,7 +120,7 @@
                                 <td class="adm-table__second">{{ $mail->subject ?? '—' }}</td>
                                 <td>
                                     @if ($mail->status === 'sent')
-                                        <x-badge variant="success">Envoyé</x-badge>
+                                        <x-badge variant="success">{{ __('admin.sante.envoye') }}</x-badge>
                                     @else
                                         <x-badge variant="danger">{{ $mail->status }}</x-badge>
                                         @if ($mail->error)
@@ -131,6 +139,6 @@
     </div>
 
     <p class="text-secondary small mt-3 mb-0">
-        Rafraîchi au chargement de la page. Aucune donnée temps réel côté navigateur.
+        {{ __('admin.sante.rafraichi') }}
     </p>
 </x-admin-layout>

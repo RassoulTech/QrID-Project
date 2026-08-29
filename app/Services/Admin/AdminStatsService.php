@@ -302,7 +302,7 @@ class AdminStatsService
                     .' en attente depuis plus de 24 heures. Une vérification manuelle peut débloquer '
                     .($enAttente > 1 ? 'ces clients' : 'ce client').'.',
                 'action' => route('admin.payments.index', ['statut' => Payment::STATUS_PENDING]),
-                'libelle' => 'Voir les paiements',
+                'libelle' => __('admin.raccourcis.paiements'),
             ];
         }
 
@@ -315,7 +315,7 @@ class AdminStatsService
                 'texte' => $expirent.' abonnement'.($expirent > 1 ? 's arrivent' : ' arrive')
                     .' à échéance dans les 7 prochains jours.',
                 'action' => route('admin.clients.index'),
-                'libelle' => 'Voir les clients',
+                'libelle' => __('admin.raccourcis.clients'),
             ];
         }
 

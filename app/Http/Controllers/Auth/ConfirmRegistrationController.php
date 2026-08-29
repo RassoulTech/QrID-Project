@@ -82,7 +82,7 @@ class ConfirmRegistrationController extends Controller
         // plus qu'un compte existe pour cette adresse.
         if (! $pending || ! hash_equals($pending->token_hash, $hash)) {
             return redirect()->route('login')
-                ->with('info', 'Ce lien a déjà été utilisé ou n\'est plus valable. Connectez-vous pour accéder à votre espace.');
+                ->with('info', __('auth.flash.lien_perime'));
         }
 
         // CAS 8 — une session est déjà ouverte : on la ferme avant de traiter
@@ -109,7 +109,7 @@ class ConfirmRegistrationController extends Controller
             $pending->delete();
 
             return redirect()->route('login')
-                ->with('success', 'Votre compte est déjà confirmé. Connectez-vous.');
+                ->with('success', __('auth.flash.deja_confirme'));
         }
 
         $user = DB::transaction(function () use ($pending) {

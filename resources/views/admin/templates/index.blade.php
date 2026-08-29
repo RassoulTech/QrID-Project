@@ -9,19 +9,19 @@
   dès la première retouche du gabarit, et personne ne s'en aperçoit.
 --}}
 <x-admin-layout
-    title="Modèles de carte"
-    subtitle="Gérer les gabarits visuels proposés aux clients à la création de leur carte."
+    :title="__('admin.modeles.titre')"
+    :subtitle="__('admin.modeles.sous_titre')"
 >
     <x-slot:actions>
         {{-- Pas de bouton « Nouveau modèle » : créer un gabarit demande d'en
              écrire le rendu, ce qui ne se fait pas depuis un formulaire. La
              duplication d'un modèle existant est le point de départ prévu. --}}
         <span class="adm-head__sous">
-            Un nouveau modèle se crée en dupliquant un existant, puis en le relisant.
+            {{ __('admin.modeles.creation_aide') }}
         </span>
     </x-slot:actions>
 
-    <nav class="adm-onglets" aria-label="Filtrer les modèles">
+    <nav class="adm-onglets" aria-label="{{ __('admin.modeles.filtrer') }}">
         @foreach ([
             'tous' => ['Tous les modèles', $compteurs['tous']],
             'actifs' => ['Actifs', $compteurs['actifs']],
@@ -39,8 +39,8 @@
     @if ($modeles->isEmpty())
         <div class="adm-bloc">
             <x-empty-state icon="document"
-                title="Aucun modèle"
-                message="Aucun gabarit ne correspond à cet onglet." />
+                :title="__('admin.modeles.aucun_titre')"
+                :message="__('admin.modeles.aucun_message')" />
         </div>
     @else
         <div class="adm-modeles">
@@ -68,7 +68,7 @@
                                         @class(['adm-switch', 'is-on' => $modele->is_active])
                                         role="switch"
                                         aria-checked="{{ $modele->is_active ? 'true' : 'false' }}"
-                                        aria-label="{{ $modele->is_active ? 'Désactiver' : 'Activer' }} le modèle {{ $modele->name }}">
+                                        aria-label="{{ $modele->is_active ? __('common.actions.desactiver') : __('common.actions.activer') }} {{ __('admin.modeles.le_modele') }} {{ $modele->name }}">
                                     <span class="adm-switch__bille"></span>
                                 </button>
                             </form>
@@ -76,7 +76,7 @@
 
                         <p class="adm-modele__meta">
                             @if ($modele->is_default)
-                                <x-badge variant="success">Par défaut</x-badge>
+                                <x-badge variant="success">{{ __('admin.modeles.par_defaut') }}</x-badge>
                             @endif
                             @if ($modele->is_premium)
                                 <x-badge variant="warning">Premium</x-badge>
@@ -99,7 +99,7 @@
                                 <form method="POST" action="{{ route('admin.templates.default', $modele) }}">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit" class="adm-lien adm-lien--action">Définir par défaut</button>
+                                    <button type="submit" class="adm-lien adm-lien--action">{{ __('admin.modeles.definir_defaut') }}</button>
                                 </form>
                             @endif
                         </div>

@@ -38,7 +38,7 @@ class LegalController extends Controller
         $editeur = config('legal.editeur');
 
         return view('legal.page', [
-            'title' => 'Conditions générales d\'utilisation et de vente',
+            'title' => __('legal.titres.conditions'),
             'updatedAt' => config('legal.mise_a_jour'),
             'blocks' => [
                 ['heading' => 'Objet',
@@ -132,7 +132,7 @@ class LegalController extends Controller
         $editeur = config('legal.editeur');
 
         return view('legal.page', [
-            'title' => 'Politique de confidentialité',
+            'title' => __('legal.titres.confidentialite'),
             'updatedAt' => config('legal.mise_a_jour'),
             'blocks' => [
                 ['heading' => 'Responsable du traitement',
@@ -217,7 +217,7 @@ class LegalController extends Controller
         $hebergeur = config('legal.hebergeur');
 
         return view('legal.page', [
-            'title' => 'Mentions légales',
+            'title' => __('legal.titres.mentions'),
             'updatedAt' => config('legal.mise_a_jour'),
             'blocks' => [
                 ['heading' => 'Éditeur du site',

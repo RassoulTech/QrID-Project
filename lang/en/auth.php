@@ -46,6 +46,7 @@ return [
         'afficher_mot_de_passe' => 'Show password',
         'masquer_mot_de_passe' => 'Hide password',
         'se_souvenir' => 'Remember me',
+        'mot_de_passe_aide' => 'At least 8 characters.',
     ],
 
     'liens' => [
@@ -163,4 +164,11 @@ return [
         'visuel_titre' => 'Links have a lifespan',
         'visuel_texte' => 'One hour, no more: that is what makes them safe.',
     ],
+
+    'flash' => [
+        'deja_confirme' => 'Your account is already confirmed. Please sign in.',
+        'lien_perime' => 'This link has already been used, or is no longer valid. Sign in to reach your account.',
+        'compte_incomplet' => 'This account is incomplete. Start registration again, or contact support.',
+    ],
+
 ];

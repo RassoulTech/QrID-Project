@@ -40,10 +40,10 @@ class CheckoutRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'plan.required' => 'Choisissez une formule.',
-            'plan.exists' => 'Cette formule n\'est pas disponible.',
-            'method.required' => 'Choisissez un moyen de paiement.',
-            'method.in' => 'Ce moyen de paiement n\'est pas proposé.',
+            'plan.required' => __('validation.messages.paiement.formule_requise'),
+            'plan.exists' => __('validation.messages.paiement.formule_absente'),
+            'method.required' => __('validation.messages.paiement.moyen_requis'),
+            'method.in' => __('validation.messages.paiement.moyen_absent'),
         ];
     }
 

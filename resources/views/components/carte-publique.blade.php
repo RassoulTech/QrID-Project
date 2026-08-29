@@ -64,11 +64,11 @@
     }
 
     if ($profile->phone) {
-        $actions[] = ['telephone', $profile->tel_href, 'Appeler', false];
+        $actions[] = ['telephone', $profile->tel_href, __('card.actions.appeler'), false];
     }
 
     if ($lienCarte = $profile->lienCarte()) {
-        $actions[] = ['localisation', $lienCarte, 'Localisation', true];
+        $actions[] = ['localisation', $lienCarte, __('card.actions.localisation'), true];
     }
 
     foreach ($profile->socialLinks as $lien) {

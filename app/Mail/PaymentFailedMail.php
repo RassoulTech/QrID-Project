@@ -33,7 +33,7 @@ class PaymentFailedMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Votre paiement n\'a pas abouti',
+            subject: __('emails.paiement_echoue.sujet'),
         );
     }
 

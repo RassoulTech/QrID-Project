@@ -91,4 +91,86 @@ return [
         'socials' => 'réseaux sociaux',
         'bio' => 'présentation',
     ],
+
+    /*
+     | NOS MESSAGES, PAR CONTEXTE.
+     |
+     | Le groupe `custom` de Laravel indexe par champ ; il ne peut pas
+     | porter deux formulations differentes pour un meme champ. Ces cles
+     | sont donc appelees explicitement depuis chaque FormRequest.
+     */
+    'messages' => [
+        'compte' => [
+            'nom_requis' => 'Votre nom est obligatoire.',
+            'email_requis' => 'Votre adresse e-mail est obligatoire.',
+            'email_pris' => 'Cette adresse e-mail est déjà utilisée.',
+        ],
+        'inscription' => [
+            'nom_requis' => 'Le nom complet est obligatoire.',
+            'email_requis' => 'L\'adresse e-mail est obligatoire.',
+            'email_invalide' => 'L\'adresse e-mail n\'est pas valide.',
+            'telephone_requis' => 'Le numéro de téléphone est obligatoire.',
+            'mot_de_passe_requis' => 'Le mot de passe est obligatoire.',
+            'mots_de_passe_differents' => 'Les deux mots de passe ne correspondent pas.',
+        ],
+        'motif' => [
+            'requis' => 'Un motif est obligatoire pour cette action.',
+            'trop_court' => 'Le motif doit être compréhensible par quelqu\'un qui relira le journal dans six mois — 10 caractères au minimum.',
+        ],
+        'prolongation' => [
+            'trop_long' => 'Au-delà de :max jours, passez par une formule : elle laisse une trace comptable.',
+        ],
+        'formule' => [
+            'slug_pris' => 'Cet identifiant technique est déjà pris par une autre formule.',
+            'slug_invalide' => 'L\'identifiant technique n\'accepte que lettres, chiffres, tirets et tirets bas.',
+        ],
+        'paiement' => [
+            'formule_requise' => 'Choisissez une formule.',
+            'formule_absente' => 'Cette formule n\'est pas disponible.',
+            'moyen_requis' => 'Choisissez un moyen de paiement.',
+            'moyen_absent' => 'Ce moyen de paiement n\'est pas proposé.',
+        ],
+        'carte' => [
+            'prenom_requis' => 'Votre prénom est obligatoire.',
+            'nom_requis' => 'Votre nom est obligatoire.',
+            'fonction_requise' => 'Votre fonction est obligatoire.',
+            'image_invalide' => 'Ce fichier n\'est pas une image.',
+            'image_formats' => 'Formats acceptés : JPG, PNG ou WEBP.',
+            'image_trop_lourde' => 'Votre image dépasse 2 Mo. Choisissez une image plus légère.',
+            'image_envoi_echoue' => 'L\'envoi a échoué : l\'image dépasse 2 Mo ou la connexion s\'est interrompue.',
+            'telephone_requis' => 'Votre téléphone est obligatoire.',
+            'email_invalide' => 'Cette adresse e-mail n\'est pas valide.',
+            'site_invalide' => 'Cette adresse de site n\'est pas valide.',
+            'reseaux_max' => 'Six réseaux sociaux au maximum.',
+            'lien_invalide' => 'Ce lien n\'est pas une adresse valide.',
+            'reseau_requis' => 'Choisissez le réseau correspondant à ce lien.',
+            'reseau_absent' => 'Ce réseau n\'est pas proposé.',
+            'modele_requis' => 'Choisissez un modèle.',
+            'modele_absent' => 'Ce modèle n\'est plus disponible.',
+            'variante_requise' => 'Choisissez une variante de carte.',
+            'variante_absente' => 'Cette variante de carte n\'existe pas.',
+        ],
+    ],
+
+    /*
+     | LES NOMS DE CHAMPS, tels qu'ils apparaissent DANS une phrase.
+     | Laravel les insere dans « Le champ :attribute est obligatoire »,
+     | donc en minuscules et sans article.
+     */
+    'attributs' => [
+        'nombre_jours' => 'nombre de jours',
+        'motif' => 'motif',
+        'nom_plan' => 'nom du plan',
+        'identifiant_technique' => 'identifiant technique',
+        'prix' => 'prix',
+        'periodicite' => 'périodicité',
+        'inclusion' => 'inclusion',
+        'destinataire' => 'nom du destinataire',
+        'telephone' => 'téléphone',
+        'adresse' => 'adresse',
+        'ville' => 'ville',
+        'lien' => 'lien',
+        'reseau' => 'réseau',
+    ],
+
 ];

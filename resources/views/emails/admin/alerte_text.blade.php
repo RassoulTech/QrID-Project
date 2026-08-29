@@ -1,4 +1,4 @@
-{{ $motif->estUrgent() ? 'ACTION REQUISE' : 'POUR INFORMATION' }}
+{{ $motif->estUrgent() ? __('emails.alerte.action_requise') : __('emails.alerte.pour_information') }}
 {{ $motif->titre() }}
 
 @foreach ($lignes as $libelle => $valeur)
@@ -6,11 +6,11 @@
 @endforeach
 @if ($url)
 
-Ouvrir dans l'administration :
+{{ __('emails.alerte.bouton') }} :
 {{ $url }}
 @endif
 
-Message automatique destiné à l'équipe. Il n'a pas été envoyé au client.
+{{ __('emails.alerte.automatique') }}
 
 —
 {{ config('app.name') }}

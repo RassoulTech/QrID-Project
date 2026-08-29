@@ -41,7 +41,7 @@ class EnsureAccountIsUsable
             $request->session()->regenerateToken();
 
             return redirect()->route('login')->withErrors([
-                'email' => 'Ce compte est incomplet. Reprenez l\'inscription ou contactez le support.',
+                'email' => __('auth.flash.compte_incomplet'),
             ]);
         }
 

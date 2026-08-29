@@ -1,27 +1,28 @@
-Bonjour {{ $name }},
+{{ __('emails.commun.bonjour', ['nom' => $name]) }}
 
-Votre paiement de {{ $montant }} FCFA est encaissé et votre abonnement est actif. Conservez ce message : il vaut reçu.
+{{ __('emails.paiement_reussi.intro_texte', ['montant' => $montant]) }}
 
-Référence : {{ $reference }}
-Date : {{ $date }}
-Formule : {{ $formule }}
-Moyen de paiement : {{ $moyen }}
-Montant : {{ $montant }} FCFA
+{{ __('emails.paiement_reussi.lignes.reference') }} : {{ $reference }}
+{{ __('emails.paiement_reussi.lignes.date') }} : {{ $date }}
+{{ __('emails.paiement_reussi.lignes.formule') }} : {{ $formule }}
+{{ __('emails.paiement_reussi.lignes.moyen') }} : {{ $moyen }}
+{{ __('emails.paiement_reussi.lignes.montant') }} : {{ $montant }} FCFA
 @if ($echeance)
-Valable jusqu'au : {{ $echeance }}
+{{ __('emails.paiement_reussi.lignes.echeance') }} : {{ $echeance }}
 @endif
-
 @if ($publicUrl)
-Votre lien à partager :
+
+{{ __('emails.commun.lien_a_partager') }} :
 {{ $publicUrl }}
 @else
-Votre espace :
+
+{{ __('emails.paiement_reussi.bouton_espace') }} :
 {{ $dashboardUrl }}
 @endif
 
-Votre QR Code et le fichier prêt pour l'impression sont joints à ce message. Ils restent également téléchargeables depuis votre espace.
+{{ __('emails.paiement_reussi.pieces') }}
 
-Une question sur ce paiement ? Répondez à ce message en citant la référence ci-dessus.
+{{ __('emails.paiement_reussi.question') }}
 
 —
 {{ config('app.name') }}

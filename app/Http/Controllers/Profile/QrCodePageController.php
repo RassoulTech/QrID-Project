@@ -23,7 +23,7 @@ class QrCodePageController extends Controller
 
         if (! $profile) {
             return redirect()->route('profile.create.step1')
-                ->with('info', 'Créez d\'abord votre carte : son QR Code sera généré automatiquement.');
+                ->with('info', __('profile.flash.carte_avant_qr'));
         }
 
         return view('carte.qr', [

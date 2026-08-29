@@ -44,7 +44,7 @@ class PaymentSucceededMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Paiement confirmé — '.$this->montant.' FCFA',
+            subject: __('emails.paiement_reussi.sujet', ['montant' => $this->montant]),
         );
     }
 

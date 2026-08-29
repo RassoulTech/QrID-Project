@@ -68,19 +68,19 @@ class PlanRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => 'nom du plan',
-            'slug' => 'identifiant technique',
-            'price_fcfa' => 'prix',
-            'duration_days' => 'périodicité',
-            'features.*' => 'inclusion',
+            'name' => __('validation.attributs.nom_plan'),
+            'slug' => __('validation.attributs.identifiant_technique'),
+            'price_fcfa' => __('validation.attributs.prix'),
+            'duration_days' => __('validation.attributs.periodicite'),
+            'features.*' => __('validation.attributs.inclusion'),
         ];
     }
 
     public function messages(): array
     {
         return [
-            'slug.unique' => 'Cet identifiant technique est déjà pris par une autre formule.',
-            'slug.alpha_dash' => 'L\'identifiant technique n\'accepte que lettres, chiffres, tirets et tirets bas.',
+            'slug.unique' => __('validation.messages.formule.slug_pris'),
+            'slug.alpha_dash' => __('validation.messages.formule.slug_invalide'),
         ];
     }
 

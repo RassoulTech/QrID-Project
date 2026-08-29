@@ -94,7 +94,7 @@
 
             <select id="{{ $champPays }}" name="{{ $champPays }}"
                     class="f__control tel__pays" data-tel-pays
-                    aria-label="Indicatif du pays">
+                    aria-label="{{ __('common.champs.indicatif') }}">
                 @foreach (\App\Support\IndicatifsPays::options() as $code => $libelle)
                     <option value="{{ $code }}" @selected($codePays === $code)>{{ $libelle }}</option>
                 @endforeach

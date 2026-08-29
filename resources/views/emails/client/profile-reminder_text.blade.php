@@ -1,17 +1,17 @@
-Bonjour {{ $name }},
+{{ __('emails.commun.bonjour', ['nom' => $name]) }}
 
 @if ($rang === 1)
-Votre carte est enregistrée, mais elle n'est pas encore en ligne : son lien ne répond donc à personne. Il ne manque qu'un clic pour la publier.
+{{ __('emails.rappel_carte.premier') }}
 @else
-Votre carte est toujours enregistrée sans être publiée. Si quelque chose vous a arrêté — un champ qui ne convient pas, une photo qui ne passe pas, un doute sur le rendu — répondez simplement à ce message : nous regardons avec vous.
+{{ __('emails.rappel_carte.second') }}
 @endif
 
-Publier ne coûte rien pendant votre essai gratuit, et reste réversible : vous pouvez retirer votre carte à tout moment.
+{{ __('emails.rappel_carte.gratuit') }}
 
-Publier ma carte :
+{{ __('emails.rappel_carte.bouton') }} :
 {{ $activateUrl }}
 
-C'est notre {{ $rang === 1 ? 'premier' : 'second et dernier' }} rappel à ce sujet.
+{{ __($rang === 1 ? 'emails.rappel_carte.rang_1' : 'emails.rappel_carte.rang_2') }}
 
 —
 {{ config('app.name') }}

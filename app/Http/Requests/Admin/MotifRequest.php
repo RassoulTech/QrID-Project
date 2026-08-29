@@ -34,14 +34,14 @@ class MotifRequest extends FormRequest
 
     public function attributes(): array
     {
-        return ['motif' => 'motif'];
+        return ['motif' => __('validation.attributs.motif')];
     }
 
     public function messages(): array
     {
         return [
-            'motif.required' => 'Un motif est obligatoire pour cette action.',
-            'motif.min' => 'Le motif doit être compréhensible par quelqu\'un qui relira le journal dans six mois — 10 caractères au minimum.',
+            'motif.required' => __('validation.messages.motif.requis'),
+            'motif.min' => __('validation.messages.motif.trop_court'),
         ];
     }
 

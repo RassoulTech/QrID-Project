@@ -47,7 +47,7 @@
             :label="$aUnMotDePasse ? __('profile.compte.nouveau') : __('profile.compte.mot_de_passe')"
             autocomplete="new-password"
             errorBag="updatePassword"
-            help="Au moins 8 caractères."
+            help="{{ __('auth.champs.mot_de_passe_aide') }}"
         />
 
         <x-password

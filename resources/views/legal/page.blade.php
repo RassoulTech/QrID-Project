@@ -5,9 +5,9 @@
     <section class="section">
         <div class="wrap">
             <div class="section-head">
-                <span class="eyebrow">Informations légales</span>
+                <span class="eyebrow">{{ __('legal.surtitre') }}</span>
                 <h2>{{ $title }}</h2>
-                <p>Dernière mise à jour : {{ $updatedAt }}</p>
+                <p>{{ __('legal.mise_a_jour', ['date' => $updatedAt]) }}</p>
             </div>
 
             <div style="max-width:720px;margin-top:44px">

@@ -22,9 +22,9 @@ use Illuminate\Http\Request;
 class SettingsController extends Controller
 {
     public const ONGLETS = [
-        'plans' => 'Plans tarifaires',
-        'general' => 'Paramètres généraux',
-        'securite' => 'Sécurité',
+        'plans' => 'admin.parametres.onglets.plans',
+        'general' => 'admin.parametres.onglets.general',
+        'securite' => 'admin.parametres.onglets.securite',
     ];
 
     public function index(Request $request): View

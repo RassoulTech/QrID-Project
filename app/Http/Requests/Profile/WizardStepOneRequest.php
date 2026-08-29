@@ -42,13 +42,13 @@ class WizardStepOneRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'first_name.required' => 'Votre prénom est obligatoire.',
-            'last_name.required' => 'Votre nom est obligatoire.',
-            'job_title.required' => 'Votre fonction est obligatoire.',
-            'cover.image' => 'Ce fichier n\'est pas une image.',
-            'cover.mimes' => 'Formats acceptés : JPG, PNG ou WEBP.',
-            'cover.max' => 'Votre image dépasse 2 Mo. Choisissez une image plus légère.',
-            'cover.uploaded' => 'L\'envoi a échoué : la image dépasse 2 Mo ou la connexion s\'est interrompue.',
+            'first_name.required' => __('validation.messages.carte.prenom_requis'),
+            'last_name.required' => __('validation.messages.carte.nom_requis'),
+            'job_title.required' => __('validation.messages.carte.fonction_requise'),
+            'cover.image' => __('validation.messages.carte.image_invalide'),
+            'cover.mimes' => __('validation.messages.carte.image_formats'),
+            'cover.max' => __('validation.messages.carte.image_trop_lourde'),
+            'cover.uploaded' => __('validation.messages.carte.image_envoi_echoue'),
         ];
     }
 }

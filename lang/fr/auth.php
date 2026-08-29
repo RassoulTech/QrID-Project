@@ -69,6 +69,7 @@ return [
         'afficher_mot_de_passe' => 'Afficher le mot de passe',
         'masquer_mot_de_passe' => 'Masquer le mot de passe',
         'se_souvenir' => 'Se souvenir de moi',
+        'mot_de_passe_aide' => 'Au moins 8 caractères.',
     ],
 
     'liens' => [
@@ -228,4 +229,11 @@ return [
         'visuel_titre' => 'Les liens ont une durée de vie',
         'visuel_texte' => 'Une heure, pas plus : c\'est ce qui les rend sûrs.',
     ],
+
+    'flash' => [
+        'deja_confirme' => 'Votre compte est déjà confirmé. Connectez-vous.',
+        'lien_perime' => 'Ce lien a déjà été utilisé ou n\'est plus valable. Connectez-vous pour accéder à votre espace.',
+        'compte_incomplet' => 'Ce compte est incomplet. Reprenez l\'inscription ou contactez le support.',
+    ],
+
 ];

@@ -19,7 +19,7 @@ class ConfirmRegistrationMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Confirmez votre inscription — '.config('app.name'),
+            subject: __('emails.confirmation.sujet', ['marque' => config('app.name')]),
         );
     }
 

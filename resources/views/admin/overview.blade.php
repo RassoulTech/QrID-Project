@@ -8,15 +8,15 @@
   zéro est une information, et le masquer laisse croire à une panne.
 --}}
 <x-admin-layout
-    title="Vue d'ensemble"
-    subtitle="Suivi de l'activité de la plateforme aujourd'hui."
+    :title="__('admin.vue_ensemble.titre')"
+    :subtitle="__('admin.vue_ensemble.sous_titre')"
 >
     <x-slot:actions>
         {{-- Sélecteur de période : formulaire GET. La période reste dans
              l'URL, donc le lien envoyé à un collègue montre la même chose. --}}
         <form method="GET" action="{{ route('admin.overview') }}" class="adm-filtres adm-filtres--nu">
             <div class="adm-filtre">
-                <label for="periode">Période</label>
+                <label for="periode">{{ __('admin.commun.periode') }}</label>
                 <select id="periode" name="periode" class="adm-select" onchange="this.form.submit()">
                     @foreach ($periodes as $cle)
                         <option value="{{ $cle }}" @selected($cle === $periode)>
@@ -58,11 +58,11 @@
                 @if ($carte['variation'] === null)
                     {{-- Aucune base de comparaison : un tiret, pas un « +100 % »
                          qui impressionnerait sans rien vouloir dire. --}}
-                    <span class="adm-stat__var is-neutre">— sur la période précédente</span>
+                    <span class="adm-stat__var is-neutre">{{ __('admin.vue_ensemble.sur_periode_precedente') }}</span>
                 @else
                     <span @class(['adm-stat__var', 'is-hausse' => $carte['variation'] >= 0, 'is-baisse' => $carte['variation'] < 0])>
                         {{ $carte['variation'] >= 0 ? '+' : '' }}{{ number_format($carte['variation'], 1, ',', ' ') }} %
-                        <span class="adm-stat__ref">sur la période précédente</span>
+                        <span class="adm-stat__ref">{{ __('admin.vue_ensemble.sur_periode_precedente') }}</span>
                     </span>
                 @endif
             </div>
@@ -74,18 +74,18 @@
 
         <section class="adm-bloc">
             <div class="adm-bloc__tete">
-                <h2 class="adm-bloc__titre">Tendance des inscriptions</h2>
+                <h2 class="adm-bloc__titre">{{ __('admin.vue_ensemble.tendance_inscriptions') }}</h2>
 
                 <p class="adm-legende">
                     <span class="adm-legende__puce"></span>
-                    Nouveaux comptes
+                    {{ __('admin.vue_ensemble.nouveaux_comptes') }}
                 </p>
             </div>
 
             @if ($tendance->sum('valeur') === 0)
                 <x-empty-state
-                    title="Aucune inscription sur la période"
-                    message="Le graphique apparaîtra dès la première création de compte." />
+                    :title="__('admin.vue_ensemble.aucune_inscription_periode_titre')"
+                    :message="__('admin.vue_ensemble.aucune_inscription_periode_message')" />
             @else
                 @php $max = max(1, $tendance->max('valeur')); @endphp
 
@@ -125,12 +125,12 @@
 
             {{-- ================= MOYENS DE PAIEMENT ================= --}}
             <section class="adm-bloc">
-                <h2 class="adm-bloc__titre">Moyens de paiement</h2>
+                <h2 class="adm-bloc__titre">{{ __('admin.vue_ensemble.moyens_paiement') }}</h2>
 
                 @if ($moyens->sum('total') === 0)
                     <x-empty-state icon="payment"
-                        title="Aucun paiement encaissé"
-                        message="La répartition apparaîtra au premier encaissement." />
+                        :title="__('admin.vue_ensemble.aucun_encaissement_titre')"
+                        :message="__('admin.vue_ensemble.aucun_encaissement_message')" />
                 @else
                     <ul class="adm-parts">
                         @foreach ($moyens as $moyen)
@@ -159,8 +159,8 @@
 
         <section class="adm-bloc">
             <div class="adm-bloc__tete">
-                <h2 class="adm-bloc__titre">Dernières inscriptions</h2>
-                <a href="{{ route('admin.clients.index') }}" class="adm-lien">Voir tout</a>
+                <h2 class="adm-bloc__titre">{{ __('admin.vue_ensemble.dernieres_inscriptions') }}</h2>
+                <a href="{{ route('admin.clients.index') }}" class="adm-lien">{{ __('admin.commun.voir_tout') }}</a>
             </div>
 
             @forelse ($inscriptions as $client)
@@ -180,15 +180,15 @@
                 </div>
             @empty
                 <x-empty-state icon="profile"
-                    title="Aucune inscription"
-                    message="Les nouveaux comptes apparaîtront ici." />
+                    :title="__('admin.vue_ensemble.aucune_inscription_titre')"
+                    :message="__('admin.vue_ensemble.aucune_inscription_message')" />
             @endforelse
         </section>
 
         <section class="adm-bloc">
             <div class="adm-bloc__tete">
-                <h2 class="adm-bloc__titre">Derniers paiements</h2>
-                <a href="{{ route('admin.payments.index') }}" class="adm-lien">Voir tout</a>
+                <h2 class="adm-bloc__titre">{{ __('admin.vue_ensemble.derniers_paiements') }}</h2>
+                <a href="{{ route('admin.payments.index') }}" class="adm-lien">{{ __('admin.commun.voir_tout') }}</a>
             </div>
 
             @forelse ($paiements as $paiement)
@@ -211,8 +211,8 @@
                 </div>
             @empty
                 <x-empty-state icon="payment"
-                    title="Aucun paiement"
-                    message="Les encaissements apparaîtront ici." />
+                    :title="__('admin.vue_ensemble.aucun_paiement_titre')"
+                    :message="__('admin.vue_ensemble.aucun_paiement_message')" />
             @endforelse
         </section>
     </div>

@@ -1,32 +1,24 @@
-@component('emails.layout', ['title' => 'Votre abonnement arrive à échéance'])
-    <h1 style="margin:0 0 12px;font-size:20px;">Bonjour {{ $name }},</h1>
+@component('emails.layout', ['title' => __('emails.abonnement_expirant.titre')])
+    <h1 style="margin:0 0 12px;font-size:20px;">{{ __('emails.commun.bonjour', ['nom' => $name]) }}</h1>
 
     <p style="margin:0 0 20px;line-height:1.5;">
         @if ($joursRestants <= 0)
-            Votre abonnement {{ $formule }} se termine <strong>aujourd'hui</strong>.
+            {!! __('emails.abonnement_expirant.aujourdhui', ['formule' => e($formule)]) !!}
         @elseif ($joursRestants === 1)
-            Votre abonnement {{ $formule }} se termine <strong>demain</strong>,
-            le {{ $echeance }}.
+            {!! __('emails.abonnement_expirant.demain', ['formule' => e($formule), 'date' => e($echeance)]) !!}
         @else
-            Votre abonnement {{ $formule }} se termine dans
-            <strong>{{ $joursRestants }} jours</strong>, le {{ $echeance }}.
+            {!! __('emails.abonnement_expirant.dans_jours', ['formule' => e($formule), 'jours' => $joursRestants, 'date' => e($echeance)]) !!}
         @endif
     </p>
 
     <p style="margin:0 0 16px;line-height:1.5;">
-        Passé cette date, le lien public de votre carte cessera de répondre :
-        les personnes qui l'ouvriront, ou qui scanneront votre QR Code, ne
-        verront plus vos coordonnées.
+        {{ __('emails.abonnement_expirant.consequence') }}
     </p>
 
     <p style="margin:0 0 20px;line-height:1.5;">
-        <strong>Rien n'est supprimé.</strong> Votre carte, vos coordonnées et
-        votre lien sont conservés en l'état. Un renouvellement les remet en
-        ligne immédiatement, sans rien ressaisir et sans changer d'adresse —
-        les cartes déjà imprimées restent valables.
+        {!! __('emails.abonnement_expirant.rien_supprime') !!}
     </p>
 
-    @include('emails.partials.bouton', ['url' => $renewUrl, 'libelle' => 'Renouveler mon abonnement'])
-
+    @include('emails.partials.bouton', ['url' => $renewUrl, 'libelle' => __('emails.abonnement_expirant.bouton')])
     @include('emails.partials.lien-brut', ['url' => $renewUrl])
 @endcomponent

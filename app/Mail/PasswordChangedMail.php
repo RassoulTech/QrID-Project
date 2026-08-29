@@ -35,7 +35,7 @@ class PasswordChangedMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Votre mot de passe a été modifié',
+            subject: __('emails.mot_de_passe_change.sujet'),
         );
     }
 

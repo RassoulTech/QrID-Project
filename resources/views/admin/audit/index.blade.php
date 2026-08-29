@@ -11,15 +11,15 @@
 @php use App\Support\AdminActionType; @endphp
 
 <x-admin-layout
-    title="Journal d'audit"
-    subtitle="Traçabilité complète des actions administratives sensibles."
+    :title="__('admin.journal.titre')"
+    :subtitle="__('admin.journal.sous_titre')"
 >
     <x-slot:actions>
         <a href="{{ route('admin.audit.export', request()->query()) }}" class="adm-btn adm-btn--clair">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M8 1v8.6l2.3-2.3 1 1L8 11.7 4.7 8.3l1-1L8 9.6zM2 12h12v2H2z"/>
             </svg>
-            Exporter CSV
+            {{ __('admin.commun.exporter_csv') }}
         </a>
     </x-slot:actions>
 
@@ -31,11 +31,11 @@
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
             </svg>
             <input type="search" id="q" name="q" class="adm-filtres__champ"
-                   value="{{ $recherche }}" placeholder="Action, cible ou motif…">
+                   value="{{ $recherche }}" placeholder="{{ __('admin.journal.recherche') }}">
         </div>
 
         <div class="adm-filtre">
-            <label for="periode">Période</label>
+            <label for="periode">{{ __('admin.commun.periode') }}</label>
             <select id="periode" name="periode" class="adm-select">
                 @foreach ($periodes as $cle => $libelle)
                     <option value="{{ $cle }}" @selected($periode === $cle)>{{ $libelle }}</option>
@@ -46,7 +46,7 @@
         <div class="adm-filtre">
             <label for="admin">Administrateur</label>
             <select id="admin" name="admin" class="adm-select">
-                <option value="">Tous les administrateurs</option>
+                <option value="">{{ __('admin.journal.tous_administrateurs') }}</option>
                 @foreach ($administrateurs as $a)
                     <option value="{{ $a->id }}" @selected((string) $admin === (string) $a->id)>{{ $a->name }}</option>
                 @endforeach
@@ -54,9 +54,9 @@
         </div>
 
         <div class="adm-filtre">
-            <label for="type">Type d'action</label>
+            <label for="type">{{ __('admin.journal.type_action') }}</label>
             <select id="type" name="type" class="adm-select">
-                <option value="">Tous les types</option>
+                <option value="">{{ __('admin.journal.tous_types') }}</option>
                 @foreach ($typesAction as $cle => $libelle)
                     <option value="{{ $cle }}" @selected($type === $cle)>{{ $libelle }}</option>
                 @endforeach
@@ -66,7 +66,7 @@
         <button type="submit" class="adm-btn adm-btn--vert" data-auto-filtre-bouton>Filtrer</button>
 
         @if ($recherche || $periode || $admin || $type)
-            <a href="{{ route('admin.audit.index') }}" class="adm-btn adm-btn--clair">Réinitialiser</a>
+            <a href="{{ route('admin.audit.index') }}" class="adm-btn adm-btn--clair">{{ __('admin.commun.reinitialiser') }}</a>
         @endif
     </form>
 
@@ -76,8 +76,8 @@
         <x-liste-resultats :total="$entrees->total()"
                            :filtre="(bool) ($recherche || $type || $admin || $periode)"
                            :reset="route('admin.audit.index')"
-                           nom="entrée" icon="document"
-                           vide="Les actions d'administration seront consignées ici." />
+                           :nom="__('admin.journal.entree_singulier')" icon="document"
+                           :vide="__('admin.journal.vide')" />
 
         @if (! $entrees->isEmpty())
 
@@ -85,7 +85,7 @@
                 <table class="adm-table">
                     <thead>
                         <tr>
-                            <th scope="col">Date et heure</th>
+                            <th scope="col">{{ __('admin.commun.date_heure') }}</th>
                             <th scope="col">Administrateur</th>
                             <th scope="col">Action</th>
                             <th scope="col">Cible</th>
@@ -163,8 +163,13 @@
 
             <div class="adm-pied">
                 <p class="adm-pied__compte">
-                    Affichage {{ $entrees->firstItem() }} à {{ $entrees->lastItem() }}
-                    sur {{ number_format($entrees->total(), 0, ',', ' ') }} entrée{{ $entrees->total() > 1 ? 's' : '' }}
+                    {{ __('admin.journal.affichage', [
+                        'debut' => $entrees->firstItem(),
+                        'fin' => $entrees->lastItem(),
+                    ]) }}
+                    {{ trans_choice('admin.journal.entree', $entrees->total(), [
+                        'compte' => \App\Support\Formats::nombre($entrees->total()),
+                    ]) }}
                 </p>
                 {{ $entrees->links() }}
             </div>

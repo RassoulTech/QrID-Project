@@ -14,13 +14,18 @@
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 mt-4">
         <p class="text-secondary small mb-0">
             {{ $paginator->firstItem() }}–{{ $paginator->lastItem() }}
-            sur {{ $paginator->total() }} résultat{{ $paginator->total() > 1 ? 's' : '' }}
+            {{ __('common.pagination.sur') }}
+            {{ trans_choice('common.pagination.resultat', $paginator->total(), [
+                'compte' => \App\Support\Formats::nombre($paginator->total()),
+            ]) }}
         </p>
 
         {{ $paginator->onEachSide(1)->links('pagination::bootstrap-5') }}
     </div>
 @elseif ($paginator && $paginator->total() > 0)
     <p class="text-secondary small mb-0 mt-3">
-        {{ $paginator->total() }} résultat{{ $paginator->total() > 1 ? 's' : '' }}
+        {{ trans_choice('common.pagination.resultat', $paginator->total(), [
+            'compte' => \App\Support\Formats::nombre($paginator->total()),
+        ]) }}
     </p>
 @endif

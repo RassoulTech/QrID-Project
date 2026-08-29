@@ -12,7 +12,7 @@
 @props(['items' => []])
 
 @if (count($items))
-    <nav aria-label="Fil d'Ariane">
+    <nav aria-label="{{ __('common.divers.fil_ariane') }}">
         <ol class="breadcrumb">
             @foreach ($items as $item)
                 @php $isLast = $loop->last || empty($item['url']); @endphp

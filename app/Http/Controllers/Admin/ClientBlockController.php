@@ -31,7 +31,7 @@ class ClientBlockController extends Controller
 
         $this->service->bloquer($user, $request->motif());
 
-        return back()->with('status', "Le compte de {$user->name} est bloqué. Ses sessions ont été fermées.");
+        return back()->with('status', __('admin.flash.compte_bloque', ['nom' => $user->name]));
     }
 
     public function destroy(MotifRequest $request, User $user): RedirectResponse
@@ -42,17 +42,17 @@ class ClientBlockController extends Controller
 
         $this->service->debloquer($user, $request->motif());
 
-        return back()->with('status', "Le compte de {$user->name} est de nouveau actif.");
+        return back()->with('status', __('admin.flash.compte_debloque', ['nom' => $user->name]));
     }
 
     private function refus(MotifRequest $request, User $user): ?RedirectResponse
     {
         if ($user->is($request->user())) {
-            return back()->withErrors(['motif' => 'Vous ne pouvez pas bloquer votre propre compte.']);
+            return back()->withErrors(['motif' => __('admin.flash.pas_soi_meme')]);
         }
 
         if ($user->isAdmin()) {
-            return back()->withErrors(['motif' => 'Un compte administrateur ne se bloque pas depuis cet écran.']);
+            return back()->withErrors(['motif' => __('admin.flash.pas_un_admin')]);
         }
 
         return null;

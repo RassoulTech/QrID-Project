@@ -46,12 +46,12 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Le nom complet est obligatoire.',
-            'email.required' => 'L\'adresse e-mail est obligatoire.',
-            'email.email' => 'L\'adresse e-mail n\'est pas valide.',
-            'phone.required' => 'Le numéro de téléphone est obligatoire.',
-            'password.required' => 'Le mot de passe est obligatoire.',
-            'password.confirmed' => 'Les deux mots de passe ne correspondent pas.',
+            'name.required' => __('validation.messages.inscription.nom_requis'),
+            'email.required' => __('validation.messages.inscription.email_requis'),
+            'email.email' => __('validation.messages.inscription.email_invalide'),
+            'phone.required' => __('validation.messages.inscription.telephone_requis'),
+            'password.required' => __('validation.messages.inscription.mot_de_passe_requis'),
+            'password.confirmed' => __('validation.messages.inscription.mots_de_passe_differents'),
         ];
     }
 

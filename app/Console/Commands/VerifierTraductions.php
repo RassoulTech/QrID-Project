@@ -2,299 +2,212 @@
 
 namespace App\Console\Commands;
 
-use App\Support\Langue;
 use Illuminate\Console\Command;
 
 /**
  * LES DEUX LANGUES DOIVENT PORTER EXACTEMENT LES MÊMES CLÉS.
  *
  * ═══════════════════════════════════════════════════════════════════════
- * CE QUE CETTE COMMANDE EMPÊCHE
+ * POURQUOI UNE COMMANDE, ET PAS UNE RELECTURE
  * ═══════════════════════════════════════════════════════════════════════
- * Une clé absente d'un fichier de langue ne casse rien. Laravel rend alors
- * la CLÉ ELLE-MÊME : l'écran affiche « dashboard.carte.titre » à la place
- * d'un titre, la page reste à 200, aucun test ne tombe.
+ * Une clé présente en français et absente en anglais ne provoque AUCUNE
+ * erreur. Laravel rend alors la clé elle-même : la page affiche
+ * « admin.clients.titre » à l'endroit d'un titre. Rien dans les journaux,
+ * rien dans les tests, rien à l'écran côté français — le défaut ne se voit
+ * que dans l'autre langue, celle qu'on regarde le moins.
  *
- * C'est le défaut le plus discret de tout ce chantier, et le plus sûr de
- * revenir : il suffit d'ajouter une phrase en français et d'oublier
- * l'anglais. Personne ne s'en aperçoit tant que personne ne bascule.
+ * C'est la panne qui revient toujours : on ajoute une phrase, on la traduit
+ * « plus tard », et « plus tard » arrive le jour où un anglophone ouvre la
+ * page.
  *
  *     php artisan lang:check
  *
- * Elle rend un code de sortie non nul dès qu'un écart existe — une
- * intégration continue peut s'y brancher sans lire la sortie.
+ * Le code de sortie est non nul dès qu'un écart existe : l'intégration
+ * continue peut s'y brancher sans lire la sortie.
  *
  * ═══════════════════════════════════════════════════════════════════════
- * ELLE COMPARE AUSSI LES PLURIELS
+ * CE QU'ELLE VÉRIFIE EN PLUS DE LA SYMÉTRIE
  * ═══════════════════════════════════════════════════════════════════════
- * `:compte jour|:compte jours` porte deux formes, séparées par une barre.
- * Une traduction qui n'en donne qu'une fait échouer trans_choice au moment
- * où le nombre bascule — donc rarement, donc en production.
- *
- * ═══════════════════════════════════════════════════════════════════════
- * ET LES PARAMÈTRES
- * ═══════════════════════════════════════════════════════════════════════
- * `Bonjour :nom` traduit en `Hello :name` ne lève aucune erreur : la phrase
- * s'affiche avec « :name » écrit en toutes lettres au milieu. La commande
- * compare donc les jetons `:xxx` présents de part et d'autre.
+ * Une clé peut exister des deux côtés et rester VIDE, ou n'être qu'une
+ * copie mot pour mot du français. Le premier cas affiche du blanc, le
+ * second passe la symétrie sans que rien ne soit traduit. Les deux sont
+ * signalés à part, car ils ne sont pas des erreurs de la même nature :
+ * une chaîne vide est toujours un défaut ; une chaîne identique peut être
+ * légitime (« Instagram », « Orange Money », « QrID »).
  */
 class VerifierTraductions extends Command
 {
     protected $signature = 'lang:check
-        {--diff : Affiche aussi les clés dont le texte est identique dans les deux langues}';
+                            {--strict : Traite aussi les valeurs identiques comme des écarts}';
 
-    protected $description = 'Compare les fichiers de langue et signale toute clé manquante ou incohérente.';
+    protected $description = 'Compare lang/fr et lang/en et signale toute clé manquante.';
+
+    /** Valeurs légitimement identiques dans les deux langues. */
+    private const IDENTIQUES_ADMISES = [
+        'QrID', 'Instagram', 'LinkedIn', 'Facebook', 'WhatsApp', 'TikTok',
+        'YouTube', 'Twitter', 'Snapchat', 'Telegram', 'Wave', 'Orange Money',
+        'FCFA', 'PDF', 'QR Code', 'NFC', 'Email', 'Google', 'SMS', 'URL',
+    ];
 
     public function handle(): int
     {
-        $langues = Langue::disponibles();
-        $reference = array_shift($langues);
+        $base = lang_path();
 
-        $tables = [];
+        $fr = $this->aplatir($this->charger($base.'/fr'));
+        $en = $this->aplatir($this->charger($base.'/en'));
 
-        foreach (array_merge([$reference], $langues) as $code) {
-            $tables[$code] = $this->aplatir($code);
-        }
+        $manqueEn = array_diff_key($fr, $en);
+        $manqueFr = array_diff_key($en, $fr);
 
-        $ecarts = 0;
+        $vides = [];
+        $identiques = [];
 
-        $this->newLine();
-        $this->line('  <fg=white;options=bold>VÉRIFICATION DES TRADUCTIONS</>');
-        $this->newLine();
+        foreach (array_intersect_key($fr, $en) as $cle => $valeurFr) {
+            /*
+             | LA COMPARAISON PORTE SUR LA CHAINE NUE, PAS SUR SON trim().
+             |
+             | `common.formats.separateur_milliers` vaut une espace en
+             | francais : c'est une valeur DELIBEREE, et la seule correcte.
+             | Un trim() la reduisait a la chaine vide, et le controle
+             | signalait comme defaut le fonctionnement normal.
+             |
+             | Une chaine reellement vide reste un defaut ; une chaine qui
+             | ne contient qu'une espace n'en est pas un.
+             */
+            if ((string) $valeurFr === '' || (string) $en[$cle] === '') {
+                $vides[] = $cle;
 
-        // ── Le compte par fichier, d'abord : c'est ce qu'on regarde ────
-        $this->lignesParFichier($tables);
+                continue;
+            }
 
-        foreach ($langues as $code) {
-            $ecarts += $this->comparer($reference, $tables[$reference], $code, $tables[$code]);
-            $ecarts += $this->comparer($code, $tables[$code], $reference, $tables[$reference]);
-            $ecarts += $this->coherence($reference, $tables[$reference], $code, $tables[$code]);
-
-            if ($this->option('diff')) {
-                $this->identiques($reference, $tables[$reference], $code, $tables[$code]);
+            if ($valeurFr === $en[$cle] && ! $this->identiqueAdmise($valeurFr)) {
+                $identiques[$cle] = $valeurFr;
             }
         }
 
         $this->newLine();
+        $this->line('  <fg=white;options=bold>SYMÉTRIE DES TRADUCTIONS</>');
+        $this->line(sprintf('  fr : %d clés    en : %d clés', count($fr), count($en)));
+        $this->newLine();
+
+        $ecarts = 0;
+
+        $ecarts += $this->rapporter('Absentes de lang/en', array_keys($manqueEn), $fr);
+        $ecarts += $this->rapporter('Absentes de lang/fr', array_keys($manqueFr), $en);
+        $ecarts += $this->rapporter('Valeur vide', $vides, $fr);
+
+        if ($identiques !== []) {
+            $strict = (bool) $this->option('strict');
+
+            $this->line(sprintf(
+                '  <fg=%s>%s</> %d clé(s) identiques dans les deux langues',
+                $strict ? 'red' : 'yellow',
+                $strict ? '✗' : '!',
+                count($identiques)
+            ));
+
+            foreach (array_slice($identiques, 0, 15, true) as $cle => $valeur) {
+                $this->line(sprintf('      %-46s « %s »', $cle, mb_strimwidth($valeur, 0, 40, '…')));
+            }
+
+            if (count($identiques) > 15) {
+                $this->line(sprintf('      … et %d autres', count($identiques) - 15));
+            }
+
+            $this->newLine();
+
+            if ($strict) {
+                $ecarts += count($identiques);
+            }
+        }
 
         if ($ecarts > 0) {
-            $this->error("  {$ecarts} écart(s). Les fichiers de langue ne concordent pas.");
+            $this->error(sprintf('  %d écart(s).', $ecarts));
 
             return self::FAILURE;
         }
 
-        $this->info('  Aucun écart : toutes les langues portent les mêmes clés.');
+        $this->info('  Les deux langues portent exactement les mêmes clés.');
 
         return self::SUCCESS;
     }
 
     /**
-     * Toutes les clés d'une langue, aplaties en « fichier.chemin.vers.cle ».
-     *
-     * @return array<string, string>
+     * @param  list<string>  $cles
+     * @param  array<string, string>  $source
      */
-    private function aplatir(string $code): array
+    private function rapporter(string $titre, array $cles, array $source): int
     {
-        $racine = lang_path($code);
+        if ($cles === []) {
+            return 0;
+        }
 
-        if (! is_dir($racine)) {
-            $this->warn("  Dossier absent : lang/{$code}");
+        $this->line(sprintf('  <fg=red>✗</> %s — %d clé(s)', $titre, count($cles)));
 
+        foreach (array_slice($cles, 0, 25) as $cle) {
+            $this->line(sprintf('      %-46s « %s »', $cle,
+                mb_strimwidth((string) ($source[$cle] ?? ''), 0, 40, '…')));
+        }
+
+        if (count($cles) > 25) {
+            $this->line(sprintf('      … et %d autres', count($cles) - 25));
+        }
+
+        $this->newLine();
+
+        return count($cles);
+    }
+
+    private function identiqueAdmise(string $valeur): bool
+    {
+        // Une valeur courte sans espace est le plus souvent un nom propre ou
+        // une unité — « FCFA », « PDF ». Les traduire n'aurait pas de sens.
+        if (in_array(trim($valeur), self::IDENTIQUES_ADMISES, true)) {
+            return true;
+        }
+
+        // Un nombre, un symbole, une chaîne de format pure.
+        return (bool) preg_match('/^[\s\d\p{P}\p{S}:]*$/u', $valeur);
+    }
+
+    /** @return array<string, mixed> */
+    private function charger(string $dossier): array
+    {
+        if (! is_dir($dossier)) {
             return [];
         }
 
-        $plat = [];
+        $tout = [];
 
-        foreach (glob($racine.'/*.php') as $fichier) {
-            $groupe = basename($fichier, '.php');
-            $contenu = require $fichier;
-
-            if (! is_array($contenu)) {
-                continue;
-            }
-
-            $this->descendre($contenu, $groupe, $plat);
+        foreach (glob($dossier.'/*.php') ?: [] as $fichier) {
+            $tout[basename($fichier, '.php')] = require $fichier;
         }
 
-        return $plat;
+        return $tout;
     }
 
     /**
-     * @param  array<string, mixed>  $noeud
-     * @param  array<string, string>  $plat
+     * Aplatit « auth » => [« login » => [« titre » => X]] en « auth.login.titre ».
+     *
+     * @param  array<string, mixed>  $tableau
+     * @return array<string, string>
      */
-    private function descendre(array $noeud, string $prefixe, array &$plat): void
+    private function aplatir(array $tableau, string $prefixe = ''): array
     {
-        foreach ($noeud as $cle => $valeur) {
-            $chemin = $prefixe.'.'.$cle;
+        $plat = [];
+
+        foreach ($tableau as $cle => $valeur) {
+            $chemin = $prefixe === '' ? (string) $cle : $prefixe.'.'.$cle;
 
             if (is_array($valeur)) {
-                $this->descendre($valeur, $chemin, $plat);
+                $plat += $this->aplatir($valeur, $chemin);
 
                 continue;
             }
 
             $plat[$chemin] = (string) $valeur;
         }
-    }
 
-    /** @param  array<string, array<string, string>>  $tables */
-    private function lignesParFichier(array $tables): void
-    {
-        $fichiers = [];
-
-        foreach ($tables as $code => $plat) {
-            foreach (array_keys($plat) as $cle) {
-                $groupe = strstr($cle, '.', true) ?: $cle;
-                $fichiers[$groupe][$code] = ($fichiers[$groupe][$code] ?? 0) + 1;
-            }
-        }
-
-        ksort($fichiers);
-
-        $codes = array_keys($tables);
-
-        $lignes = [];
-
-        foreach ($fichiers as $groupe => $comptes) {
-            $ligne = [$groupe];
-
-            foreach ($codes as $code) {
-                $ligne[] = $comptes[$code] ?? 0;
-            }
-
-            $lignes[] = $ligne;
-        }
-
-        $totaux = ['<options=bold>TOTAL</>'];
-
-        foreach ($codes as $code) {
-            $totaux[] = '<options=bold>'.count($tables[$code]).'</>';
-        }
-
-        $lignes[] = $totaux;
-
-        $this->table(array_merge(['Fichier'], $codes), $lignes);
-    }
-
-    /**
-     * Les clés présentes dans $sourcePlat et absentes de $ciblePlat.
-     *
-     * @param  array<string, string>  $sourcePlat
-     * @param  array<string, string>  $ciblePlat
-     */
-    private function comparer(string $source, array $sourcePlat, string $cible, array $ciblePlat): int
-    {
-        $manquantes = array_diff_key($sourcePlat, $ciblePlat);
-
-        if ($manquantes === []) {
-            return 0;
-        }
-
-        $this->newLine();
-        $this->error(sprintf(
-            '  %d clé(s) présente(s) dans « %s » et ABSENTE(S) de « %s » :',
-            count($manquantes), $source, $cible
-        ));
-
-        foreach (array_keys($manquantes) as $cle) {
-            $this->line("    <fg=red>manque</> lang/{$cible}/ → {$cle}");
-        }
-
-        return count($manquantes);
-    }
-
-    /**
-     * Pluriels et paramètres : présents des deux côtés, mais incompatibles.
-     *
-     * @param  array<string, string>  $a
-     * @param  array<string, string>  $b
-     */
-    private function coherence(string $codeA, array $a, string $codeB, array $b): int
-    {
-        $ecarts = 0;
-
-        foreach (array_intersect_key($a, $b) as $cle => $texteA) {
-            $texteB = $b[$cle];
-
-            // ── Les formes plurielles ─────────────────────────────────
-            $formesA = substr_count($texteA, '|');
-            $formesB = substr_count($texteB, '|');
-
-            if ($formesA !== $formesB) {
-                $this->newLine();
-                $this->error("  Pluriel incohérent — {$cle}");
-                $this->line("    {$codeA} : ".($formesA + 1).' forme(s)');
-                $this->line("    {$codeB} : ".($formesB + 1).' forme(s)');
-                $ecarts++;
-            }
-
-            // ── Les paramètres ────────────────────────────────────────
-            $jetonsA = $this->jetons($texteA);
-            $jetonsB = $this->jetons($texteB);
-
-            if ($jetonsA !== $jetonsB) {
-                $this->newLine();
-                $this->error("  Paramètres différents — {$cle}");
-                $this->line("    {$codeA} : ".($jetonsA ? implode(', ', $jetonsA) : 'aucun'));
-                $this->line("    {$codeB} : ".($jetonsB ? implode(', ', $jetonsB) : 'aucun'));
-                $ecarts++;
-            }
-        }
-
-        return $ecarts;
-    }
-
-    /**
-     * Les jetons `:xxx` d'une chaîne, triés et dédoublonnés.
-     *
-     * `:compte` doit se retrouver des deux côtés ; l'ordre, non — l'anglais
-     * ne place pas les mots comme le français, c'est tout l'intérêt.
-     *
-     * @return list<string>
-     */
-    private function jetons(string $texte): array
-    {
-        preg_match_all('/:([a-zA-Z_][a-zA-Z0-9_]*)/', $texte, $trouves);
-
-        $jetons = array_values(array_unique($trouves[1]));
-        sort($jetons);
-
-        return $jetons;
-    }
-
-    /**
-     * Les clés dont le texte n'a pas bougé d'une langue à l'autre.
-     *
-     * Ce n'est PAS une erreur — « Contact », « Awa Ndiaye », « QrID » se
-     * disent pareil. Mais c'est le meilleur endroit où chercher une
-     * traduction oubliée par copier-coller.
-     *
-     * @param  array<string, string>  $a
-     * @param  array<string, string>  $b
-     */
-    private function identiques(string $codeA, array $a, string $codeB, array $b): void
-    {
-        $memes = [];
-
-        foreach (array_intersect_key($a, $b) as $cle => $texte) {
-            if ($texte === $b[$cle] && trim($texte) !== '') {
-                $memes[$cle] = $texte;
-            }
-        }
-
-        if ($memes === []) {
-            return;
-        }
-
-        $this->newLine();
-        $this->warn(sprintf(
-            '  %d clé(s) identique(s) entre « %s » et « %s » — à relire :',
-            count($memes), $codeA, $codeB
-        ));
-
-        foreach ($memes as $cle => $texte) {
-            $this->line('    '.$cle.'  <fg=gray>'.mb_substr($texte, 0, 50).'</>');
-        }
+        return $plat;
     }
 }

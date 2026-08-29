@@ -27,14 +27,15 @@ class ExtendSubscriptionRequest extends MotifRequest
 
     public function attributes(): array
     {
-        return array_merge(parent::attributes(), ['jours' => 'nombre de jours']);
+        return array_merge(parent::attributes(), ['jours' => __('validation.attributs.nombre_jours')]);
     }
 
     public function messages(): array
     {
         return array_merge(parent::messages(), [
-            'jours.max' => 'Au-delà de '.SubscriptionExtensionService::JOURS_MAX
-                .' jours, passez par une formule plutôt que par une prolongation.',
+            'jours.max' => __('validation.messages.prolongation.trop_long', [
+                'max' => SubscriptionExtensionService::JOURS_MAX,
+            ]),
         ]);
     }
 

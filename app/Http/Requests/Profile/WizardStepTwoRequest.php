@@ -82,21 +82,21 @@ class WizardStepTwoRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone.required' => 'Votre téléphone est obligatoire.',
-            'public_email.email' => 'Cette adresse e-mail n\'est pas valide.',
-            'website.url' => 'Cette adresse de site n\'est pas valide.',
-            'socials.max' => 'Six réseaux sociaux au maximum.',
-            'socials.*.url.url' => 'Ce lien n\'est pas une adresse valide.',
-            'socials.*.platform.required_with' => 'Choisissez le réseau correspondant à ce lien.',
-            'socials.*.platform.in' => 'Ce réseau n\'est pas proposé.',
+            'phone.required' => __('validation.messages.carte.telephone_requis'),
+            'public_email.email' => __('validation.messages.carte.email_invalide'),
+            'website.url' => __('validation.messages.carte.site_invalide'),
+            'socials.max' => __('validation.messages.carte.reseaux_max'),
+            'socials.*.url.url' => __('validation.messages.carte.lien_invalide'),
+            'socials.*.platform.required_with' => __('validation.messages.carte.reseau_requis'),
+            'socials.*.platform.in' => __('validation.messages.carte.reseau_absent'),
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'socials.*.url' => 'lien',
-            'socials.*.platform' => 'réseau',
+            'socials.*.url' => __('validation.attributs.lien'),
+            'socials.*.platform' => __('validation.attributs.reseau'),
         ];
     }
 

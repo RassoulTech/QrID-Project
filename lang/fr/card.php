@@ -137,4 +137,12 @@ return [
         'plus_tard' => 'Plus tard',
         'enregistrer' => 'Enregistrer l\'adresse',
     ],
+
+    'voir_verso' => 'Voir le verso',
+    'protocole' => 'Protocole d\'identité numérique',
+
+    'actions' => [
+        'appeler' => 'Appeler',
+        'localisation' => 'Localisation',
+    ],
 ];

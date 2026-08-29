@@ -35,7 +35,7 @@ class SubscriptionExpiredMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Votre carte n\'est plus consultable',
+            subject: __('emails.abonnement_expire.sujet'),
         );
     }
 

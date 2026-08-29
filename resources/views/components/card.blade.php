@@ -69,7 +69,7 @@
             </div>
 
             <div class="foot">
-                <span class="l">Protocole d'identité numérique</span>
+                <span class="l">{{ __('card.protocole') }}</span>
                 {{-- L'adresse vient de la configuration : en développement,
                      la dériver d'APP_URL ferait imprimer « 127.0.0.1 », et
                      cela ne se voit qu'une fois les cartes sorties. --}}

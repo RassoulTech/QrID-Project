@@ -36,16 +36,16 @@
 
     <p class="qr-card__hint">
         @if ($qrPath)
-            Vos contacts scannent, votre profil s'ouvre.
+            {{ __('profile.qr.scannent') }}
         @else
-            Génération en cours de mise en place. Votre lien public fonctionne déjà.
+            {{ __('profile.qr.en_preparation') }}
         @endif
     </p>
 
     {{-- Boutons visibles mais explicitement inactifs : des <span>, jamais des
          liens morts. L'utilisateur voit ce qui l'attend sans pouvoir cliquer. --}}
     <div class="qr-card__actions">
-        <span class="btn-pill btn-light is-disabled" aria-disabled="true">Télécharger en PNG</span>
-        <span class="btn-pill btn-ghost-light is-disabled" aria-disabled="true">Version SVG</span>
+        <span class="btn-pill btn-light is-disabled" aria-disabled="true">{{ __('profile.qr.telecharger_png') }}</span>
+        <span class="btn-pill btn-ghost-light is-disabled" aria-disabled="true">{{ __('profile.qr.version_svg') }}</span>
     </div>
 </div>

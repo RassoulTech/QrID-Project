@@ -45,6 +45,6 @@ class NotificationController extends Controller
     {
         $request->user()->alerts()->unread()->update(['read_at' => now()]);
 
-        return back()->with('success', 'Toutes vos notifications sont marquées comme lues.');
+        return back()->with('success', __('dashboard.flash.notifications_lues'));
     }
 }

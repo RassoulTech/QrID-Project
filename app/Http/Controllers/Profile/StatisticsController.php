@@ -29,7 +29,7 @@ class StatisticsController extends Controller
 
         if (! $profile) {
             return redirect()->route('profile.create.step1')
-                ->with('info', 'Créez d\'abord votre carte : ses statistiques suivront.');
+                ->with('info', __('profile.flash.carte_avant_stats'));
         }
 
         $jours = (int) $request->query('periode', 30);

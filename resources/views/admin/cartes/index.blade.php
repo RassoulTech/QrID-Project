@@ -11,15 +11,15 @@
 @php use App\Models\CardOrder; @endphp
 
 <x-admin-layout
-    title="Cartes à produire"
-    subtitle="Production par lots, export imprimeur et suivi des expéditions."
+    :title="__('admin.cartes.titre')"
+    :subtitle="__('admin.cartes.sous_titre')"
 >
     <x-slot:actions>
         <a href="{{ route('admin.cards.export', request()->query()) }}" class="adm-btn adm-btn--clair">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M8 1v8.6l2.3-2.3 1 1L8 11.7 4.7 8.3l1-1L8 9.6zM2 12h12v2H2z"/>
             </svg>
-            Export imprimeur
+            {{ __('admin.cartes.export_imprimeur') }}
         </a>
     </x-slot:actions>
 
@@ -34,7 +34,7 @@
             <p class="adm-cartes-jauge__l">en attente de production</p>
 
             @if ($compteurs[CardOrder::STATUS_PENDING] >= $seuil)
-                <span class="adm-cartes-jauge__pret">Seuil atteint — lancez un lot</span>
+                <span class="adm-cartes-jauge__pret">{{ __('admin.cartes.seuil_atteint') }}</span>
             @endif
         </div>
 
@@ -43,28 +43,28 @@
             <p class="adm-cartes-jauge__l">la plus ancienne attend depuis</p>
 
             @if ($compteurs['plus_ancienne'] > config('cartes.delai_jours'))
-                <span class="adm-cartes-jauge__retard">Délai annoncé dépassé</span>
+                <span class="adm-cartes-jauge__retard">{{ __('admin.cartes.delai_depasse') }}</span>
             @endif
         </div>
 
         <div class="adm-cartes-jauge">
             <p class="adm-cartes-jauge__n">{{ $economie['taux_renouvellement'] }}<span> %</span></p>
-            <p class="adm-cartes-jauge__l">renouvellent au 2ᵉ trimestre</p>
-            <span class="adm-cartes-jauge__note">{{ $economie['clients_payants'] }} client(s) payant(s)</span>
+            <p class="adm-cartes-jauge__l">{{ __('admin.cartes.renouvellent') }}</p>
+            <span class="adm-cartes-jauge__note">{{ $economie['clients_payants'] }} {{ __('admin.cartes.clients_payants') }}</span>
         </div>
 
         <div class="adm-cartes-jauge">
             <p class="adm-cartes-jauge__n">{{ number_format($economie['marge'], 0, ',', ' ') }}<span> FCFA</span></p>
             <p class="adm-cartes-jauge__l">marge nette</p>
             <span class="adm-cartes-jauge__note">
-                {{ number_format($economie['revenu'], 0, ',', ' ') }} encaissés −
+                {{ \App\Support\Formats::montant($economie['revenu'], false) }} {{ __('admin.cartes.encaisses') }} −
                 {{ number_format($economie['cout_cartes'], 0, ',', ' ') }} de cartes
             </span>
         </div>
     </div>
 
     {{-- ══════════════ ONGLETS ══════════════ --}}
-    <nav class="adm-onglets" aria-label="Filtrer par état">
+    <nav class="adm-onglets" aria-label="{{ __('admin.cartes.filtrer_etat') }}">
         <a href="{{ route('admin.cards.index') }}"
            @class(['adm-onglet', 'is-active' => ! $statut])>
             Toutes <span class="adm-onglet__n">{{ $compteurs['tous'] }}</span>
@@ -83,7 +83,7 @@
                            :filtre="(bool) ($statut || $lot)"
                            :reset="route('admin.cards.index')"
                            nom="commande" icon="payment"
-                           vide="Les commandes de cartes apparaîtront ici dès la première activation payée." />
+                           :vide="__('admin.cartes.vide')" />
 
         @if (! $commandes->isEmpty())
             <form method="POST" action="{{ route('admin.cards.batch') }}">
@@ -97,7 +97,7 @@
                                 <th scope="col">Client</th>
                                 <th scope="col">Livraison</th>
                                 <th scope="col">Attente</th>
-                                <th scope="col">État</th>
+                                <th scope="col">{{ __('admin.commun.etat') }}</th>
                             </tr>
                         </thead>
 
@@ -138,7 +138,7 @@
                                             {{-- Ce n'est pas un détail : le client a payé,
                                                  il attend une carte, et personne ne peut
                                                  l'expédier. C'est une relance à faire. --}}
-                                            <span class="adm-badge adm-badge--attention">Adresse manquante</span>
+                                            <span class="adm-badge adm-badge--attention">{{ __('admin.cartes.adresse_manquante') }}</span>
                                         @endif
                                     </td>
 
@@ -153,10 +153,10 @@
 
                 <div class="adm-cartes-actions">
                     <button type="submit" class="adm-btn adm-btn--vert">
-                        Créer un lot avec la sélection
+                        {{ __('admin.cartes.creer_lot') }}
                     </button>
                     <span class="adm-cartes-actions__note">
-                        Seules les commandes en attente et dont l'adresse est complète sont incluses.
+                        {{ __('admin.cartes.creer_lot_aide') }}
                     </span>
                 </div>
             </form>
@@ -167,7 +167,7 @@
                     @csrf
                     <input type="hidden" name="batch_id" value="{{ $lot }}">
 
-                    <label for="statut_lot">Faire passer le lot {{ $lot }} à</label>
+                    <label for="statut_lot">{{ __('admin.cartes.faire_passer') }} {{ $lot }} à</label>
 
                     <select id="statut_lot" name="statut" class="adm-select">
                         @foreach ($statuts as $cle => $libelle)

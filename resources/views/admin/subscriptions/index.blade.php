@@ -17,18 +17,18 @@
 
 <x-admin-layout
     title="Abonnements"
-    subtitle="Suivre les échéances et l'état des souscriptions en cours."
+    :subtitle="__('admin.abonnements.sous_titre')"
 >
     <x-slot:actions>
         <a href="{{ route('admin.subscriptions.export', request()->query()) }}" class="adm-btn adm-btn--clair">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M8 1v8.6l2.3-2.3 1 1L8 11.7 4.7 8.3l1-1L8 9.6zM2 12h12v2H2z"/>
             </svg>
-            Exporter CSV
+            {{ __('admin.commun.exporter_csv') }}
         </a>
     </x-slot:actions>
 
-    <nav class="adm-onglets" aria-label="Filtrer par statut">
+    <nav class="adm-onglets" aria-label="{{ __('admin.abonnements.filtrer_statut') }}">
         @foreach ([
             '' => ['Tous', $compteurs['tous']],
             Subscription::STATUS_ACTIVE => ['Actifs', $compteurs[Subscription::STATUS_ACTIVE]],
@@ -50,7 +50,7 @@
         <div class="adm-filtre">
             <label for="plan">Formule</label>
             <select id="plan" name="plan" class="adm-select">
-                <option value="">Toutes les formules</option>
+                <option value="">{{ __('admin.abonnements.toutes_formules') }}</option>
                 @foreach ($plans as $p)
                     <option value="{{ $p->slug }}" @selected($plan === $p->slug)>{{ $p->name }}</option>
                 @endforeach
@@ -60,12 +60,12 @@
         {{-- LE FILTRE QUI JUSTIFIE L'ÉCRAN : repérer ce qui arrive à terme
              avant que le client ne s'en aperçoive. --}}
         <div class="adm-filtre">
-            <label for="echeance">Échéance</label>
+            <label for="echeance">{{ __('admin.commun.echeance') }}</label>
             <select id="echeance" name="echeance" class="adm-select">
-                <option value="">Toutes les échéances</option>
-                <option value="3" @selected($echeance === '3')>Échoit sous 3 jours</option>
-                <option value="7" @selected($echeance === '7')>Échoit sous 7 jours</option>
-                <option value="30" @selected($echeance === '30')>Échoit sous 30 jours</option>
+                <option value="">{{ __('admin.abonnements.toutes_echeances') }}</option>
+                <option value="3" @selected($echeance === '3')>{{ __('admin.abonnements.echoit_3') }}</option>
+                <option value="7" @selected($echeance === '7')>{{ __('admin.abonnements.echoit_7') }}</option>
+                <option value="30" @selected($echeance === '30')>{{ __('admin.abonnements.echoit_30') }}</option>
             </select>
         </div>
 
@@ -73,7 +73,7 @@
 
         @if ($plan || $echeance)
             <a href="{{ route('admin.subscriptions.index', ['statut' => $statut]) }}"
-               class="adm-btn adm-btn--clair">Réinitialiser</a>
+               class="adm-btn adm-btn--clair">{{ __('admin.commun.reinitialiser') }}</a>
         @endif
     </form>
 
@@ -84,7 +84,7 @@
                            :filtre="(bool) ($statut || $plan || $echeance)"
                            :reset="route('admin.subscriptions.index')"
                            nom="abonnement" icon="payment"
-                           vide="Les abonnements apparaîtront ici dès la première souscription." />
+                           :vide="__('admin.abonnements.vide')" />
 
         @if (! $abonnements->isEmpty())
 
@@ -94,10 +94,10 @@
                         <tr>
                             <th scope="col">Client</th>
                             <th scope="col">Formule</th>
-                            <th scope="col">Début</th>
-                            <th scope="col">Échéance</th>
+                            <th scope="col">{{ __('admin.commun.debut') }}</th>
+                            <th scope="col">{{ __('admin.commun.echeance') }}</th>
                             <th scope="col">Reste</th>
-                            <th scope="col">Statut</th>
+                            <th scope="col">{{ __('admin.commun.statut') }}</th>
                             <th scope="col" class="adm-table__actions">Fiche</th>
                         </tr>
                     </thead>
@@ -165,9 +165,13 @@
 
             <div class="adm-pied">
                 <p class="adm-pied__compte">
-                    Affichage {{ $abonnements->firstItem() }} à {{ $abonnements->lastItem() }}
-                    sur {{ number_format($abonnements->total(), 0, ',', ' ') }}
-                    abonnement{{ $abonnements->total() > 1 ? 's' : '' }}
+                    {{ __('admin.commun.affichage', [
+                        'debut' => $abonnements->firstItem(),
+                        'fin' => $abonnements->lastItem(),
+                    ]) }}
+                    {{ trans_choice('admin.commun.entites.abonnements', $abonnements->total(), [
+                        'compte' => \App\Support\Formats::nombre($abonnements->total()),
+                    ]) }}
                 </p>
                 {{ $abonnements->links() }}
             </div>

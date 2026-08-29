@@ -53,7 +53,7 @@ class ContactMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[Contact] '.$this->motif().' — '.$this->contact->name,
+            subject: __('emails.contact.sujet', ['motif' => $this->motif(), 'nom' => $this->contact->name]),
             replyTo: [new Address($this->contact->email, $this->contact->name)],
         );
     }

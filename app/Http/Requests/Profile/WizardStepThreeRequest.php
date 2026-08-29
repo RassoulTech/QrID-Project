@@ -44,10 +44,10 @@ class WizardStepThreeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'template_id.required' => 'Choisissez un modèle.',
-            'template_id.exists' => 'Ce modèle n\'est plus disponible.',
-            'primary_color.required' => 'Choisissez une variante de carte.',
-            'primary_color.in' => 'Cette variante de carte n\'existe pas.',
+            'template_id.required' => __('validation.messages.carte.modele_requis'),
+            'template_id.exists' => __('validation.messages.carte.modele_absent'),
+            'primary_color.required' => __('validation.messages.carte.variante_requise'),
+            'primary_color.in' => __('validation.messages.carte.variante_absente'),
         ];
     }
 }

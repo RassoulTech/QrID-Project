@@ -10,15 +10,15 @@
   leur profil et leurs abonnements chargés d'avance.
 --}}
 <x-admin-layout
-    title="Liste des clients"
-    subtitle="Gérer et consulter la totalité des utilisateurs inscrits."
+    :title="__('admin.clients.titre')"
+    :subtitle="__('admin.clients.sous_titre')"
 >
     <x-slot:actions>
         <a href="{{ route('admin.clients.export', request()->query()) }}" class="adm-btn adm-btn--clair">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M8 1v8.6l2.3-2.3 1 1L8 11.7 4.7 8.3l1-1L8 9.6zM2 12h12v2H2z"/>
             </svg>
-            Exporter CSV
+            {{ __('admin.commun.exporter_csv') }}
         </a>
     </x-slot:actions>
 
@@ -31,7 +31,7 @@
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
             </svg>
             <input type="search" id="q" name="q" class="adm-filtres__champ"
-                   value="{{ $recherche }}" placeholder="Nom, e-mail ou téléphone…">
+                   value="{{ $recherche }}" placeholder="{{ __('admin.clients.recherche') }}">
         </div>
 
         {{-- UNE PÉRIODE, PAS UNE DATE DE DÉBUT. « Inscrit depuis le … » seul
@@ -48,13 +48,13 @@
         </div>
 
         <div class="adm-filtre">
-            <label for="statut">Statut du compte</label>
+            <label for="statut">{{ __('admin.clients.statut_compte') }}</label>
             <select id="statut" name="statut" class="adm-select">
-                <option value="">Tous les statuts</option>
-                <option value="actif" @selected($statut === 'actif')>Compte actif</option>
-                <option value="bloque" @selected($statut === 'bloque')>Compte bloqué</option>
-                <option value="abonne" @selected($statut === 'abonne')>Avec abonnement</option>
-                <option value="sans_abonnement" @selected($statut === 'sans_abonnement')>Sans abonnement</option>
+                <option value="">{{ __('admin.clients.tous_statuts') }}</option>
+                <option value="actif" @selected($statut === 'actif')>{{ __('admin.clients.compte_actif') }}</option>
+                <option value="bloque" @selected($statut === 'bloque')>{{ __('admin.clients.compte_bloque') }}</option>
+                <option value="abonne" @selected($statut === 'abonne')>{{ __('admin.clients.avec_abonnement') }}</option>
+                <option value="sans_abonnement" @selected($statut === 'sans_abonnement')>{{ __('admin.clients.sans_abonnement') }}</option>
             </select>
         </div>
 
@@ -63,7 +63,7 @@
         {{-- N'apparaît que s'il y a quelque chose à effacer : un bouton
              « Réinitialiser » sur une liste vierge n'a aucun sens. --}}
         @if ($recherche || $statut || $periode)
-            <a href="{{ route('admin.clients.index') }}" class="adm-btn adm-btn--clair">Réinitialiser</a>
+            <a href="{{ route('admin.clients.index') }}" class="adm-btn adm-btn--clair">{{ __('admin.commun.reinitialiser') }}</a>
         @endif
     </form>
 
@@ -75,7 +75,7 @@
                            :filtre="(bool) ($recherche || $statut || $periode)"
                            :reset="route('admin.clients.index')"
                            nom="client" icon="profile"
-                           vide="Les comptes clients apparaîtront ici dès la première inscription." />
+                           :vide="__('admin.clients.vide')" />
 
         @if (! $clients->isEmpty())
 
@@ -85,7 +85,7 @@
                         <tr>
                             <th scope="col">Client</th>
                             <th scope="col">E-mail</th>
-                            <th scope="col">Téléphone</th>
+                            <th scope="col">{{ __('admin.commun.telephone') }}</th>
                             <th scope="col">Profil</th>
                             <th scope="col">Abonnement</th>
                             <th scope="col">Inscription</th>
@@ -109,7 +109,7 @@
                                         <span class="adm-cell-id__texte">
                                             <span class="adm-table__principal">{{ $client->name }}</span>
                                             @if ($client->isBlocked())
-                                                <span class="adm-table__second">Compte bloqué</span>
+                                                <span class="adm-table__second">{{ __('admin.clients.compte_bloque') }}</span>
                                             @endif
                                         </span>
                                     </span>
@@ -123,11 +123,11 @@
                                          jamais publié n'est pas un profil coupé par
                                          l'administration. --}}
                                     @if ($profil === null)
-                                        <x-badge variant="secondary">Aucun profil</x-badge>
+                                        <x-badge variant="secondary">{{ __('admin.clients.aucun_profil') }}</x-badge>
                                     @elseif ($profil->isDeactivated())
-                                        <x-badge variant="danger">Désactivé</x-badge>
+                                        <x-badge variant="danger">{{ __('admin.commun.desactive') }}</x-badge>
                                     @elseif ($profil->is_active)
-                                        <x-badge variant="success">Publié</x-badge>
+                                        <x-badge variant="success">{{ __('admin.commun.publie') }}</x-badge>
                                     @else
                                         <x-badge variant="secondary">Brouillon</x-badge>
                                     @endif
@@ -137,7 +137,7 @@
                                     @if ($abo === null)
                                         <x-badge variant="secondary">Aucun</x-badge>
                                     @elseif ($abo->isTrial())
-                                        <x-badge variant="warning">Essai gratuit</x-badge>
+                                        <x-badge variant="warning">{{ __('admin.clients.essai_gratuit') }}</x-badge>
                                     @else
                                         <x-badge variant="success">{{ $abo->plan?->name ?? 'Actif' }}</x-badge>
                                     @endif
@@ -162,9 +162,13 @@
                      « 15 clients » sur une liste qui en compte 310 ferait
                      prendre des décisions sur un nombre faux. --}}
                 <p class="adm-pied__compte">
-                    Affichage {{ $clients->firstItem() }} à {{ $clients->lastItem() }}
-                    sur {{ number_format($total, 0, ',', ' ') }}
-                    client{{ $total > 1 ? 's' : '' }}
+                    {{ __('admin.commun.affichage', [
+                        'debut' => $clients->firstItem(),
+                        'fin' => $clients->lastItem(),
+                    ]) }}
+                    {{ trans_choice('admin.commun.entites.clients', $total, [
+                        'compte' => \App\Support\Formats::nombre($total),
+                    ]) }}
                 </p>
 
                 {{ $clients->links() }}

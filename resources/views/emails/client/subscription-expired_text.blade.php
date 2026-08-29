@@ -1,16 +1,16 @@
-Bonjour {{ $name }},
+{{ __('emails.commun.bonjour', ['nom' => $name]) }}
 
-Votre abonnement est arrivé à échéance le {{ $echeance }}. Depuis cette date, le lien public de votre carte ne répond plus.
+{{ __('emails.abonnement_expire.intro', ['date' => $echeance]) }}
 
-VOS DONNÉES SONT INTACTES. Rien n'a été supprimé : votre carte, vos coordonnées, vos liens et votre QR Code sont conservés. Votre adresse publique reste la même, donc les cartes que vous avez déjà imprimées ou distribuées redeviendront valables telles quelles.
+{{ __('emails.abonnement_expire.intactes_texte') }}
 
-Un renouvellement remet tout en ligne en quelques secondes.
+{{ __('emails.abonnement_expire.renouveler') }}
 
-Réactiver ma carte :
+{{ __('emails.abonnement_expire.bouton') }} :
 {{ $renewUrl }}
 @if ($publicUrl)
 
-Adresse conservée pour votre carte : {{ $publicUrl }}
+{{ __('emails.abonnement_expire.adresse_conservee', ['url' => $publicUrl]) }}
 @endif
 
 —

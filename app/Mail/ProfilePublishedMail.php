@@ -27,7 +27,7 @@ class ProfilePublishedMail extends BaseMailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Votre carte est en ligne — '.config('app.name'),
+            subject: __('emails.carte_publiee.sujet', ['marque' => config('app.name')]),
         );
     }
 
