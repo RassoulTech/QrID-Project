@@ -1,0 +1,238 @@
+- generic [active] [ref=f16e1]:
+  - link "Skip to content" [ref=f16e2] [cursor=pointer]:
+    - /url: "#contenu"
+  - navigation [ref=f16e3]:
+    - generic [ref=f16e4]:
+      - link "QrID" [ref=f16e5] [cursor=pointer]:
+        - /url: http://127.0.0.1:8899
+        - generic [ref=f16e6]: QI
+      - button "Open menu" [ref=f16e10] [cursor=pointer]
+  - main [ref=f16e13]:
+    - generic [ref=f16e15]:
+      - generic [ref=f16e16]:
+        - heading "Your professional identity, reinvented" [level=1] [ref=f16e17]:
+          - text: Your professional identity,
+          - generic [ref=f16e18]: reinvented
+        - paragraph [ref=f16e19]: The secure digital identity platform for Senegal's professional elite. Bring your expertise together and stand out with elegance.
+        - generic [ref=f16e20]:
+          - link "Start the free trial" [ref=f16e21] [cursor=pointer]:
+            - /url: http://127.0.0.1:8899/register
+          - link "See an example" [ref=f16e24] [cursor=pointer]:
+            - /url: http://127.0.0.1:8899/exemple
+      - generic [ref=f16e30]:
+        - generic [ref=f16e32]: 9:41
+        - generic [ref=f16e46]:
+          - generic [ref=f16e47]:
+            - img "Illustrative portrait" [ref=f16e51]
+            - generic [ref=f16e60]:
+              - generic [ref=f16e61]: Mouhamed Dione
+              - generic [ref=f16e62]: Etudiant
+              - generic [ref=f16e63]: DigiGeek
+            - generic [ref=f16e64]:
+              - generic [ref=f16e65]: dionemhd1@gmail.com
+              - generic [ref=f16e71]: +221 77 383 13 64
+              - generic [ref=f16e76]: Thiés
+            - generic [ref=f16e82]:
+              - generic [ref=f16e83]: WhatsApp
+              - generic [ref=f16e87]: Call
+              - generic [ref=f16e91]: Location
+              - generic [ref=f16e95]: LinkedIn
+              - generic [ref=f16e99]: Instagram
+              - generic [ref=f16e103]: Facebook
+            - generic [ref=f16e107]:
+              - generic [ref=f16e108]: Share
+              - generic [ref=f16e109]: Save
+            - generic [ref=f16e110]: Card made with QrID
+          - paragraph [ref=f16e111]: Un lien, un QR Code. Vos coordonnées à jour, partout.
+    - region "Professions served" [ref=f16e112]:
+      - generic [ref=f16e113]:
+        - generic [ref=f16e114]: Architect
+        - generic [ref=f16e115]: Consultant
+        - generic [ref=f16e116]: Lawyer
+        - generic [ref=f16e117]: Doctor
+        - generic [ref=f16e118]: Engineer
+        - generic [ref=f16e119]: Freelancer
+        - generic [ref=f16e120]: Architect
+        - generic [ref=f16e121]: Consultant
+        - generic [ref=f16e122]: Lawyer
+        - generic [ref=f16e123]: Doctor
+        - generic [ref=f16e124]: Engineer
+        - generic [ref=f16e125]: Freelancer
+    - generic [ref=f16e127]:
+      - generic [ref=f16e128]:
+        - generic [ref=f16e129]: "3"
+        - generic [ref=f16e130]: Minutes
+        - generic [ref=f16e131]: To get set up
+      - generic [ref=f16e132]:
+        - generic [ref=f16e133]: "1"
+        - generic [ref=f16e134]: Link
+        - generic [ref=f16e135]: To share everything
+      - generic [ref=f16e136]:
+        - generic [ref=f16e137]: "15"
+        - generic [ref=f16e138]: Days
+        - generic [ref=f16e139]: Of free trial
+    - generic [ref=f16e141]:
+      - heading "How it works" [level=2] [ref=f16e142]
+      - generic [ref=f16e143]:
+        - generic [ref=f16e144]:
+          - generic [ref=f16e145]: "1"
+          - heading "Create your profile" [level=3] [ref=f16e146]
+          - paragraph [ref=f16e147]: Fill in your professional details in a few clicks, through an interface that stays out of your way.
+        - generic [ref=f16e148]:
+          - generic [ref=f16e149]: "2"
+          - heading "Set up your links" [level=3] [ref=f16e150]
+          - paragraph [ref=f16e151]: Add your social networks, your portfolio and the ways you prefer to be reached.
+        - generic [ref=f16e152]:
+          - generic [ref=f16e153]: "3"
+          - heading "Share without limits" [level=3] [ref=f16e154]
+          - paragraph [ref=f16e155]: A single link, or an elegant QR code, for every professional encounter.
+    - generic [ref=f16e157]:
+      - generic [ref=f16e158]:
+        - heading "See your finished profile before you pay." [level=2] [ref=f16e159]
+        - paragraph [ref=f16e160]: See exactly how your digital identity will look, right away. No hidden fees, no commitment up front. Try QrID for free.
+        - generic [ref=f16e161]:
+          - generic [ref=f16e162]: Scan & View
+          - generic "More than 500 professionals" [ref=f16e170]:
+            - generic [ref=f16e171]: AD
+            - generic [ref=f16e172]: MF
+            - generic [ref=f16e173]: FS
+            - generic [ref=f16e174]: "+500"
+      - generic [ref=f16e180]:
+        - generic [ref=f16e182]: 9:41
+        - generic [ref=f16e196]:
+          - generic [ref=f16e197]:
+            - img "Illustrative portrait" [ref=f16e201]
+            - generic [ref=f16e210]:
+              - generic [ref=f16e211]: Rassoul Tech
+              - generic [ref=f16e212]: Etudiant
+            - generic [ref=f16e213]:
+              - generic [ref=f16e214]: rassoultech404@gmail.com
+              - generic [ref=f16e220]: +221 78 990 36 74
+              - generic [ref=f16e225]: Thiés, ville ile de goré
+            - generic [ref=f16e231]:
+              - generic [ref=f16e232]: WhatsApp
+              - generic [ref=f16e236]: Call
+              - generic [ref=f16e240]: Location
+              - generic [ref=f16e244]: LinkedIn
+              - generic [ref=f16e248]: Instagram
+              - generic [ref=f16e252]: Facebook
+            - generic [ref=f16e256]:
+              - generic [ref=f16e257]: Share
+              - generic [ref=f16e258]: Save
+            - generic [ref=f16e259]: Card made with QrID
+          - paragraph [ref=f16e260]: Un lien, un QR Code. Vos coordonnées à jour, partout.
+    - generic [ref=f16e262]:
+      - heading "Simple, transparent pricing" [level=2] [ref=f16e263]
+      - paragraph [ref=f16e264]: Pay with Wave, Orange Money or Free Money.
+      - generic [ref=f16e265]:
+        - generic [ref=f16e266]:
+          - generic [ref=f16e267]: Essai gratuit
+          - generic [ref=f16e268]: 0 FCFA
+          - generic [ref=f16e269]: Pendant 14 jours
+          - list [ref=f16e270]:
+            - listitem [ref=f16e271]:
+              - generic [ref=f16e274]: Profil professionnel complet
+            - listitem [ref=f16e275]:
+              - generic [ref=f16e278]: QR Code illimité
+            - listitem [ref=f16e279]:
+              - generic [ref=f16e282]: Statistiques de consultation
+            - listitem [ref=f16e283]:
+              - generic [ref=f16e286]: Sans carte physique
+          - link "Try it free" [ref=f16e287] [cursor=pointer]:
+            - /url: http://127.0.0.1:8899/register
+        - generic [ref=f16e288]:
+          - generic [ref=f16e289]: Best value
+          - generic [ref=f16e290]: Standard
+          - generic [ref=f16e291]: 3 500 FCFA
+          - generic [ref=f16e292]: Pour 3 mois
+          - list [ref=f16e293]:
+            - listitem [ref=f16e294]:
+              - generic [ref=f16e297]: Carte PVC offerte à la première activation
+            - listitem [ref=f16e298]:
+              - generic [ref=f16e301]: Profil professionnel complet
+            - listitem [ref=f16e302]:
+              - generic [ref=f16e305]: QR Code illimité
+            - listitem [ref=f16e306]:
+              - generic [ref=f16e309]: Statistiques de consultation
+            - listitem [ref=f16e310]:
+              - generic [ref=f16e313]: Support WhatsApp
+          - link "Subscribe" [ref=f16e314] [cursor=pointer]:
+            - /url: http://127.0.0.1:8899/register
+    - generic [ref=f16e317]:
+      - generic [ref=f16e318]:
+        - heading "A question ? Write to us." [level=2] [ref=f16e319]
+        - paragraph [ref=f16e320]: "A question about the service, an order for printed cards, or simply a doubt : we reply within 24 working hours."
+        - 'link "Faster answer : WhatsApp The quickest channel, Monday to Saturday." [ref=f16e321] [cursor=pointer]':
+          - /url: https://wa.me/221773831364
+          - generic [ref=f16e325]:
+            - strong [ref=f16e326]: "Faster answer : WhatsApp"
+            - generic [ref=f16e327]: The quickest channel, Monday to Saturday.
+      - generic [ref=f16e329]:
+        - paragraph [ref=f16e330]:
+          - generic [ref=f16e331]: "*"
+          - text: Fields marked with an asterisk are required.
+        - generic [ref=f16e332]:
+          - generic [ref=f16e333]: Do not fill in this field
+          - textbox [ref=f16e334]
+        - generic [ref=f16e335]:
+          - generic [ref=f16e336]:
+            - generic [ref=f16e337]: Your name *
+            - textbox "Your name" [ref=f16e338]:
+              - /placeholder: Awa Ndiaye
+          - generic [ref=f16e339]:
+            - generic [ref=f16e340]: Email address *
+            - textbox "Email address" [ref=f16e341]:
+              - /placeholder: you@example.sn
+        - generic [ref=f16e342]:
+          - generic [ref=f16e343]:
+            - generic [ref=f16e344]: Phone (facultatif)
+            - textbox "Phone (facultatif)" [ref=f16e345]:
+              - /placeholder: 77 000 00 00
+          - generic [ref=f16e346]:
+            - generic [ref=f16e347]: Subject *
+            - combobox "Subject" [ref=f16e348]:
+              - option "A question about the service" [selected]
+              - option "Order printed cards"
+              - option "I need help with my account"
+              - option "Partnership or reselling"
+        - generic [ref=f16e349]:
+          - generic [ref=f16e350]: Your message *
+          - textbox "Your message" [ref=f16e351]:
+            - /placeholder: Tell us in a few lines what you need.
+        - button "Send my message" [ref=f16e352] [cursor=pointer]
+        - paragraph [ref=f16e353]: Your details are used only to reply to you. They are never sold, and never used for cold outreach.
+    - generic [ref=f16e355]:
+      - heading "Ready to stand out in Senegal ?" [level=2] [ref=f16e356]
+      - paragraph [ref=f16e357]: Join the growing community of leaders who trust QrID to carry their message.
+      - link "Start my journey" [ref=f16e358] [cursor=pointer]:
+        - /url: http://127.0.0.1:8899/register
+  - contentinfo [ref=f16e359]:
+    - generic [ref=f16e360]:
+      - generic [ref=f16e361]:
+        - generic [ref=f16e362]:
+          - generic [ref=f16e363]: QI
+          - generic [ref=f16e364]: QrID
+        - paragraph [ref=f16e366]: © 2026 QrID. Senegalese Professional Excellence. The reference for a secure digital presence.
+      - generic [ref=f16e367]:
+        - paragraph [ref=f16e368]: Platform
+        - link "Products" [ref=f16e369] [cursor=pointer]:
+          - /url: http://127.0.0.1:8899#produits
+        - link "Resources" [ref=f16e370] [cursor=pointer]:
+          - /url: http://127.0.0.1:8899#ressources
+        - link "Pricing" [ref=f16e371] [cursor=pointer]:
+          - /url: http://127.0.0.1:8899#tarifs
+      - generic [ref=f16e372]:
+        - paragraph [ref=f16e373]: Legal
+        - link "Terms" [ref=f16e374] [cursor=pointer]:
+          - /url: http://127.0.0.1:8899/conditions-generales
+        - link "Privacy" [ref=f16e375] [cursor=pointer]:
+          - /url: http://127.0.0.1:8899/confidentialite
+      - generic [ref=f16e376]:
+        - paragraph [ref=f16e377]: Support
+        - link "Help" [ref=f16e378] [cursor=pointer]:
+          - /url: http://127.0.0.1:8899/mentions-legales
+        - link "Contact" [ref=f16e379] [cursor=pointer]:
+          - /url: https://wa.me/221773831364
+  - link "Message us on WhatsApp" [ref=f16e380] [cursor=pointer]:
+    - /url: https://wa.me/221773831364?text=Bonjour%2C%20je%20d%C3%A9couvre%20QrID%20et%20j%27aimerais%20en%20savoir%20plus.
+    - generic [ref=f16e384]: A question ?

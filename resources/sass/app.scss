@@ -8,6 +8,11 @@
 // =============================================================================
 
 @import "variables";
+
+// LES TOKENS AVANT TOUT LE RESTE. Ils ne produisent qu'un bloc :root et un
+// bloc .theme-dark ; aucun selecteur existant n'est touche. C'est la
+// fondation de l'etape 1 : elle est posee, rien ne la consomme encore.
+@import "tokens";
 @import "bootstrap/scss/bootstrap";
 @import "base";
 @import "theme";

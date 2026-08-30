@@ -1,0 +1,58 @@
+- generic [ref=f25e1]:
+  - main [ref=f25e2]:
+    - generic [ref=f25e4]:
+      - generic [ref=f25e5]:
+        - link "QrID" [ref=f25e6] [cursor=pointer]:
+          - /url: http://127.0.0.1:8899
+          - generic [ref=f25e7]: QI
+        - group [ref=f25e10]:
+          - 'generic "Language: English" [ref=f25e11] [cursor=pointer]': EN
+        - button "Switch to light theme" [ref=f25e16] [cursor=pointer]
+      - generic [ref=f25e19]:
+        - heading "Welcome to QrID" [level=1] [ref=f25e20]
+        - paragraph [ref=f25e21]: Sign in to get back to your account.
+        - navigation "Sign in or create an account" [ref=f25e22]:
+          - link "Sign in" [ref=f25e23] [cursor=pointer]:
+            - /url: http://127.0.0.1:8899/login
+          - link "Create an account" [ref=f25e24] [cursor=pointer]:
+            - /url: http://127.0.0.1:8899/register
+        - generic [ref=f25e25]:
+          - link "Continue with Google" [ref=f25e26] [cursor=pointer]:
+            - /url: http://127.0.0.1:8899/auth/google
+          - generic [ref=f25e33]: or with your email address
+        - generic [ref=f25e35]:
+          - generic [ref=f25e36]:
+            - generic [ref=f25e37]:
+              - text: Email address
+              - generic [ref=f25e38]: "*"
+            - textbox "Email address" [active] [ref=f25e40]:
+              - /placeholder: you@example.sn
+          - generic [ref=f25e41]:
+            - generic [ref=f25e42]:
+              - text: Password
+              - generic [ref=f25e43]: "*"
+            - generic [ref=f25e44]:
+              - textbox "Password" [ref=f25e45]
+              - button "Show password" [ref=f25e46] [cursor=pointer]
+          - generic [ref=f25e50]:
+            - generic [ref=f25e51]:
+              - checkbox "Remember me" [ref=f25e52]
+              - generic [ref=f25e53]: Remember me
+            - link "Forgot your password ?" [ref=f25e54] [cursor=pointer]:
+              - /url: http://127.0.0.1:8899/forgot-password
+          - button "Sign in" [ref=f25e55] [cursor=pointer]
+        - paragraph [ref=f25e56]:
+          - text: No account yet ?
+          - link "Create an account" [ref=f25e57] [cursor=pointer]:
+            - /url: http://127.0.0.1:8899/register
+      - paragraph [ref=f25e58]:
+        - generic [ref=f25e59]: © 2026 QrID
+        - link "Terms and conditions" [ref=f25e60] [cursor=pointer]:
+          - /url: http://127.0.0.1:8899/conditions-generales
+        - link "Privacy" [ref=f25e61] [cursor=pointer]:
+          - /url: http://127.0.0.1:8899/confidentialite
+        - link "Legal notice" [ref=f25e62] [cursor=pointer]:
+          - /url: http://127.0.0.1:8899/mentions-legales
+  - link "Message us on WhatsApp" [ref=f25e63] [cursor=pointer]:
+    - /url: https://wa.me/221773831364?text=Bonjour%2C%20je%20n%27arrive%20pas%20%C3%A0%20me%20connecter%20%C3%A0%20mon%20espace%20QrID.
+    - generic [ref=f25e67]: A question ?

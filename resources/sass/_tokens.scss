@@ -1,0 +1,382 @@
+// =============================================================================
+// QrID — TOKENS
+// =============================================================================
+//
+// LE SEUL FICHIER QUI CONTIENT DES VALEURS. Partout ailleurs, on référence.
+// Une couleur, une taille, un espacement, un rayon, une ombre ou une durée
+// écrits en dur dans un autre fichier sont une régression, et la commande
+// `php artisan design:check` les signale.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// POURQUOI DES PROPRIÉTÉS CSS ET PAS SEULEMENT DES VARIABLES SCSS
+// ─────────────────────────────────────────────────────────────────────────
+// Une variable SCSS est résolue à la compilation : elle ne peut pas changer
+// selon le thème. Or le thème bascule à l'exécution, par une classe posée
+// sur <html>.
+//
+// D'où deux couches, et la distinction compte :
+//
+//   · LES VARIABLES SCSS ($...) portent la palette BRUTE. C'est la source
+//     de vérité, celle qu'on modifie.
+//   · LES PROPRIÉTÉS CSS (--...) portent la valeur ACTIVE, déclinée pour
+//     chaque thème. C'est ce que les composants consomment.
+//
+// Un composant écrit donc `color: var(--texte)` et n'a rien à savoir du
+// thème courant. Ajouter un troisième thème ne demandera pas de rouvrir
+// un seul composant.
+//
+// Les échelles qui NE dépendent pas du thème — espacement, rayons,
+// typographie, durées, points de rupture — restent en SCSS pur : elles
+// sont utilisées dans des `@media` et des calculs, où une propriété CSS
+// ne fonctionnerait pas.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// TOUTES LES COULEURS SONT MESURÉES
+// ─────────────────────────────────────────────────────────────────────────
+// Chaque couleur de texte a été vérifiée contre les trois surfaces sur
+// lesquelles elle peut atterrir (page, carte, surélevé), dans les deux
+// thèmes. Le ratio le plus faible est noté en commentaire. Aucune valeur
+// n'est en dessous de 4,5:1.
+//
+// Ce n'est pas une précaution théorique : l'audit a mesuré « En attente »
+// à 1,46:1 — un texte illisible, présent 23 fois sur trois écrans, parce
+// que le badge reprenait le jaune de Bootstrap sur un fond gris clair.
+//
+// =============================================================================
+
+
+// =============================================================================
+// 1. LA MARQUE — imposée, jamais recalculée
+// =============================================================================
+
+$vert-fonce:  #0B3B2E;   // sections sombres, boutons principaux, médaillon
+$vert-accent: #1E9E7A;   // accents, traits, icônes — JAMAIS un fond de texte
+$vert-clair:  #E4F2EC;   // fonds doux, badges, appel à l'action final
+
+// La MÊME teinte, remontée pour le thème sombre. Ce n'est pas une seconde
+// couleur de marque : c'est la même, rendue lisible sur fond sombre.
+$vert-accent-sombre: #1FBC8A;
+
+// Le vert accent porte mal le texte : #FFFFFF dessus ne donne que 3,37:1.
+// C'est ce qui rendait le médaillon « QI » non conforme sur 18 pages. Il
+// reste une couleur de TRAIT et d'ICÔNE ; pour un fond de texte, on prend
+// le vert foncé — #FFFFFF dessus donne 12,51:1.
+
+
+// =============================================================================
+// 2. SURFACES ET TEXTES — deux thèmes
+// =============================================================================
+
+// ── Thème clair ──────────────────────────────────────────────────────────
+$c-page:      #F7F8F7;
+$c-carte:     #FFFFFF;
+$c-surelev:   #F2F3F1;
+
+$c-texte:     #0A1F1A;   // min 15,42:1
+$c-texte-2:   #42524C;   // min  7,42:1
+$c-texte-3:   #5C6B66;   // min  5,03:1
+$c-texte-inv: #FFFFFF;
+
+$c-bordure:   rgba(#0A1F1A, .10);
+$c-bordure-f: rgba(#0A1F1A, .18);
+
+// ── Thème sombre ─────────────────────────────────────────────────────────
+$s-page:      #0F1714;
+$s-carte:     #16211D;
+$s-surelev:   #1D2B26;
+
+$s-texte:     #EAF1EE;   // min 12,85:1
+$s-texte-2:   #B8C7C1;   // min  8,40:1
+$s-texte-3:   #93A59E;   // min  5,69:1
+$s-texte-inv: #0A1F1A;
+
+$s-bordure:   rgba(#EAF1EE, .12);
+$s-bordure-f: rgba(#EAF1EE, .22);
+
+
+// =============================================================================
+// 3. ÉTATS — version PLEINE (fond coloré) et version DOUCE (texte sur fond pâle)
+// =============================================================================
+//
+// La version douce est celle des badges. C'est elle qui échouait : un badge
+// « En attente » écrivait le jaune vif de Bootstrap sur du gris clair.
+// Chaque teinte douce a donc été assombrie jusqu'à passer 4,5:1 sur la
+// surface la plus claire des trois.
+
+// ── Clair ────────────────────────────────────────────────────────────────
+$c-succes:        #177A5F;   // 4,57:1 — pire cas : sur son propre fond doux
+$c-succes-fond:   #E4F2EC;
+$c-alerte:        #8A6700;   // 4,66:1
+$c-alerte-fond:   #FBF1DC;
+$c-danger:        #B42318;   // 5,62:1
+$c-danger-fond:   #FCE9E7;
+$c-info:          #1D6DB4;   // 4,59:1
+$c-info-fond:     #E4EEF8;
+$c-neutre:        #587067;   // 4,62:1
+$c-neutre-fond:   #ECEFED;
+
+// ── Sombre ───────────────────────────────────────────────────────────────
+$s-succes:        #1FBC8A;   // 4,57:1 sur son fond teinté | 6,04:1 sur surface nue
+$s-succes-fond:   rgba(#1FBC8A, .16);
+$s-alerte:        #F68F00;   // 4,58:1 teinté | 6,21:1 nu
+$s-alerte-fond:   rgba(#F68F00, .18);
+$s-danger:        #E78E83;   // 4,58:1 teinté | 6,03:1 nu
+$s-danger-fond:   rgba(#E78E83, .16);
+$s-info:          #70ADE0;   // 4,56:1 teinté | 6,13:1 nu
+$s-info-fond:     rgba(#70ADE0, .16);
+$s-neutre:        #93A59E;   // 4,97:1 teinté | 5,69:1 nu
+$s-neutre-fond:   rgba(#EAF1EE, .08);
+
+
+// =============================================================================
+// 4. OVERLAYS ET VOILES
+// =============================================================================
+//
+// Le voile de la couverture publique n'est pas décoratif : c'est lui qui
+// rend le nom lisible sur une photo dont on ne sait rien. Il est donc un
+// token, pas une valeur locale.
+
+$c-overlay:       rgba(#0A1F1A, .48);
+$s-overlay:       rgba(#000000, .62);
+$voile-couverture: linear-gradient(180deg,
+                     rgba(#04120E, 0) 34%,
+                     rgba(#04120E, .58) 68%,
+                     rgba(#04120E, .86) 100%);
+
+
+// =============================================================================
+// 5. TYPOGRAPHIE — une seule famille, chargée en local
+// =============================================================================
+//
+// JAMAIS DE CDN. Un visiteur sénégalais en 3G paie une résolution DNS, un
+// handshake TLS et un aller-retour supplémentaires pour un fichier que
+// l'hébergeur sert déjà. Et si fonts.googleapis.com est lent ou bloqué,
+// c'est la page entière qui attend.
+//
+// Le repli sur la pile système est délibéré : tant que les fichiers ne
+// sont pas déposés, la page s'affiche dans une police correcte plutôt que
+// dans du Times New Roman.
+
+$font: 'QrID', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+// Chaque taille porte : mobile, bureau, graisse, interligne, interlettrage.
+// Aucune valeur de police ailleurs dans le projet.
+$type: (
+  display:  (mobile: 34px, bureau: 52px, graisse: 800, interligne: 1.06, espacement: -.03em),
+  h1:       (mobile: 26px, bureau: 36px, graisse: 800, interligne: 1.14, espacement: -.025em),
+  h2:       (mobile: 21px, bureau: 27px, graisse: 700, interligne: 1.22, espacement: -.02em),
+  h3:       (mobile: 17px, bureau: 20px, graisse: 700, interligne: 1.32, espacement: -.01em),
+  body-lg:  (mobile: 17px, bureau: 18px, graisse: 400, interligne: 1.62, espacement: 0),
+  body:     (mobile: 16px, bureau: 16px, graisse: 400, interligne: 1.62, espacement: 0),
+  body-sm:  (mobile: 14px, bureau: 14px, graisse: 400, interligne: 1.55, espacement: 0),
+  caption:  (mobile: 13px, bureau: 13px, graisse: 500, interligne: 1.45, espacement: 0),
+  overline: (mobile: 11px, bureau: 11px, graisse: 700, interligne: 1.3,  espacement: .08em),
+);
+
+// `body` reste à 16px sur mobile, et ce n'est pas négociable : en dessous,
+// iOS zoome automatiquement à la mise au point d'un champ, et la page part
+// de travers. L'audit a relevé 41 tailles distinctes, dont 12,5px répété
+// 40 fois — c'est cette dérive que l'échelle supprime.
+
+// `typo()` et non `type()` : Sass reserve `type` pour la fonction CSS du
+// meme nom. Troisieme collision apres `e()` et `r()` — les noms courts
+// coutent plus qu'ils ne rapportent.
+@function typo($nom, $clef: mobile) {
+  @return map-get(map-get($type, $nom), $clef);
+}
+
+
+// =============================================================================
+// 6. ESPACEMENT — treize valeurs, pas une de plus
+// =============================================================================
+//
+// L'audit a relevé 63 valeurs distinctes pour 781 usages : 14px employé 74
+// fois, 12px 63 fois, 9px 24 fois, 7px 21 fois. Personne n'a choisi 7px
+// contre 8px ; c'est le résultat d'un ajustement local qui n'a jamais été
+// repris. L'échelle rend ce choix impossible.
+
+$espaces: (0: 0, 1: 4px, 2: 8px, 3: 12px, 4: 16px, 5: 20px, 6: 24px,
+           7: 32px, 8: 40px, 9: 48px, 10: 64px, 11: 80px, 12: 96px, 13: 128px);
+
+// `esp()` et non `e()` : Sass réserve `e` pour la constante mathématique
+// de CSS. Un nom court qui entre en collision avec le langage coûte plus
+// cher qu'il ne fait gagner.
+@function esp($n) {
+  @if not map-has-key($espaces, $n) {
+    @error "Espacement #{$n} hors échelle. Valeurs permises : #{map-keys($espaces)}.";
+  }
+  @return map-get($espaces, $n);
+}
+
+
+// =============================================================================
+// 7. RAYONS
+// =============================================================================
+
+$rayons: (none: 0, sm: 8px, md: 14px, lg: 22px, xl: 32px, full: 999px);
+
+@function rayon($nom) {
+  @if not map-has-key($rayons, $nom) {
+    @error "Rayon #{$nom} inconnu. Valeurs : #{map-keys($rayons)}.";
+  }
+  @return map-get($rayons, $nom);
+}
+
+// LA CARTE PVC UTILISE `none`, ET C'EST UNE CONTRAINTE PHYSIQUE, PAS UN GOÛT.
+// La référence figée `carte-qrid.html` porte des angles vifs ; le rendu
+// écran doit correspondre à ce qui sort de l'imprimeur.
+
+
+// =============================================================================
+// 8. OMBRES — quatre niveaux, deux thèmes
+// =============================================================================
+//
+// Sur fond sombre, une ombre noire ne se voit pas : elle salit sans
+// séparer. Le thème sombre sépare donc par la BORDURE et une ombre plus
+// dense, jamais par une ombre seule.
+
+$c-ombre-1: 0 1px 2px rgba(#0A1F1A, .05);
+$c-ombre-2: 0 4px 12px rgba(#0A1F1A, .08);
+$c-ombre-3: 0 12px 32px rgba(#0A1F1A, .12);
+$c-ombre-4: 0 28px 64px rgba(#0A1F1A, .18);
+
+$s-ombre-1: 0 1px 2px rgba(#000000, .30);
+$s-ombre-2: 0 4px 12px rgba(#000000, .40);
+$s-ombre-3: 0 12px 32px rgba(#000000, .50);
+$s-ombre-4: 0 28px 64px rgba(#000000, .62);
+
+
+// =============================================================================
+// 9. MOUVEMENT — une seule courbe pour tout le projet
+// =============================================================================
+
+$d-rapide: 150ms;   // halo de focus, changement de teinte
+$d-normal: 250ms;   // apparition, survol, ouverture
+$d-lent:   400ms;   // révélation au défilement
+$d-carte:  600ms;   // permutation 3D de la carte PVC
+
+$courbe: cubic-bezier(.2, .8, .2, 1);
+
+// Une courbe unique n'est pas une simplification : deux courbes
+// différentes sur deux éléments voisins se remarquent, et ce qui se
+// remarque dans une animation d'interface est presque toujours un défaut.
+
+
+// =============================================================================
+// 10. POINTS DE RUPTURE
+// =============================================================================
+//
+// MOBILE FIRST STRICT : on écrit le style de base pour 320px, et chaque
+// `@media` ne fait qu'AJOUTER. Aucune requête `max-width` — elles obligent
+// à défaire ce qu'on vient de faire, et c'est ainsi qu'un style finit par
+// dépendre de l'ordre des déclarations.
+
+$ruptures: (xs: 320px, sm: 375px, ms: 480px, md: 640px,
+            lg: 768px, xl: 1024px, xxl: 1280px, max: 1440px);
+
+@mixin ecran($nom) {
+  @if not map-has-key($ruptures, $nom) {
+    @error "Rupture #{$nom} inconnue. Valeurs : #{map-keys($ruptures)}.";
+  }
+  @media (min-width: map-get($ruptures, $nom)) { @content; }
+}
+
+
+// =============================================================================
+// 11. ZONES TACTILES
+// =============================================================================
+
+$tactile-min:   44px;   // le minimum absolu (WCAG 2.5.5)
+$champ-hauteur: 48px;   // hauteur d'un champ sur mobile
+$action-mobile: 52px;   // barre d'actions de la page publique
+$tuile-reseau:  64px;   // grille des réseaux sociaux
+
+
+// =============================================================================
+// 12. LA COUCHE ACTIVE — ce que les composants consomment
+// =============================================================================
+//
+// Tout ce qui précède est une source. Ce qui suit est l'interface : les
+// composants n'écrivent QUE `var(--quelque-chose)`.
+
+:root {
+  --page:        #{$c-page};
+  --carte:       #{$c-carte};
+  --surelev:     #{$c-surelev};
+
+  --texte:       #{$c-texte};
+  --texte-2:     #{$c-texte-2};
+  --texte-3:     #{$c-texte-3};
+  --texte-inv:   #{$c-texte-inv};
+
+  --bordure:     #{$c-bordure};
+  --bordure-f:   #{$c-bordure-f};
+
+  --succes:      #{$c-succes};
+  --succes-fond: #{$c-succes-fond};
+  --alerte:      #{$c-alerte};
+  --alerte-fond: #{$c-alerte-fond};
+  --danger:      #{$c-danger};
+  --danger-fond: #{$c-danger-fond};
+  --info:        #{$c-info};
+  --info-fond:   #{$c-info-fond};
+  --neutre:      #{$c-neutre};
+  --neutre-fond: #{$c-neutre-fond};
+
+  --overlay:     #{$c-overlay};
+
+  --ombre-1:     #{$c-ombre-1};
+  --ombre-2:     #{$c-ombre-2};
+  --ombre-3:     #{$c-ombre-3};
+  --ombre-4:     #{$c-ombre-4};
+
+  // La marque ne change pas avec le thème : c'est ce qui la rend
+  // reconnaissable. Seules les surfaces autour d'elle changent.
+  --marque:      #{$vert-fonce};
+  --accent:      #{$vert-accent};
+  --marque-doux: #{$vert-clair};
+}
+
+.theme-dark {
+  --page:        #{$s-page};
+  --carte:       #{$s-carte};
+  --surelev:     #{$s-surelev};
+
+  --texte:       #{$s-texte};
+  --texte-2:     #{$s-texte-2};
+  --texte-3:     #{$s-texte-3};
+  --texte-inv:   #{$s-texte-inv};
+
+  --bordure:     #{$s-bordure};
+  --bordure-f:   #{$s-bordure-f};
+
+  --succes:      #{$s-succes};
+  --succes-fond: #{$s-succes-fond};
+  --alerte:      #{$s-alerte};
+  --alerte-fond: #{$s-alerte-fond};
+  --danger:      #{$s-danger};
+  --danger-fond: #{$s-danger-fond};
+  --info:        #{$s-info};
+  --info-fond:   #{$s-info-fond};
+  --neutre:      #{$s-neutre};
+  --neutre-fond: #{$s-neutre-fond};
+
+  --overlay:     #{$s-overlay};
+
+  --ombre-1:     #{$s-ombre-1};
+  --ombre-2:     #{$s-ombre-2};
+  --ombre-3:     #{$s-ombre-3};
+  --ombre-4:     #{$s-ombre-4};
+
+  // Sur fond sombre, le vert foncé de la marque devient illisible : il se
+  // confond avec la surface. L'accent prend le relais — c'est le seul
+  // endroit où la charte s'adapte au thème.
+  //
+  // ET IL EST REMONTÉ, PAS REPRIS TEL QUEL. #1E9E7A ne donne que 4,37:1
+  // sur la surface surélevée, et 3,64:1 sur son propre fond teinté. La
+  // même teinte éclaircie passe les deux. C'est le piège qu'on ne voit
+  // pas : un fond teinté à 16 % éclaircit la surface, et le texte perd
+  // du contraste contre son PROPRE fond.
+  --marque:      #{$vert-accent-sombre};
+  --marque-doux: #{rgba($vert-accent-sombre, .16)};
+}
