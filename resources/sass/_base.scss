@@ -7,23 +7,22 @@
 // Déposer les .woff2 dans public/fonts/ puis décommenter.
 // Tant qu'ils sont absents, la pile système sert de repli.
 // -----------------------------------------------------------------------------
-// @font-face{font-family:'QrID';src:url('/fonts/qrid-400.woff2') format('woff2');font-weight:400;font-display:swap}
-// @font-face{font-family:'QrID';src:url('/fonts/qrid-500.woff2') format('woff2');font-weight:500;font-display:swap}
-// @font-face{font-family:'QrID';src:url('/fonts/qrid-600.woff2') format('woff2');font-weight:600;font-display:swap}
-// @font-face{font-family:'QrID';src:url('/fonts/qrid-700.woff2') format('woff2');font-weight:700;font-display:swap}
-// @font-face{font-family:'QrID';src:url('/fonts/qrid-800.woff2') format('woff2');font-weight:800;font-display:swap}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 
 body{
   margin:0;
-  background:$blanc;
-  color:$texte;
-  font-family:$font-base;
-  font-size:16px;
-  line-height:1.6;
   -webkit-font-smoothing:antialiased;
+
+  /*
+   | NI FOND, NI COULEUR, NI POLICE, NI TAILLE ICI.
+   |
+   | `_socle.scss` les pose sur `html` et `body` à partir des tokens, et
+   | il est importé APRÈS ce fichier : les déclarations qui vivaient ici
+   | étaient donc écrasées à chaque rendu. Elles ne faisaient plus que
+   | tromper qui lisait le fichier.
+   */
 
   /*
    | LA PAGE NE DÉFILE JAMAIS LATÉRALEMENT.
@@ -79,7 +78,9 @@ p,li,dd,dt,td,th,figcaption{overflow-wrap:break-word}
   .theme-toggle,.app-bell,.adm-top__burger{min-width:40px;min-height:40px}
 }
 
-h1,h2,h3,h4{margin:0;font-family:$font-base;color:$texte;letter-spacing:-.02em}
+// Les titres suivent l'échelle typographique du socle, qui porte aussi
+// leur graisse, leur interligne et leur interlettrage par palier.
+h1,h2,h3,h4{margin:0}
 
 // Aucun lien souligné, dans aucun état.
 //
@@ -95,14 +96,20 @@ a,a:link,a:visited,a:hover,a:active,a:focus,a:focus-visible{text-decoration:none
 a{color:inherit;transition:color .18s ease,opacity .18s ease}
 .btn-link,.nav-link,.dropdown-item,.navbar-brand,.page-link{text-decoration:none !important}
 
-// Focus visible : seul repère au clavier.
-a:focus-visible,button:focus-visible{outline:3px solid $vert-accent;outline-offset:3px;border-radius:8px}
+// LE CONTOUR DE FOCUS EST POSÉ PAR LE SOCLE, pour tous les éléments
+// interactifs et pas seulement pour deux d'entre eux. La règle qui vivait
+// ici en imposait un autre — 3px au lieu de 2, sur le vert accent au lieu
+// de la marque — et contredisait la loi 8 sur les liens et les boutons
+// pendant que le reste du produit suivait la règle.
 
 .wrap{width:100%;max-width:1180px;margin-inline:auto;padding-inline:20px}
 
 .skip-link{
   position:absolute;left:-9999px;top:0;z-index:100;
-  padding:12px 16px;background:$vert-fonce;color:$blanc;border-radius:0 0 8px 0;
+  padding:esp(3) esp(4);
+  background:var(--marque);
+  color:var(--texte-inv-marque);
+  border-radius:0 0 rayon(sm) 0;
 }
 .skip-link:focus{left:0}
 

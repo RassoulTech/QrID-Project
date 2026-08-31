@@ -1,68 +1,72 @@
 // =============================================================================
-// QrID — VARIABLES DE MARQUE
-// Palette imposée. Aucune couleur en dur ailleurs dans le projet.
+// QrID — SURCHARGE BOOTSTRAP
+// =============================================================================
+//
+// CE FICHIER NE CONTIENT AUCUNE VALEUR. Il n'existe que pour une raison :
+// Bootstrap lit des VARIABLES SCSS au moment de sa compilation, et ne sait
+// pas résoudre une propriété CSS. `$primary: var(--marque)` ne fonctionne
+// pas — Bootstrap calcule des nuances à partir de cette couleur, et il lui
+// faut une valeur, pas une référence différée.
+//
+// C'est donc le seul pont possible entre les tokens et le framework. Chaque
+// ligne ci-dessous RÉFÉRENCE un token ; aucune n'en invente.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// CE QUI A ÉTÉ RETIRÉ, ET POURQUOI
+// ─────────────────────────────────────────────────────────────────────────
+// Dix-huit déclarations vivaient ici et dupliquaient des tokens — la
+// palette, les rayons, les ombres, la police. Le fichier s'ouvrait pourtant
+// sur « Palette imposée. Aucune couleur en dur ailleurs », pendant que
+// `_tokens.scss` s'ouvrait sur « LE SEUL FICHIER QUI CONTIENT DES VALEURS ».
+// Les deux affirmations ne pouvaient pas être vraies ensemble.
+//
+// Elles sont devenues des alias, dans `_tokens.scss` § 13, où elles servent
+// les ~700 usages des feuilles historiques en attendant le Lot 2.
+//
+// L'ORDRE D'IMPORT A DÛ CHANGER : `_tokens.scss` passe AVANT ce fichier.
+// La source de vérité vient d'abord, le pont ensuite, le framework en
+// dernier. C'est la seule séquence où chaque étage ne dépend que du
+// précédent.
 // =============================================================================
 
-$vert-fonce:  #0B3B2E;  // boutons principaux, sections sombres, titres forts
-$vert-accent: #1E9E7A;  // accents, icônes, traits, pastilles
-$vert-clair:  #E4F2EC;  // fonds doux, badges, appel à l'action final
-$gris-fond:   #F2F3F1;  // fond de section
-$blanc:       #FFFFFF;  // cartes
-$texte:       #0A1F1A;  // texte principal, pied de page
-$gris-second: #5C6B66;  // texte secondaire
-
-// Rouge d'erreur — la seule couleur hors palette du projet, imposée par le
-// contraste : il faut 4,5:1 sur blanc pour un message lisible, ce qu'aucune
-// teinte de la palette ne fournit. Était écrit en dur dans _app-shell.scss ;
-// centralisé ici pour qu'il n'existe qu'à un seul endroit.
-$rouge-erreur: #B42318;   // 5,94:1 sur blanc
-
-// Dérivés strictement issus de la palette
-$bordure:     rgba($texte, .08);
-$bordure-forte: rgba($texte, .14);
-
-$r-sm: 12px;
-$r-md: 20px;
-$r-lg: 28px;
-$r-xl: 40px;
-$r-full: 999px;
-
-$shadow-1: 0 1px 2px rgba(10, 31, 26, .05);
-$shadow-2: 0 12px 32px rgba(10, 31, 26, .10);
-$shadow-3: 0 28px 64px rgba(10, 31, 26, .16);
-
 // -----------------------------------------------------------------------------
-// Typographie — police locale, jamais de CDN (voir @font-face dans _base.scss).
-// Repli sur la pile système tant que les fichiers ne sont pas déposés.
-// -----------------------------------------------------------------------------
-$font-base: 'QrID', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-
-// -----------------------------------------------------------------------------
-// Correspondance Bootstrap (navbar repliable, offcanvas)
+// Couleurs — Bootstrap en dérive ses nuances, ses états et ses contrastes
 // -----------------------------------------------------------------------------
 $primary:   $vert-fonce;
-$secondary: $gris-second;
-$success:   $vert-accent;
-$light:     $gris-fond;
-$dark:      $texte;
+$secondary: $c-texte-3;
+$success:   $c-succes;
+$danger:    $c-danger;
+$warning:   $c-alerte;
+$info:      $c-info;
+$light:     $c-surelev;
+$dark:      $c-texte;
 
-$body-color: $texte;
-$body-bg:    $blanc;
-$border-color: $bordure;
+$body-color:   $c-texte;
+$body-bg:      $c-carte;
+$border-color: $c-bordure;
 
-$font-family-sans-serif: $font-base;
-$font-size-base: 1rem;
+// -----------------------------------------------------------------------------
+// Typographie
+// -----------------------------------------------------------------------------
+$font-family-sans-serif: $font;
+$font-size-base:   1rem;
 $line-height-base: 1.6;
 
-$border-radius:    $r-sm;
-$border-radius-lg: $r-md;
-$border-radius-xl: $r-lg;
+// -----------------------------------------------------------------------------
+// Formes
+// -----------------------------------------------------------------------------
+$border-radius:    rayon(sm);
+$border-radius-lg: rayon(md);
+$border-radius-xl: rayon(lg);
 
-$box-shadow-sm: $shadow-1;
-$box-shadow:    $shadow-2;
-$box-shadow-lg: $shadow-3;
+$box-shadow-sm: $c-ombre-1;
+$box-shadow:    $c-ombre-3;
+$box-shadow-lg: $c-ombre-4;
 
-$enable-shadows: false;
+// -----------------------------------------------------------------------------
+// Interdits du concept — « ni dégradé décoratif, ni ombre lourde »
+// -----------------------------------------------------------------------------
+$enable-shadows:   false;
 $enable-gradients: false;
 
-$grid-gutter-width: 1.5rem;
+$grid-gutter-width: esp(6);

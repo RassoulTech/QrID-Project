@@ -164,7 +164,30 @@ $voile-couverture: linear-gradient(180deg,
 // sont pas déposés, la page s'affiche dans une police correcte plutôt que
 // dans du Times New Roman.
 
-$font: 'QrID', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+// LA PILE SYSTÈME, ASSUMÉE — décision du Lot 1.
+//
+// `'QrID'` ouvrait cette pile, cinq `@font-face` l'attendaient en
+// commentaire dans `_base.scss`, et `public/fonts/` n'a jamais existé. Le
+// produit annonçait donc une police qu'il ne servait pas : le repli
+// fonctionnait, mais la première famille de la liste était un mensonge.
+//
+// DEUX ISSUES SEULEMENT, ET ON TRANCHE POUR LA SECONDE :
+//   A — déposer les cinq .woff2 (jamais un CDN) ;
+//   B — assumer la pile système.
+//
+// B, parce que le poids est un critère du produit : le trafic public
+// arrive par scan de QR Code, souvent en 3G, et cinq graisses coûtent
+// 150 à 250 Ko avant le premier mot lisible. La pile système ne coûte
+// rien et rend une police native sur chaque plateforme.
+//
+// LE CARACTÈRE VIENT D'AILLEURS : de l'échelle, des graisses (800 sur
+// `display` et `h1`) et de l'interlettrage (-.03em sur `display`,
+// -.025em sur `h1`). C'est ce qui donne le ton institutionnel, pas le
+// dessin des lettres.
+//
+// Reversible : l'option A reste ouverte en V2, et ne demandera que de
+// remettre une famille en tête de cette pile.
+$font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
 // Chaque taille porte : mobile, bureau, graisse, interligne, interlettrage.
 // Aucune valeur de police ailleurs dans le projet.
@@ -408,3 +431,66 @@ $tuile-reseau:  64px;   // grille des réseaux sociaux
   --marque-halo: #{rgba($vert-accent-sombre, .30)};
   --danger-halo: #{rgba($s-danger, .30)};
 }
+
+
+// =============================================================================
+// 13. COMPATIBILITÉ — les noms historiques, branchés sur les tokens
+// =============================================================================
+//
+// Ces dix-huit noms sont employés ~700 fois dans les feuilles historiques.
+// Les remplacer un à un est le travail du Lot 2 ; les redéclarer ici avec
+// leur ancienne valeur serait rouvrir une seconde source.
+//
+// On les garde donc comme ALIAS : le nom survit, la valeur vient du token.
+// Une correction de charte se fait à un seul endroit et se propage, ce qui
+// était tout l'objet du chantier.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// CE QUE CE BRANCHEMENT CHANGE À L'ÉCRAN — et il fallait le mesurer
+// ─────────────────────────────────────────────────────────────────────────
+// Les deux fichiers ne portaient PAS les mêmes valeurs. Brancher les alias
+// sur les tokens modifie donc le rendu, et voici exactement où :
+//
+//   RAYONS — le changement le plus visible, ~120 usages
+//     sm  12px -> 8px      md  20px -> 14px
+//     lg  28px -> 22px     xl  40px -> 32px
+//   Tout le produit s'arrondit moins. C'est l'échelle validée qui gagne :
+//   les anciennes valeurs n'avaient jamais été choisies, elles avaient été
+//   posées avant qu'une échelle existe.
+//
+//   BORDURES — imperceptible, mais mesurable
+//     discrète  8 % -> 10 %      marquée  14 % -> 18 %
+//   Les bordures gagnent en visibilité, ce qui sert la lisibilité des
+//   champs (WCAG 1.4.11 demande 3:1 pour délimiter une saisie).
+//
+//   COULEURS — aucun changement. Les cinq teintes étaient déjà identiques.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// LES OMBRES SONT MAPPÉES PAR ÉQUIVALENCE VISUELLE, PAS PAR NUMÉRO
+// ─────────────────────────────────────────────────────────────────────────
+// L'échelle des tokens compte QUATRE niveaux, l'ancienne en comptait TROIS.
+// Faire correspondre les numéros aurait écrasé l'élévation : l'ancien
+// `shadow-2` (0 12px 32px) vaut le nouveau `ombre-3`, pas `ombre-2`
+// (0 4px 12px), qui est trois fois plus discret.
+//
+// On apparie donc par ce que l'œil voit, pas par ce que le nom suggère.
+
+$blanc:         $c-carte;        // #FFFFFF — inchangé
+$texte:         $c-texte;        // #0A1F1A — inchangé
+$gris-second:   $c-texte-3;      // #5C6B66 — inchangé
+$gris-fond:     $c-surelev;      // #F2F3F1 — inchangé
+$rouge-erreur:  $c-danger;       // #B42318 — inchangé
+$font-base:     $font;
+
+$bordure:       $c-bordure;      // 8 %  -> 10 %
+$bordure-forte: $c-bordure-f;    // 14 % -> 18 %
+
+$r-sm:   rayon(sm);              // 12px -> 8px
+$r-md:   rayon(md);              // 20px -> 14px
+$r-lg:   rayon(lg);              // 28px -> 22px
+$r-xl:   rayon(xl);              // 40px -> 32px
+$r-full: rayon(full);            // 999px — inchangé
+
+$shadow-1: $c-ombre-1;           // identique
+$shadow-2: $c-ombre-3;           // apparié à l'œil, pas au numéro
+$shadow-3: $c-ombre-4;           // idem

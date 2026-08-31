@@ -22,7 +22,7 @@
     {{-- LE MESSAGE, tel qu'il a été écrit.
          nl2br sur une valeur ÉCHAPPÉE : les retours à la ligne sont conservés
          sans qu'aucun HTML saisi par un tiers ne puisse être interprété. --}}
-    <div style="margin:0 0 24px;padding:14px 16px;border-left:3px solid #0B5D3B;background:#F8FAFC;font-size:15px;line-height:1.6;color:#1E293B;">
+    <div style="margin:0 0 24px;padding:14px 16px;border-left:3px solid #0B3B2E;background:#F8FAFC;font-size:15px;line-height:1.6;color:#1E293B;">
         {!! nl2br(e($contact->message)) !!}
     </div>
 

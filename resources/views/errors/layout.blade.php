@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#0B5D3B">
+    <meta name="theme-color" content="#0B3B2E">
 
     @include('layouts.partials.icons')
     <title>@yield('title') — {{ config('app.name') }}</title>

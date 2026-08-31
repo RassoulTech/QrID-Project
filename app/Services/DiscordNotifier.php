@@ -42,8 +42,15 @@ use Throwable;
  */
 class DiscordNotifier
 {
-    /** Vert de la marque, converti en entier — Discord n'accepte pas « #0B5D3B ». */
-    public const COULEUR_OK = 0x0B5D3B;
+    /**
+     * Vert de la marque, converti en entier — Discord n'accepte pas
+     * « #0B3B2E ».
+     *
+     * La valeur suit $vert-fonce de `_tokens.scss`. Elle est recopiée à la
+     * main, et doit l'être : aucune feuille de style n'atteint la charge
+     * utile d'une API. Un changement de charte se répercute donc ici.
+     */
+    public const COULEUR_OK = 0x0B3B2E;
 
     /** Ambre : la journée a produit quelque chose qui appelle une action. */
     public const COULEUR_ALERTE = 0xB45309;

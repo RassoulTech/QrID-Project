@@ -34,7 +34,7 @@
                 <td style="padding:14px 16px;font-size:14px;line-height:1.5;color:#1E293B;">
                     <strong>{{ __('emails.bienvenue.groupe_titre') }}</strong><br>
                     {{ __('emails.bienvenue.groupe_texte') }}
-                    <a href="{{ $groupeUrl }}" style="color:#0B5D3B;font-weight:bold;">{{ __('emails.bienvenue.groupe_lien') }}</a>.
+                    <a href="{{ $groupeUrl }}" style="color:#0B3B2E;font-weight:bold;">{{ __('emails.bienvenue.groupe_lien') }}</a>.
                 </td>
             </tr>
         </table>

@@ -9,7 +9,7 @@
   vert de la marque suggérerait à tort une bonne nouvelle.
 --}}
 @php
-    $fond = ($ton ?? 'vert') === 'sombre' ? '#1E293B' : '#0B5D3B';
+    $fond = ($ton ?? 'vert') === 'sombre' ? '#1E293B' : '#0B3B2E';
 @endphp
 
 <p style="margin:0 0 24px;" align="center">

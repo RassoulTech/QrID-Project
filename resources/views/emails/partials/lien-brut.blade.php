@@ -10,5 +10,5 @@
 --}}
 <p style="margin:0 0 16px;font-size:13px;color:#64748b;word-break:break-all;">
     {{ __('emails.commun.lien_brut') }}<br>
-    <a href="{{ $url }}" style="color:#0B5D3B;">{{ $url }}</a>
+    <a href="{{ $url }}" style="color:#0B3B2E;">{{ $url }}</a>
 </p>

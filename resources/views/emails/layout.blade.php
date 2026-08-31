@@ -8,7 +8,7 @@
   Contraintes de délivrabilité, à ne jamais enfreindre :
   tableaux HTML, CSS strictement en ligne, aucune police ni image externe,
   aucun JavaScript. Les couleurs reprennent les tokens de _variables.scss
-  (primaire #0B5D3B, gris #1E293B / #64748B / #E6EAF0).
+  (primaire #0B3B2E, gris #1E293B / #64748B / #E6EAF0).
 --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -24,7 +24,7 @@
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;background:#FFFFFF;border-radius:12px;border:1px solid #E6EAF0;overflow:hidden;">
                     {{-- En-tête : marque --}}
                     <tr>
-                        <td style="background:#0B5D3B;padding:20px 24px;">
+                        <td style="background:#0B3B2E;padding:20px 24px;">
                             <span style="color:#FFFFFF;font-size:19px;font-weight:800;letter-spacing:-.03em;">
                                 {{ config('app.name') }}
                             </span>

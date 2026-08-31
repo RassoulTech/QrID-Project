@@ -23,7 +23,11 @@ return [
     'plafond' => [
 
         // Couleurs, longueurs et durées littérales hors _tokens.scss.
-        'valeurs' => 1366,
+        // Lot 0 : 1366 (depart)
+        // Lot 1 : 1361 — l'absorption de _variables.scss. Le gain est
+        //   modeste et c'est attendu : le Lot 1 est architectural, pas
+        //   massif. La traduction des ~700 usages est le Lot 2.
+        'valeurs' => 1361,
 
         /*
          | `!important` — plafonné, pas interdit.

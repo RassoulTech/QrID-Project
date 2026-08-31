@@ -17,6 +17,30 @@
 
 ---
 
+## La police — décision du Lot 1
+
+**Option B retenue : la pile système, assumée.**
+
+`'QrID'` ouvrait la pile de `$font`, cinq `@font-face` l'attendaient en
+commentaire dans `_base.scss`, et `public/fonts/` n'a jamais existé. Le repli
+fonctionnait — mais la première famille déclarée était un mensonge.
+
+**Pourquoi B** : le poids est un critère du produit. Le trafic public arrive
+par scan de QR Code, souvent en 3G, et cinq graisses coûtent 150 à 250 Ko
+avant le premier mot lisible. La pile système ne coûte rien et rend une
+police native sur chaque plateforme.
+
+**D'où vient le caractère, alors** : de l'échelle, des graisses (800 sur
+`display` et `h1`) et de l'interlettrage (`-.03em` sur `display`, `-.025em`
+sur `h1`). C'est cela qui donne le ton institutionnel, pas le dessin des
+lettres.
+
+**Réversible** : l'option A reste ouverte en V2. Elle ne demandera que de
+déposer les `.woff2` dans `public/fonts/` et de remettre une famille en tête
+de la pile — **jamais un CDN**.
+
+---
+
 ## L'outillage de vérification
 
 Trois commandes, ajoutées au Lot 0. Elles remplacent les relevés manuels,
