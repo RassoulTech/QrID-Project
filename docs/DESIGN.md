@@ -1,3 +1,109 @@
+> # ⚠ CE DOCUMENT EST PÉRIMÉ
+>
+> Il décrit un système qui n'existe plus, et le suivre **réinjecte
+> l'ancien** dans tout ce qu'on écrit. Il est réécrit intégralement au
+> **Lot 6**. D'ici là, la source de vérité est `resources/sass/_tokens.scss`.
+>
+> **Les quatre divergences, mesurées :**
+>
+> | Sujet | Ce document dit | `_tokens.scss` dit | Conséquence |
+> |---|---|---|---|
+> | Vert de marque | `#0B5D3B` | `#0B3B2E` | deux verts de marque dans le produit |
+> | Espacement | `3 = 16px`, 7 valeurs | `3 = 12px`, `4 = 16px`, 13 valeurs | un `esp(3)` écrit d'après ce document vaut 12px, pas 16 |
+> | Rayons | `lg = .75rem` (12px) | `lg = 22px` | presque le double |
+> | Typographie | échelle `clamp()` | carte `mobile`/`bureau` en px | deux méthodes incompatibles |
+>
+> Rien d'autre ne cite ce fichier tant qu'il n'est pas réécrit.
+
+---
+
+## L'outillage de vérification
+
+Trois commandes, ajoutées au Lot 0. Elles remplacent les relevés manuels,
+qui ont rendu trois chiffres différents (1963, 651, 1598) avant qu'on
+comprenne que l'écart venait de l'auditeur, pas du code audité.
+
+### `php artisan design:check`
+
+Le garde-fou. Il signale les valeurs en dur hors `_tokens.scss`, les
+`!important`, les `@media (max-width)`, les styles en ligne, les liens
+morts et les soulignements.
+
+```
+php artisan design:check                    # le tableau de conformité
+php artisan design:check --detail           # chaque occurrence, fichier et ligne
+php artisan design:check --categorie=couleur
+php artisan design:check --json             # pour l'intégration continue
+```
+
+**Il compare à un PLAFOND, pas à zéro.** Comparer à zéro ferait échouer
+le dépôt dès aujourd'hui, et la commande serait désactivée dans la
+semaine. Les plafonds vivent dans `config/design.php` et forment un
+**cliquet** : chaque lot les baisse, ils ne remontent jamais. La bonne
+réponse à un dépassement est de corriger la valeur, pas le plafond.
+
+État au Lot 0 :
+
+| Mesure | Départ | Cible |
+|---|---:|---|
+| valeurs en dur | 1366 | 0 hors sources |
+| `!important` | 44 | 27 après le Lot 2 |
+| `@media (max-width)` | 18 | 3 (feuilles gelées) |
+| styles en ligne | 98 | 0 hors e-mails et PDF |
+| liens morts | 1 | 0 |
+| soulignements | 9 | 0 |
+
+### `php artisan design:audit`
+
+Le relevé complet, qui produit `audit-design.json`. Il existait hors du
+dépôt, ce qui rendait ses chiffres invérifiables — un chiffre dont on ne
+peut pas refaire le calcul est une affirmation, pas une mesure.
+
+Il partage son moteur avec `design:check` : les deux ne peuvent donc pas
+diverger, ce qui était le vrai risque.
+
+### `php artisan design:contraste`
+
+Il lit `_tokens.scss` et mesure chaque couple texte/fond, dans les deux
+thèmes. **20 couples, aucun sous 4,5:1.**
+
+Il aplatit les fonds semi-transparents avant de mesurer, et c'est le
+point : un badge pose un fond qui est sa propre teinte à 16 %, lequel
+éclaircit la surface. Le texte perd alors du contraste contre son PROPRE
+fond. Mesurer contre la surface nue donne un chiffre faux dans le sens
+rassurant — celui qu'on ne corrige jamais. Treize couleurs échouaient
+ainsi sans que rien ne le signale.
+
+Ce qu'il ne peut PAS faire : dire ce qu'un visiteur voit. Une couleur
+héritée dépend de la cascade, un texte sur photo dépend de la photo.
+
+### `node tests/Browser/contraste.mjs`
+
+Le relevé sur le **DOM rendu** : 10 pages publiques × 6 largeurs × 2
+thèmes. Il mesure aussi les cibles tactiles sous 44px et les débordements
+horizontaux.
+
+Deux erreurs déjà commises, que ce script ne refait pas :
+
+- **Le thème vient du serveur**, par le cookie de préférence — pas d'une
+  classe posée en JavaScript. Un premier relevé basculait le thème dans
+  une iframe : la feuille sombre ne s'appliquait pas, et le script
+  annonçait 7 défauts sur la page d'accueil quand il y en avait un.
+- **Le texte sur une image est exclu et compté à part.** `.pubc__nom` est
+  du blanc sur la photo de couverture, un `<img>` positionné en absolu :
+  un parcours du DOM ne voit que du blanc sur blanc et rend 1:1. Faux
+  positif. Le contraste réel dépend de la photo et repose sur le voile.
+
+### Le budget CSS
+
+`config/design.php` porte la taille de référence du bundle compilé —
+**364 551 octets** au Lot 0. Un lot qui l'augmente de plus de 5 %
+s'explique dans son commit. Le trafic public arrive par scan de QR Code,
+souvent en 3G : chaque kilo-octet se paie en secondes devant un écran
+blanc.
+
+---
+
 # Système de design — Identité Pro
 
 Référence unique pour toutes les pages du produit.
