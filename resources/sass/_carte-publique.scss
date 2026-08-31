@@ -376,10 +376,14 @@
   .pubc-page{
     background:var(--surface-2);
     padding:esp(6) esp(4) esp(9);
+
+    // LA LARGEUR DE LA CARTE DEVIENT UNE VARIABLE, et c'est ce qui permet au
+    // groupe de préférences de rester juste quand elle change (voir plus bas).
+    --pubc-largeur:480px;
   }
 
   .pubc{
-    max-width:480px;
+    max-width:var(--pubc-largeur);
     margin:0 auto;
   }
 
@@ -406,13 +410,71 @@
     top:34px;
     right:auto;
     left:50%;
-    transform:translateX(226px) translateX(-100%);
+
+    // 226px était 480/2 − 14 : une valeur juste pour UNE largeur de carte, et
+    // fausse pour toute autre. Le calcul part maintenant de la variable, donc
+    // il suit la carte quand elle s'élargit à 1024px.
+    transform:translateX(calc(var(--pubc-largeur) / 2 - 14px)) translateX(-100%);
   }
 
   // 340px au-delà du téléphone, comme demandé.
   .pubc__couverture{height:340px}
 
   .pubc__nom{font-size:typo(h1)}
+}
+
+// =============================================================================
+// À PARTIR DE 1024px — la carte occupe enfin l'écran
+// =============================================================================
+//
+// LE DÉFAUT MESURÉ : à 1440px, la page restait une colonne de 480px centrée
+// dans 1425px. 945 pixels de gris vide autour du seul contenu de la page.
+// Sur un écran de bureau, un profil professionnel qui tient dans un tiers de
+// la largeur ne fait pas « sobre », il fait « site mobile agrandi ».
+//
+// La carte devient une GRILLE, sans qu'une seule ligne de HTML ne bouge :
+// la couverture garde toute la largeur, les coordonnées et les réseaux se
+// répartissent en deux colonnes, les actions reprennent la pleine largeur.
+//
+//   ┌───────────────────────────────┐
+//   │          COUVERTURE           │
+//   ├───────────────┬───────────────┤
+//   │  coordonnées  │    réseaux    │
+//   ├───────────────┴───────────────┤
+//   │            actions            │
+//   └───────────────────────────────┘
+//
+// La hauteur passe de 992px à environ 700px : le profil entier tient dans
+// un écran de bureau, sans défilement.
+@include ecran(xl){
+  // Une seule valeur à changer : `.pubc` la lit pour sa largeur, et le groupe
+  // de préférences la lit pour son décalage. Rien d'autre à ajuster.
+  .pubc-page{--pubc-largeur:760px}
+
+  .pubc__carte{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-areas:
+      "couverture couverture"
+      "infos      grille"
+      "barre      barre"
+      "pied       pied";
+    column-gap:esp(6);
+    align-items:start;
+  }
+
+  .pubc__couverture{grid-area:couverture}
+  .pubc__infos{grid-area:infos}
+  .pubc__grille{grid-area:grille}
+  .pubc__barre{grid-area:barre}
+  .pubc__pied{grid-area:pied}
+
+  // Les tuiles se recalculent d'elles-mêmes dans la colonne de droite, au
+  // lieu de garder les trois colonnes calibrées pour 480px.
+  .pubc__grille{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+
+  // La couverture peut respirer : elle est le seul élément pleine largeur.
+  .pubc__couverture{height:380px}
 }
 
 // Très petits écrans : la couverture se resserre un peu, le reste tient.

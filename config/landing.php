@@ -152,6 +152,41 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Second profil d'illustration — section sombre
+    |--------------------------------------------------------------------------
+    | La section « démonstration » montrait le DEUXIÈME profil publié de la
+    | base. Même problème que le hero, et même remède : une illustration.
+    */
+    'mockup_secondaire' => [
+        'first_name' => 'Ousmane',
+        'last_name' => 'Fall',
+        'job_title' => 'Consultant',
+        'company' => 'Baobab Conseil',
+        'phone' => '+221780000000',
+        'public_email' => 'bonjour@exemple.sn',
+        'address' => 'Dakar, Sénégal',
+        'primary_color' => '#0B3B2E',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Compteur affiché à côté de la maquette — DÉCORATIF, ET C'EST LA RÈGLE
+    |--------------------------------------------------------------------------
+    | Il affichait le NOMBRE RÉEL DE VUES du premier profil publié de la base.
+    | Deux conséquences, toutes deux constatées à l'écran :
+    |
+    |   · une donnée d'exploitation d'un client réel s'affichait sur la page
+    |     d'accueil publique ;
+    |   · le chiffre bougeait au gré de l'activité d'un compte, sur une
+    |     maquette dont tout le reste est fictif. Le jour où ce profil n'a
+    |     aucune vue, l'accueil annonçait « 0 ».
+    |
+    | La maquette illustre le produit. Elle ne rapporte l'activité de personne.
+    */
+    'mockup_vues' => '1.2k',
+
+    /*
+    |--------------------------------------------------------------------------
     | Preuve sociale — désactivée tant qu'il n'y a pas de vrais clients.
     | Pour activer : renseigner les valeurs et passer 'enabled' à true.
     |--------------------------------------------------------------------------

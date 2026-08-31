@@ -66,7 +66,44 @@
    */
   max-width:100%;
   aspect-ratio:1.586;          // format carte bancaire — jamais de hauteur fixe
-  border-radius:0;             // angles vifs
+
+  /*
+   | LE RAYON EST IMPOSÉ PAR LA NORME, PAS CHOISI.
+   |
+   | Il valait 0 — « angles vifs » — et le socle le remplaçait par 22px.
+   | Les deux étaient faux, dans deux directions opposées :
+   |
+   |   · 0 est ce que l'imprimeur NE LIVRE PAS. Le format employé est déjà
+   |     le bon, CR80 : 85,6 × 54 mm. Or CR80 spécifie aussi un rayon de
+   |     coin de 3,18 mm. Une carte PVC sort de la découpe arrondie.
+   |   · 22px sur une face de 142px, c'est 15,5 % de la largeur : une
+   |     pastille, pas une carte.
+   |
+   |   3,18 / 85,6 = 3,71 % de la largeur.
+   |
+   | POURQUOI PAS `cqw` — l'essai a été fait et il est faux.
+   |
+   | `3.7cqw` semblait naturel puisque tout le reste de la carte est en
+   | `cqw`. Mais une propriété d'un élément ne peut pas interroger le
+   | conteneur QUE CET ÉLÉMENT LUI-MÊME établit : elle remonte au conteneur
+   | ancêtre, et faute d'en trouver un, retombe sur la fenêtre. Mesuré :
+   | 13,89px sur une carte de 302px — soit 3,7 % de 375px, la largeur de
+   | l'écran, et non de la carte. Sur un écran de 1440px le même rayon
+   | aurait valu 53px.
+   |
+   | POURQUOI DEUX POURCENTAGES.
+   |
+   | Un `border-radius` en pourcentage résout l'horizontale sur la LARGEUR
+   | et la verticale sur la HAUTEUR. Une seule valeur donnerait donc des
+   | coins elliptiques sur un rectangle 1,586:1. Il faut la corriger du
+   | rapport d'aspect pour retrouver un arc de cercle :
+   |
+   |   horizontale : 3,18 / 85,6           = 3,71 %
+   |   verticale   : 3,71 % × 1,586        = 5,88 %
+   |
+   | Vérifié : à 302 × 190, les deux rendent 11,2px.
+   */
+  border-radius:3.71% / 5.88%;
   padding:5.5% 6%;
   display:flex;flex-direction:column;
   position:relative;overflow:hidden;
@@ -236,6 +273,20 @@
    | `min-width:0` est le second morceau : un élément de grille ou de
    | flex refuse par défaut de descendre sous la taille de son contenu.
    */
+  /*
+   | IL PREND LA LARGEUR QU'ON LUI DONNE, ET NE LA DEVINE PLUS.
+   |
+   | `max-width:100%` seul laissait ce conteneur en flex « ajusté au
+   | contenu » : sa largeur venait de la carte, dont la largeur
+   | (`min(420px, 100%)`) venait de lui. Raisonnement circulaire, que le
+   | navigateur résout au plus petit — mesuré sur le tableau de bord :
+   | 142px de carte dans un bloc de 302px. La carte, produit central du
+   | service, occupait moins de la moitié de son propre bloc.
+   |
+   | `width:100%` casse le cercle : le conteneur prend sa colonne, et la
+   | carte remplit le conteneur jusqu'à son plafond de 420px.
+   */
+  width:100%;
   max-width:100%;
   min-width:0;
 }

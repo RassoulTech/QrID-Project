@@ -46,6 +46,15 @@
 // perdu le contrôle de sa cascade.
 @import "socle";
 
+// LA POLITIQUE DE MOUVEMENT EN TOUT DERNIER.
+//
+// Ce fichier n'était PAS IMPORTÉ — d'où soixante-six lignes qui n'ont jamais
+// été compilées, et un bloc `prefers-reduced-motion` qui n'a jamais protégé
+// personne. Il vient après le socle parce qu'il contient la neutralisation
+// générale du mouvement : elle doit battre toute animation déclarée avant,
+// y compris celles qui seront écrites plus tard.
+@import "animations";
+
 // LE DOCK APRÈS LE SOCLE : il consomme ses tokens et ses
 // fonctions, et doit gagner sur les règles de coque.
 @import "dock";

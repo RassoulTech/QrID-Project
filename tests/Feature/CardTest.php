@@ -326,22 +326,36 @@ class CardTest extends TestCase
         }
     }
 
-    /** Les coins restent à zéro : rectangle strict. */
-    public function test_the_card_corners_stay_square(): void
+    /** Les coins suivent la norme CR80 : ni carrés, ni arrondis d'interface. */
+    public function test_the_card_corners_follow_the_cr80_radius(): void
     {
         $css = file_get_contents(resource_path('sass/_card.scss'));
 
         preg_match('/\.card\{[^}]*border-radius:\s*([^;]+);/s', $css, $m);
 
         /*
-         | « 0 » ET NON « 0 !important ».
+         | CE TEST GARDAIT « 0 », ET C'ÉTAIT FAUX DANS LES DEUX SENS.
          |
-         | Le !important répondait à une règle de thème qui arrondissait les
-         | surfaces de l'application. La référence figée déclare border-radius:0
-         | sur .card, et aucune règle du projet ne vise cette classe : il n'y a
-         | plus rien à neutraliser.
+         | Le format employé est CR80 — 85,6 × 54 mm — et CR80 spécifie un
+         | rayon de coin de 3,18 mm. Une carte PVC sort de la découpe
+         | ARRONDIE : des angles vifs sont ce que l'imprimeur ne livre pas.
+         |
+         | À l'opposé, `_socle.scss` imposait `rayon(lg)` — 22px sur une face
+         | de 142px, soit 15,5 % de la largeur. Une pastille, pas une carte.
+         |
+         |   horizontale : 3,18 / 85,6      = 3,71 %
+         |   verticale   : 3,71 % × 1,586   = 5,88 %   (corrigée du ratio,
+         |                                              sinon les coins sont
+         |                                              elliptiques)
+         |
+         | Le test garde donc la valeur normative, et continue de protéger
+         | contre le retour d'un arrondi d'interface.
          */
-        $this->assertSame('0', trim($m[1] ?? ''), 'Un arrondi est revenu sur la carte.');
+        $this->assertSame(
+            '3.71% / 5.88%',
+            trim($m[1] ?? ''),
+            'Le rayon de la carte ne suit plus la norme CR80.'
+        );
     }
 
     /** La carte n'impose jamais de hauteur fixe : elle suit son ratio. */

@@ -102,7 +102,23 @@ a{color:inherit;transition:color .18s ease,opacity .18s ease}
 // de la marque — et contredisait la loi 8 sur les liens et les boutons
 // pendant que le reste du produit suivait la règle.
 
-.wrap{width:100%;max-width:1180px;margin-inline:auto;padding-inline:20px}
+// LE CONTENEUR DE TOUTE LA VITRINE ET DE LA COQUE.
+//
+// Il portait `padding-inline:20px` et `max-width:1180px` : deux valeurs hors
+// système. 20px n'est pas un cran de $espaces (les voisins sont 16 et 24), et
+// 1180px n'est dans aucune rupture de $ruptures. Une gouttière hors échelle
+// sur le conteneur de TOUTES les pages désaligne tout ce qu'il contient.
+//
+// Mobile first : la gouttière grandit avec l'écran, elle ne se défait jamais.
+.wrap{
+  width:100%;
+  max-width:map-get($ruptures,xxl);   // 1280px
+  margin-inline:auto;
+  padding-inline:esp(4);              // 16px
+
+  @include ecran(lg){ padding-inline:esp(6); }   // 24px
+  @include ecran(xl){ padding-inline:esp(7); }   // 32px
+}
 
 .skip-link{
   position:absolute;left:-9999px;top:0;z-index:100;
@@ -117,24 +133,41 @@ a{color:inherit;transition:color .18s ease,opacity .18s ease}
 // SÉQUENCE D'ENTRÉE DU HERO — CSS pur, déclenchée au CHARGEMENT.
 // Courbe unique : cubic-bezier(.2,.8,.2,1). Aucun JavaScript nécessaire.
 // -----------------------------------------------------------------------------
-$ease-hero: cubic-bezier(.2,.8,.2,1);
-
+// LA SÉQUENCE ÉTAIT DEUX FOIS TROP LENTE.
+//
+// Relevé de l'ancienne cadence : le surlignement démarrait à 500ms et durait
+// 600ms — le hero ne se posait qu'à 1 100ms. Et comme chaque élément part de
+// `opacity:0`, le titre restait INVISIBLE pendant les 100 premières
+// millisecondes, le chapeau pendant 250, les boutons pendant 350.
+//
+// Sur la page d'accueil, en 3G, cela s'ajoute au temps de chargement : le
+// visiteur voit une page blanche, puis du texte qui glisse. Une entrée doit
+// accompagner l'arrivée du contenu, pas la retarder.
+//
+// Nouvelle cadence : le TITRE n'a plus aucun retard — c'est la première chose
+// à lire, elle ne se fait pas attendre. Les autres suivent par paliers de
+// 70ms, et tout est posé à 600ms au lieu de 1 100.
+//
+// La courbe et les durées viennent des tokens : plus de `$ease-hero` local.
 @keyframes hero-in{
-  from{opacity:0;transform:translateY(20px)}
+  // 20px de translation donnaient un glissement qu'on remarque. 12px se
+  // ressent sans se voir — c'est la différence entre « ça bouge » et « c'est
+  // arrivé ».
+  from{opacity:0;transform:translateY(12px)}
   to  {opacity:1;transform:translateY(0)}
 }
 
-// Pastille d'accroche — 400ms, retard 0
-.hero-eyebrow{opacity:0;animation:hero-in 400ms $ease-hero 0ms forwards}
+// Pastille d'accroche — retard 0
+.hero-eyebrow{opacity:0;animation:hero-in $d-normal $courbe 0ms forwards}
 
-// Titre — 600ms, retard 100ms
-.hero-title{opacity:0;animation:hero-in 600ms $ease-hero 100ms forwards}
+// Titre — AUCUN RETARD. C'est la promesse du produit.
+.hero-title{opacity:0;animation:hero-in $d-normal $courbe 0ms forwards}
 
-// Sous-titre — 600ms, retard 250ms
-.hero-lead{opacity:0;animation:hero-in 600ms $ease-hero 250ms forwards}
+// Sous-titre — 70ms
+.hero-lead{opacity:0;animation:hero-in $d-normal $courbe 70ms forwards}
 
-// Boutons — 600ms, retard 350ms
-.hero-actions{opacity:0;animation:hero-in 600ms $ease-hero 350ms forwards}
+// Boutons — 140ms
+.hero-actions{opacity:0;animation:hero-in $d-normal $courbe 140ms forwards}
 
 // Surlignement vert — 600ms, retard 500ms, gauche → droite
 .hero-mark{position:relative;display:inline-block;white-space:nowrap}
@@ -152,7 +185,10 @@ $ease-hero: cubic-bezier(.2,.8,.2,1);
   z-index:-1;
   transform-origin:left center;
   transform:scaleX(0);
-  animation:hero-mark 600ms $ease-hero 500ms forwards;
+  // Démarrait à 500ms pour 600ms de tracé : le trait finissait de se dessiner
+  // à 1,1s, bien après que le visiteur ait fini de lire le titre. Il part
+  // maintenant à 210ms, juste après les boutons, et se pose à 610ms.
+  animation:hero-mark $d-lent $courbe 210ms forwards;
 }
 @keyframes hero-mark{to{transform:scaleX(1)}}
 
@@ -163,17 +199,22 @@ $ease-hero: cubic-bezier(.2,.8,.2,1);
 // reste lisible. C'est le module scroll-reveal qui ajoute `.is-hidden` au
 // démarrage, puis le retire à l'entrée dans le champ de vision.
 // -----------------------------------------------------------------------------
+// 600ms, c'était deux fois trop long pour une apparition au défilement : le
+// bloc finissait de monter alors que le lecteur était déjà passé au suivant.
+// $d-lent (400ms) suffit à ce que le mouvement se remarque sans se subir.
 [data-reveal]{
-  transition:opacity 600ms $ease-hero, transform 600ms $ease-hero;
+  transition:opacity $d-lent $courbe, transform $d-lent $courbe;
 }
 [data-reveal].is-hidden{
   opacity:0;
-  transform:translateY(30px);
+  // 30px de montée sur un bloc de 400px de haut donnait une impression de
+  // saut. 16px — un cran de l'échelle — suffit à signaler l'arrivée.
+  transform:translateY(esp(4));
 }
 
 // Section sombre : léger agrandissement en plus.
 [data-reveal="scale"].is-hidden{
-  transform:translateY(30px) scale(.97);
+  transform:translateY(esp(4)) scale(.98);
 }
 
 // -----------------------------------------------------------------------------

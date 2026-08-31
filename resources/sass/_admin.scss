@@ -269,25 +269,46 @@ body:has(> .adm){
 
 .adm-search__icone {
   position: absolute;
-  left: 11px;
+  // Propriété logique, et sur l'échelle : 11px n'était pas un cran.
+  inset-inline-start: esp(4);
   top: 50%;
   transform: translateY(-50%);
+  // 15px se lisait comme un détail sali. 18px est la taille d'icône
+  // courante du produit, et elle tient dans un champ de 48px.
+  width: 18px;
+  height: 18px;
   color: var(--texte-2);
   pointer-events: none;
 }
 
-.adm-search__champ {
-  width: 100%;
-  height: 35px;
-  padding:0 esp(3) 0 esp(7);
-  border: 1px solid var(--bord);
+/*
+ | LA LOUPE ÉTAIT POSÉE SUR LE TEXTE, DANS LES DEUX ESPACES.
+ |
+ | Relevé dans le navigateur : le marque-place démarrait à 28px, l'icône
+ | occupait 23 à 38px. Dix pixels de recouvrement — d'où le « ⌕Rechercher »
+ | visible sur le tableau de bord comme en administration.
+ |
+ | LA CAUSE N'EST PAS ICI, ET C'EST TOUT LE PROBLÈME. Cette règle réservait
+ | bien la place, avec `padding:0 esp(3) 0 esp(7)`. Mais `_socle.scss` est
+ | importé EN DERNIER et applique `padding: esp(3) esp(4)` à tout champ : à
+ | spécificité égale (0,1,0), c'est lui qui gagnait, et les 32px réservés
+ | tombaient à 16.
+ |
+ | Le sélecteur double porte la spécificité à (0,2,0) et reprend la main sans
+ | un seul !important. La hauteur et la police, elles, sont volontairement
+ | LAISSÉES au socle : 48px et 16px valent mieux que les 35px et 13px d'ici,
+ | qui passaient sous le minimum tactile.
+ */
+.adm-search .adm-search__champ {
+  // 16 (bord) + 18 (icône) + 14 (gouttière) = 48px = esp(9).
+  //
+  // La première correction posait 40px, soit 8px entre l'icône et le texte.
+  // Le chevauchement disparaissait, mais les deux restaient collés — une
+  // gouttière de 8px sur un champ de 48px de haut se lit comme un défaut.
+  // 14px les sépare franchement, et la valeur reste sur l'échelle.
+  padding-inline-start: esp(9);
+  padding-inline-end: esp(4);
   border-radius: $r-full;
-  background: var(--surface-2);
-  color: var(--texte);
-  font-size:typo(caption);
-
-  &::placeholder { color: var(--texte-2); }
-  &:focus { outline: 2px solid var(--accent-vif); outline-offset: -1px; }
 }
 
 .adm-top__user {

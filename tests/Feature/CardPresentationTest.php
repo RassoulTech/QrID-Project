@@ -95,13 +95,41 @@ class CardPresentationTest extends TestCase
         );
     }
 
-    /** LES ANGLES SONT VIFS. La référence pose border-radius:0, explicitement. */
-    public function test_the_corners_stay_sharp(): void
+    /**
+     * LES ANGLES SUIVENT LA NORME CR80 — 3,18 mm sur 85,6 mm de large.
+     *
+     * Le test exigeait `border-radius:0`. C'était une erreur de fait : une
+     * carte PVC au format CR80 sort de la découpe avec des coins arrondis.
+     * Des angles vifs ne sont pas « la contrainte physique », ils sont ce que
+     * l'imprimeur ne livre pas.
+     *
+     * Il protège toujours contre l'inverse — un arrondi d'interface qui
+     * reviendrait par `_socle.scss`, où `.card` désigne un panneau et non
+     * une carte de visite.
+     */
+    public function test_the_corners_follow_the_cr80_radius(): void
     {
         $this->assertMatchesRegularExpression(
-            '/\.card\{[^}]*border-radius:\s*0/s',
+            '/\.card\{[^}]*border-radius:\s*3\.71%\s*\/\s*5\.88%/s',
             $this->feuille(),
-            'Les angles de la carte se sont arrondis.'
+            'Le rayon de la carte ne suit plus la norme CR80.'
+        );
+    }
+
+    /**
+     * LE SOCLE NE REVENDIQUE PAS LA CARTE DE VISITE.
+     *
+     * `.card` désigne deux objets : une surface d'interface dans le socle, la
+     * carte PVC dans `_card.scss`. Le socle étant importé en dernier, il
+     * gagnait et imposait son rayon de 22px à la carte, sur toutes les pages
+     * qui la montrent. L'exclusion doit rester.
+     */
+    public function test_the_socle_excludes_the_business_card(): void
+    {
+        $this->assertStringContainsString(
+            '.card:not(.light):not(.dark)',
+            file_get_contents(resource_path('sass/_socle.scss')),
+            "Le socle a recommencé à habiller la carte de visite : son rayon d'interface va l'arrondir."
         );
     }
 

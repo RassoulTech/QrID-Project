@@ -180,7 +180,11 @@
 //                ci-dessus le laissaient paraître cliquable.
 .btn-pill.is-disabled,
 .btn-pill:disabled{
-  opacity:.45;
+  // L'OPACITÉ EST CELLE DU SOCLE, et cette règle ne la redéclare plus.
+  //
+  // Elle portait .45 quand le socle porte .55, à spécificité égale : le
+  // socle étant importé après, sa valeur gagnait déjà. La ligne ne
+  // faisait que décrire un état qui n'existait pas.
   cursor:not-allowed;
   box-shadow:none;
   transform:none;
@@ -206,30 +210,75 @@
 // -----------------------------------------------------------------------------
 // 3. HERO — texte à gauche, visuel à droite
 // -----------------------------------------------------------------------------
-.hero{padding:esp(11) 0 esp(12)}
+.hero{
+  padding:esp(10) 0 esp(11);
+
+  @include ecran(lg){ padding:esp(11) 0 esp(12); }
+}
 
 .hero__grid{
-  display:grid;gap:esp(10);align-items:center;grid-template-columns:1fr;
-  @media(min-width:992px){grid-template-columns:1.05fr 1fr;gap:esp(9)}
+  display:grid;gap:esp(8);align-items:center;grid-template-columns:1fr;
+
+  // 992px est une borne de Bootstrap, absente de `$ruptures`. La colonne
+  // double arrive à `xl` — 1024px, le premier palier où deux colonnes de
+  // texte tiennent sans se serrer.
+  @include ecran(xl){ grid-template-columns:1.05fr 1fr; gap:esp(9); }
 }
 
 .hero__title{
-  font-size:clamp(38px,6.4vw,60px);
-  font-weight:800;
-  line-height:1.04;
-  letter-spacing:-.035em;
-  max-width:11ch;
+  // L'ÉCHELLE, PAS UN clamp() MAISON. `clamp(38px, 6.4vw, 60px)` donnait 38px
+  // à 375px là où l'échelle dit 34, et 60px au-delà de la valeur bureau de 52.
+  // Deux tailles hors système sur le titre le plus vu du produit.
+  font-size:typo(display);
+  font-weight:typo(display,graisse);
+  line-height:typo(display,interligne);
+  letter-spacing:typo(display,espacement);
+
+  // 11ch bridait le titre à 250px sur les 335px disponibles : « Votre identité
+  // professionnelle réinventée » tombait en TROIS lignes avec un vide à droite.
+  // 15ch le laisse respirer sans devenir une ligne trop longue à lire.
+  max-width:15ch;
+
+  @include ecran(lg){ font-size:typo(display,bureau); }
 }
 
 .hero__lead{
-  margin-top:esp(6);
-  font-size:typo(body-sm);
-  line-height:1.7;
-  color:$gris-second;
-  max-width:42ch;
+  // ÉTAIT À 14px — plus petit que le corps de texte (16px). Le chapeau du hero
+  // annonçait donc le produit dans la plus petite taille de la page. C'est le
+  // rôle de `body-lg` : 17px sur mobile, 18px au-dessus.
+  margin-top:esp(4);
+  font-size:typo(body-lg);
+  line-height:typo(body-lg,interligne);
+
+  // Jeton, plus la variable SCSS figée : `$gris-second` obligeait
+  // `_theme-dark.scss` à repasser derrière pour rattraper le thème sombre.
+  color:var(--texte-2);
+  max-width:46ch;
+
+  @include ecran(lg){ font-size:typo(body-lg,bureau); }
 }
 
-.hero__cta{margin-top:esp(7);display:flex;gap:esp(3);flex-wrap:wrap}
+.hero__cta{
+  margin-top:esp(7);
+  display:flex;
+  gap:esp(3);
+
+  // MOBILE : les deux actions occupent toute la largeur et font la MÊME
+  // largeur. En `flex-wrap:wrap` elles se dimensionnaient sur leur texte —
+  // « Démarrer l'essai gratuit » faisait 423px de large, « Voir un exemple »
+  // 245px : deux boutons empilés de largeurs différentes, sans alignement.
+  flex-direction:column;
+  align-items:stretch;
+
+  // Côte à côte dès qu'il y a la place pour deux libellés entiers.
+  @include ecran(ms){
+    flex-direction:row;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+
+  > *{ justify-content:center; }
+}
 
 // Le cadre de smartphone, les cartes flottantes et le socle de la section
 // sombre sont définis dans _phone.scss (composant unique, aucune duplication).
@@ -281,35 +330,116 @@
 // -----------------------------------------------------------------------------
 // 5. CHIFFRES CLÉS — cartes blanches sur fond gris clair
 // -----------------------------------------------------------------------------
-.figures{background:$gris-fond;padding:esp(2) 0 esp(11)}
+// TROIS CHIFFRES — le motif « Executive Dashboard » : la métrique domine,
+// la carte se tait.
+//
+// Le rythme était asymétrique et hors échelle : esp(2) en haut, esp(11) en
+// bas. Une section qui commence à 8px du bloc précédent et finit 80px plus
+// loin n'a pas de rythme, elle a deux valeurs sans rapport.
+.figures{
+  background:var(--surelev);
+  padding-block:esp(10);
+
+  @include ecran(lg){ padding-block:esp(12); }
+}
 
 .figures__grid{
-  display:grid;gap:esp(5);grid-template-columns:1fr;
-  @media(min-width:768px){grid-template-columns:repeat(3,1fr)}
+  display:grid;
+  gap:esp(4);
+
+  // `auto-fit` plutôt qu'un saut brutal 1 → 3 colonnes à 768px : la grille
+  // passe à 2 puis 3 colonnes d'elle-même, sans requête média et sans état
+  // intermédiaire où trois colonnes de 96px se serrent.
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+
+  @include ecran(lg){ gap:esp(6); }
 }
 
 .figure-card{
-  background:$blanc;
-  border-radius:$r-md;
-  padding:esp(8) esp(6);
+  background:var(--carte);
+  border:1px solid var(--bordure);
+  border-radius:rayon(md);
+
+  // ÉTAIT À esp(8) esp(6) — 40px de padding vertical pour trois lignes de
+  // texte, soit une carte de 174px de haut pour afficher « 3 / MINUTES /
+  // POUR CRÉER ». Trois cartes coûtaient 570px de hauteur sur un écran qui
+  // en fait 812. Le padding d'une carte est esp(5) sur mobile, esp(6) au-delà.
+  padding:esp(5);
   text-align:center;
-  box-shadow:$shadow-1;
+  box-shadow:var(--ombre-1);
+
+  @include ecran(lg){ padding:esp(6); }
 }
-.figure-card__n{font-size:typo(display);font-weight:800;line-height:1;color:$texte}
-.figure-card__w{font-size:typo(body-sm);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:$texte;margin-top:esp(3)}
-.figure-card__l{font-size:typo(overline);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:$gris-second;margin-top:esp(2)}
+
+.figure-card__n{
+  font-size:typo(display);
+  font-weight:typo(display,graisse);
+  line-height:1;
+  letter-spacing:typo(display,espacement);
+  color:var(--marque);
+
+  @include ecran(lg){ font-size:typo(display,bureau); }
+}
+
+.figure-card__w{
+  margin-top:esp(2);
+  font-size:typo(body-sm);
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--texte);
+}
+
+.figure-card__l{
+  margin-top:esp(1);
+  font-size:typo(overline);
+  font-weight:typo(overline,graisse);
+  letter-spacing:typo(overline,espacement);
+  text-transform:uppercase;
+  color:var(--texte-3);
+}
 
 // -----------------------------------------------------------------------------
 // 6. SECTIONS GÉNÉRIQUES
 // -----------------------------------------------------------------------------
-.section{padding:esp(12) 0}
+/*
+ | LE RYTHME VERTICAL D'UNE SECTION VITRINE.
+ |
+ | Il valait esp(12) — 96px — À TOUTES LES LARGEURS. Sur un écran de
+ | 320px, 96px de blanc au-dessus et au-dessous d'une section, c'est un
+ | tiers de la hauteur utile dépensé avant le premier mot.
+ |
+ | La table du rythme donne trois paliers, et ils montent avec la place
+ | disponible : 64px sur téléphone, 96 à partir de 768, 128 à partir de
+ | 1024.
+ */
+.section{
+  padding:esp(10) 0;
+
+  @include ecran(lg){ padding:esp(12) 0; }
+  @include ecran(xl){ padding:esp(13) 0; }
+}
 .section--tint{background:$gris-fond}
 
+/*
+ | LE TITRE SUIT L'ÉCHELLE, PLUS UN clamp().
+ |
+ | `clamp(24px, 3.6vw, 30px)` est une quatrième méthode de dimensionnement
+ | dans un projet qui en a déjà une : la carte `mobile` / `bureau` de
+ | `$type`. Les deux ne peuvent pas coexister sans que l'une devienne le
+ | commentaire de l'autre.
+ |
+ | Et ses bornes étaient hors échelle : 24 et 30 ne sont ni h1 (26) ni
+ | h2 (21) ni display (34).
+ */
 .section-title{
-  font-size:clamp(24px,3.6vw,30px);
-  font-weight:700;
+  font-size:typo(h1);
+  font-weight:typo(h1, graisse);
+  line-height:typo(h1, interligne);
+  letter-spacing:typo(h1, espacement);
   text-align:center;
-  letter-spacing:-.02em;
+
+  @include ecran(lg){ font-size:typo(h1, bureau); }
 }
 
 // Trait vert court sous le titre

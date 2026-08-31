@@ -135,23 +135,29 @@
             {{-- COUVERTURE ET MÉDAILLON — le médaillon déborde, c'est ce
                  chevauchement qui fait lire la photo et le nom comme un seul
                  bloc. Même composition que .pubc__couverture. --}}
+            {{-- L'IDENTITÉ EST DANS LA COUVERTURE, comme sur la vraie page.
+                 Elle vivait en dessous, sur fond blanc : la maquette montrait
+                 donc une composition que le produit ne rend nulle part. Sur
+                 .pubc, le nom est POSÉ SUR la couverture, sous un voile qui le
+                 rend lisible quelle que soit la photo. Les deux doivent se
+                 ressembler — c'est tout l'intérêt d'une maquette. --}}
             <div class="phc__couverture">
                 <span class="phc__couverture-fond" aria-hidden="true"></span>
+                <span class="phc__couverture-voile" aria-hidden="true"></span>
 
                 <div class="phc__medaillon">
                     <x-avatar-demo :taille="52" class="phc__photo" />
                 </div>
-            </div>
 
-            {{-- IDENTITÉ --}}
-            <div class="phc__identite">
-                <span class="phc__nom">{{ $profile->full_name }}</span>
-                @if ($profile->job_title)
-                    <span class="phc__role">{{ $profile->job_title }}</span>
-                @endif
-                @if ($profile->company)
-                    <span class="phc__entreprise">{{ $profile->company }}</span>
-                @endif
+                <div class="phc__identite">
+                    <span class="phc__nom">{{ $profile->full_name }}</span>
+                    @if ($profile->job_title)
+                        <span class="phc__role">{{ $profile->job_title }}</span>
+                    @endif
+                    @if ($profile->company)
+                        <span class="phc__entreprise">{{ $profile->company }}</span>
+                    @endif
+                </div>
             </div>
 
             {{-- COORDONNÉES — bloc teinté, lu d'un seul regard. --}}

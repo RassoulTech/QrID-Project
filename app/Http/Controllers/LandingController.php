@@ -14,28 +14,35 @@ class LandingController extends Controller
 {
     public function index(): View
     {
-        // Profils de démonstration (DemoSeeder) : le premier pour le hero,
-        // le suivant pour la section sombre.
-        $profiles = Profile::published()
-            ->withCount(['events as views_count' => fn ($q) => $q->where('type', 'view')])
-            ->orderBy('id')
-            ->take(2)
-            ->get();
-
-        // La maquette du téléphone n'accepte pas d'absence de profil. Sans ce
-        // repli, une base sans jeu de démonstration faisait tomber l'accueil
-        // en erreur 500 — voir config/landing.php.
-        $hero = $profiles->first() ?? $this->mockupProfile();
-
+        /*
+         | LA MAQUETTE N'AFFICHE PLUS PERSONNE.
+         |
+         | Elle montrait le PREMIER PROFIL PUBLIÉ DE LA BASE, et le second dans
+         | la section sombre. Sur la production, cela affichait sur la page
+         | d'accueil publique le nom, la fonction, l'entreprise, le TÉLÉPHONE
+         | et l'ADRESSE E-MAIL d'un client réel — à tout visiteur, sans qu'il
+         | l'ait jamais demandé ni su.
+         |
+         | Le compteur de vues à côté du téléphone était pire encore : c'était
+         | le nombre réel de consultations de ce compte. Une donnée
+         | d'exploitation d'un client, publiée, et qui bougeait toute seule.
+         |
+         | Les deux maquettes viennent maintenant de `config/landing.php`.
+         | Elles n'existent pas en base, ne sont enregistrées nulle part, et
+         | ne changent que si on décide de les changer.
+         |
+         | Effet de bord bienvenu : l'accueil ne fait plus la requête de
+         | profils ni son sous-comptage d'événements.
+         */
         return view('welcome', [
             // Un visiteur va vers l'inscription ; un connecté vers son espace.
             'ctaUrl' => auth()->check() ? route('dashboard') : route('register'),
 
-            'heroProfile' => $hero,
-            'showcaseProfile' => $profiles->get(1) ?? $hero,
+            'heroProfile' => $this->mockupProfile('mockup'),
+            'showcaseProfile' => $this->mockupProfile('mockup_secondaire'),
 
-            // Compteur réel, formaté « 1.2k » au-delà du millier.
-            'heroViews' => $this->formatViews($hero?->views_count ?? 0),
+            // Décoratif, pris en configuration. Voir le commentaire là-bas.
+            'heroViews' => config('landing.mockup_vues'),
 
             // Les tarifs viennent de la table plans, jamais du gabarit.
             'plans' => Plan::active()->orderBy('price_fcfa')->get(),
@@ -53,15 +60,8 @@ class LandingController extends Controller
      * affiche alors ses pastilles décoratives sans jamais interroger la base
      * depuis la vue.
      */
-    private function mockupProfile(): Profile
+    private function mockupProfile(string $cle): Profile
     {
-        return new Profile(config('landing.mockup'));
-    }
-
-    private function formatViews(int $count): string
-    {
-        return $count >= 1000
-            ? rtrim(rtrim(number_format($count / 1000, 1, '.', ''), '0'), '.').'k'
-            : (string) $count;
+        return new Profile(config('landing.'.$cle));
     }
 }

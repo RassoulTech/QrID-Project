@@ -79,6 +79,30 @@ return [
         'mon_profil' => 'Mon profil',
         'mon_qr' => 'Mon QR Code',
         'mon_abonnement' => 'Mon abonnement',
+
+        /*
+         | LIBELLÉS COURTS DU DOCK — un jeu séparé, et c'est nécessaire.
+         |
+         | Le dock reprenait les libellés ci-dessus. À 320px, cinq entrées
+         | laissent 57px chacune : « Tableau de bord » s'affichait
+         | « Tableau d… », « Mon QR Code » « Mon QR C… », « Mon abonnement »
+         | « Mon abo… ». Trois entrées sur cinq tronquées.
+         |
+         | Un libellé tronqué est pire qu'un libellé court : il donne
+         | l'impression d'un défaut, et ne dit pas davantage.
+         |
+         | RÈGLE : HUIT caractères au maximum, en français comme en anglais.
+         | Mesuré, pas estimé : « Abonnement » (10 caractères) rend 60px dans
+         | une part de 57 — il se tronquait encore. « Ma carte » (8) rend 44px
+         | et tient. Au-delà de huit, ça ne passe pas à 320px.
+         */
+        'court' => [
+            'tableau_de_bord' => 'Accueil',
+            'mon_profil' => 'Profil',
+            'mon_qr' => 'Carte',
+            'statistiques' => 'Stats',
+            'mon_abonnement' => 'Offre',
+        ],
     ],
 
     'admin' => [
@@ -107,6 +131,16 @@ return [
         'tout_marquer' => 'Tout marquer comme lu',
         'vide' => "Rien pour l'instant.",
         'vide_aide' => 'Vous serez prévenu dès la première consultation de votre carte.',
+
+        /*
+         | LE MESSAGE VIDE DÉPEND DE L'ESPACE.
+         |
+         | La cloche est partagée par les deux coques. En administration, elle
+         | annonçait « dès la première consultation de VOTRE carte » — à un
+         | exploitant qui n'en a pas. Le message parlait du produit au lieu de
+         | parler à celui qui le lit.
+         */
+        'vide_aide_admin' => "Vous serez prévenu des paiements, des cartes à produire et des incidents.",
         'voir_tout' => 'Voir tout',
     ],
 

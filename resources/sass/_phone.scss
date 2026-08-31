@@ -72,8 +72,8 @@ $ease: cubic-bezier(.2,.8,.2,1);
     .phone__screen{border-radius:31px}
     .phone__notch{width:76px;height:20px}
     // La carte se resserre : mêmes proportions, deux points de moins.
-    .phc__couverture{height:48px;margin-bottom:22px}
-    .phc__medaillon{width:46px;height:46px;bottom:-21px;left:10px}
+    .phc__couverture{height:92px}
+    .phc__medaillon{width:46px;height:46px}
     .phc__nom{font-size:11.5px}
     .phc__role,.phc__entreprise{font-size:8.5px}
     .phc__tuile-nom{font-size:6px}
@@ -88,8 +88,8 @@ $ease: cubic-bezier(.2,.8,.2,1);
 
     .phone__screen{border-radius:31px}
     .phone__notch{width:70px;height:19px}
-    .phc__couverture{height:44px;margin-bottom:20px}
-    .phc__medaillon{width:42px;height:42px;bottom:-19px}
+    .phc__couverture{height:86px}
+    .phc__medaillon{width:42px;height:42px}
     .phc__nom{font-size:11px}
     .phc__action{height:21px}
   }
@@ -214,10 +214,35 @@ $ease: cubic-bezier(.2,.8,.2,1);
 // -----------------------------------------------------------------------------
 .phc__couverture{
   position:relative;
-  height:56px;
+  // 56px et l'identité en dessous, sur fond blanc — ce que la page publique
+  // ne rend nulle part. Sur .pubc la couverture occupe environ le tiers de la
+  // carte et PORTE le nom. 104px tient la même proportion à cette échelle.
+  height:104px;
   flex:0 0 auto;
-  // La marge du bas laisse la place au médaillon qui déborde.
-  margin-bottom:26px;
+  // Plus de marge : l'identité est dedans, elle ne déborde plus.
+  margin-bottom:0;
+  overflow:hidden;
+
+  // MÉDAILLON ET IDENTITÉ SUR UNE MÊME LIGNE, calés en bas.
+  //
+  // Premier essai : médaillon en absolu en haut à gauche, identité en bas.
+  // À cette échelle ils se recouvraient — le nom disparaissait derrière la
+  // photo. Une couverture de 86px sur mobile ne peut pas empiler 42px de
+  // médaillon et trois lignes de texte.
+  //
+  // En ligne, les deux tiennent à toutes les tailles et se lisent comme un
+  // seul bloc d'identité.
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+  padding:0 12px 10px;
+}
+
+// LE VOILE — fonctionnel, pas décoratif. C'est lui qui rend le nom lisible
+// par-dessus la couverture, exactement comme sur la page publique.
+.phc__couverture-voile{
+  position:absolute;inset:0;
+  background:$voile-couverture;
 }
 
 // LE MÊME DÉCOR QUE LA PAGE PUBLIQUE, à l'échelle. Les deux doivent
@@ -242,8 +267,11 @@ $ease: cubic-bezier(.2,.8,.2,1);
 // Le médaillon DÉBORDE sur la couverture, comme sur la page publique : c'est
 // ce chevauchement qui fait lire le portrait et le nom comme un seul bloc.
 .phc__medaillon{
-  position:absolute;
-  left:12px;bottom:-24px;
+  // Il débordait sous la couverture (`position:absolute; bottom:-24px`). Il
+  // est maintenant DANS le flux, sur la même ligne que l'identité.
+  position:relative;
+  z-index:1;
+  flex:0 0 auto;
   width:52px;height:52px;
   // ROND, comme sur la page publique : c'est la même carte, à l'échelle.
   border-radius:999px;
@@ -258,21 +286,27 @@ $ease: cubic-bezier(.2,.8,.2,1);
 // -----------------------------------------------------------------------------
 // IDENTITÉ
 // -----------------------------------------------------------------------------
+// L'IDENTITÉ EST POSÉE SUR LA COUVERTURE, au-dessus du voile.
 .phc__identite{
-  padding:0 12px;
+  position:relative;
+  z-index:1;
+  // La gouttière est portée par la couverture, qui les aligne tous les deux.
+  padding:0;
   display:flex;flex-direction:column;gap:1px;
   min-width:0;
 }
 
+// Les trois lignes passent en blanc : elles sont désormais sur la couverture,
+// pas sur le fond blanc de la carte. Le voile garantit le contraste.
 .phc__nom{
   font-size:13px;font-weight:700;
   letter-spacing:-.02em;line-height:1.15;
-  color:$texte;
+  color:$blanc;
   overflow-wrap:anywhere;
 }
 
-.phc__role{font-size:9.5px;color:$gris-second;line-height:1.2}
-.phc__entreprise{font-size:9px;font-weight:600;color:$vert-fonce;line-height:1.2}
+.phc__role{font-size:9.5px;color:rgba(255,255,255,.88);line-height:1.2}
+.phc__entreprise{font-size:9px;font-weight:600;color:$blanc;line-height:1.2}
 
 // -----------------------------------------------------------------------------
 // COORDONNÉES — un bloc teinté, lu d'un seul regard

@@ -1,66 +1,94 @@
 // =============================================================================
-// ANIMATIONS — CSS UNIQUEMENT, aucune ligne de JavaScript.
-// Déclenchées au CHARGEMENT ou au SURVOL. Jamais au défilement (impossible
-// sans JS). Toutes désactivées sous prefers-reduced-motion.
+// QrID — POLITIQUE DE MOUVEMENT
+// =============================================================================
+//
+// CE FICHIER PORTAIT UN SECOND SYSTÈME D'ANIMATION, ENTIÈREMENT MORT.
+//
+// `.anim-enter`, `.anim-delay-1..6`, `.headline-mark` et `.card--hover` :
+// zéro occurrence dans `resources/views`. Vérifié classe par classe. Ils
+// dupliquaient la séquence d'entrée du hero, qui vit dans `_base.scss` et qui
+// est, elle, réellement employée.
+//
+// Le plus grave était ailleurs : le bloc `prefers-reduced-motion` de ce
+// fichier ne désactivait QUE ces classes mortes. Les animations réelles —
+// `.hero-title`, `.hero-lead`, `.hero-actions`, `.hero-mark`, les révélations
+// au défilement — continuaient de tourner pour un utilisateur qui a
+// explicitement demandé à son système de réduire le mouvement.
+//
+// On remplace donc une liste de classes par une RÈGLE GÉNÉRALE : ce qui est
+// listé se périme au premier composant ajouté, une règle générale non.
+//
 // =============================================================================
 
+
 // -----------------------------------------------------------------------------
-// Entrée : opacité 0 → 1 et translateY(24px) → 0, sur 500ms
+// LA COURBE ET LES DURÉES VIENNENT DES TOKENS
 // -----------------------------------------------------------------------------
-@keyframes enter-up {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+//
+// $d-rapide 150ms · $d-normal 250ms · $d-lent 400ms · $d-carte 600ms
+// $courbe   cubic-bezier(.2, .8, .2, 1)
+//
+// Une seule courbe pour tout le produit. Deux courbes différentes sur deux
+// éléments voisins se remarquent, et ce qui se remarque dans une animation
+// d'interface est presque toujours un défaut.
+
+
+// -----------------------------------------------------------------------------
+// TRANSITIONS PAR DÉFAUT — sur ce qui réagit au doigt et au curseur
+// -----------------------------------------------------------------------------
+//
+// 150–300ms : en dessous le changement paraît brutal, au-dessus l'interface
+// paraît molle. On n'anime que `background-color`, `border-color`, `color`,
+// `opacity`, `box-shadow` et `transform` : ce sont les seules propriétés qui
+// ne déclenchent pas de recalcul de mise en page.
+//
+// `:where()` garde la spécificité à zéro : n'importe quelle règle de composant
+// reprend la main sans avoir à surenchérir.
+:where(a, button, .btn, .adm-nav__lien, .pubc__tuile, .pubc__action,
+       input, select, textarea, summary, [role="button"]) {
+  transition:
+    background-color $d-rapide $courbe,
+    border-color     $d-rapide $courbe,
+    color            $d-rapide $courbe,
+    box-shadow       $d-rapide $courbe,
+    opacity          $d-rapide $courbe,
+    transform        $d-rapide $courbe;
 }
 
-.anim-enter {
-  opacity: 0;
-  animation: enter-up 500ms cubic-bezier(.22, .61, .36, 1) forwards;
-}
-
-// Retard progressif de 100ms entre les éléments du hero
-@for $i from 1 through 6 {
-  .anim-delay-#{$i} { animation-delay: #{$i * 100}ms; }
-}
 
 // -----------------------------------------------------------------------------
-// Soulignement du groupe de mots : trait épais 8px vert-050 DERRIÈRE le texte,
-// animé en largeur de 0 à 100 % sur 600ms au chargement.
+// LE CURSEUR — un élément cliquable le dit
 // -----------------------------------------------------------------------------
-@keyframes underline-grow {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
-}
+:where(button, .btn, [role="button"], summary, label[for]) { cursor: pointer; }
 
-.headline-mark {
-  position: relative;
-  color: $vert-900;
-  white-space: nowrap;
+:where(button, .btn)[disabled],
+:where(button, .btn).disabled { cursor: not-allowed; }
 
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 4px;
-    height: 8px;
-    background: $vert-050;
-    z-index: -1;
-    transform-origin: left center;
-    animation: underline-grow 600ms cubic-bezier(.22, .61, .36, 1) 400ms backwards;
-  }
-}
 
 // -----------------------------------------------------------------------------
-// Désactivation stricte
+// RÉDUCTION DU MOUVEMENT — générale, pas une liste
 // -----------------------------------------------------------------------------
+//
+// `prefers-reduced-motion` n'est pas une préférence esthétique : pour une
+// partie des utilisateurs, une animation de défilement ou un élément qui
+// glisse déclenche un malaise physique réel.
+//
+// On neutralise donc TOUT — y compris ce qui sera écrit demain — plutôt que
+// d'énumérer. `!important` est ici légitime et volontairement borné à ce seul
+// bloc : il doit battre une animation déclarée par n'importe quel composant.
+//
+// `animation-duration: .01ms` et non `none` : à `none`, une animation en
+// `forwards` ne s'applique jamais et l'élément reste à son état de départ —
+// c'est-à-dire `opacity: 0`. Le contenu disparaîtrait pour l'utilisateur qui
+// demande moins de mouvement. À .01ms, elle se joue instantanément et l'état
+// final est bien posé.
 @media (prefers-reduced-motion: reduce) {
-  .anim-enter,
-  .headline-mark::after {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
   }
-
-  .card--hover:hover { transform: none !important; }
-  .btn:active { transform: none !important; }
 }

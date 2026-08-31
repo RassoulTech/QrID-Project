@@ -66,6 +66,18 @@ return [
         'mon_profil' => 'My profile',
         'mon_qr' => 'My QR code',
         'mon_abonnement' => 'My subscription',
+
+        /*
+         | SHORT DOCK LABELS — see the French file for the measurement.
+         | Twelve characters maximum: past that they truncate at 320px.
+         */
+        'court' => [
+            'tableau_de_bord' => 'Home',
+            'mon_profil' => 'Profile',
+            'mon_qr' => 'Card',
+            'statistiques' => 'Stats',
+            'mon_abonnement' => 'Plan',
+        ],
     ],
 
     'admin' => [
@@ -91,6 +103,7 @@ return [
         'tout_marquer' => 'Mark all as read',
         'vide' => 'Nothing yet.',
         'vide_aide' => 'You will be notified the first time someone opens your card.',
+        'vide_aide_admin' => 'You will be notified about payments, cards to produce and incidents.',
         'voir_tout' => 'See all',
     ],
 

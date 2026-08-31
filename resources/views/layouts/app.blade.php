@@ -158,12 +158,16 @@
      Cinq destinations : c'est exactement ce que compte l'espace client,
      donc aucune n'est reléguée. Le panneau latéral reste accessible par
      le bouton de la barre supérieure pour l'aide et la déconnexion. --}}
+{{-- LES LIBELLÉS VIENNENT DE `navigation.client.court.*`, PAS DE LA COLONNE.
+     Le dock reprenait les libellés longs : à 320px, « Tableau de bord »,
+     « Mon QR Code » et « Mon abonnement » s'affichaient tronqués — trois
+     entrées sur cinq. Voir le commentaire dans lang/fr/navigation.php. --}}
 <x-dock jeu="client" :entrees="[
-    ['route' => 'dashboard',           'icone' => 'grille',         'libelle' => __('navigation.client.tableau_de_bord')],
-    ['route' => 'profil.index',        'icone' => 'personne',       'libelle' => __('navigation.client.mon_profil')],
-    ['route' => 'carte.qr',            'icone' => 'qr',             'libelle' => __('navigation.client.mon_qr')],
-    ['route' => 'statistiques',        'icone' => 'courbe',         'libelle' => __('navigation.client.statistiques')],
-    ['route' => 'abonnement.paiement', 'icone' => 'carte-bancaire', 'libelle' => __('navigation.client.mon_abonnement')],
+    ['route' => 'dashboard',           'icone' => 'grille',         'libelle' => __('navigation.client.court.tableau_de_bord')],
+    ['route' => 'profil.index',        'icone' => 'personne',       'libelle' => __('navigation.client.court.mon_profil')],
+    ['route' => 'carte.qr',            'icone' => 'qr',             'libelle' => __('navigation.client.court.mon_qr')],
+    ['route' => 'statistiques',        'icone' => 'courbe',         'libelle' => __('navigation.client.court.statistiques')],
+    ['route' => 'abonnement.paiement', 'icone' => 'carte-bancaire', 'libelle' => __('navigation.client.court.mon_abonnement')],
 ]" />
 
 <x-whatsapp-fab />

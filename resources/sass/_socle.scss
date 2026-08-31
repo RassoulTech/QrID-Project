@@ -554,7 +554,24 @@ label.form-label {
 // 6. SURFACES — cartes, panneaux, listes
 // =============================================================================
 
-.card,
+/*
+ | `.card` DÉSIGNE DEUX CHOSES DANS CE PROJET, ET C'EST LA COLLISION.
+ |
+ |   · ici, une SURFACE D'INTERFACE : un panneau blanc, arrondi, bordé ;
+ |   · dans `_card.scss`, la CARTE DE VISITE PVC — un objet physique, au
+ |     format CR80, dont les angles sont presque droits.
+ |
+ | Le socle est importé en dernier : à spécificité égale il gagnait, et
+ | imposait donc `rayon(lg)` — 22px — à la carte de visite. Mesuré sur le
+ | tableau de bord : une face de 142px de large portait 22px de rayon, soit
+ | 15,5 % de sa largeur, là où une vraie carte CR80 est à 3,7 %. Quatre fois
+ | trop arrondie, sur toutes les surfaces qui montrent la carte.
+ |
+ | La carte de visite porte TOUJOURS `.light` ou `.dark` — c'est ce qui
+ | décide de sa variante. On l'exclut donc ici, et le socle cesse d'habiller
+ | un objet qui ne lui appartient pas.
+ */
+.card:not(.light):not(.dark),
 .adm-fiche,
 .adm-carte,
 .panneau {

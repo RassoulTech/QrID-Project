@@ -71,7 +71,7 @@
             </form>
 
             <div class="adm-top__actions">
-                @include('layouts.partials.notifications-menu')
+                @include('layouts.partials.notifications-menu', ['espace' => 'admin'])
 
                 <x-language-toggle />
                 <x-theme-toggle />
