@@ -46,6 +46,9 @@
 // perdu le contrôle de sa cascade.
 @import "socle";
 
+// APRÈS LE SOCLE, parce qu'il étend `%champ` : le placeholder doit exister.
+@import "select-riche";
+
 // LA POLITIQUE DE MOUVEMENT EN TOUT DERNIER.
 //
 // Ce fichier n'était PAS IMPORTÉ — d'où soixante-six lignes qui n'ont jamais

@@ -31,6 +31,7 @@ import flashAuto from './modules/flash-auto';
 import telephone from './modules/telephone';
 import langue from './modules/langue';
 import enregistrerContact from './modules/enregistrer-contact';
+import selectRiche from './modules/select-riche';
 
 const modules = [
     scrollReveal,
@@ -49,6 +50,10 @@ const modules = [
     telephone,
     langue,
     enregistrerContact,
+
+    /* EN DERNIER : il enveloppe les <select> déjà en place, y compris ceux
+       que telephone.js vient de renseigner. */
+    selectRiche,
 ];
 
 // Chaque module renvoie tôt s'il n'a rien à faire sur la page courante.

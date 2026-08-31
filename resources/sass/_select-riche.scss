@@ -1,0 +1,189 @@
+// =============================================================================
+// SELECT RICHE — la liste déroulante habillée, sur bureau
+// =============================================================================
+//
+// Ce que le natif ne laisse pas faire, et qui justifie ce fichier : la liste
+// OUVERTE d'un <select> est dessinée par le système. On ne peut imposer aux
+// <option> que `background` et `color` ; ni le rayon, ni la police, ni la
+// couleur de surbrillance, ni l'espacement. Sous Windows, cela donne une
+// surbrillance bleue système dans une interface qui n'a pas de bleu.
+//
+// LE DÉCLENCHEUR EST LE MÊME OBJET QUE LE CHAMP. Il reprend `%champ` : même
+// hauteur, même rayon, même bordure, même halo de focus. Un formulaire où le
+// menu déroulant ne ressemble pas aux champs voisins se lit comme deux
+// formulaires côte à côte.
+//
+// TOUT EST EN JETONS. Aucune valeur ici n'est littérale : ce composant est
+// neuf, il n'a aucune dette à porter.
+// =============================================================================
+
+.selr {
+  position: relative;
+  display: block;
+}
+
+// LE NATIF RESTE DANS LA PAGE, invisible mais présent : c'est lui qui porte
+// le nom, la valeur et la validation du navigateur. On ne l'escamote pas avec
+// `display:none`, qui le retirerait de la validation contrainte du formulaire
+// et empêcherait le navigateur de le mettre au point sur une erreur.
+.selr__natif {
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+// ── Le déclencheur ──────────────────────────────────────────────────────
+.selr__declencheur {
+  @extend %champ;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: esp(3);
+
+  text-align: start;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { border-color: var(--marque); }
+}
+
+.selr__valeur {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  // Le marque-place n'est pas une valeur : il nomme l'action. Il se
+  // distingue par la teinte, jamais par une opacité — un texte atténué à
+  // l'opacité tombe sous le seuil de contraste sans qu'on s'en aperçoive.
+  &.is-vide { color: var(--texte-3); }
+}
+
+.selr__chevron {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: var(--texte-2);
+  transition: transform $d-rapide $courbe;
+}
+
+.selr.is-ouvert .selr__chevron { transform: rotate(180deg); }
+
+// ── Le panneau ──────────────────────────────────────────────────────────
+.selr__liste {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + #{esp(2)});
+  z-index: 30;
+
+  max-height: 288px;   // six options de 48px : au-delà, on fait défiler
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  padding: esp(2);
+
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+  border-radius: rayon(md);
+  box-shadow: var(--ombre-3);
+
+  // L'APPARITION EST COURTE ET NE DÉPLACE RIEN. 150ms, et seulement
+  // `opacity` et `transform` : aucune ligne de mise en page n'est
+  // recalculée pendant que le panneau arrive.
+  animation: selr-ouvre $d-rapide $courbe;
+  transform-origin: top center;
+}
+
+@keyframes selr-ouvre {
+  from { opacity: 0; transform: translateY(-4px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+
+// ── Les options ─────────────────────────────────────────────────────────
+.selr__option {
+  display: flex;
+  align-items: center;
+  gap: esp(2);
+  width: 100%;
+
+  // 44px : la même cible que partout ailleurs. La liste native de Windows
+  // rend des lignes de 18px, qu'on rate une fois sur trois à la souris.
+  min-height: $tactile-min;
+  padding: esp(2) esp(3);
+
+  appearance: none;
+  border: 0;
+  background: none;
+  border-radius: rayon(sm);
+
+  font: inherit;
+  font-size: typo(body-sm);
+  text-align: start;
+  color: var(--texte);
+  cursor: pointer;
+
+  transition: background-color $d-rapide $courbe, color $d-rapide $courbe;
+
+  // Le survol au doigt n'existe pas : c'est la classe posée par le module
+  // qui fait autorité, pour que le clavier et la souris se comportent
+  // exactement pareil.
+  &.is-survol { background: var(--surelev); }
+
+  /*
+   | L'OPTION CHOISIE SE LIT AU REPOS — fond ET couleur.
+   |
+   | La liste native la distingue par une surbrillance qui disparaît dès que
+   | le pointeur bouge : on rouvre le menu et l'on ne sait plus ce qu'on
+   | avait choisi. Ici la marque la tient, et une coche la double : la
+   | couleur n'est jamais le seul porteur d'une information.
+   */
+  &.is-choisi {
+    background: var(--marque-doux);
+    color: var(--marque);
+    font-weight: 600;
+
+    &::after {
+      content: "";
+      margin-inline-start: auto;
+      width: 16px;
+      height: 16px;
+      flex: 0 0 auto;
+      background: currentColor;
+      // Coche en masque : elle suit `color`, donc elle reste juste dans les
+      // deux thèmes sans qu'on ait à en encoder deux versions.
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 13 4 4L19 7'/%3E%3C/svg%3E") no-repeat center / contain;
+    }
+  }
+
+  &.is-inactif {
+    color: var(--texte-3);
+    cursor: not-allowed;
+    &.is-survol { background: none; }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--marque);
+    outline-offset: -2px;
+  }
+}
+
+// ── Les groupes ─────────────────────────────────────────────────────────
+//
+// Le sélecteur d'indicatif met l'Afrique de l'Ouest en tête : c'est
+// exactement un cas d'`optgroup`. Le titre natif s'affiche dans une teinte
+// choisie par le système, souvent illisible en thème sombre.
+.selr__groupe {
+  padding: esp(3) esp(3) esp(1);
+  font-size: typo(overline);
+  font-weight: typo(overline, graisse);
+  letter-spacing: typo(overline, espacement);
+  text-transform: uppercase;
+  color: var(--texte-3);
+
+  &:first-child { padding-top: esp(1); }
+}
