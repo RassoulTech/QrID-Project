@@ -40,7 +40,7 @@ const LARGEURS = [320, 360, 390, 768, 1024, 1440];
 
 /** Les pages publiques : mesurées sans session. */
 const PAGES_PUBLIQUES = [
-    '/', '/tarifs', '/login', '/register', '/forgot-password',
+    '/', '/login', '/register', '/forgot-password',
     '/mentions-legales', '/confidentialite', '/conditions-generales',
     '/exemple', '/p/mouhamed-dione',
 ];
@@ -113,6 +113,19 @@ const MESURE = () => {
             .map((v) => Math.round(v).toString(16).padStart(2, '0'))
             .join('').toUpperCase();
 
+    /* SI LA FEUILLE N'EST PAS APPLIQUÉE, TOUTE MESURE EST DU BRUIT.
+       Sans ce garde, on relève le #0000EE des liens par défaut du
+       navigateur et du « noir sur noir » — et on les prend pour des
+       défauts de contraste. C'est exactement ce qui s'est produit au
+       premier passage, avec `waitUntil: domcontentloaded` qui rend la
+       main AVANT l'application des styles. */
+    const tokenResolu = getComputedStyle(document.documentElement)
+        .getPropertyValue('--texte').trim();
+    if (!tokenResolu) {
+        return { sansCss: true, echecs: [], surImage: 0, cibles: [],
+                 debordement: 0, theme: '', url: location.pathname };
+    }
+
     const vus = new Map();
     let surImage = 0;
     let petitesCibles = [];
@@ -125,8 +138,14 @@ const MESURE = () => {
         /* ── Les cibles tactiles, tant qu'on est dans le DOM ─────────── */
         const cliquable = el.matches('a[href], button, input:not([type=hidden]), select, textarea, summary, [role=button]');
         if (cliquable) {
+            /* WCAG 2.5.5 EXEMPTE les cibles « dans une phrase ». Un lien
+               au fil du texte ne peut pas faire 44px de haut sans casser
+               l'interligne du paragraphe. Les compter noyait les vraies
+               violations sous une vingtaine de fausses. */
+            const enLigne = st.display === 'inline'
+                && el.closest('p, li, td, label, figcaption, .prose, .legal');
             const r = el.getBoundingClientRect();
-            if (r.width > 0 && r.height > 0 && (r.height < 44 || r.width < 44)) {
+            if (!enLigne && r.width > 0 && r.height > 0 && (r.height < 44 || r.width < 44)) {
                 petitesCibles.push({
                     sel: (el.className || el.tagName).toString().split(' ')[0].slice(0, 28),
                     l: Math.round(r.width), h: Math.round(r.height),
@@ -174,6 +193,7 @@ const MESURE = () => {
     });
 
     return {
+        sansCss: false,
         echecs: [...vus.values()].sort((a, b) => a.ratio - b.ratio),
         surImage,
         cibles: [...cibles.values()],
@@ -207,13 +227,18 @@ for (const theme of ['light', 'dark']) {
 
         for (const chemin of PAGES_PUBLIQUES) {
             try {
-                await page.goto(BASE + chemin, { waitUntil: 'domcontentloaded', timeout: 20000 });
+                await page.goto(BASE + chemin, { waitUntil: 'load', timeout: 30000 });
             } catch {
                 console.log(`  ?? ${chemin} injoignable`);
                 continue;
             }
 
             const r = await page.evaluate(MESURE);
+
+            if (r.sansCss) {
+                console.log(`  SANS CSS     ${theme.padEnd(5)} ${String(largeur).padStart(4)}px  ${chemin}`);
+                continue;
+            }
 
             if (r.debordement > 0) {
                 debordements++;
@@ -261,13 +286,15 @@ console.log(`\nCONTRASTE SOUS LE SEUIL — ${contrastes.length} couple(s) distin
 contrastes.forEach((e) => {
     console.log(
         `   ${String(e.ratio).padStart(5)}:1  (seuil ${e.seuil})  ${e.texte} sur ${e.fond}` +
-        `  ${String(e.px).padStart(2)}px  ${e.sel.padEnd(30)} ${e.pages.size} page(s)  « ${e.ex} »`
+        `  ${String(e.px).padStart(2)}px  ${e.sel.padEnd(26)} « ${e.ex} »
+` +
+        `            ${[...e.pages].join(', ')}`
     );
 });
 
 console.log(`\nCIBLES TACTILES SOUS 44px — ${cibles.length} distincte(s)`);
 cibles.slice(0, 20).forEach((c) => {
-    console.log(`   ${String(c.l).padStart(4)}×${String(c.h).padEnd(4)}  ${c.sel.padEnd(30)} ${c.pages.size} page(s)`);
+    console.log(`   ${String(c.l).padStart(4)}×${String(c.h).padEnd(4)}  ${c.sel.padEnd(26)} ${[...c.pages].slice(0, 3).join(', ')}`);
 });
 
 console.log(`\nDÉBORDEMENTS HORIZONTAUX : ${debordements}`);

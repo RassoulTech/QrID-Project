@@ -26,3 +26,7 @@ Thumbs.db
 # Outil de développement local (boîte mail de test)
 mailpit.exe
 mailpit.zip
+
+# Base d'apercu jetable pour la verification navigateur (Lot 0.d).
+# Reconstruite par : php artisan design:apercu
+database/apercu.sqlite
