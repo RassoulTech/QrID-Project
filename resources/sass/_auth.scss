@@ -17,7 +17,7 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:16px;
+  padding:esp(4);
 }
 
 // Le conteneur blanc. overflow:hidden pour que le vert de droite soit
@@ -39,15 +39,15 @@
 .auth__panel{
   display:flex;
   flex-direction:column;
-  padding:28px 24px;
+  padding:esp(7) esp(6);
   min-width:0;
 }
 
 .auth__brand{
   display:inline-flex;
   align-items:center;
-  gap:9px;
-  font-size:15px;
+  gap:esp(3);
+  font-size:typo(body-sm);
   font-weight:700;
   letter-spacing:-.01em;
   align-self:flex-start;
@@ -58,7 +58,7 @@
 .auth__mark{
   width:28px;height:28px;
   flex:0 0 auto;
-  border-radius:8px;
+  border-radius:rayon(sm);
   background:$vert-fonce;
   color:$blanc;
   display:grid;
@@ -71,14 +71,14 @@
   display:flex;
   flex-direction:column;
   justify-content:center;
-  padding:32px 0;
+  padding:esp(7) 0;
   max-width:420px;
   width:100%;
   margin-inline:auto;
 }
 
 .auth__title{
-  font-size:24px;
+  font-size:typo(h1);
   font-weight:700;
   letter-spacing:-.025em;
   color:$texte;
@@ -86,18 +86,18 @@
 }
 
 .auth__lead{
-  font-size:14px;
+  font-size:typo(body-sm);
   line-height:1.6;
   color:$gris-second;
-  margin:8px 0 0;
+  margin:esp(2) 0 0;
 }
 
 .auth__legal{
   display:flex;
   flex-wrap:wrap;
   align-items:center;
-  gap:6px 14px;
-  font-size:11.5px;
+  gap:esp(2) esp(4);
+  font-size:typo(overline);
   color:$gris-second;
 
   a{
@@ -117,11 +117,11 @@
 .auth-tabs{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:4px;
-  padding:4px;
+  gap:esp(1);
+  padding:esp(1);
   background:$gris-fond;
   border-radius:$r-full;
-  margin:24px 0 22px;
+  margin:esp(6) 0 esp(6);
 }
 
 .auth-tabs__item{
@@ -129,10 +129,10 @@
   border-radius:$r-full;
   display:grid;
   place-items:center;
-  font-size:13.5px;
+  font-size:typo(caption);
   font-weight:600;
   text-align:center;
-  transition:background 180ms ease, color 180ms ease;
+  transition:background $d-rapide ease, color $d-rapide ease;
 
   // La couleur du texte est déclarée pour tous les états : aucun libellé
   // n'attend un survol pour devenir lisible.
@@ -155,7 +155,7 @@
 .auth-fields{
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:esp(5);
 }
 
 // Enveloppe nécessaire dès qu'une icône se superpose au champ : œil du mot
@@ -165,7 +165,7 @@
   display:block;
 }
 
-.f__wrap .f__control{padding-right:46px}
+.f__wrap .f__control{padding-right:esp(9)}
 
 // Bouton œil. type="button" : sans JavaScript il ne fait rien, et le champ
 // reste type="password". Retiré du parcours clavier (le champ juste avant
@@ -178,7 +178,7 @@
   display:grid;place-items:center;
   border:0;
   background:transparent;
-  border-radius:8px;
+  border-radius:rayon(sm);
   color:$gris-second;
   cursor:pointer;
 
@@ -205,7 +205,7 @@
 .f__error{
   display:flex;
   align-items:flex-start;
-  gap:6px;
+  gap:esp(2);
 }
 
 // -----------------------------------------------------------------------------
@@ -218,12 +218,12 @@
 .pw-meter{
   display:flex;
   flex-direction:column;
-  gap:6px;
+  gap:esp(2);
 }
 
 .pw-meter__track{
   display:flex;
-  gap:5px;
+  gap:esp(2);
 }
 
 .pw-meter__seg{
@@ -231,10 +231,10 @@
   flex:1 1 0;
   border-radius:$r-full;
   background:$gris-fond;
-  transition:background 200ms ease;
+  transition:background $d-rapide ease;
 }
 
-.pw-meter__label{font-size:12px;color:$gris-second}
+.pw-meter__label{font-size:typo(overline);color:$gris-second}
 
 .pw-meter--1 .pw-meter__seg:nth-child(-n+1),
 .pw-meter--2 .pw-meter__seg:nth-child(-n+2),
@@ -250,11 +250,11 @@
 // -----------------------------------------------------------------------------
 .mail-icon{
   width:56px;height:56px;
-  border-radius:18px;
+  border-radius:rayon(md);
   background:$vert-clair;
   color:$vert-fonce;
   display:grid;place-items:center;
-  margin-bottom:20px;
+  margin-bottom:esp(5);
 }
 
 .mail-address{
@@ -265,19 +265,19 @@
 
 .mail-steps{
   list-style:none;
-  margin:24px 0;
+  margin:esp(6) 0;
   padding:0;
   display:flex;
   flex-direction:column;
-  gap:14px;
+  gap:esp(4);
   counter-reset:mail-step;
 }
 
 .mail-steps li{
   display:flex;
-  gap:12px;
+  gap:esp(3);
   align-items:flex-start;
-  font-size:13.5px;
+  font-size:typo(caption);
   line-height:1.55;
   color:$gris-second;
   counter-increment:mail-step;
@@ -289,7 +289,7 @@
     border-radius:$r-full;
     background:$vert-clair;
     color:$vert-fonce;
-    font-size:11.5px;
+    font-size:typo(overline);
     font-weight:700;
     display:grid;place-items:center;
   }
@@ -297,12 +297,12 @@
 
 .mail-spam{
   display:flex;
-  gap:10px;
-  padding:14px 16px;
+  gap:esp(3);
+  padding:esp(4) esp(4);
   border-radius:$r-sm;
   background:$gris-fond;
   border:1px solid $bordure;
-  font-size:12.5px;
+  font-size:typo(caption);
   line-height:1.55;
   color:$gris-second;
 
@@ -322,7 +322,7 @@
 // clair sous leur logo en couleurs. Le choix rejoint donc la contrainte.
 // =============================================================================
 .oauth{
-  margin:20px 0 0;
+  margin:esp(5) 0 0;
 }
 
 // Le séparateur « ou » : deux filets et un mot, sans image ni pseudo-élément
@@ -333,7 +333,7 @@
 .oauth__ou{
   position:relative;
   text-align:center;
-  margin:18px 0 0;
+  margin:esp(5) 0 0;
 
   &::before{
     content:"";
@@ -345,9 +345,9 @@
 
   span{
     position:relative;
-    padding:0 12px;
+    padding:0 esp(3);
     background:var(--surface, #{$blanc});
-    font-size:12px;
+    font-size:typo(overline);
     color:var(--texte-2, #{$gris-second});
   }
 }
@@ -356,15 +356,15 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:10px;
+  gap:esp(3);
   width:100%;
-  padding:13px 18px;
+  padding:esp(4) esp(5);
   border-radius:$r-sm;
   border:1px solid var(--bordure-forte, #{$bordure-forte});
   background:var(--surface, #{$blanc});
-  font-size:15px;
+  font-size:typo(body-sm);
   font-weight:600;
-  transition:border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  transition:border-color $d-rapide ease, box-shadow $d-rapide ease, transform $d-rapide ease;
 
   // La couleur est déclarée pour TOUS les états : un bouton d'authentification
   // ne doit jamais attendre un survol pour être lisible.
@@ -407,21 +407,21 @@
  | l'environnement local, pas à APP_DEBUG.
  */
 .oauth--absent{
-  padding:14px 16px;
+  padding:esp(4) esp(4);
   border-radius:$r-sm;
   border:1px dashed var(--bordure-forte, #{$bordure-forte});
   background:var(--surface-2, #{$gris-fond});
-  font-size:12.5px;
+  font-size:typo(caption);
   line-height:1.5;
   color:var(--texte-2, #{$gris-second});
 
   p{margin:0}
-  p + p{margin-top:6px;font-size:11.5px;opacity:.8}
+  p + p{margin-top:esp(2);font-size:typo(overline);opacity:.8}
 
   code{
-    font-size:11.5px;
-    padding:1px 5px;
-    border-radius:4px;
+    font-size:typo(overline);
+    padding:1px esp(2);
+    border-radius:rayon(sm);
     background:var(--surface, #{$blanc});
     color:var(--texte, #{$texte});
   }
@@ -430,10 +430,10 @@
 // Compteur avant renvoi possible. Vide sans JavaScript : le bouton reste
 // utilisable, le serveur applique de toute façon son propre délai.
 .resend-note{
-  font-size:12px;
+  font-size:typo(overline);
   color:$gris-second;
   text-align:center;
-  margin:10px 0 0;
+  margin:esp(3) 0 0;
   // Réserve la hauteur d'une ligne : le compteur qui s'efface ne doit pas
   // faire sauter le bloc de liens juste dessous.
   min-height:1.4em;
@@ -451,7 +451,7 @@
   display:none;              // absente sous 992px, pas seulement invisible
   position:relative;
   overflow:hidden;
-  padding:48px 44px;
+  padding:esp(9) esp(9);
 }
 
 // Motif de grille. Purement décoratif, donc en pseudo-élément.
@@ -516,7 +516,7 @@
 
 .auth-aside__mark{
   width:34px;height:34px;
-  border-radius:10px;
+  border-radius:rayon(sm);
   border:1px solid transparent;
   display:grid;place-items:center;
 }
@@ -526,7 +526,7 @@
   flex:1 1 auto;
   display:grid;
   place-items:center;
-  padding:36px 0;
+  padding:esp(8) 0;
 }
 
 .auth-aside__cards{
@@ -536,7 +536,7 @@
 }
 
 .auth-aside__title{
-  font-size:24px;
+  font-size:typo(h1);
   font-weight:700;
   letter-spacing:-.025em;
   line-height:1.25;
@@ -544,16 +544,16 @@
 }
 
 .auth-aside__text{
-  font-size:13.5px;
+  font-size:typo(caption);
   line-height:1.65;
-  margin:12px 0 0;
+  margin:esp(3) 0 0;
 }
 
 // Indicateur de progression — quatre traits.
 .auth-aside__dots{
   display:flex;
-  gap:7px;
-  margin-top:26px;
+  gap:esp(2);
+  margin-top:esp(7);
 }
 
 .auth-aside__dot{
@@ -582,7 +582,7 @@
 
 .av-card__head{
   background:$vert-fonce;
-  padding:20px 18px 16px;
+  padding:esp(5) esp(5) esp(4);
   text-align:center;
   color:$blanc;
   display:flex;
@@ -596,18 +596,18 @@
   background:rgba($blanc,.16);
   border:2px solid rgba($blanc,.4);
   display:grid;place-items:center;
-  font-size:16px;
+  font-size:typo(body);
   font-weight:700;
 }
 
-.av-card__name{font-size:14px;font-weight:700;line-height:1.3}
-.av-card__role{font-size:11px;color:rgba($blanc,.72);margin-top:3px}
+.av-card__name{font-size:typo(body-sm);font-weight:700;line-height:1.3}
+.av-card__role{font-size:typo(overline);color:rgba($blanc,.72);margin-top:esp(1)}
 
 .av-card__body{
-  padding:16px 18px 18px;
+  padding:esp(4) esp(5) esp(5);
   display:flex;
   flex-direction:column;
-  gap:9px;
+  gap:esp(3);
 }
 
 .av-card__line{
@@ -620,7 +620,7 @@
 }
 
 .av-card__cta{
-  margin-top:6px;
+  margin-top:esp(2);
   height:30px;
   border-radius:$r-full;
   background:$vert-clair;
@@ -632,13 +632,13 @@
   z-index:2;
   display:inline-flex;
   align-items:center;
-  gap:7px;
-  padding:9px 13px;
+  gap:esp(2);
+  padding:esp(3) esp(4);
   border-radius:$r-full;
   background:$blanc;
   color:$texte;
   box-shadow:$shadow-2;
-  font-size:11.5px;
+  font-size:typo(overline);
   font-weight:600;
   white-space:nowrap;
 
@@ -657,7 +657,7 @@
   background:$blanc;
   border-radius:$r-sm;
   box-shadow:$shadow-2;
-  padding:12px 14px;
+  padding:esp(3) esp(4);
   color:$texte;
   min-width:118px;
 
@@ -667,20 +667,20 @@
   &--bd{bottom:-26px;right:-56px}
 }
 
-.av-stat__value{display:block;font-size:20px;font-weight:800;line-height:1}
-.av-stat__label{display:block;font-size:10px;color:$gris-second;margin-top:3px}
+.av-stat__value{display:block;font-size:typo(h2);font-weight:800;line-height:1}
+.av-stat__label{display:block;font-size:typo(overline);color:$gris-second;margin-top:esp(1)}
 
 .av-stat__chart{
   display:flex;
   align-items:flex-end;
-  gap:3px;
+  gap:esp(1);
   height:26px;
-  margin-top:9px;
+  margin-top:esp(3);
 }
 
 .av-stat__bar{
   flex:1 1 0;
-  border-radius:2px 2px 0 0;
+  border-radius:rayon(sm) rayon(sm) 0 0;
   background:$vert-clair;
 
   &:last-child{background:$vert-accent}
@@ -747,14 +747,14 @@
 }
 
 .av-portrait__meta{
-  padding:14px 16px 16px;
+  padding:esp(4) esp(4) esp(4);
   display:flex;
   flex-direction:column;
-  gap:3px;
+  gap:esp(1);
 }
 
-.av-portrait__name{font-size:13.5px;font-weight:700;color:$texte}
-.av-portrait__role{font-size:11.5px;color:$gris-second}
+.av-portrait__name{font-size:typo(caption);font-weight:700;color:$texte}
+.av-portrait__role{font-size:typo(overline);color:$gris-second}
 
 // --- Carte verte à icône -----------------------------------------------------
 .av-badge{
@@ -762,28 +762,28 @@
   color:$blanc;
   border-radius:$r-md;
   box-shadow:$shadow-2;
-  padding:20px;
+  padding:esp(5);
   display:flex;
   flex-direction:column;
-  gap:6px;
+  gap:esp(2);
 }
 
 .av-badge__icon{
   width:40px;height:40px;
-  border-radius:12px;
+  border-radius:rayon(md);
   background:rgba($blanc,.16);
   display:grid;place-items:center;
-  margin-bottom:6px;
+  margin-bottom:esp(2);
 }
 
-.av-badge__title{font-size:15px;font-weight:700;line-height:1.3}
-.av-badge__text{font-size:12px;line-height:1.6;color:rgba($blanc,.76)}
+.av-badge__title{font-size:typo(body-sm);font-weight:700;line-height:1.3}
+.av-badge__text{font-size:typo(overline);line-height:1.6;color:rgba($blanc,.76)}
 
 // Empilement vertical des briques dans une même scène.
 .av-pile{
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:esp(4);
   width:100%;
 }
 
@@ -791,11 +791,11 @@
 // ≥ 992px : deux colonnes, la droite apparaît
 // -----------------------------------------------------------------------------
 @media (min-width:992px){
-  .auth{padding:32px}
+  .auth{padding:esp(7)}
 
   .auth__shell{grid-template-columns:minmax(0,1fr) minmax(0,.86fr)}
 
-  .auth__panel{padding:40px 48px}
+  .auth__panel{padding:esp(8) esp(9)}
 
   .auth__aside{display:block}
 }
@@ -803,11 +803,17 @@
 // -----------------------------------------------------------------------------
 // 375px — aucun débordement horizontal, boutons pleine largeur
 // -----------------------------------------------------------------------------
-@media (max-width:400px){
-  .auth{padding:10px}
-  .auth__panel{padding:22px 18px}
-  .auth__title{font-size:21px}
-  .auth-tabs__item{font-size:12.5px}
+// LE RESSERREMENT EST LA BASE, l'aération est l'ajout.
+//
+// Ces quatre valeurs étaient écrites comme des exceptions « sous 400px ».
+// Ce sont en réalité les valeurs du cas le plus fréquent : la majorité
+// du trafic arrive sur un téléphone. Elles montent donc dans les règles
+// de base, et c'est à partir de 480px qu'on desserre.
+@include ecran(ms){
+  .auth{padding:esp(5)}
+  .auth__panel{padding:esp(7) esp(6)}
+  .auth__title{font-size:typo(h1)}
+  .auth-tabs__item{font-size:typo(body-sm)}
 }
 
 // -----------------------------------------------------------------------------

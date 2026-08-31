@@ -10,7 +10,7 @@
   position:sticky;top:0;z-index:50;
   background:$blanc;
   border-bottom:1px solid $bordure;
-  transition:box-shadow .25s ease, background-color .25s ease;
+  transition:box-shadow $d-normal ease, background-color $d-normal ease;
 
   // Ajouté par le module navbar-scroll après 40px de défilement.
   // Sans JavaScript, la navbar garde cet état de repos : parfaitement lisible.
@@ -22,13 +22,13 @@
 
   &__in{display:flex;align-items:center;justify-content:space-between;height:68px}
 
-  &__brand{font-size:19px;font-weight:800;letter-spacing:-.03em;color:$vert-fonce}
+  &__brand{font-size:typo(body-lg);font-weight:800;letter-spacing:-.03em;color:$vert-fonce}
 
-  &__menu{display:none;align-items:center;gap:28px}
-  &__link{font-size:14px;font-weight:500;color:$gris-second}
+  &__menu{display:none;align-items:center;gap:esp(7)}
+  &__link{font-size:typo(body-sm);font-weight:500;color:$gris-second}
   &__link:hover{color:$texte}
 
-  &__right{display:flex;align-items:center;gap:10px}
+  &__right{display:flex;align-items:center;gap:esp(3)}
 
   // MOBILE FIRST : la barre ne porte que le logo et le menu.
   //
@@ -36,9 +36,9 @@
   // les quatre se chevauchaient, et le bouton passait sous le menu. Ils sont
   // repris à l'identique dans le panneau latéral, où ils ont la place d'être
   // touchés — pas d'écran perdu, un écran gagné.
-  &__actions{display:none;align-items:center;gap:10px}
+  &__actions{display:none;align-items:center;gap:esp(3)}
 
-  &__signin{display:none;font-size:14px;font-weight:500;color:$gris-second}
+  &__signin{display:none;font-size:typo(body-sm);font-weight:500;color:$gris-second}
   &__signin:hover{color:$texte}
 
   // 44×44 : la cible tactile minimale. Six pixels de remplissage autour d'une
@@ -57,7 +57,7 @@
     &__actions{display:flex}
     &__signin{display:inline}
     &__burger{display:none}
-    &__right{gap:20px}
+    &__right{gap:esp(5)}
   }
 }
 
@@ -80,7 +80,7 @@
 .menu-mobile__corps{
   display:flex;
   flex-direction:column;
-  gap:22px;
+  gap:esp(6);
   // Le pied est poussé en bas : le pouce y arrive sans étirement.
   justify-content:space-between;
 }
@@ -90,8 +90,8 @@
 .menu-mobile__lien{
   display:flex;align-items:center;
   min-height:48px;
-  padding:0 4px;
-  font-size:16px;font-weight:600;
+  padding:0 esp(1);
+  font-size:typo(body);font-weight:600;
   color:var(--texte);
   text-decoration:none;
   border-bottom:1px solid var(--bord);
@@ -99,31 +99,31 @@
   &:hover,&:focus-visible{color:var(--accent)}
 }
 
-.menu-mobile__prefs{display:flex;flex-direction:column;gap:10px}
+.menu-mobile__prefs{display:flex;flex-direction:column;gap:esp(3)}
 
 .menu-mobile__titre{
-  font-size:11px;font-weight:700;
+  font-size:typo(overline);font-weight:700;
   letter-spacing:.09em;text-transform:uppercase;
   color:var(--texte-2);
 }
 
 // Les deux bascules côte à côte : ce sont deux réglages du même ordre, les
 // séparer ferait chercher la seconde ailleurs.
-.menu-mobile__bascules{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.menu-mobile__bascules{display:flex;align-items:center;gap:esp(3);flex-wrap:wrap}
 
-.menu-mobile__pied{margin-top:auto;padding-top:10px}
+.menu-mobile__pied{margin-top:auto;padding-top:esp(3)}
 
 // -----------------------------------------------------------------------------
 // 2. BOUTONS
 // -----------------------------------------------------------------------------
 .btn-pill{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  height:46px;padding:0 24px;
+  display:inline-flex;align-items:center;justify-content:center;gap:esp(2);
+  height:46px;padding:0 esp(6);
   border-radius:$r-full;
-  font-size:14px;font-weight:600;
+  font-size:typo(body-sm);font-weight:600;
   border:1px solid transparent;
   cursor:pointer;
-  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+  transition:transform $d-rapide ease,background $d-rapide ease,box-shadow $d-rapide ease;
 
   &:active{transform:translateY(1px)}
 }
@@ -171,7 +171,7 @@
 }
 
 // Taille réduite, pour les actions secondaires d'une carte.
-.btn-pill--sm{padding:8px 16px;font-size:13px}
+.btn-pill--sm{padding:esp(2) esp(4);font-size:typo(caption)}
 
 // Action pas encore disponible.
 // .is-disabled : portée par un <span>, jamais par un lien mort.
@@ -188,7 +188,7 @@
 
 .btn-pill.is-disabled{pointer-events:none}
 
-.btn-sm-pill{height:40px;padding:0 20px;font-size:13px}
+.btn-sm-pill{height:40px;padding:0 esp(5);font-size:typo(caption)}
 .btn-block{width:100%}
 
 // -----------------------------------------------------------------------------
@@ -206,11 +206,11 @@
 // -----------------------------------------------------------------------------
 // 3. HERO — texte à gauche, visuel à droite
 // -----------------------------------------------------------------------------
-.hero{padding:72px 0 96px}
+.hero{padding:esp(11) 0 esp(12)}
 
 .hero__grid{
-  display:grid;gap:56px;align-items:center;grid-template-columns:1fr;
-  @media(min-width:992px){grid-template-columns:1.05fr 1fr;gap:48px}
+  display:grid;gap:esp(10);align-items:center;grid-template-columns:1fr;
+  @media(min-width:992px){grid-template-columns:1.05fr 1fr;gap:esp(9)}
 }
 
 .hero__title{
@@ -222,14 +222,14 @@
 }
 
 .hero__lead{
-  margin-top:22px;
-  font-size:14px;
+  margin-top:esp(6);
+  font-size:typo(body-sm);
   line-height:1.7;
   color:$gris-second;
   max-width:42ch;
 }
 
-.hero__cta{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap}
+.hero__cta{margin-top:esp(7);display:flex;gap:esp(3);flex-wrap:wrap}
 
 // Le cadre de smartphone, les cartes flottantes et le socle de la section
 // sombre sont définis dans _phone.scss (composant unique, aucune duplication).
@@ -239,7 +239,7 @@
 // -----------------------------------------------------------------------------
 .trades{
   background:$gris-fond;
-  padding:26px 0;
+  padding:esp(7) 0;
   overflow:hidden;
 }
 
@@ -247,10 +247,10 @@
 // Le contenu est dupliqué dans le markup pour que la boucle soit continue.
 .trades__row{
   display:flex;align-items:center;
-  gap:38px;
+  gap:esp(8);
   white-space:nowrap;
   width:max-content;
-  animation:trades-scroll 36s linear infinite;
+  animation:trades-scroll $d-carte linear infinite;
   will-change:transform;
 
   // Fondu progressif gauche et droite
@@ -281,28 +281,28 @@
 // -----------------------------------------------------------------------------
 // 5. CHIFFRES CLÉS — cartes blanches sur fond gris clair
 // -----------------------------------------------------------------------------
-.figures{background:$gris-fond;padding:8px 0 72px}
+.figures{background:$gris-fond;padding:esp(2) 0 esp(11)}
 
 .figures__grid{
-  display:grid;gap:20px;grid-template-columns:1fr;
+  display:grid;gap:esp(5);grid-template-columns:1fr;
   @media(min-width:768px){grid-template-columns:repeat(3,1fr)}
 }
 
 .figure-card{
   background:$blanc;
   border-radius:$r-md;
-  padding:38px 24px;
+  padding:esp(8) esp(6);
   text-align:center;
   box-shadow:$shadow-1;
 }
-.figure-card__n{font-size:44px;font-weight:800;line-height:1;color:$texte}
-.figure-card__w{font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:$texte;margin-top:10px}
-.figure-card__l{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:$gris-second;margin-top:8px}
+.figure-card__n{font-size:typo(display);font-weight:800;line-height:1;color:$texte}
+.figure-card__w{font-size:typo(body-sm);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:$texte;margin-top:esp(3)}
+.figure-card__l{font-size:typo(overline);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:$gris-second;margin-top:esp(2)}
 
 // -----------------------------------------------------------------------------
 // 6. SECTIONS GÉNÉRIQUES
 // -----------------------------------------------------------------------------
-.section{padding:88px 0}
+.section{padding:esp(12) 0}
 .section--tint{background:$gris-fond}
 
 .section-title{
@@ -324,34 +324,34 @@
 
 .section-sub{
   text-align:center;color:$gris-second;
-  font-size:13px;margin-top:10px;
+  font-size:typo(caption);margin-top:esp(3);
 }
 
 // -----------------------------------------------------------------------------
 // 7. COMMENT ÇA MARCHE — cercles fins bordés
 // -----------------------------------------------------------------------------
 .steps{
-  display:grid;gap:36px;grid-template-columns:1fr;margin-top:56px;
-  @media(min-width:768px){grid-template-columns:repeat(3,1fr);gap:32px}
+  display:grid;gap:esp(8);grid-template-columns:1fr;margin-top:esp(10);
+  @media(min-width:768px){grid-template-columns:repeat(3,1fr);gap:esp(7)}
 }
 .step__num{
   width:38px;height:38px;border-radius:50%;
   border:1px solid $bordure-forte;
   display:grid;place-items:center;
-  font-size:13px;font-weight:600;color:$gris-second;
-  margin-bottom:20px;
+  font-size:typo(caption);font-weight:600;color:$gris-second;
+  margin-bottom:esp(5);
 }
-.step__title{font-size:16px;font-weight:700;color:$texte}
-.step__text{font-size:12px;line-height:1.7;color:$gris-second;margin-top:8px;margin-bottom:0}
+.step__title{font-size:typo(body);font-weight:700;color:$texte}
+.step__text{font-size:typo(overline);line-height:1.7;color:$gris-second;margin-top:esp(2);margin-bottom:0}
 
 // -----------------------------------------------------------------------------
 // 8. SECTION SOMBRE — pleine largeur, fond vert foncé
 // -----------------------------------------------------------------------------
-.showcase{background:$vert-fonce;color:$blanc;padding:80px 0}
+.showcase{background:$vert-fonce;color:$blanc;padding:esp(11) 0}
 
 .showcase__grid{
-  display:grid;gap:48px;align-items:center;grid-template-columns:1fr;
-  @media(min-width:992px){grid-template-columns:1fr 1fr;gap:56px}
+  display:grid;gap:esp(9);align-items:center;grid-template-columns:1fr;
+  @media(min-width:992px){grid-template-columns:1fr 1fr;gap:esp(10)}
 }
 
 .showcase__title{
@@ -359,20 +359,20 @@
   font-weight:800;color:$blanc;line-height:1.2;max-width:16ch;
 }
 .showcase__text{
-  margin-top:18px;font-size:13px;line-height:1.8;
+  margin-top:esp(5);font-size:typo(caption);line-height:1.8;
   color:rgba($blanc,.72);max-width:44ch;
 }
 
-.showcase__meta{margin-top:36px;display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+.showcase__meta{margin-top:esp(8);display:flex;align-items:center;gap:esp(7);flex-wrap:wrap}
 
 // Icône carrée blanche + légende
 .scan-badge{text-align:center}
 .scan-badge__box{
-  width:44px;height:44px;border-radius:12px;
+  width:44px;height:44px;border-radius:rayon(md);
   background:$blanc;color:$vert-fonce;
   display:grid;place-items:center;margin:0 auto;
 }
-.scan-badge__label{font-size:10px;font-weight:600;color:rgba($blanc,.8);margin-top:8px}
+.scan-badge__label{font-size:typo(overline);font-weight:600;color:rgba($blanc,.8);margin-top:esp(2)}
 
 // Avatars superposés + pastille +500
 .avatars{display:flex;align-items:center}
@@ -381,30 +381,30 @@
   background:$vert-clair;color:$vert-fonce;
   border:2px solid $vert-fonce;
   display:grid;place-items:center;
-  font-size:10px;font-weight:700;
-  margin-left:-10px;
+  font-size:typo(overline);font-weight:700;
+  margin-left:-esp(3);
 }
 .avatars__item:first-child{margin-left:0}
 .avatars__more{
   // Fond vert FONCÉ : blanc sur vert accent ne donnait que 3.37:1.
-  background:$vert-fonce;color:$blanc;font-size:9px;font-weight:700;
+  background:$vert-fonce;color:$blanc;font-size:typo(overline);font-weight:700;
 }
 
 // Carte claire arrondie contenant le téléphone
 .showcase__frame{
   background:rgba($blanc,.1);
   border-radius:$r-lg;
-  padding:28px;
+  padding:esp(7);
   display:grid;place-items:center;
 }
-.showcase__frame .phone{width:200px;border-width:8px;border-radius:34px}
-.showcase__frame .phone__screen{padding:20px 14px 18px}
+.showcase__frame .phone{width:200px;border-width:8px;border-radius:rayon(xl)}
+.showcase__frame .phone__screen{padding:esp(5) esp(4) esp(5)}
 
 // -----------------------------------------------------------------------------
 // 9. TARIFS
 // -----------------------------------------------------------------------------
 .plans{
-  display:grid;gap:20px;grid-template-columns:1fr;margin-top:52px;align-items:stretch;
+  display:grid;gap:esp(5);grid-template-columns:1fr;margin-top:esp(10);align-items:stretch;
   @media(min-width:900px){grid-template-columns:repeat(3,1fr)}
 }
 
@@ -412,10 +412,10 @@
   background:$blanc;
   border:1px solid $bordure;
   border-radius:$r-md;
-  padding:32px 24px;
+  padding:esp(7) esp(6);
   text-align:center;
   display:flex;flex-direction:column;
-  transition:transform .2s ease,box-shadow .2s ease;
+  transition:transform $d-rapide ease,box-shadow $d-rapide ease;
   position:relative;
 }
 .plan:hover{transform:translateY(-4px);box-shadow:$shadow-2}
@@ -427,19 +427,19 @@
   position:absolute;top:-11px;left:50%;transform:translateX(-50%);
   // Fond vert FONCÉ : blanc sur vert accent ne donnait que 3.37:1.
   background:$vert-fonce;color:$blanc;
-  font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  padding:5px 14px;border-radius:$r-full;white-space:nowrap;
+  font-size:typo(overline);font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:esp(2) esp(4);border-radius:$r-full;white-space:nowrap;
 }
 
-.plan__name{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:$gris-second}
-.plan__price{font-size:26px;font-weight:800;color:$texte;margin-top:14px;line-height:1}
-.plan__price small{font-size:15px;font-weight:700}
-.plan__period{font-size:11px;color:$gris-second;margin-top:8px}
+.plan__name{font-size:typo(overline);font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:$gris-second}
+.plan__price{font-size:typo(h1);font-weight:800;color:$texte;margin-top:esp(4);line-height:1}
+.plan__price small{font-size:typo(body-sm);font-weight:700}
+.plan__period{font-size:typo(overline);color:$gris-second;margin-top:esp(2)}
 
-.plan__list{list-style:none;padding:0;margin:26px 0 28px;text-align:left}
+.plan__list{list-style:none;padding:0;margin:esp(7) 0 esp(7);text-align:left}
 .plan__list li{
-  display:flex;align-items:center;gap:9px;
-  padding:6px 0;font-size:12px;color:$gris-second;
+  display:flex;align-items:center;gap:esp(3);
+  padding:esp(2) 0;font-size:typo(overline);color:$gris-second;
 }
 .plan__list li svg{color:$vert-accent;flex:0 0 auto}
 .plan__list li.is-muted{opacity:.4}
@@ -447,17 +447,17 @@
 .plan .btn-pill{margin-top:auto}
 
 // Moyens de paiement rappelés
-.pay-note{text-align:center;font-size:11px;color:$gris-second;margin-top:8px}
+.pay-note{text-align:center;font-size:typo(overline);color:$gris-second;margin-top:esp(2)}
 
 // -----------------------------------------------------------------------------
 // 10. APPEL À L'ACTION FINAL — fond vert très clair
 // -----------------------------------------------------------------------------
-.final{background:$vert-clair;padding:88px 0;text-align:center}
+.final{background:$vert-clair;padding:esp(12) 0;text-align:center}
 .final__title{font-size:clamp(22px,3.4vw,28px);font-weight:700;color:$texte}
 .final__text{
-  font-size:13px;color:$gris-second;margin:14px auto 0;max-width:48ch;line-height:1.7;
+  font-size:typo(caption);color:$gris-second;margin:14px auto 0;max-width:48ch;line-height:1.7;
 }
-.final .btn-pill{margin-top:32px}
+.final .btn-pill{margin-top:esp(7)}
 
 // -----------------------------------------------------------------------------
 // 11. PIED DE PAGE — fond très sombre
@@ -465,23 +465,23 @@
 .site-footer{
   background:$texte;
   color:rgba($blanc,.6);
-  padding:64px 0 40px;
-  font-size:12px;
+  padding:esp(10) 0 esp(8);
+  font-size:typo(overline);
 }
 
 .site-footer__grid{
-  display:grid;gap:40px;grid-template-columns:1fr;
-  @media(min-width:768px){grid-template-columns:1.6fr repeat(3,1fr);gap:32px}
+  display:grid;gap:esp(8);grid-template-columns:1fr;
+  @media(min-width:768px){grid-template-columns:1.6fr repeat(3,1fr);gap:esp(7)}
 }
 
-.site-footer__brand{font-size:15px;font-weight:800;color:$blanc;letter-spacing:-.02em}
-.site-footer__about{margin-top:16px;line-height:1.8;max-width:34ch}
+.site-footer__brand{font-size:typo(body-sm);font-weight:800;color:$blanc;letter-spacing:-.02em}
+.site-footer__about{margin-top:esp(4);line-height:1.8;max-width:34ch}
 
 .site-footer__title{
-  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
-  color:$blanc;margin-bottom:14px;
+  font-size:typo(overline);font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:$blanc;margin-bottom:esp(4);
 }
-.site-footer a{display:block;padding:5px 0;color:rgba($blanc,.6)}
+.site-footer a{display:block;padding:esp(2) 0;color:rgba($blanc,.6)}
 .site-footer a:hover{color:$blanc}
 
 // -----------------------------------------------------------------------------
@@ -501,9 +501,9 @@
 }
 
 .f__legende{
-  display:flex;align-items:baseline;gap:6px;
-  margin:0 0 18px;
-  font-size:12.5px;
+  display:flex;align-items:baseline;gap:esp(2);
+  margin:0 0 esp(5);
+  font-size:typo(caption);
   color:var(--texte-2, #{$gris-second});
 }
 
@@ -517,7 +517,7 @@
 // reste : c'est le numéro qu'on saisit, pas le pays qu'on change.
 .tel{
   display:flex;
-  gap:8px;
+  gap:esp(2);
   align-items:stretch;
 
   // MOBILE FIRST — EMPILÉ D'ABORD, CÔTE À CÔTE ENSUITE.
@@ -572,8 +572,8 @@
   width:100%;
   appearance:none;
   // À gauche : la place du drapeau. À droite : celle de la flèche.
-  padding-left:44px;
-  padding-right:34px;
+  padding-left:esp(9);
+  padding-right:esp(8);
 
   // Les options natives suivent le thème du document : voir color-scheme
   // dans _theme.scss. On teinte ce qui l'est réellement.
@@ -629,19 +629,23 @@
 }
 
 .langue__declencheur{
-  display:inline-flex;align-items:center;gap:6px;
-  // 34px : la hauteur des autres pastilles de la barre. En dessous de 640px
-  // il passe à 40px — une barre de navigation se touche au pouce.
-  height:34px;padding:0 10px;
+  display:inline-flex;align-items:center;gap:esp(2);
+  // 44px PARTOUT — le minimum tactile de WCAG 2.5.5.
+  //
+  // Il valait 34px de base et 40px sous 640px : deux valeurs sous le
+  // seuil, et dans le mauvais sens — le mobile first veut la valeur
+  // confortable en base, pas en exception. Le relevé navigateur le
+  // mesurait à 54×40 sur trois pages.
+  height:$tactile-min;padding:0 esp(3);
   border:1px solid var(--bord-fort, #{$bordure-forte});
   border-radius:$r-full;
   background:transparent;
   color:var(--texte-2, #{$gris-second});
-  font-size:12px;font-weight:700;
+  font-size:typo(overline);font-weight:700;
   letter-spacing:.04em;
   cursor:pointer;
   user-select:none;
-  transition:color 140ms ease, border-color 140ms ease, background 140ms ease;
+  transition:color $d-rapide ease, border-color $d-rapide ease, background $d-rapide ease;
 
   &:hover{
     color:var(--accent, #{$vert-fonce});
@@ -656,7 +660,7 @@
 // Le chevron pivote à l'ouverture : c'est le seul retour visuel qui dise que
 // le menu est déplié quand il s'ouvre vers le bas, hors du champ de vision
 // immédiat sur un petit écran.
-.langue__chevron{transition:transform 160ms ease}
+.langue__chevron{transition:transform $d-rapide ease}
 .langue[open] .langue__chevron{transform:rotate(180deg)}
 
 .langue[open] .langue__declencheur{
@@ -675,7 +679,7 @@
   right:0;
   z-index:60;
   min-width:150px;
-  padding:5px;
+  padding:esp(2);
   display:flex;flex-direction:column;gap:2px;
   background:var(--surface-3, #{$blanc});
   border:1px solid var(--bord, #{$bordure});
@@ -684,17 +688,17 @@
 }
 
 .langue__option{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  display:flex;align-items:center;justify-content:space-between;gap:esp(3);
   width:100%;
   // 40px : une ligne de menu se touche, elle ne se vise pas.
   min-height:40px;
-  padding:0 10px;
+  padding:0 esp(3);
   border:0;
-  border-radius:8px;   // un cran sous $r-sm : une ligne de menu, pas une carte
+  border-radius:rayon(sm);   // un cran sous $r-sm : une ligne de menu, pas une carte
   background:transparent;
   color:var(--texte, #{$texte});
   font-family:inherit;
-  font-size:13.5px;font-weight:600;
+  font-size:typo(caption);font-weight:600;
   text-align:left;
   cursor:pointer;
 
@@ -723,16 +727,19 @@
 }
 
 // MOBILE — la barre supérieure est étroite, le doigt ne l'est pas.
-@media (max-width:639px){
-  .langue__declencheur{height:40px;padding:0 12px}
-  .langue__menu{min-width:170px}
-}
+// La largeur minimale du menu vaut pour tous les écrans : une liste de
+// deux langues n'a aucune raison de rétrécir au-delà de 640px.
+.langue__menu{min-width:170px}
 
 // Sous 380px, la barre est pleine : le globe devient décoratif et disparaît
 // plutôt que de pousser le reste. Le code de langue, lui, reste.
-@media (max-width:379px){
-  .langue__globe{display:none}
-  .langue__declencheur{padding:0 10px}
+// LE GLOBE EST DÉCORATIF : il disparaît par défaut et n'apparaît qu'à
+// partir de 380px, quand la barre a la place de le porter. C'est
+// l'inverse de la règle qu'il remplace, et c'est le sens du mobile
+// first : on n'ajoute que ce que l'espace permet.
+.langue__globe{display:none}
+@include ecran(sm){
+  .langue__globe{display:inline-block}
 }
 
 // -----------------------------------------------------------------------------
@@ -753,7 +760,7 @@
   z-index:5;
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:esp(2);
 }
 
 // Le corps de la page d'erreur est le seul ancêtre positionné disponible.

@@ -27,7 +27,11 @@ return [
         // Lot 1 : 1361 — l'absorption de _variables.scss. Le gain est
         //   modeste et c'est attendu : le Lot 1 est architectural, pas
         //   massif. La traduction des ~700 usages est le Lot 2.
-        'valeurs' => 1361,
+        // Lot 2 : 418 — la traduction des 11 feuilles historiques.
+        // Reste : les couleurs, dont le rôle ne s'automatise pas (un même
+        // #0A1F1A est l'encre du thème clair ET le fond volontairement
+        // sombre de l'en-tête d'administration).
+        'valeurs' => 418,
 
         /*
          | `!important` — plafonné, pas interdit.
@@ -66,7 +70,11 @@ return [
          | elles ne figurent pas dans `$ruptures`, et c'est le signe le
          | plus net qu'on a suivi un autre système que le nôtre.
          */
-        'max-width' => 18,
+        // Lot 2 : 11. Sept inversées. Les onze restantes :
+        //   _app-shell 4 + _admin 2  -> Lot 4 bis, qui refait la coque
+        //   _carte-publique 2        -> Lot 4 quater
+        //   _phone 2 + _matiere 1    -> feuilles gelées, on laisse
+        'max-width' => 11,
 
         // Styles en ligne hors e-mails et PDF, où ils sont imposés.
         'style-en-ligne' => 98,

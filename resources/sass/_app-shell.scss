@@ -29,13 +29,13 @@ $topbar-h: 64px;
 .app-trial{
   background:$vert-clair;
   color:$vert-fonce;
-  font-size:13px;
+  font-size:typo(caption);
   text-align:center;
-  padding:9px 20px;
+  padding:esp(3) esp(5);
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:8px;
+  gap:esp(2);
   flex-wrap:wrap;
 
   a{font-weight:600;color:$vert-fonce;text-decoration:underline}
@@ -51,12 +51,12 @@ $topbar-h: 64px;
   background:$blanc;
   border-radius:$r-lg;
   box-shadow:$shadow-2;
-  padding:36px 40px 0;
+  padding:esp(8) esp(8) 0;
   overflow:hidden;
 }
 
 .step-card__kicker{
-  font-size:12px;
+  font-size:typo(overline);
   color:$gris-second;
   letter-spacing:.01em;
 }
@@ -64,35 +64,35 @@ $topbar-h: 64px;
 // Barre de progression : trois segments de 4px, gouttière de 8px.
 .step-bar{
   display:flex;
-  gap:8px;
-  margin:10px 0 28px;
+  gap:esp(2);
+  margin:esp(3) 0 esp(7);
 }
 .step-bar__seg{
   height:4px;
   flex:1 1 0;
   border-radius:$r-full;
   background:$gris-fond;
-  transition:background 300ms ease;
+  transition:background $d-normal ease;
   &.is-done{background:$vert-fonce}
 }
 
-.step-card__title{font-size:22px;font-weight:700;letter-spacing:-.02em}
-.step-card__sub{color:$gris-second;font-size:14px;margin:6px 0 28px}
+.step-card__title{font-size:typo(h2);font-weight:700;letter-spacing:-.02em}
+.step-card__sub{color:$gris-second;font-size:typo(body-sm);margin:esp(2) 0 esp(7)}
 
-.step-fields{display:flex;flex-direction:column;gap:20px}
+.step-fields{display:flex;flex-direction:column;gap:esp(5)}
 
 .step-card__foot{
-  margin:32px -40px 0;
-  padding:20px 40px;
+  margin:esp(7) -esp(8) 0;
+  padding:esp(5) esp(8);
   border-top:1px solid $bordure;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:16px;
+  gap:esp(4);
 }
 .step-back{
-  font-size:14px;font-weight:500;color:$gris-second;
-  padding:8px 4px;border-radius:$r-sm;
+  font-size:typo(body-sm);font-weight:500;color:$gris-second;
+  padding:esp(2) esp(1);border-radius:$r-sm;
   &:hover{color:$texte}
 }
 
@@ -105,17 +105,17 @@ $topbar-h: 64px;
 // -----------------------------------------------------------------------------
 $bordure-champ: rgba($texte, .48);   // 3,16:1 sur blanc · 3,07:1 sur gris fond
 
-.f{display:flex;flex-direction:column;gap:7px}
+.f{display:flex;flex-direction:column;gap:esp(2)}
 
 .f__label{
-  font-size:13px;font-weight:600;color:$texte;
-  display:flex;align-items:baseline;gap:6px;
+  font-size:typo(caption);font-weight:600;color:$texte;
+  display:flex;align-items:baseline;gap:esp(2);
 }
-.f__opt{font-size:12px;font-weight:400;color:$gris-second}
+.f__opt{font-size:typo(overline);font-weight:400;color:$gris-second}
 
 .f__control{
   width:100%;
-  padding:12px 14px;
+  padding:esp(3) esp(4);
   font-family:inherit;
 
   // MOBILE FIRST — 16px, et ce n'est pas une question de goût.
@@ -125,7 +125,7 @@ $bordure-champ: rgba($texte, .48);   // 3,16:1 sur blanc · 3,07:1 sur gris fond
   // agrandi qu'il doit faire défiler latéralement pour voir ses propres
   // boutons. Le texte redescend à 15px seulement là où il n'y a pas de
   // clavier virtuel — c'est-à-dire à partir de la tablette.
-  font-size:16px;
+  font-size:typo(body);
 
   // 48px : la cible tactile recommandée. Le remplissage seul donnait 46px,
   // et deux pixels manquants se paient en frappes à côté.
@@ -135,7 +135,7 @@ $bordure-champ: rgba($texte, .48);   // 3,16:1 sur blanc · 3,07:1 sur gris fond
   background:$blanc;
   border:1px solid $bordure-champ;
   border-radius:$r-sm;
-  transition:border-color 160ms ease, box-shadow 160ms ease;
+  transition:border-color $d-rapide ease, box-shadow $d-rapide ease;
 
   // Un marque-place se lit : pas d'opacité qui le ferait tomber sous 4,5:1.
   &::placeholder{color:$gris-second;opacity:1}
@@ -148,14 +148,14 @@ $bordure-champ: rgba($texte, .48);   // 3,16:1 sur blanc · 3,07:1 sur gris fond
 }
 
 @media (min-width:640px){
-  .f__control{font-size:15px}
+  .f__control{font-size:typo(body-sm)}
 }
 
 textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 
-.f__hint{font-size:12px;color:$gris-second}
-.f__error{font-size:12.5px;color:$rouge-erreur;font-weight:500}
-.f__count{font-size:12px;color:$gris-second;text-align:right}
+.f__hint{font-size:typo(overline);color:$gris-second}
+.f__error{font-size:typo(caption);color:$rouge-erreur;font-weight:500}
+.f__count{font-size:typo(overline);color:$gris-second;text-align:right}
 
 // MOBILE FIRST : une colonne par défaut, deux quand la place existe.
 // Deux champs côte à côte sur 375px laissent 155px par champ — un prénom
@@ -164,7 +164,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 .f-row{
   display:grid;
   grid-template-columns:1fr;
-  gap:20px;
+  gap:esp(5);
 
   @media (min-width:576px){grid-template-columns:1fr 1fr}
 }
@@ -185,48 +185,48 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
  */
 .checkout{
   display:grid;
-  gap:24px;
+  gap:esp(6);
   align-items:start;
 
   @media (min-width:992px){
     grid-template-columns:minmax(0,1fr) 340px;
-    gap:32px;
+    gap:esp(7);
   }
 }
 
 .checkout__main{min-width:0}
 
-.checkout__head{margin-bottom:28px}
+.checkout__head{margin-bottom:esp(7)}
 
 .checkout__kicker{
-  font-size:12px;font-weight:700;
+  font-size:typo(overline);font-weight:700;
   letter-spacing:.08em;text-transform:uppercase;
   color:$vert-accent;
-  margin:0 0 6px;
+  margin:0 0 esp(2);
 }
 
 .checkout__title{
   font-size:clamp(1.5rem, 1.25rem + 1.1vw, 2rem);
   font-weight:700;letter-spacing:-.015em;
-  color:$texte;margin:0 0 8px;
+  color:$texte;margin:0 0 esp(2);
 }
 
 .checkout__sub{
-  font-size:14.5px;color:$gris-second;margin:0;
+  font-size:typo(body-sm);color:$gris-second;margin:0;
   max-width:56ch;line-height:1.6;
 }
 
 .checkout__group{
-  border:0;padding:0;margin:0 0 28px;
+  border:0;padding:0;margin:0 0 esp(7);
   min-width:0;   // sans quoi un fieldset refuse de rétrécir dans une grille
 }
 
 // Le numéro d'étape porte le rythme de l'écran : on voit qu'il y a DEUX
 // décisions à prendre, et lesquelles, avant même de lire.
 .checkout__legend{
-  display:flex;align-items:center;gap:10px;
-  font-size:15px;font-weight:700;color:$texte;
-  padding:0;margin-bottom:14px;
+  display:flex;align-items:center;gap:esp(3);
+  font-size:typo(body-sm);font-weight:700;color:$texte;
+  padding:0;margin-bottom:esp(4);
 }
 
 .checkout__step{
@@ -234,13 +234,13 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   display:grid;place-items:center;
   border-radius:$r-full;
   background:$vert-fonce;color:$blanc;
-  font-size:12.5px;font-weight:700;
+  font-size:typo(caption);font-weight:700;
 }
 
 // -----------------------------------------------------------------------------
 // LES FORMULES
 // -----------------------------------------------------------------------------
-.plan-grid{display:grid;gap:12px}
+.plan-grid{display:grid;gap:esp(3)}
 
 .plan-card{display:block;cursor:pointer;position:relative}
 
@@ -255,11 +255,11 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 
 .plan-card__box{
   display:block;position:relative;
-  padding:18px 46px 18px 20px;   // à droite, la place de la coche
+  padding:esp(5) esp(9) esp(5) esp(5);   // à droite, la place de la coche
   border:1.5px solid $bordure-champ;
   border-radius:$r-md;
   background:$blanc;
-  transition:border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+  transition:border-color $d-rapide ease, background $d-rapide ease, box-shadow $d-rapide ease;
 }
 
 .plan-card:hover .plan-card__box{border-color:$bordure-forte}
@@ -276,41 +276,41 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 
 .plan-card__top{
-  display:flex;align-items:center;gap:10px;
+  display:flex;align-items:center;gap:esp(3);
   flex-wrap:wrap;margin-bottom:2px;
 }
 
-.plan-card__name{font-size:15px;font-weight:700;color:$texte}
+.plan-card__name{font-size:typo(body-sm);font-weight:700;color:$texte}
 
 // L'économie est CALCULÉE depuis les prix en base : voir la vue.
 .plan-card__badge{
-  font-size:11px;font-weight:700;
+  font-size:typo(overline);font-weight:700;
   letter-spacing:.02em;
-  padding:3px 9px;border-radius:$r-full;
+  padding:esp(1) esp(3);border-radius:$r-full;
   background:$vert-fonce;color:$blanc;
 }
 
 .plan-card__price{
   display:block;
-  font-size:24px;font-weight:700;
+  font-size:typo(h1);font-weight:700;
   letter-spacing:-.02em;color:$vert-fonce;
-  line-height:1.2;margin:4px 0 2px;
+  line-height:1.2;margin:esp(1) 0 2px;
 }
 
 .plan-card__meta{
   display:block;
-  font-size:12.5px;color:$gris-second;line-height:1.5;
+  font-size:typo(caption);color:$gris-second;line-height:1.5;
 }
 
 .plan-card__features{
-  display:flex;flex-direction:column;gap:5px;
-  margin-top:12px;padding-top:12px;
+  display:flex;flex-direction:column;gap:esp(2);
+  margin-top:esp(3);padding-top:esp(3);
   border-top:1px solid $bordure;
 }
 
 .plan-card__feature{
-  display:flex;align-items:flex-start;gap:7px;
-  font-size:12.5px;color:$gris-second;line-height:1.45;
+  display:flex;align-items:flex-start;gap:esp(2);
+  font-size:typo(caption);color:$gris-second;line-height:1.45;
 
   svg{flex:0 0 auto;margin-top:2px;color:$vert-accent}
 }
@@ -325,7 +325,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   border-radius:$r-full;
   border:1.5px solid $bordure-champ;
   background:$blanc;color:transparent;
-  transition:background 160ms ease, border-color 160ms ease, color 160ms ease;
+  transition:background $d-rapide ease, border-color $d-rapide ease, color $d-rapide ease;
 }
 
 .plan-card__input:checked + .plan-card__box .plan-card__tick,
@@ -339,20 +339,20 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 // Une option entière est cliquable, pas seulement le petit rond : sur mobile,
 // viser un radio de 16px est une cause d'abandon à elle seule.
 // -----------------------------------------------------------------------------
-.method-grid{display:grid;gap:10px}
+.method-grid{display:grid;gap:esp(3)}
 
 .pay-method{display:block;cursor:pointer}
 
 // align-items:center et non baseline : une pastille de 40px alignée sur la
 // ligne de base d'un texte de 15px pendrait sous la boîte.
 .pay-method__box{
-  display:flex;align-items:center;gap:14px;
+  display:flex;align-items:center;gap:esp(4);
   position:relative;
-  padding:12px 46px 12px 14px;
+  padding:esp(3) esp(9) esp(3) esp(4);
   border:1.5px solid $bordure-champ;
   border-radius:$r-md;
   background:$blanc;
-  transition:border-color 160ms ease, background 160ms ease;
+  transition:border-color $d-rapide ease, background $d-rapide ease;
 }
 
 .pay-method:hover .pay-method__box{border-color:$bordure-forte}
@@ -367,7 +367,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   outline-offset:2px;
 }
 
-.pay-method__name{font-size:14.5px;font-weight:600;color:$texte}
+.pay-method__name{font-size:typo(body-sm);font-weight:600;color:$texte}
 
 .pay-method__tick{top:50%;transform:translateY(-50%)}
 
@@ -377,7 +377,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 .checkout__aside{min-width:0}
 
 .checkout__panel{
-  padding:22px 20px;
+  padding:esp(6) esp(5);
   border:1px solid $bordure;
   border-radius:$r-md;
   background:$gris-fond;
@@ -386,15 +386,15 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 
 .checkout__panel-title{
-  font-size:14px;font-weight:700;color:$texte;
-  margin:0 0 14px;
+  font-size:typo(body-sm);font-weight:700;color:$texte;
+  margin:0 0 esp(4);
 }
 
-.trust{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:13px}
+.trust{list-style:none;padding:0;margin:0 0 esp(5);display:grid;gap:esp(4)}
 
 .trust__item{
-  display:flex;align-items:flex-start;gap:10px;
-  font-size:12.5px;color:$gris-second;line-height:1.5;
+  display:flex;align-items:flex-start;gap:esp(3);
+  font-size:typo(caption);color:$gris-second;line-height:1.5;
 
   strong{color:$texte;font-weight:600}
 }
@@ -409,8 +409,8 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 
 .checkout__later{
   display:block;text-align:center;
-  margin-top:12px;
-  font-size:13px;font-weight:600;color:$gris-second;
+  margin-top:esp(3);
+  font-size:typo(caption);font-weight:600;color:$gris-second;
 }
 
 /*
@@ -429,17 +429,17 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   height:40px;
   flex:0 0 auto;
   object-fit:contain;
-  border-radius:8px;
+  border-radius:rayon(sm);
 }
 
 .pay-option__pastille{
   width:40px;
   height:40px;
   flex:0 0 auto;
-  border-radius:8px;
+  border-radius:rayon(sm);
   display:grid;
   place-items:center;
-  font-size:13px;
+  font-size:typo(caption);
   font-weight:800;
   letter-spacing:.02em;
   // Les couleurs viennent de la charte de chaque opérateur et sont posées en
@@ -451,11 +451,11 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 // petite — un logo de 40px dans une cellule de tableau écraserait la ligne.
 .pay-mark--sm{
   .pay-option__logo,
-  .pay-option__pastille{width:26px;height:26px;border-radius:6px;font-size:10px}
+  .pay-option__pastille{width:26px;height:26px;border-radius:rayon(sm);font-size:typo(overline)}
 }
 
 // Marque et libellé sur une seule ligne, pour un tableau ou un récapitulatif.
-.pay-inline{display:inline-flex;align-items:center;gap:8px}
+.pay-inline{display:inline-flex;align-items:center;gap:esp(2)}
 
 // -----------------------------------------------------------------------------
 // PHOTO — zone de dépôt
@@ -463,13 +463,13 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 .drop{
   display:flex;
   align-items:center;
-  gap:16px;
-  padding:16px;
+  gap:esp(4);
+  padding:esp(4);
   border:1.5px dashed $bordure-champ;
   border-radius:$r-md;
   background:$gris-fond;
   cursor:pointer;
-  transition:border-color 160ms ease, background 160ms ease;
+  transition:border-color $d-rapide ease, background $d-rapide ease;
 
   &:hover,&.is-over{border-color:$vert-accent;background:$vert-clair}
   &:focus-within{border-color:$vert-accent;box-shadow:0 0 0 3px rgba($vert-accent,.18)}
@@ -487,8 +487,8 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 .drop__thumb img{width:100%;height:100%;object-fit:cover;display:block}
 
-.drop__text{font-size:14px;font-weight:600;color:$texte}
-.drop__hint{font-size:12px;color:$gris-second;margin-top:2px}
+.drop__text{font-size:typo(body-sm);font-weight:600;color:$texte}
+.drop__hint{font-size:typo(overline);color:$gris-second;margin-top:2px}
 
 // Champ fichier natif : visible pour le clavier, discret à l'œil.
 .drop__input{
@@ -501,12 +501,12 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 // -----------------------------------------------------------------------------
 // RÉSEAUX SOCIAUX — lignes ajoutables
 // -----------------------------------------------------------------------------
-.socials{display:flex;flex-direction:column;gap:12px}
+.socials{display:flex;flex-direction:column;gap:esp(3)}
 
 .social-row{
   display:grid;
   grid-template-columns:150px 1fr 40px;
-  gap:10px;
+  gap:esp(3);
   align-items:center;
 }
 
@@ -553,11 +553,11 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 
 .social-add{
   align-self:flex-start;
-  display:inline-flex;align-items:center;gap:7px;
+  display:inline-flex;align-items:center;gap:esp(2);
   // 44px : la cible tactile minimale. Le remplissage seul donnait 36px.
   min-height:44px;
-  padding:11px 16px;
-  font-size:13.5px;font-weight:600;
+  padding:esp(3) esp(4);
+  font-size:typo(caption);font-weight:600;
   color:var(--accent);
   background:var(--accent-doux);
   border:1px solid transparent;
@@ -576,7 +576,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 .tpl-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:14px;
+  gap:esp(4);
 
   @media (min-width:576px){grid-template-columns:repeat(3,1fr)}
 }
@@ -605,16 +605,16 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   display:block;
   border:2px solid $bordure-champ;
   border-radius:$r-md;
-  padding:12px;
+  padding:esp(3);
   background:$blanc;
-  transition:border-color 160ms ease, box-shadow 160ms ease;
+  transition:border-color $d-rapide ease, box-shadow $d-rapide ease;
   position:relative;
 }
 
 // Aperçu miniature : un écran de profil schématisé, en CSS pur.
 .tpl__mini{
   aspect-ratio:9/16;
-  border-radius:10px;
+  border-radius:rayon(sm);
   background:$gris-fond;
   border:1px solid $bordure;
   overflow:hidden;
@@ -627,16 +627,16 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   width:22px;height:22px;border-radius:$r-full;
   background:$blanc;border:2px solid $blanc;box-shadow:$shadow-1;
 }
-.tpl__mini-body{flex:1;padding:16px 10px 8px;display:flex;flex-direction:column;gap:5px}
+.tpl__mini-body{flex:1;padding:esp(4) esp(3) esp(2);display:flex;flex-direction:column;gap:esp(2)}
 .tpl__mini-line{height:4px;border-radius:$r-full;background:$bordure-forte}
 .tpl__mini-line--w60{width:60%;margin-inline:auto}
 .tpl__mini-line--w40{width:40%;margin-inline:auto;background:$bordure}
-.tpl__mini-btns{display:flex;gap:4px;margin-top:auto}
-.tpl__mini-btn{flex:1;height:8px;border-radius:3px;background:var(--tpl-color,#{$vert-fonce});opacity:.25}
+.tpl__mini-btns{display:flex;gap:esp(1);margin-top:auto}
+.tpl__mini-btn{flex:1;height:8px;border-radius:rayon(sm);background:var(--tpl-color,#{$vert-fonce});opacity:.25}
 
 // Variante « Moderne » : bandeau haut plus court, boutons pleins.
 .tpl__mini--moderne{
-  .tpl__mini-head{height:26%;border-radius:0 0 14px 14px}
+  .tpl__mini-head{height:26%;border-radius:0 0 rayon(md) rayon(md)}
   .tpl__mini-btn{opacity:.5}
 }
 // Variante « Minimal » : pas de bandeau coloré, trait seul.
@@ -646,7 +646,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   .tpl__mini-btn{opacity:.18}
 }
 
-.tpl__name{font-size:13px;font-weight:600;margin-top:10px;color:$texte}
+.tpl__name{font-size:typo(caption);font-weight:600;margin-top:esp(3);color:$texte}
 
 .tpl__check{
   position:absolute;top:-8px;right:-8px;
@@ -654,7 +654,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   background:$vert-fonce;color:$blanc;
   display:grid;place-items:center;
   opacity:0;transform:scale(.6);
-  transition:opacity 160ms ease, transform 160ms ease;
+  transition:opacity $d-rapide ease, transform $d-rapide ease;
   box-shadow:$shadow-1;
 }
 
@@ -674,7 +674,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 .varcard-grid{
   display:grid;
   grid-template-columns:1fr;
-  gap:14px;
+  gap:esp(4);
 
   @media (min-width:576px){grid-template-columns:repeat(2,1fr)}
 }
@@ -702,9 +702,9 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   position:relative;
   border:2px solid $bordure-champ;
   border-radius:$r-md;
-  padding:12px;
+  padding:esp(3);
   background:$blanc;
-  transition:border-color 160ms ease, box-shadow 160ms ease;
+  transition:border-color $d-rapide ease, box-shadow $d-rapide ease;
 }
 
 /*
@@ -734,7 +734,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 
 .varcard__nom{
-  font-size:11px;
+  font-size:typo(overline);
   font-weight:800;
   letter-spacing:-.01em;
   line-height:1;
@@ -748,7 +748,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 
 .varcard__fonction{
-  font-size:6px;
+  font-size:typo(overline);
   font-weight:600;
   letter-spacing:.22em;
   opacity:.88;
@@ -756,19 +756,19 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 
 .varcard__texte{
   display:block;
-  margin-top:10px;
+  margin-top:esp(3);
 }
 
 .varcard__titre{
   display:block;
-  font-size:13px;
+  font-size:typo(caption);
   font-weight:700;
   color:var(--texte);
 }
 
 .varcard__desc{
   display:block;
-  font-size:12px;
+  font-size:typo(overline);
   line-height:1.4;
   // Jeton de thème, et non une teinte figée : cet écran existe aussi en
   // thème sombre, où un gris compilé en dur passerait sous le seuil.
@@ -782,7 +782,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   background:$vert-fonce;color:$blanc;
   display:grid;place-items:center;
   opacity:0;transform:scale(.6);
-  transition:opacity 160ms ease, transform 160ms ease;
+  transition:opacity $d-rapide ease, transform $d-rapide ease;
   box-shadow:$shadow-1;
 }
 
@@ -796,14 +796,14 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   align-items:center;
   justify-content:center;
   text-align:center;
-  padding:48px 20px 64px;
+  padding:esp(9) esp(5) esp(10);
 }
-.preview__title{font-size:26px;font-weight:700;letter-spacing:-.02em}
-.preview__sub{color:$gris-second;font-size:15px;margin:8px 0 40px}
-.preview__stage{margin-bottom:40px}
+.preview__title{font-size:typo(h1);font-weight:700;letter-spacing:-.02em}
+.preview__sub{color:$gris-second;font-size:typo(body-sm);margin:esp(2) 0 esp(8)}
+.preview__stage{margin-bottom:esp(8)}
 .preview__edit{
-  display:inline-block;margin-top:18px;
-  font-size:13.5px;color:$gris-second;
+  display:inline-block;margin-top:esp(5);
+  font-size:typo(caption);color:$gris-second;
   &:hover{color:$texte}
 }
 
@@ -816,17 +816,17 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 @media (max-width: 575.98px){
 
   .step-card{
-    padding:24px 18px 0;
+    padding:esp(6) esp(5) 0;
     border-radius:$r-md;
     box-shadow:$shadow-1;
   }
   .step-card__foot{
-    margin:24px -18px 0;
-    padding:16px 18px;
+    margin:esp(6) -esp(5) 0;
+    padding:esp(4) esp(5);
     // Le bouton principal passe en premier et occupe toute la largeur.
     flex-direction:column-reverse;
     align-items:stretch;
-    gap:10px;
+    gap:esp(3);
     .btn-pill{width:100%;justify-content:center}
   }
   .step-back{text-align:center}
@@ -837,13 +837,13 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
     .social-row__url{grid-area:u}
     .social-row__del{grid-area:d}
   }
-  .tpl-grid{grid-template-columns:1fr;gap:12px}
+  .tpl-grid{grid-template-columns:1fr;gap:esp(3)}
   .tpl__mini{aspect-ratio:16/7}
-  .tpl__mini--minimal .tpl__mini-ava{margin-top:6px}
+  .tpl__mini--minimal .tpl__mini-ava{margin-top:esp(2)}
 
-  .preview{padding:28px 14px 48px}
-  .preview__title{font-size:21px}
-  .preview__sub{margin-bottom:28px}
+  .preview{padding:esp(7) esp(4) esp(9)}
+  .preview__title{font-size:typo(h2)}
+  .preview__sub{margin-bottom:esp(7)}
 }
 
 // =============================================================================
@@ -854,7 +854,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 .board-empty{
   display:flex;
   justify-content:center;
-  padding-top:32px;
+  padding-top:esp(7);
 }
 .board-empty__card{
   width:100%;
@@ -862,7 +862,7 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   background:$blanc;
   border-radius:$r-lg;
   box-shadow:$shadow-2;
-  padding:48px 40px;
+  padding:esp(9) esp(8);
   text-align:center;
 }
 .board-empty__icon{
@@ -873,41 +873,41 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   background:$vert-clair;
   color:$vert-fonce;
 }
-.board-empty__title{font-size:21px;font-weight:700;letter-spacing:-.02em}
-.board-empty__text{color:$gris-second;font-size:14.5px;margin:8px auto 28px;max-width:340px}
+.board-empty__title{font-size:typo(h2);font-weight:700;letter-spacing:-.02em}
+.board-empty__text{color:$gris-second;font-size:typo(body-sm);margin:8px auto 28px;max-width:340px}
 
 // --- Grille du dashboard actif ------------------------------------------------
 .board{
   display:grid;
   grid-template-columns:minmax(0,340px) minmax(0,1fr);
-  gap:20px;
+  gap:esp(5);
   align-items:start;
   max-width:980px;
   margin-inline:auto;
 }
-.board__side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.board__side{display:flex;flex-direction:column;gap:esp(5);min-width:0}
 
 // --- Carte QR Code : l'élément mis en avant ------------------------------------
 .qr-card{
   background:$vert-fonce;
   border-radius:$r-lg;
   box-shadow:$shadow-2;
-  padding:24px;
+  padding:esp(6);
   text-align:center;
   color:$blanc;
 }
 .qr-card__label{
-  font-size:12px;
+  font-size:typo(overline);
   font-weight:600;
   letter-spacing:.04em;
   text-transform:uppercase;
   color:rgba($blanc,.75);   // 7,07:1 sur le vert foncé
-  margin:0 0 16px;
+  margin:0 0 esp(4);
 }
 .qr-card__frame{
   background:$blanc;
   border-radius:$r-md;
-  padding:20px;
+  padding:esp(5);
   display:grid;
   place-items:center;
   aspect-ratio:1;
@@ -922,13 +922,13 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 .qr-card__pending{color:rgba($texte,.48)}   // 3,16:1 sur blanc
 
 .qr-card__hint{
-  font-size:12.5px;
+  font-size:typo(caption);
   color:rgba($blanc,.8);    // 8,02:1
   margin:16px auto 20px;
   max-width:250px;
   line-height:1.5;
 }
-.qr-card__actions{display:flex;flex-direction:column;gap:8px}
+.qr-card__actions{display:flex;flex-direction:column;gap:esp(2)}
 
 // --- Cartes latérales ----------------------------------------------------------
 .board-card{
@@ -936,36 +936,36 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   border-radius:$r-lg;
   box-shadow:$shadow-1;
   border:1px solid $bordure;
-  padding:24px;
+  padding:esp(6);
 }
 .board-card__head{
   display:flex;align-items:center;justify-content:space-between;
-  gap:12px;margin-bottom:14px;
+  gap:esp(3);margin-bottom:esp(4);
 }
-.board-card__title{font-size:15px;font-weight:700;margin:0}
-.board-card__name{font-size:16px;font-weight:600;margin:0}
-.board-card__meta{font-size:13.5px;color:$gris-second;margin:2px 0 0}
+.board-card__title{font-size:typo(body-sm);font-weight:700;margin:0}
+.board-card__name{font-size:typo(body);font-weight:600;margin:0}
+.board-card__meta{font-size:typo(caption);color:$gris-second;margin:2px 0 0}
 .board-card__notice{
-  font-size:13px;color:$gris-second;
+  font-size:typo(caption);color:$gris-second;
   background:$gris-fond;border-radius:$r-sm;
-  padding:12px 14px;margin:16px 0 0;
+  padding:esp(3) esp(4);margin:esp(4) 0 0;
 }
 .board-card__foot{
-  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
-  margin-top:20px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:esp(3);
+  margin-top:esp(5);
 }
 
 // --- Lien public : champ readonly + copie ---------------------------------------
-.board-link{display:block;margin-top:18px}
+.board-link{display:block;margin-top:esp(5)}
 .board-link__label{
-  display:block;font-size:12px;font-weight:600;
-  color:$gris-second;margin-bottom:6px;
+  display:block;font-size:typo(overline);font-weight:600;
+  color:$gris-second;margin-bottom:esp(2);
 }
-.board-link__row{display:flex;gap:8px}
+.board-link__row{display:flex;gap:esp(2)}
 .board-link__input{
   flex:1 1 auto;min-width:0;
-  padding:10px 12px;
-  font-family:inherit;font-size:13px;
+  padding:esp(3) esp(3);
+  font-family:inherit;font-size:typo(caption);
   color:$texte;background:$gris-fond;
   border:1px solid $bordure-champ;
   border-radius:$r-sm;
@@ -974,8 +974,8 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 .board-link__copy{
   flex:0 0 auto;
-  padding:0 16px;
-  font-size:13px;font-weight:600;
+  padding:0 esp(4);
+  font-size:typo(caption);font-weight:600;
   color:$vert-fonce;background:$vert-clair;
   border:0;border-radius:$r-sm;
   cursor:pointer;
@@ -983,28 +983,28 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 
 // --- Statistiques ---------------------------------------------------------------
-.board-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.board-stat{text-align:center;padding:14px 8px;background:$gris-fond;border-radius:$r-md}
-.board-stat__n{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em}
-.board-stat__l{display:block;font-size:11.5px;color:$gris-second;margin-top:2px}
+.board-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:esp(3)}
+.board-stat{text-align:center;padding:esp(4) esp(2);background:$gris-fond;border-radius:$r-md}
+.board-stat__n{display:block;font-size:typo(h2);font-weight:700;letter-spacing:-.02em}
+.board-stat__l{display:block;font-size:typo(overline);color:$gris-second;margin-top:2px}
 
 // --- 375px -----------------------------------------------------------------------
 @media (max-width: 767.98px){
   .board{grid-template-columns:1fr;max-width:520px}
 }
 @media (max-width: 575.98px){
-  .board{gap:14px}
-  .board-empty__card{padding:32px 20px;border-radius:$r-md;box-shadow:$shadow-1}
-  .board-empty__text{margin-bottom:22px}
-  .qr-card,.board-card{padding:18px;border-radius:$r-md}
-  .qr-card__frame{padding:14px;max-width:190px}
+  .board{gap:esp(4)}
+  .board-empty__card{padding:esp(7) esp(5);border-radius:$r-md;box-shadow:$shadow-1}
+  .board-empty__text{margin-bottom:esp(6)}
+  .qr-card,.board-card{padding:esp(5);border-radius:$r-md}
+  .qr-card__frame{padding:esp(4);max-width:190px}
   .board-card__foot{
     flex-direction:column;align-items:stretch;
     .btn-pill,form,form .btn-pill{width:100%;justify-content:center;text-align:center}
   }
-  .board-stats{gap:8px}
-  .board-stat{padding:12px 4px}
-  .board-stat__n{font-size:19px}
+  .board-stats{gap:esp(2)}
+  .board-stat{padding:esp(3) esp(1)}
+  .board-stat__n{font-size:typo(body-lg)}
 }
 
 // =============================================================================
@@ -1013,11 +1013,11 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 .pub{
   max-width:420px;
   margin-inline:auto;
-  padding:32px 20px 48px;
+  padding:esp(7) esp(5) esp(9);
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:28px;
+  gap:esp(7);
 }
 /*
  | « Enregistrer le contact » — la seule action en pleine largeur, parce que
@@ -1026,17 +1026,17 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
  */
 .pub__save{width:100%}
 
-.pub__actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
-.pub__socials{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pub__actions{display:flex;flex-wrap:wrap;gap:esp(3);justify-content:center}
+.pub__socials{display:flex;flex-wrap:wrap;gap:esp(2);justify-content:center}
 .pub__social{
-  padding:7px 14px;
-  font-size:13px;font-weight:600;
+  padding:esp(2) esp(4);
+  font-size:typo(caption);font-weight:600;
   color:$vert-fonce;background:$vert-clair;
   border-radius:$r-full;
   &:hover{background:darken($vert-clair,4%)}
 }
 .pub__foot{
-  font-size:12.5px;color:$gris-second;text-align:center;margin:0;
+  font-size:typo(caption);color:$gris-second;text-align:center;margin:0;
   a{color:$vert-fonce;font-weight:600}
 }
 
@@ -1049,8 +1049,8 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
  */
 .carte-off{
   text-align:center;
-  display:flex;flex-direction:column;align-items:center;gap:14px;
-  padding:8px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:esp(4);
+  padding:esp(2) esp(1);
 }
 .carte-off__marque{
   width:60px;height:60px;
@@ -1059,24 +1059,24 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   background:$vert-clair;color:$vert-fonce;
 }
 .carte-off__titre{
-  font-size:19px;font-weight:700;color:$texte;margin:0;
+  font-size:typo(body-lg);font-weight:700;color:$texte;margin:0;
   line-height:1.3;
 }
 .carte-off__texte{
-  font-size:14px;color:$gris-second;margin:0;
+  font-size:typo(body-sm);color:$gris-second;margin:0;
   max-width:34ch;line-height:1.55;
   strong{color:$texte;font-weight:600}
 }
 // Une seule action, et elle prend toute la largeur : il n'y a rien d'autre à
 // faire sur cette page.
-.carte-off__action{width:100%;margin-top:4px}
+.carte-off__action{width:100%;margin-top:esp(1)}
 .carte-off__pied{
-  font-size:12.5px;margin:0;
+  font-size:typo(caption);margin:0;
   a{color:$vert-fonce;font-weight:600}
 }
 
 @media (max-width: 575.98px){
-  .pub{padding:20px 14px 36px;gap:22px}
+  .pub{padding:esp(5) esp(4) esp(8);gap:esp(6)}
   .pub__actions .btn-pill{flex:1 1 auto;justify-content:center;min-width:110px}
 }
 
@@ -1086,22 +1086,22 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 // Le client vient d'abord pour SAVOIR OÙ EN EST SA CARTE, pas pour saisir
 // quelque chose. L'état passe donc avant le formulaire.
 .carte-etat{
-  display:flex;align-items:center;flex-wrap:wrap;gap:10px;
-  margin:0 0 20px;
+  display:flex;align-items:center;flex-wrap:wrap;gap:esp(3);
+  margin:0 0 esp(5);
 }
 
 .carte-etat__pastille{
-  padding:6px 14px;
+  padding:esp(2) esp(4);
   border-radius:$r-full;
   background:$vert-clair;color:$vert-fonce;
-  font-size:12.5px;font-weight:700;
+  font-size:typo(caption);font-weight:700;
 }
 
-.carte-etat__date{font-size:12.5px;color:$gris-second}
+.carte-etat__date{font-size:typo(caption);color:$gris-second}
 
 .carte-recap{
-  display:grid;grid-template-columns:auto 1fr;gap:6px 16px;
-  margin:18px 0 0;font-size:13.5px;
+  display:grid;grid-template-columns:auto 1fr;gap:esp(2) esp(4);
+  margin:esp(5) 0 0;font-size:typo(caption);
 
   dt{color:$gris-second}
   dd{margin:0;color:$texte;font-weight:600}
@@ -1117,15 +1117,15 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 // passé. Cette ligne dit ce que la BASE contient — pas ce que le formulaire a
 // affiché, qui ne prouve rien.
 .board-medias{
-  display:flex;flex-wrap:wrap;gap:8px;
-  margin-bottom:12px;
+  display:flex;flex-wrap:wrap;gap:esp(2);
+  margin-bottom:esp(3);
 }
 
 .board-media{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:5px 11px;
+  display:inline-flex;align-items:center;gap:esp(2);
+  padding:esp(2) esp(3);
   border-radius:$r-full;
-  font-size:12px;font-weight:600;
+  font-size:typo(overline);font-weight:600;
   background:var(--accent-doux, #{$vert-clair});
   color:var(--accent, #{$vert-fonce});
 

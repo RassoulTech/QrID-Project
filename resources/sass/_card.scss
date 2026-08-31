@@ -194,27 +194,27 @@
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:16px;
+  gap:esp(4);
 }
 
 .card-duo__scene{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:16px;
+  gap:esp(4);
   width:100%;
 }
 
 .card-duo__bouton{
-  display:inline-flex;align-items:center;gap:8px;
+  display:inline-flex;align-items:center;gap:esp(2);
   min-height:44px;
-  padding:0 18px;
+  padding:0 esp(5);
   border:1px solid var(--bord-fort, rgba(10,31,26,.14));
-  border-radius:999px;
+  border-radius:rayon(full);
   background:var(--surface, #{$blanc});
   color:var(--texte, #{$texte});
   font-family:inherit;
-  font-size:13.5px;font-weight:600;
+  font-size:typo(body-sm);font-weight:600;
   cursor:pointer;
 
   &:hover,&:focus-visible{border-color:var(--accent, #{$vert-fonce});color:var(--accent, #{$vert-fonce})}
@@ -239,7 +239,7 @@
     inset:0;
     width:100%;
     // 600ms, sur l'axe vertical.
-    transition:transform 600ms cubic-bezier(.22,.68,.28,1);
+    transition:transform $d-carte cubic-bezier(.22,.68,.28,1);
     transform-style:preserve-3d;
     backface-visibility:hidden;
     cursor:pointer;

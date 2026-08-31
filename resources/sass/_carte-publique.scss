@@ -48,7 +48,7 @@
   z-index:5;
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:esp(2);
 }
 
 // LE SÉLECTEUR DE LANGUE EST TRANSPARENT PARTOUT AILLEURS. ICI, IL POSE SUR
@@ -141,30 +141,30 @@
   position:relative;
   z-index:2;
   width:100%;
-  padding:0 20px 20px;
+  padding:0 esp(5) esp(5);
   min-width:0;
 }
 
 .pubc__nom{
-  font-size:27px;font-weight:800;
+  font-size:typo(h1);font-weight:800;
   letter-spacing:-.025em;line-height:1.12;
   color:#FFFFFF;
-  margin:0 0 5px;
+  margin:0 0 esp(2);
   overflow-wrap:anywhere;   // un nom long passe à la ligne
   text-shadow:0 1px 12px rgba(0,0,0,.35);
 }
 
 .pubc__role{
-  font-size:14.5px;font-weight:500;
+  font-size:typo(body-sm);font-weight:500;
   color:rgba(255,255,255,.88);
   margin:0;overflow-wrap:anywhere;
   text-shadow:0 1px 10px rgba(0,0,0,.3);
 }
 
 .pubc__entreprise{
-  font-size:13px;font-weight:600;
+  font-size:typo(caption);font-weight:600;
   color:rgba(255,255,255,.72);
-  margin:3px 0 0;overflow-wrap:anywhere;
+  margin:esp(1) 0 0;overflow-wrap:anywhere;
   text-shadow:0 1px 10px rgba(0,0,0,.3);
 }
 
@@ -173,14 +173,14 @@
 // -----------------------------------------------------------------------------
 .pubc__infos{
   list-style:none;
-  margin:16px 20px 0;padding:2px 0;
+  margin:esp(4) esp(5) 0;padding:2px 0;
   background:var(--surface-3);
   border:1px solid var(--bord);
   border-radius:$r-sm;
 }
 
 .pubc__info{
-  display:flex;align-items:center;gap:12px;
+  display:flex;align-items:center;gap:esp(3);
   padding:esp(3) esp(4);
   // 56px et non 44 : cette ligne n'est pas un bouton parmi d'autres,
   // c'est LA cible qu'on vise en marchant, une carte à la main. Les
@@ -204,7 +204,7 @@
 .pubc__info-texte{display:grid;gap:1px;min-width:0}
 
 .pubc__info-valeur{
-  font-size:13.5px;font-weight:600;
+  font-size:typo(caption);font-weight:600;
   color:var(--accent);
   overflow-wrap:anywhere;
 }
@@ -213,7 +213,7 @@
 // --texte-2 tient 4,5:1 sur --surface-3 dans les DEUX thèmes ; ne pas le
 // remplacer par une teinte plus pâle « pour faire discret ».
 .pubc__info-etiquette{
-  font-size:9.5px;font-weight:700;
+  font-size:typo(overline);font-weight:700;
   letter-spacing:.09em;text-transform:uppercase;
   color:var(--texte-2);
 }
@@ -231,8 +231,8 @@
 .pubc__grille{
   display:grid;
   grid-template-columns:repeat(3, 1fr);
-  gap:10px;
-  padding:14px 20px 0;
+  gap:esp(3);
+  padding:esp(4) esp(5) 0;
 }
 
 .pubc__tuile{
@@ -250,7 +250,7 @@
   border:1px solid var(--bord);
   color:var(--texte-2);
   text-decoration:none;
-  transition:transform 140ms ease, border-color 140ms ease, color 140ms ease;
+  transition:transform $d-rapide ease, border-color $d-rapide ease, color $d-rapide ease;
 
   // La couleur officielle n'apparaît qu'au survol : une grille multicolore au
   // repos ferait concurrence au nom du porteur, qui est le sujet de la page.
@@ -265,7 +265,7 @@
 }
 
 .pubc__tuile-nom{
-  font-size:10.5px;font-weight:600;
+  font-size:typo(overline);font-weight:600;
   text-align:center;line-height:1.15;
   color:var(--texte);
   overflow-wrap:anywhere;
@@ -277,20 +277,20 @@
 .pubc__barre{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:10px;
-  padding:16px 20px 0;
+  gap:esp(3);
+  padding:esp(4) esp(5) 0;
 }
 
 // Une seule action est PLEINE. Deux boutons primaires n'en font aucun : c'est
 // « Enregistrer » qui termine le parcours, « Partager » n'est qu'un service.
 .pubc__action{
-  display:flex;align-items:center;justify-content:center;gap:8px;
+  display:flex;align-items:center;justify-content:center;gap:esp(2);
   // 52px : ce sont les deux seules actions de la page — « Enregistrer »
   // et « Partager ». Elles doivent se toucher sans viser.
   min-height:52px;
   padding:esp(3) esp(4);
   border-radius:$r-full;
-  font-size:13px;font-weight:700;
+  font-size:typo(caption);font-weight:700;
   letter-spacing:.02em;
   text-decoration:none;
   text-align:center;
@@ -318,8 +318,8 @@
 
 .pubc__pied{
   text-align:center;
-  margin:14px 0 0;padding:0 20px 22px;
-  font-size:11.5px;color:var(--texte-2);
+  margin:esp(4) 0 0;padding:0 esp(5) esp(6);
+  font-size:typo(overline);color:var(--texte-2);
 
   a{color:var(--accent);font-weight:600}
 }
@@ -331,20 +331,20 @@
   display:none;
   position:fixed;inset:0;z-index:60;
   background:rgba(6,20,16,.94);
-  padding:24px;text-align:center;
+  padding:esp(6);text-align:center;
 
-  &:target{display:grid;place-content:center;gap:16px}
+  &:target{display:grid;place-content:center;gap:esp(4)}
 
   svg,img{
     width:min(74vw,290px);height:auto;
     // Le QR reste sur fond BLANC quel que soit le thème : un module clair sur
     // fond sombre sort de la norme et échoue sur certains lecteurs.
-    background:#FFF;padding:14px;border-radius:$r-sm;
+    background:#FFF;padding:esp(4);border-radius:$r-sm;
   }
 }
 
 .pubc__qr-nom{color:#FFF;font-weight:700;margin:0}
-.pubc__qr-fermer{color:#FFF;font-size:13px;font-weight:600;text-decoration:underline}
+.pubc__qr-fermer{color:#FFF;font-size:typo(caption);font-weight:600;text-decoration:underline}
 
 // -----------------------------------------------------------------------------
 // TRÈS PETITS ÉCRANS — 320px
@@ -352,17 +352,17 @@
 // Le format le plus étroit encore en service. Tout tient déjà ; seules les
 // marges se resserrent pour ne pas manger la moitié de la largeur.
 @media (max-width:359px){
-  .pubc{padding:12px 8px 30px}
-  .pubc__identite{padding:0 14px}
-  .pubc__infos{margin:16px 10px 0}
-  .pubc__grille,.pubc__barre{padding-left:10px;padding-right:10px;gap:8px}
+  .pubc{padding:esp(3) esp(2) esp(7)}
+  .pubc__identite{padding:0 esp(4)}
+  .pubc__infos{margin:esp(4) esp(3) 0}
+  .pubc__grille,.pubc__barre{padding-left:esp(3);padding-right:esp(3);gap:esp(2)}
   .pubc__medaillon{left:14px;width:96px;height:96px;bottom:-48px}
-  .pubc__couverture{margin-bottom:56px}
+  .pubc__couverture{margin-bottom:esp(10)}
   // Le nom suit l'échelle typographique, comme n'importe quel h1. Il
   // n'est JAMAIS tronqué : overflow-wrap:anywhere plus haut s'en charge,
   // quelle que soit la longueur.
   .pubc__nom{font-size:typo(h1)}
-  .pubc__tuile-nom{font-size:9.5px}
+  .pubc__tuile-nom{font-size:typo(overline)}
 }
 
 // =============================================================================
@@ -375,7 +375,7 @@
 @media (min-width:640px){
   .pubc-page{
     background:var(--surface-2);
-    padding:24px 16px 48px;
+    padding:esp(6) esp(4) esp(9);
   }
 
   .pubc{
@@ -412,14 +412,14 @@
   // 340px au-delà du téléphone, comme demandé.
   .pubc__couverture{height:340px}
 
-  .pubc__nom{font-size:30px}
+  .pubc__nom{font-size:typo(h1)}
 }
 
 // Très petits écrans : la couverture se resserre un peu, le reste tient.
 @media (max-width:359px){
   .pubc__couverture{height:250px}
-  .pubc__identite{padding:0 16px 16px}
-  .pubc__nom{font-size:23px}
+  .pubc__identite{padding:0 esp(4) esp(4)}
+  .pubc__nom{font-size:typo(h2)}
 }
 
 // -----------------------------------------------------------------------------
@@ -431,15 +431,15 @@
 .pubc__couverture-marque{
   position:absolute;
   right:14px;top:14px;
-  display:inline-flex;align-items:center;gap:6px;
-  padding:5px 11px 5px 8px;
+  display:inline-flex;align-items:center;gap:esp(2);
+  padding:esp(2) esp(3) esp(2) esp(2);
   border-radius:$r-full;
   background:rgba(255,255,255,.14);
   // Le liseré détache la pastille des zones claires du dégradé, où un fond
   // translucide seul disparaîtrait.
   border:1px solid rgba(255,255,255,.22);
   backdrop-filter:blur(6px);
-  font-size:10.5px;font-weight:700;
+  font-size:typo(overline);font-weight:700;
   letter-spacing:.10em;text-transform:uppercase;
   color:rgba(255,255,255,.92);
   user-select:none;

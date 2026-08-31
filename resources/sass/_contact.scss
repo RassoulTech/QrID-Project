@@ -7,29 +7,29 @@
 // =============================================================================
 
 .contact{
-  padding:88px 0;
+  padding:esp(12) 0;
   background:var(--surface-2, #{$gris-fond});
-  scroll-margin-top:80px;   // l'ancre #contact ne passe pas sous la navbar
+  scroll-margin-top:esp(11);   // l'ancre #contact ne passe pas sous la navbar
 }
 
 .contact__grille{
   display:grid;
   grid-template-columns:1fr;
-  gap:36px;
+  gap:esp(8);
   align-items:start;
 
   @media (min-width:900px){
     // La colonne du formulaire est la plus large : c'est elle qui porte
     // l'action, et six champs ont besoin de place pour ne pas se tasser.
     grid-template-columns:0.85fr 1.15fr;
-    gap:56px;
+    gap:esp(10);
   }
 }
 
 .contact__intro{
   // Sur grand écran, le texte accompagne le formulaire au lieu de le
   // surplomber : il reste à hauteur de regard pendant la saisie.
-  @media (min-width:900px){padding-top:8px}
+  @media (min-width:900px){padding-top:esp(2)}
 }
 
 // -----------------------------------------------------------------------------
@@ -42,13 +42,13 @@
 .contact__wa{
   display:flex;
   align-items:center;
-  gap:14px;
-  margin-top:28px;
-  padding:16px 18px;
+  gap:esp(4);
+  margin-top:esp(7);
+  padding:esp(4) esp(5);
   border-radius:$r-md;
   background:var(--surface, #{$blanc});
   border:1px solid var(--bordure, #{$bordure});
-  transition:border-color 160ms ease, box-shadow 160ms ease;
+  transition:border-color $d-rapide ease, box-shadow $d-rapide ease;
 
   &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
     color:var(--texte, #{$texte});
@@ -56,7 +56,7 @@
   }
 
   &:hover{
-    border-color:#25D366;
+    border-color:$marque-whatsapp;
     box-shadow:$shadow-1;
   }
 
@@ -67,31 +67,31 @@
 
   svg{
     flex:0 0 auto;
-    color:#25D366;   // la couleur du service, pas celle de la marque
+    color:$marque-whatsapp;   // la couleur du service, pas celle de la marque
   }
 
   span{display:flex;flex-direction:column;gap:2px}
-  strong{font-size:14.5px;font-weight:700}
-  small{font-size:12.5px;color:var(--texte-2, #{$gris-second})}
+  strong{font-size:typo(body);font-weight:700}
+  small{font-size:typo(caption);color:var(--texte-2, #{$gris-second})}
 }
 
 // -----------------------------------------------------------------------------
 // La carte du formulaire
 // -----------------------------------------------------------------------------
 .contact__carte{
-  padding:28px;
+  padding:esp(7);
   border-radius:$r-lg;
   background:var(--surface, #{$blanc});
   border:1px solid var(--bordure, #{$bordure});
   box-shadow:$shadow-1;
 
-  @media (min-width:576px){padding:34px}
+  @media (min-width:576px){padding:esp(8)}
 }
 
 .contact__form{
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:esp(5);
 }
 
 // Deux champs par ligne au-delà de 576 px. En dessous, ils s'empilent : deux
@@ -100,18 +100,18 @@
 .contact__paire{
   display:grid;
   grid-template-columns:1fr;
-  gap:18px;
+  gap:esp(5);
 
   @media (min-width:576px){grid-template-columns:1fr 1fr}
 }
 
 // La légende de l'astérisque tient contre le premier champ plutôt que de
 // flotter au milieu de l'écart de 18px du formulaire.
-.contact__form .f__legende{margin-bottom:-8px}
+.contact__form .f__legende{margin-bottom:-esp(2)}
 
 .contact__legal{
   margin:0;
-  font-size:12.5px;
+  font-size:typo(caption);
   line-height:1.5;
   color:var(--texte-2, #{$gris-second});
   text-align:center;
@@ -123,13 +123,13 @@
 .contact__ok{
   display:flex;
   align-items:flex-start;
-  gap:12px;
-  margin-bottom:22px;
-  padding:14px 16px;
+  gap:esp(3);
+  margin-bottom:esp(6);
+  padding:esp(4) esp(4);
   border-radius:$r-sm;
   background:var(--accent-doux, #{$vert-clair});
   color:var(--accent, #{$vert-fonce});
-  font-size:14px;
+  font-size:typo(body-sm);
   line-height:1.5;
 
   svg{flex:0 0 auto;margin-top:2px}

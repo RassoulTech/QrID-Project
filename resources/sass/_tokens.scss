@@ -494,3 +494,22 @@ $r-full: rayon(full);            // 999px — inchangé
 $shadow-1: $c-ombre-1;           // identique
 $shadow-2: $c-ombre-3;           // apparié à l'œil, pas au numéro
 $shadow-3: $c-ombre-4;           // idem
+
+// =============================================================================
+// 14. LES COULEURS IMPOSÉES PAR DES TIERS
+// =============================================================================
+//
+// Ces teintes ne nous appartiennent pas et ne suivent donc pas la charte.
+// Elles sont pourtant des TOKENS, pour une raison précise : recopiées à la
+// main, elles divergent. `#25D366` était écrit à trois endroits —
+// `_whatsapp.scss`, `_contact.scss` et `_dashboard.scss` — et rien ne
+// garantissait qu'ils restent d'accord.
+//
+// RÈGLE D'EMPLOI : elles servent de FOND ou de TRAIT identifiant une
+// plateforme. Elles ne portent jamais de texte sans qu'on ait mesuré le
+// couple, car aucune n'a été choisie pour son contraste sur nos surfaces.
+
+$marque-whatsapp: #25D366;   // WhatsApp
+$marque-wave:     #1DC8FF;   // Wave
+$marque-orange:   #FF7900;   // Orange Money
+$marque-free:     #CD1719;   // Free Money

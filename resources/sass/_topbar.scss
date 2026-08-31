@@ -31,11 +31,11 @@
   position:absolute;
   top:-4px;right:-4px;
   min-width:17px;height:17px;
-  padding:0 4px;
+  padding:0 esp(1);
   border-radius:$r-full;
   background:$rouge-erreur;
   color:$blanc;
-  font-size:10px;
+  font-size:typo(overline);
   font-weight:700;
   line-height:17px;
   text-align:center;
@@ -58,18 +58,18 @@
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:10px;
-  padding:12px 14px;
+  gap:esp(3);
+  padding:esp(3) esp(4);
   border-bottom:1px solid var(--bord);
 }
 
-.notif-menu__titre{font-size:13px;font-weight:700;color:var(--texte)}
+.notif-menu__titre{font-size:typo(caption);font-weight:700;color:var(--texte)}
 
 .notif-menu__tout{
   border:0;
   background:none;
   padding:0;
-  font-size:11.5px;
+  font-size:typo(caption);
   color:var(--texte-2);
   cursor:pointer;
 
@@ -80,7 +80,7 @@
   display:flex;
   flex-direction:column;
   gap:2px;
-  padding:11px 14px;
+  padding:esp(3) esp(4);
   border-bottom:1px solid var(--bord);
 
   &,&:link,&:visited,&:hover,&:focus,&:focus-visible{color:var(--texte)}
@@ -90,15 +90,15 @@
   &.is-unread{box-shadow:inset 3px 0 0 var(--accent-vif)}
 }
 
-.notif-item__titre{font-size:13px;font-weight:600}
-.notif-item__corps{font-size:12px;color:var(--texte-2);line-height:1.45}
-.notif-item__date{font-size:11px;color:var(--texte-2)}
+.notif-item__titre{font-size:typo(caption);font-weight:600}
+.notif-item__corps{font-size:typo(caption);color:var(--texte-2);line-height:1.45}
+.notif-item__date{font-size:typo(overline);color:var(--texte-2)}
 
 .notif-menu__pied{
   display:block;
-  padding:11px 14px;
+  padding:esp(3) esp(4);
   text-align:center;
-  font-size:12.5px;
+  font-size:typo(caption);
   font-weight:600;
 
   &,&:link,&:visited,&:hover,&:focus,&:focus-visible{color:var(--accent)}
@@ -106,16 +106,16 @@
 }
 
 .notif-vide{
-  padding:26px 18px;
+  padding:esp(7) esp(5);
   text-align:center;
   color:var(--texte-2);
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:6px;
+  gap:esp(2);
 
-  span{font-size:12.5px}
+  span{font-size:typo(caption)}
 }
 
-.notif-vide__aide{font-size:11.5px;line-height:1.5;max-width:30ch}
+.notif-vide__aide{font-size:typo(caption);line-height:1.5;max-width:30ch}
 

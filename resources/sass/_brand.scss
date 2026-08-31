@@ -13,7 +13,7 @@
 .brand{
   display:inline-flex;
   align-items:center;
-  gap:10px;
+  gap:esp(3);
   line-height:1.15;
 
   // La couleur est déclarée pour TOUS les états : aucune marque ne doit
@@ -30,7 +30,7 @@
   flex:0 0 auto;
   display:grid;
   place-items:center;
-  border-radius:9px;
+  border-radius:rayon(md);
   font-weight:800;
   letter-spacing:.02em;
   // Le monogramme est une abréviation : les capitales y sont légitimes,
@@ -62,23 +62,23 @@
 // Tailles
 // -----------------------------------------------------------------------------
 .brand--sm{
-  gap:8px;
-  .brand__mark{width:26px;height:26px;font-size:11px;border-radius:7px}
-  .brand__name{font-size:14px}
-  .brand__tagline{font-size:10px}
+  gap:esp(2);
+  .brand__mark{width:26px;height:26px;font-size:typo(overline);border-radius:rayon(sm)}
+  .brand__name{font-size:typo(body-sm)}
+  .brand__tagline{font-size:typo(overline)}
 }
 
 .brand--md{
-  .brand__mark{width:32px;height:32px;font-size:13px}
-  .brand__name{font-size:17px}
-  .brand__tagline{font-size:11px}
+  .brand__mark{width:32px;height:32px;font-size:typo(caption)}
+  .brand__name{font-size:typo(body-lg)}
+  .brand__tagline{font-size:typo(overline)}
 }
 
 .brand--lg{
-  gap:12px;
-  .brand__mark{width:42px;height:42px;font-size:17px;border-radius:12px}
-  .brand__name{font-size:22px}
-  .brand__tagline{font-size:12px}
+  gap:esp(3);
+  .brand__mark{width:42px;height:42px;font-size:typo(body-lg);border-radius:rayon(md)}
+  .brand__name{font-size:typo(h1)}
+  .brand__tagline{font-size:typo(caption)}
 }
 
 // -----------------------------------------------------------------------------

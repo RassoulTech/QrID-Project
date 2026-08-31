@@ -56,7 +56,7 @@ body:has(> .adm){
   color: rgba($blanc, .74);
   display: flex;
   flex-direction: column;
-  padding: 20px 14px 16px;
+  padding:esp(5) esp(4) esp(4);
   position: sticky;
   top: 0;
   height: 100vh;
@@ -97,14 +97,14 @@ body:has(> .adm){
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 7px;
-  padding: 2px 11px 18px;
-  margin-bottom: 14px;
+  gap:esp(2);
+  padding:2px esp(3) esp(5);
+  margin-bottom:esp(4);
   border-bottom: 1px solid rgba($blanc, .10);
 }
 
 .adm-side__portail {
-  font-size: 9.5px;
+  font-size:typo(overline);
   font-weight: 700;
   letter-spacing: .13em;
   text-transform: uppercase;
@@ -125,37 +125,37 @@ body:has(> .adm){
 // sur ce vert, il tombait sous 2:1 et disparaissait. 62 % le tient au-dessus
 // de 4,5:1 tout en le laissant clairement en retrait des entrées.
 .adm-nav__titre {
-  margin: 16px 0 6px;
-  padding: 0 11px;
-  font-size: 9.5px;
+  margin:esp(4) 0 esp(2);
+  padding:0 esp(3);
+  font-size:typo(overline);
   font-weight: 700;
   letter-spacing: .15em;
   text-transform: uppercase;
   color: rgba($blanc, .62);
 
-  &:first-child { margin-top: 0; }
+  &:first-child { margin-top:0; }
 }
 
 .adm-nav__liste {
   list-style: none;
-  margin: 0;
-  padding: 0;
+  margin:0;
+  padding:0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap:2px;
 }
 
 // L'entrée : pilule arrondie, pleine en vert quand elle est active.
 .adm-nav__lien {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap:esp(3);
   width: 100%;
-  padding: 9px 11px;
+  padding:esp(3) esp(3);
   border: 0;
   border-radius: $r-full;
   background: transparent;
-  font-size: 12.5px;
+  font-size:typo(caption);
   font-weight: 500;
   text-align: left;
   line-height: 1.25;
@@ -206,11 +206,11 @@ body:has(> .adm){
 
 .adm-nav__bas {
   margin-top: auto;
-  padding-top: 12px;
+  padding-top:esp(3);
   border-top: 1px solid rgba($blanc, .10);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap:2px;
 }
 
 // -----------------------------------------------------------------------------
@@ -227,8 +227,8 @@ body:has(> .adm){
   min-height: $adm-top-h;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 0 20px;
+  gap:esp(4);
+  padding:0 esp(5);
   background: var(--surface);
   border-bottom: 1px solid var(--bord);
   position: sticky;
@@ -241,13 +241,13 @@ body:has(> .adm){
   border: 0;
   background: transparent;
   color: var(--texte);
-  padding: 6px;
+  padding:esp(2);
   border-radius: $r-sm;
   &:hover { background: var(--survol); }
 }
 
 .adm-top__section {
-  font-size: 12.5px;
+  font-size:typo(caption);
   font-weight: 600;
   color: var(--texte-2);
   white-space: nowrap;
@@ -257,14 +257,14 @@ body:has(> .adm){
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap:esp(3);
 }
 
 .adm-search {
   position: relative;
   flex: 0 1 300px;
   min-width: 0;
-  margin: 0;
+  margin:0;
 }
 
 .adm-search__icone {
@@ -279,12 +279,12 @@ body:has(> .adm){
 .adm-search__champ {
   width: 100%;
   height: 35px;
-  padding: 0 12px 0 32px;
+  padding:0 esp(3) 0 esp(7);
   border: 1px solid var(--bord);
   border-radius: $r-full;
   background: var(--surface-2);
   color: var(--texte);
-  font-size: 12.5px;
+  font-size:typo(caption);
 
   &::placeholder { color: var(--texte-2); }
   &:focus { outline: 2px solid var(--accent-vif); outline-offset: -1px; }
@@ -293,12 +293,12 @@ body:has(> .adm){
 .adm-top__user {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap:esp(3);
   border: 0;
   background: transparent;
-  padding: 4px 6px;
+  padding:esp(1) esp(2);
   border-radius: $r-full;
-  font-size: 12.5px;
+  font-size:typo(caption);
   font-weight: 600;
   color: var(--texte);
 
@@ -314,7 +314,7 @@ body:has(> .adm){
   color: #06231B;
   display: grid;
   place-items: center;
-  font-size: 10.5px;
+  font-size:typo(overline);
   font-weight: 700;
   letter-spacing: .02em;
 }
@@ -325,7 +325,7 @@ body:has(> .adm){
   flex: 0 0 32px;
   background: var(--accent-doux);
   color: var(--accent);
-  font-size: 11px;
+  font-size:typo(overline);
 }
 
 // -----------------------------------------------------------------------------
@@ -334,7 +334,7 @@ body:has(> .adm){
 .adm-content {
   flex: 1 1 auto;
   background: var(--surface-2);
-  padding: 22px 20px 40px;
+  padding:esp(6) esp(5) esp(8);
 }
 
 .adm-page {
@@ -346,22 +346,22 @@ body:has(> .adm){
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap:esp(4);
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  margin-bottom:esp(5);
 }
 
 .adm-head__titre {
-  font-size: 21px;
+  font-size:typo(h2);
   font-weight: 700;
   letter-spacing: -.02em;
   color: var(--texte);
-  margin: 0;
+  margin:0;
 }
 
 .adm-head__sous {
-  margin: 4px 0 0;
-  font-size: 12.5px;
+  margin:esp(1) 0 0;
+  font-size:typo(caption);
   color: var(--texte-2);
   max-width: 64ch;
 }
@@ -369,7 +369,7 @@ body:has(> .adm){
 .adm-head__actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap:esp(2);
   flex-wrap: wrap;
 }
 
@@ -379,12 +379,12 @@ body:has(> .adm){
 .adm-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap:esp(2);
   height: 35px;
-  padding: 0 14px;
+  padding:0 esp(4);
   border-radius: $r-full;
   border: 1px solid transparent;
-  font-size: 12.5px;
+  font-size:typo(caption);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -422,7 +422,7 @@ body:has(> .adm){
  */
 
 .adm-lien {
-  font-size: 12px;
+  font-size:typo(overline);
   font-weight: 600;
   color: var(--accent);
   &:hover { text-decoration: underline; }
@@ -433,9 +433,9 @@ body:has(> .adm){
 // -----------------------------------------------------------------------------
 .adm-stats {
   display: grid;
-  gap: 12px;
+  gap:esp(3);
   grid-template-columns: repeat(2, 1fr);
-  margin-bottom: 16px;
+  margin-bottom:esp(4);
 
   @media (min-width: 768px)  { grid-template-columns: repeat(3, 1fr); }
   @media (min-width: 1200px) { grid-template-columns: repeat(6, 1fr); }
@@ -444,11 +444,11 @@ body:has(> .adm){
 .adm-stat {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap:esp(2);
   background: var(--surface);
   border: 1px solid var(--bord);
   border-radius: $r-sm;
-  padding: 14px;
+  padding:esp(4);
   min-width: 0;
 }
 
@@ -466,7 +466,7 @@ body:has(> .adm){
 }
 
 .adm-stat__libelle {
-  font-size: 9px;
+  font-size:typo(overline);
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -475,7 +475,7 @@ body:has(> .adm){
 }
 
 .adm-stat__valeur {
-  font-size: 22px;
+  font-size:typo(h2);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -.02em;
@@ -483,16 +483,16 @@ body:has(> .adm){
   // Un montant long ne doit pas déborder de sa carte sur écran étroit.
   overflow-wrap: anywhere;
 
-  small { font-size: 11px; font-weight: 700; }
+  small { font-size:typo(overline); font-weight: 700; }
 }
 
 .adm-stat__var {
-  font-size: 10.5px;
+  font-size:typo(overline);
   font-weight: 700;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px;
+  gap:esp(1);
 
   &.is-hausse { color: $vert-accent; }
   &.is-baisse { color: $rouge-erreur; }
@@ -506,9 +506,9 @@ body:has(> .adm){
 // -----------------------------------------------------------------------------
 .adm-grille {
   display: grid;
-  gap: 14px;
+  gap:esp(4);
   grid-template-columns: 1fr;
-  margin-bottom: 14px;
+  margin-bottom:esp(4);
 
   &--2-1 { @media (min-width: 992px) { grid-template-columns: 1.9fr 1fr; } }
   &--1-1 { @media (min-width: 992px) { grid-template-columns: 1fr 1fr; } }
@@ -517,7 +517,7 @@ body:has(> .adm){
 .adm-colonne {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap:esp(4);
   min-width: 0;
 }
 
@@ -525,7 +525,7 @@ body:has(> .adm){
   background: var(--surface);
   border: 1px solid var(--bord);
   border-radius: $r-sm;
-  padding: 16px;
+  padding:esp(4);
   min-width: 0;
 }
 
@@ -533,15 +533,15 @@ body:has(> .adm){
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap:esp(3);
+  margin-bottom:esp(4);
 }
 
 .adm-bloc__titre {
-  font-size: 13.5px;
+  font-size:typo(caption);
   font-weight: 700;
   color: var(--texte);
-  margin: 0;
+  margin:0;
 }
 
 // -----------------------------------------------------------------------------
@@ -550,9 +550,9 @@ body:has(> .adm){
 .adm-chart {
   display: flex;
   align-items: flex-end;
-  gap: 4px;
+  gap:esp(1);
   height: 200px;
-  padding-top: 18px;   // place pour la valeur affichée au-dessus des barres
+  padding-top:esp(5);   // place pour la valeur affichée au-dessus des barres
 }
 
 .adm-chart__col {
@@ -562,7 +562,7 @@ body:has(> .adm){
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  gap: 6px;
+  gap:esp(2);
   height: 100%;
 }
 
@@ -570,7 +570,7 @@ body:has(> .adm){
   position: relative;
   width: 100%;
   max-width: 38px;
-  border-radius: 5px 5px 2px 2px;
+  border-radius:rayon(sm) rayon(sm) 2px 2px;
   background: $vert-fonce;
   // Une valeur nulle reste visible : un jour sans inscription est une
   // information, pas un trou dans le graphique.
@@ -585,13 +585,13 @@ body:has(> .adm){
   top: -16px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 9.5px;
+  font-size:typo(overline);
   font-weight: 700;
   color: var(--texte-2);
 }
 
 .adm-chart__libelle {
-  font-size: 8.5px;
+  font-size:typo(overline);
   color: var(--texte-2);
   white-space: nowrap;
   overflow: hidden;
@@ -606,16 +606,16 @@ body:has(> .adm){
 .adm-legende {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap:esp(2);
+  font-size:typo(overline);
   color: var(--texte-2);
-  margin: 0;
+  margin:0;
 }
 
 .adm-legende__puce {
   width: 8px;
   height: 8px;
-  border-radius: 2px;
+  border-radius:2px;
   background: $vert-fonce;
   flex: 0 0 8px;
 }
@@ -625,7 +625,7 @@ body:has(> .adm){
 // -----------------------------------------------------------------------------
 .adm-alerte {
   border-radius: $r-sm;
-  padding: 14px;
+  padding:esp(4);
   border: 1px solid transparent;
 }
 
@@ -640,21 +640,21 @@ body:has(> .adm){
 }
 
 .adm-alerte__titre {
-  font-size: 12.5px;
+  font-size:typo(caption);
   font-weight: 700;
   color: var(--texte);
-  margin: 0 0 5px;
+  margin:0 0 esp(2);
 }
 
 .adm-alerte__texte {
-  font-size: 11.5px;
+  font-size:typo(overline);
   line-height: 1.6;
   color: var(--texte-2);
-  margin: 0 0 9px;
+  margin:0 0 esp(3);
 }
 
 .adm-alerte__lien {
-  font-size: 11.5px;
+  font-size:typo(overline);
   font-weight: 700;
   color: var(--accent);
   &:hover { text-decoration: underline; }
@@ -665,31 +665,31 @@ body:has(> .adm){
 // -----------------------------------------------------------------------------
 .adm-parts {
   list-style: none;
-  margin: 0;
-  padding: 0;
+  margin:0;
+  padding:0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap:esp(4);
 }
 
 .adm-part {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 5px 10px;
+  gap:esp(2) esp(3);
   align-items: center;
 }
 
 .adm-part__nom {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 12px;
+  gap:esp(2);
+  font-size:typo(overline);
   color: var(--texte);
   min-width: 0;
 }
 
 .adm-part__chiffre {
-  font-size: 12px;
+  font-size:typo(overline);
   font-weight: 700;
   color: var(--texte);
 }
@@ -712,16 +712,16 @@ body:has(> .adm){
 .adm-part__puce {
   width: 8px;
   height: 8px;
-  border-radius: 2px;
+  border-radius:2px;
   flex: 0 0 8px;
   background: $vert-accent;
 }
 
 // Une teinte par opérateur : la barre se lit sans relire l'étiquette.
 // Ce sont les couleurs officielles des trois services.
-.adm-part__puce--wave,         .adm-part__barre--wave         { background: #1DC8FF; }
-.adm-part__puce--orange_money, .adm-part__barre--orange_money { background: #FF7900; }
-.adm-part__puce--free_money,   .adm-part__barre--free_money   { background: #CD1719; }
+.adm-part__puce--wave,         .adm-part__barre--wave         { background: $marque-wave; }
+.adm-part__puce--orange_money, .adm-part__barre--orange_money { background: $marque-orange; }
+.adm-part__puce--free_money,   .adm-part__barre--free_money   { background: $marque-free; }
 
 // -----------------------------------------------------------------------------
 // LIGNES DE LISTE
@@ -729,12 +729,12 @@ body:has(> .adm){
 .adm-ligne {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 10px 0;
+  gap:esp(3);
+  padding:esp(3) 0;
   border-bottom: 1px solid var(--bord);
   min-width: 0;
 
-  &:last-child { border-bottom: 0; padding-bottom: 0; }
+  &:last-child { border-bottom: 0; padding-bottom:0; }
 }
 
 .adm-ligne__texte {
@@ -745,7 +745,7 @@ body:has(> .adm){
 }
 
 .adm-ligne__nom {
-  font-size: 12.5px;
+  font-size:typo(caption);
   font-weight: 600;
   color: var(--texte);
   white-space: nowrap;
@@ -754,7 +754,7 @@ body:has(> .adm){
 }
 
 .adm-ligne__meta {
-  font-size: 11px;
+  font-size:typo(overline);
   color: var(--texte-2);
   white-space: nowrap;
   overflow: hidden;
@@ -766,11 +766,11 @@ body:has(> .adm){
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap:esp(1);
 }
 
 .adm-ligne__montant {
-  font-size: 12.5px;
+  font-size:typo(caption);
   font-weight: 700;
   color: var(--texte);
   white-space: nowrap;
@@ -783,7 +783,7 @@ body:has(> .adm){
 // On ne décrit ici que l'apparence.
 .adm-modale {
   border: 0;
-  padding: 0;
+  padding:0;
   border-radius: $r-md;
   background: var(--surface);
   color: var(--texte);
@@ -796,32 +796,32 @@ body:has(> .adm){
 
 .adm-modale__corps,
 .adm-modale__repli {
-  padding: 20px;
+  padding:esp(5);
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap:esp(3);
 }
 
-.adm-modale__titre { font-size: 15px; font-weight: 700; margin: 0; }
+.adm-modale__titre { font-size:typo(body-sm); font-weight: 700; margin:0; }
 
 .adm-modale__texte {
-  font-size: 12.5px;
+  font-size:typo(caption);
   line-height: 1.6;
   color: var(--texte-2);
-  margin: 0;
+  margin:0;
 }
 
 .adm-modale__label {
-  font-size: 12px;
+  font-size:typo(overline);
   font-weight: 600;
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin-top: 4px;
+  gap:esp(2);
+  margin-top:esp(1);
 }
 
 .adm-modale__obligatoire {
-  font-size: 10px;
+  font-size:typo(overline);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .06em;
@@ -830,9 +830,9 @@ body:has(> .adm){
 
 .adm-modale__champ {
   width: 100%;
-  padding: 10px 12px;
+  padding:esp(3) esp(3);
   font-family: inherit;
-  font-size: 13.5px;
+  font-size:typo(caption);
   color: var(--texte);
   background: var(--surface);
   // Bordure à 3:1 minimum : WCAG 1.4.11 l'exige pour délimiter un champ.
@@ -844,19 +844,19 @@ body:has(> .adm){
   &:focus { outline: 2px solid var(--accent-vif); outline-offset: -1px; }
 }
 
-.adm-modale__erreur { font-size: 12px; color: $rouge-erreur; margin: 0; }
+.adm-modale__erreur { font-size:typo(overline); color: $rouge-erreur; margin:0; }
 
 .adm-modale__pied {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 6px;
+  gap:esp(2);
+  margin-top:esp(2);
 }
 
 .adm-modale__repli {
   border: 1px solid var(--bord-fort);
   border-radius: $r-sm;
-  margin-top: 8px;
+  margin-top:esp(2);
 }
 
 .adm-btn--danger {
@@ -874,9 +874,9 @@ body:has(> .adm){
 .adm-lien--action {
   border: 0;
   background: transparent;
-  padding: 0;
+  padding:0;
   font: inherit;
-  font-size: 12px;
+  font-size:typo(overline);
   font-weight: 600;
   cursor: pointer;
 }
@@ -902,12 +902,12 @@ $adm-controle-h: 38px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 10px;
-  padding: 12px;
+  gap:esp(3);
+  padding:esp(3);
   background: var(--surface);
   border: 1px solid var(--bord);
   border-radius: $r-sm;
-  margin-bottom: 12px;
+  margin-bottom:esp(3);
 }
 
 // Chaque contrôle porte son libellé VISIBLE au-dessus, en petites capitales.
@@ -916,16 +916,16 @@ $adm-controle-h: 38px;
 .adm-filtre {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap:esp(1);
   min-width: 0;
 
   > label {
-    font-size: 9px;
+    font-size:typo(overline);
     font-weight: 700;
     letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--texte-2);
-    padding-left: 2px;
+    padding-left:2px;
   }
 }
 
@@ -934,10 +934,10 @@ $adm-controle-h: 38px;
 // Variante sans cadre : un contrôle isolé posé dans un en-tête d'écran n'a
 // pas besoin de la boîte qui regroupe une vraie barre de filtres.
 .adm-filtres--nu {
-  padding: 0;
+  padding:0;
   background: transparent;
   border: 0;
-  margin-bottom: 0;
+  margin-bottom:0;
 }
 
 // Socle commun. Tout contrôle de filtre hérite d'ici : une seule bordure,
@@ -945,15 +945,15 @@ $adm-controle-h: 38px;
 %adm-controle {
   height: $adm-controle-h;
   width: 100%;
-  padding: 0 13px;
+  padding:0 esp(4);
   border: 1px solid var(--bord-fort);
   border-radius: $r-sm;
   background: var(--surface);
   color: var(--texte);
   font-family: inherit;
-  font-size: 13px;
+  font-size:typo(caption);
   line-height: 1;
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+  transition: border-color $d-rapide ease, box-shadow $d-rapide ease;
 
   &:hover { border-color: var(--accent); }
 
@@ -969,7 +969,7 @@ $adm-controle-h: 38px;
 
 .adm-filtres__champ {
   @extend %adm-controle;
-  padding-left: 35px;
+  padding-left:esp(8);
   &::placeholder { color: var(--texte-2); opacity: 1; }
 }
 
@@ -995,7 +995,7 @@ $adm-controle-h: 38px;
 
 .adm-select {
   @extend %adm-controle;
-  padding-right: 34px;
+  padding-right:esp(8);
   font-weight: 500;
   cursor: pointer;
   min-width: 150px;
@@ -1051,19 +1051,19 @@ $adm-controle-h: 38px;
 .pagin {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap:esp(2);
   flex-wrap: wrap;
 }
 
 .pagin__lien {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap:esp(2);
   height: 34px;
-  padding: 0 13px;
+  padding:0 esp(4);
   border: 1px solid var(--bord-fort);
   border-radius: $r-sm;
-  font-size: 12.5px;
+  font-size:typo(caption);
   font-weight: 600;
   background: var(--surface);
 
@@ -1082,9 +1082,9 @@ $adm-controle-h: 38px;
 }
 
 .pagin__position {
-  font-size: 12px;
+  font-size:typo(overline);
   color: var(--texte-2);
-  padding: 0 8px;
+  padding:0 esp(2);
   white-space: nowrap;
 
   strong { color: var(--texte); font-weight: 700; }
@@ -1097,9 +1097,14 @@ $adm-controle-h: 38px;
 
 // Sur téléphone, les mots cèdent la place aux flèches : « Précédent » et
 // « Suivant » écrits en toutes lettres poussaient la position hors écran.
-@media (max-width: 479.98px) {
-  .pagin__mot { display: none; }
-  .pagin__lien { padding: 0 11px; }
+// LE MOT DE LA PAGINATION EST MASQUÉ PAR DÉFAUT et n'apparaît qu'à
+// partir de 480px. « Précédent » et « Suivant » à côté d'un chevron
+// doublent la largeur du contrôle sur un écran de 320px, pour une
+// information que le chevron porte déjà.
+.pagin__mot{display:none}
+
+@include ecran(ms){
+  .pagin__mot{display:inline}
 }
 
 // =============================================================================
@@ -1108,17 +1113,17 @@ $adm-controle-h: 38px;
 .adm-onglets {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 12px;
+  gap:esp(1);
+  margin-bottom:esp(3);
 }
 
 .adm-onglet {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 13px;
+  gap:esp(2);
+  padding:esp(2) esp(4);
   border-radius: $r-full;
-  font-size: 12.5px;
+  font-size:typo(caption);
   font-weight: 600;
 
   &, &:link, &:visited, &:hover, &:focus { color: var(--texte-2); text-decoration: none; }
@@ -1135,9 +1140,9 @@ $adm-controle-h: 38px;
 // Le compteur fait partie de l'onglet : « En attente (18) » se lit d'un coup,
 // alors qu'un chiffre posé ailleurs oblige à faire le rapprochement.
 .adm-onglet__n {
-  font-size: 10.5px;
+  font-size:typo(overline);
   font-weight: 700;
-  padding: 1px 6px;
+  padding:1px esp(2);
   border-radius: $r-full;
   background: var(--surface-3);
   color: var(--texte-2);
@@ -1158,19 +1163,19 @@ $adm-controle-h: 38px;
 .adm-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12.5px;
+  font-size:typo(caption);
   // Sans largeur minimale, les colonnes se compriment jusqu'à l'illisible
   // au lieu de déclencher le défilement du conteneur.
   min-width: 720px;
 
   th, td {
-    padding: 11px 12px;
+    padding:esp(3) esp(3);
     text-align: left;
     vertical-align: middle;
   }
 
   thead th {
-    font-size: 9.5px;
+    font-size:typo(overline);
     font-weight: 700;
     letter-spacing: .09em;
     text-transform: uppercase;
@@ -1187,7 +1192,7 @@ $adm-controle-h: 38px;
 }
 
 .adm-table__principal { font-weight: 600; }
-.adm-table__second { font-size: 11px; color: var(--texte-2); }
+.adm-table__second { font-size:typo(overline); color: var(--texte-2); }
 
 // Colonne d'actions : toujours à droite, jamais compressée.
 .adm-table__actions {
@@ -1199,7 +1204,7 @@ $adm-controle-h: 38px;
 .adm-cell-id {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap:esp(3);
   min-width: 0;
 }
 
@@ -1212,14 +1217,14 @@ $adm-controle-h: 38px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap:esp(3);
   flex-wrap: wrap;
-  padding: 12px 2px 0;
+  padding:esp(3) 2px 0;
   border-top: 1px solid var(--bord);
-  margin-top: 4px;
+  margin-top:esp(1);
 }
 
-.adm-pied__compte { font-size: 11.5px; color: var(--texte-2); }
+.adm-pied__compte { font-size:typo(overline); color: var(--texte-2); }
 
 // =============================================================================
 // FIL D'ARIANE ET FICHE CLIENT
@@ -1227,10 +1232,10 @@ $adm-controle-h: 38px;
 .adm-fil {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 11.5px;
+  gap:esp(2);
+  font-size:typo(overline);
   color: var(--texte-2);
-  margin-bottom: 12px;
+  margin-bottom:esp(3);
 
   a { color: var(--accent); font-weight: 600; &:hover { text-decoration: underline; } }
 }
@@ -1238,16 +1243,16 @@ $adm-controle-h: 38px;
 .adm-fiche__tete {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
+  gap:esp(4);
   flex-wrap: wrap;
-  margin-bottom: 14px;
+  margin-bottom:esp(4);
 }
 
 .adm-avatar--xl {
   width: 58px;
   height: 58px;
   flex: 0 0 58px;
-  font-size: 19px;
+  font-size:typo(body-lg);
   background: var(--accent-doux);
   color: var(--accent);
 }
@@ -1255,32 +1260,32 @@ $adm-controle-h: 38px;
 .adm-fiche__ident { min-width: 0; flex: 1 1 260px; }
 
 .adm-fiche__nom {
-  font-size: 18px;
+  font-size:typo(body-lg);
   font-weight: 700;
   color: var(--texte);
-  margin: 0 0 5px;
+  margin:0 0 esp(2);
 }
 
 .adm-fiche__coord {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 16px;
-  font-size: 12px;
+  gap:esp(1) esp(4);
+  font-size:typo(overline);
   color: var(--texte-2);
-  margin: 0 0 9px;
+  margin:0 0 esp(3);
 }
 
 .adm-fiche__etats {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin: 0;
+  gap:esp(2);
+  margin:0;
 }
 
 .adm-fiche__motif {
-  margin: 9px 0 0;
-  font-size: 12px;
+  margin:esp(3) 0 0;
+  font-size:typo(overline);
   color: $rouge-erreur;
 }
 
@@ -1289,26 +1294,26 @@ $adm-controle-h: 38px;
 .adm-defs {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2px 16px;
-  margin: 0;
-  font-size: 12.5px;
+  gap:2px esp(4);
+  margin:0;
+  font-size:typo(caption);
 
   dt {
-    font-size: 10px;
+    font-size:typo(overline);
     font-weight: 700;
     letter-spacing: .07em;
     text-transform: uppercase;
     color: var(--texte-2);
-    margin-top: 10px;
+    margin-top:esp(3);
   }
 
-  dd { margin: 0; color: var(--texte); overflow-wrap: break-word; }
+  dd { margin:0; color: var(--texte); overflow-wrap: break-word; }
 
   @media (min-width: 480px) {
     grid-template-columns: 140px minmax(0, 1fr);
     align-items: baseline;
-    dt { margin-top: 0; }
-    dd { margin-bottom: 9px; }
+    dt { margin-top:0; }
+    dd { margin-bottom:esp(3); }
   }
 }
 
@@ -1317,7 +1322,7 @@ $adm-controle-h: 38px;
 // =============================================================================
 .adm-modeles {
   display: grid;
-  gap: 14px;
+  gap:esp(4);
   grid-template-columns: repeat(2, 1fr);
 
   @media (min-width: 768px)  { grid-template-columns: repeat(3, 1fr); }
@@ -1366,7 +1371,7 @@ $adm-controle-h: 38px;
   right: 24%;
   top: 62%;
   height: 6%;
-  border-radius: 2px;
+  border-radius:2px;
   background: var(--bord-fort);
 }
 
@@ -1376,20 +1381,20 @@ $adm-controle-h: 38px;
 .adm-modele__apercu--moderne .adm-modele__bandeau { background: $vert-accent; }
 .adm-modele__apercu--minimal .adm-modele__bandeau { inset: 0 0 86% 0; }
 
-.adm-modele__corps { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.adm-modele__corps { padding:esp(3); display: flex; flex-direction: column; gap:esp(2); }
 
 .adm-modele__tete {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
+  gap:esp(2);
 }
 
 .adm-modele__nom {
-  font-size: 13px;
+  font-size:typo(caption);
   font-weight: 700;
   color: var(--texte);
-  margin: 0;
+  margin:0;
   min-width: 0;
 }
 
@@ -1397,16 +1402,16 @@ $adm-controle-h: 38px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  margin: 0;
+  gap:esp(2);
+  margin:0;
 }
 
 .adm-modele__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 2px;
-  padding-top: 9px;
+  gap:esp(3);
+  margin-top:2px;
+  padding-top:esp(3);
   border-top: 1px solid var(--bord);
 }
 
@@ -1421,7 +1426,7 @@ $adm-controle-h: 38px;
   border-radius: $r-full;
   background: var(--bord-fort);
   cursor: pointer;
-  transition: background 160ms ease;
+  transition: background $d-rapide ease;
 
   &:focus-visible { outline: 2px solid var(--accent-vif); outline-offset: 2px; }
   &.is-on { background: $vert-accent; }
@@ -1435,7 +1440,7 @@ $adm-controle-h: 38px;
   height: 15px;
   border-radius: 50%;
   background: $blanc;
-  transition: transform 160ms ease;
+  transition: transform $d-rapide ease;
 
   .adm-switch.is-on & { transform: translateX(17px); }
 }
@@ -1450,11 +1455,11 @@ $adm-controle-h: 38px;
 .adm-offre {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 13px;
+  gap:esp(1);
+  padding:esp(4);
   border: 1px solid var(--bord);
   border-radius: $r-sm;
-  margin-bottom: 9px;
+  margin-bottom:esp(3);
 
   &, &:link, &:visited, &:hover, &:focus { color: var(--texte); text-decoration: none; }
   &:hover { border-color: var(--bord-fort); background: var(--survol); }
@@ -1467,11 +1472,11 @@ $adm-controle-h: 38px;
   }
 }
 
-.adm-offre__tete { display: flex; align-items: center; gap: 8px; }
-.adm-offre__nom { font-size: 13.5px; font-weight: 700; }
+.adm-offre__tete { display: flex; align-items: center; gap:esp(2); }
+.adm-offre__nom { font-size:typo(caption); font-weight: 700; }
 
 .adm-offre__periode {
-  font-size: 10px;
+  font-size:typo(overline);
   font-weight: 700;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -1479,19 +1484,19 @@ $adm-controle-h: 38px;
 }
 
 .adm-offre__prix {
-  font-size: 21px;
+  font-size:typo(h2);
   font-weight: 800;
   letter-spacing: -.02em;
   color: var(--texte);
-  small { font-size: 11px; font-weight: 700; }
+  small { font-size:typo(overline); font-weight: 700; }
 }
 
-.adm-offre__liste { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; }
+.adm-offre__liste { display: flex; flex-direction: column; gap:esp(1); margin-top:esp(1); }
 
 .adm-offre__item {
-  font-size: 11.5px;
+  font-size:typo(overline);
   color: var(--texte-2);
-  padding-left: 15px;
+  padding-left:esp(4);
   position: relative;
 
   &::before {
@@ -1506,43 +1511,43 @@ $adm-controle-h: 38px;
   }
 }
 
-.adm-creer { margin-top: 14px; }
+.adm-creer { margin-top:esp(4); }
 
 .adm-creer__ouvrir {
-  font-size: 12.5px;
+  font-size:typo(caption);
   font-weight: 600;
   color: var(--accent);
   cursor: pointer;
-  padding: 8px 0;
+  padding:esp(2) 0;
 }
 
-.adm-form { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+.adm-form { display: flex; flex-direction: column; gap:esp(4); margin-top:esp(3); }
 
 .adm-champ {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap:esp(2);
   border: 0;
-  padding: 0;
-  margin: 0;
+  padding:0;
+  margin:0;
   min-width: 0;
 
   > label, > legend {
-    font-size: 12px;
+    font-size:typo(overline);
     font-weight: 600;
     color: var(--texte);
-    padding: 0;
+    padding:0;
   }
 }
 
-.adm-champ__aide { font-size: 11px; line-height: 1.5; color: var(--texte-2); }
-.adm-champ__ligne { margin-bottom: 6px; }
+.adm-champ__aide { font-size:typo(overline); line-height: 1.5; color: var(--texte-2); }
+.adm-champ__ligne { margin-bottom:esp(2); }
 
 .adm-coche {
   display: flex;
   align-items: center;
-  gap: 9px;
-  font-size: 12.5px;
+  gap:esp(3);
+  font-size:typo(caption);
   color: var(--texte);
   cursor: pointer;
 
@@ -1592,8 +1597,8 @@ $adm-controle-h: 38px;
    */
   .adm-top {
     flex-wrap: wrap;
-    padding: 9px 12px;
-    row-gap: 9px;
+    padding:esp(3) esp(3);
+    row-gap:esp(3);
   }
 
   .adm-top__section { display: none; }
@@ -1605,9 +1610,9 @@ $adm-controle-h: 38px;
 
   .adm-top__actions { margin-left: auto; }
 
-  .adm-content { padding: 16px 12px 32px; }
-  .adm-head { margin-bottom: 16px; }
-  .adm-head__titre { font-size: 19px; }
+  .adm-content { padding:esp(4) esp(3) esp(7); }
+  .adm-head { margin-bottom:esp(4); }
+  .adm-head__titre { font-size:typo(body-lg); }
 
   // Les actions d'en-tête passent pleine largeur : deux boutons à demi
   // coupés au bord droit de l'écran ne se cliquent pas.
@@ -1633,7 +1638,7 @@ $adm-controle-h: 38px;
   .adm-chart {
     height: 178px;
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding-bottom:esp(1);
   }
 
   // Chaque colonne garde une largeur minimale tactile. Au-delà de ce que
@@ -1642,12 +1647,12 @@ $adm-controle-h: 38px;
 
   // Les six cartes restent à deux colonnes : une seule par ligne
   // demanderait six écrans de défilement avant d'atteindre le graphique.
-  .adm-stats { gap: 9px; }
-  .adm-stat { padding: 12px; }
-  .adm-stat__valeur { font-size: 19px; }
+  .adm-stats { gap:esp(3); }
+  .adm-stat { padding:esp(3); }
+  .adm-stat__valeur { font-size:typo(body-lg); }
 
-  .adm-bloc { padding: 13px; }
-  .adm-grille { gap: 11px; }
+  .adm-bloc { padding:esp(4); }
+  .adm-grille { gap:esp(3); }
 
   // Le nom du compte disparaît, l'initiale suffit : elle sert de repère,
   // pas d'identification.
@@ -1661,17 +1666,17 @@ $adm-controle-h: 38px;
 // On filtrait, on obtenait quinze lignes, et rien ne disait s'il s'agissait de
 // quinze résultats ou de la première page de deux cents.
 .liste-compteur{
-  display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;
-  margin:0 0 14px;
-  font-size:13.5px;color:$gris-second;
+  display:flex;align-items:baseline;flex-wrap:wrap;gap:esp(2);
+  margin:0 0 esp(4);
+  font-size:typo(caption);color:$gris-second;
 
-  strong{font-size:15px;color:$texte}
+  strong{font-size:typo(body-sm);color:$texte}
 }
 
-.liste-compteur__filtre{font-size:12.5px}
+.liste-compteur__filtre{font-size:typo(caption)}
 
 .liste-compteur__reset{
-  font-size:12.5px;font-weight:600;color:$vert-fonce;
+  font-size:typo(caption);font-weight:600;color:$vert-fonce;
   text-decoration:underline;
 }
 
@@ -1684,53 +1689,53 @@ $adm-controle-h: 38px;
 .adm-cartes-tete{
   display:grid;
   grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
-  gap:14px;
-  margin-bottom:20px;
+  gap:esp(4);
+  margin-bottom:esp(5);
 }
 
 .adm-cartes-jauge{
-  padding:16px 18px;
+  padding:esp(4) esp(5);
   border:1px solid var(--bord);
   border-radius:$r-sm;
   background:var(--surface);
 }
 
 .adm-cartes-jauge__n{
-  font-size:26px;font-weight:700;letter-spacing:-.02em;
+  font-size:typo(h1);font-weight:700;letter-spacing:-.02em;
   color:var(--texte);margin:0;line-height:1.1;
 
-  span{font-size:14px;font-weight:600;color:var(--texte-2)}
+  span{font-size:typo(body-sm);font-weight:600;color:var(--texte-2)}
 }
 
 .adm-cartes-jauge__l{
-  font-size:12.5px;color:var(--texte-2);margin:4px 0 0;
+  font-size:typo(caption);color:var(--texte-2);margin:esp(1) 0 0;
 }
 
 .adm-cartes-jauge__note{
-  display:block;margin-top:6px;
-  font-size:11.5px;color:var(--texte-2);
+  display:block;margin-top:esp(2);
+  font-size:typo(overline);color:var(--texte-2);
 }
 
 .adm-cartes-jauge__pret,
 .adm-cartes-jauge__retard{
-  display:inline-block;margin-top:8px;
-  padding:3px 9px;border-radius:$r-full;
-  font-size:11px;font-weight:700;
+  display:inline-block;margin-top:esp(2);
+  padding:esp(1) esp(3);border-radius:$r-full;
+  font-size:typo(overline);font-weight:700;
 }
 
 .adm-cartes-jauge__pret{background:var(--accent-doux);color:var(--accent)}
 .adm-cartes-jauge__retard{background:rgba(180,35,24,.12);color:var(--danger)}
 
 .adm-cartes-actions{
-  display:flex;align-items:center;flex-wrap:wrap;gap:12px;
-  padding:14px 0 4px;
+  display:flex;align-items:center;flex-wrap:wrap;gap:esp(3);
+  padding:esp(4) 0 esp(1);
 }
 
-.adm-cartes-actions__note{font-size:12px;color:var(--texte-2)}
+.adm-cartes-actions__note{font-size:typo(overline);color:var(--texte-2)}
 
 .adm-cartes-lot{
-  display:flex;align-items:center;flex-wrap:wrap;gap:10px;
-  margin-top:18px;padding-top:16px;
+  display:flex;align-items:center;flex-wrap:wrap;gap:esp(3);
+  margin-top:esp(5);padding-top:esp(4);
   border-top:1px solid var(--bord);
-  font-size:13px;
+  font-size:typo(caption);
 }

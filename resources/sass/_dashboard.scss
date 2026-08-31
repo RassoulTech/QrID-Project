@@ -13,12 +13,12 @@
   flex-wrap:wrap;
   align-items:flex-start;
   justify-content:space-between;
-  gap:16px;
-  margin-bottom:24px;
+  gap:esp(4);
+  margin-bottom:esp(6);
 }
 
 .db-tete__titre{
-  font-size:24px;
+  font-size:typo(h1);
   font-weight:700;
   letter-spacing:-.025em;
   color:var(--texte);
@@ -26,29 +26,29 @@
 }
 
 .db-tete__sous{
-  font-size:14px;
+  font-size:typo(body-sm);
   color:var(--texte-2);
-  margin:4px 0 0;
+  margin:esp(1) 0 0;
 }
 
 .db-grille{
   display:grid;
   grid-template-columns:1fr;
-  gap:22px;
+  gap:esp(6);
   align-items:start;
 }
 
 .db-principal{
   display:flex;
   flex-direction:column;
-  gap:22px;
+  gap:esp(6);
   min-width:0;
 }
 
 .db-rail{
   display:flex;
   flex-direction:column;
-  gap:22px;
+  gap:esp(6);
   min-width:0;
 }
 
@@ -60,24 +60,24 @@
   border:1px solid var(--bord);
   border-radius:$r-md;
   box-shadow:var(--ombre-1);
-  padding:22px;
+  padding:esp(6);
 }
 
 .db-card__tete{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:14px;
+  gap:esp(4);
   flex-wrap:wrap;
-  margin-bottom:18px;
+  margin-bottom:esp(5);
 }
 
 .db-card__titre{
-  font-size:16px;
+  font-size:typo(body);
   font-weight:700;
   letter-spacing:-.01em;
   color:var(--texte);
-  margin:0 0 18px;
+  margin:0 0 esp(5);
 }
 
 .db-card__tete .db-card__titre{margin:0}
@@ -95,32 +95,32 @@
 // immédiatement compréhensible.
 // -----------------------------------------------------------------------------
 .db-groupe__texte{
-  font-size:13.5px;
+  font-size:typo(caption);
   line-height:1.55;
   color:var(--texte-2);
-  margin:0 0 14px;
+  margin:0 0 esp(4);
 }
 
 .db-groupe__lien{
   display:inline-flex;
   align-items:center;
-  gap:8px;
-  font-size:14px;
+  gap:esp(2);
+  font-size:typo(body-sm);
   font-weight:700;
 
   // La couleur est déclarée pour TOUS les états : un lien d'aide qui
   // deviendrait illisible au survol serait un comble.
   &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
-    color:#25D366;
+    color:$marque-whatsapp;
     text-decoration:none;
   }
 
   &:hover{text-decoration:underline}
 
   &:focus-visible{
-    outline:2px solid #25D366;
+    outline:2px solid $marque-whatsapp;
     outline-offset:3px;
-    border-radius:4px;
+    border-radius:rayon(sm);
   }
 
   svg{flex:0 0 auto}
@@ -131,14 +131,21 @@
 // -----------------------------------------------------------------------------
 .stat-grid{
   display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:14px;
+  // UNE SEULE COLONNE PAR DÉFAUT. Deux colonnes sur un écran de 320px
+  // laissent 140px chacune : un chiffre et son libellé n'y tiennent pas.
+  // La seconde colonne arrive quand l'écran peut la porter.
+  grid-template-columns:1fr;
+  gap:esp(4);
+
+  @include ecran(ms){
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
 }
 
 .stat-tuile{
   position:relative;
   border-radius:$r-sm;
-  padding:18px 16px 16px;
+  padding:esp(5) esp(4) esp(4);
   min-height:112px;
   display:flex;
   flex-direction:column;
@@ -154,14 +161,14 @@
   position:absolute;
   top:14px;right:14px;
   width:30px;height:30px;
-  border-radius:9px;
+  border-radius:rayon(sm);
   background:var(--surface);
   color:var(--texte);
   display:grid;place-items:center;
 }
 
 .stat-tuile__n{
-  font-size:30px;
+  font-size:typo(h1);
   font-weight:800;
   line-height:1;
   letter-spacing:-.03em;
@@ -169,18 +176,18 @@
 }
 
 .stat-tuile__l{
-  font-size:13px;
+  font-size:typo(caption);
   font-weight:600;
   color:var(--texte);
-  margin-top:6px;
+  margin-top:esp(2);
 }
 
 // Aide contextuelle, affichée seulement quand le compteur est à zéro.
 .stat-tuile__attente{
-  font-size:11.5px;
+  font-size:typo(overline);
   line-height:1.45;
   color:var(--texte-2);
-  margin-top:4px;
+  margin-top:esp(1);
 }
 
 // -----------------------------------------------------------------------------
@@ -194,7 +201,7 @@
 .db-carte{
   display:grid;
   grid-template-columns:1fr;
-  gap:24px;
+  gap:esp(6);
   align-items:start;
 }
 
@@ -209,7 +216,7 @@
   min-width:0;
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:esp(4);
 }
 
 // -----------------------------------------------------------------------------
@@ -217,16 +224,16 @@
 // -----------------------------------------------------------------------------
 .periode{
   display:inline-flex;
-  gap:4px;
-  padding:3px;
+  gap:esp(1);
+  padding:esp(1);
   background:var(--surface-2);
   border-radius:$r-full;
 }
 
 .periode__item{
-  padding:5px 13px;
+  padding:esp(2) esp(4);
   border-radius:$r-full;
-  font-size:12.5px;
+  font-size:typo(caption);
   font-weight:600;
 
   // Couleur déclarée dans tous les états : aucun libellé n'attend un survol.
@@ -243,9 +250,9 @@
 .chart{
   display:flex;
   align-items:flex-end;
-  gap:6px;
+  gap:esp(2);
   height:150px;
-  padding-top:8px;
+  padding-top:esp(2);
 }
 
 .chart__col{
@@ -256,15 +263,15 @@
   align-items:center;
   justify-content:flex-end;
   height:100%;
-  gap:7px;
+  gap:esp(2);
 }
 
 .chart__barre{
   width:100%;
   max-width:34px;
-  border-radius:5px 5px 2px 2px;
+  border-radius:rayon(sm) rayon(sm) rayon(sm) rayon(sm);
   background:var(--accent);
-  transition:height 260ms ease;
+  transition:height $d-normal ease;
 
   // Scans empilés sous les vues : deux teintes du même vert, distinguées
   // aussi par la légende — jamais par la seule couleur.
@@ -285,24 +292,24 @@
 
 .chart-legende{
   display:flex;
-  gap:18px;
-  margin-top:14px;
-  font-size:12px;
+  gap:esp(5);
+  margin-top:esp(4);
+  font-size:typo(overline);
   color:var(--texte-2);
 
-  span{display:inline-flex;align-items:center;gap:6px}
+  span{display:inline-flex;align-items:center;gap:esp(2)}
 }
 
 .chart-legende__puce{
   width:10px;height:10px;
-  border-radius:3px;
+  border-radius:rayon(sm);
   background:var(--accent);
 
   &--scan{background:var(--accent-vif);opacity:.55}
 }
 
 .chart__jour{
-  font-size:10px;
+  font-size:typo(overline);
   color:var(--texte-2);
   white-space:nowrap;
   overflow:hidden;
@@ -315,26 +322,26 @@
 // -----------------------------------------------------------------------------
 .db-vide{
   text-align:center;
-  padding:26px 12px;
+  padding:esp(7) esp(3);
   color:var(--texte-2);
 }
 
 .db-vide__titre{
-  font-size:14.5px;
+  font-size:typo(body-sm);
   font-weight:600;
   color:var(--texte);
-  margin:12px 0 4px;
+  margin:esp(3) 0 esp(1);
 }
 
 .db-vide__texte{
-  font-size:12.5px;
+  font-size:typo(caption);
   line-height:1.6;
   color:var(--texte-2);
   max-width:36ch;
   margin:0 auto;
 }
 
-.db-vide__texte--serre{text-align:left;padding:4px 0}
+.db-vide__texte--serre{text-align:left;padding:esp(1) 0}
 
 // -----------------------------------------------------------------------------
 // Rail : visiteurs et journal
@@ -342,8 +349,8 @@
 .visite,
 .journal{
   display:flex;
-  gap:11px;
-  padding:10px 0;
+  gap:esp(3);
+  padding:esp(3) 0;
   border-bottom:1px solid var(--bord);
 
   &:last-child{border-bottom:0;padding-bottom:0}
@@ -370,20 +377,20 @@
 
 .visite__type,
 .journal__titre{
-  font-size:13px;
+  font-size:typo(caption);
   font-weight:600;
   color:var(--texte);
 }
 
 .visite__date,
-.journal__date{font-size:11.5px;color:var(--texte-2)}
+.journal__date{font-size:typo(overline);color:var(--texte-2)}
 
-.journal__detail{font-size:12px;color:var(--texte-2)}
+.journal__detail{font-size:typo(overline);color:var(--texte-2)}
 
 .journal__point{
   flex:0 0 auto;
   width:8px;height:8px;
-  margin-top:6px;
+  margin-top:esp(2);
   border-radius:$r-full;
   background:var(--accent-vif);
 }
@@ -394,7 +401,7 @@
 .qr-page{
   display:grid;
   grid-template-columns:1fr;
-  gap:24px;
+  gap:esp(6);
   align-items:start;
 }
 
@@ -404,7 +411,7 @@
   background:#FFFFFF;
   border:1px solid var(--bord);
   border-radius:$r-md;
-  padding:18px;
+  padding:esp(5);
   max-width:280px;
   width:100%;
   margin-inline:auto;
@@ -416,7 +423,7 @@
   min-width:0;
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:esp(4);
 }
 
 // -----------------------------------------------------------------------------
@@ -428,13 +435,13 @@
   display:grid;
   grid-template-columns:1fr;
   gap:2px;
-  padding:11px 0;
+  padding:esp(3) 0;
   border-bottom:1px solid var(--bord);
 
   &:last-child{border-bottom:0;padding-bottom:0}
 
-  dt{font-size:12px;color:var(--texte-2);font-weight:400}
-  dd{font-size:14px;color:var(--texte);font-weight:600;margin:0;word-break:break-word}
+  dt{font-size:typo(overline);color:var(--texte-2);font-weight:400}
+  dd{font-size:typo(body-sm);color:var(--texte);font-weight:600;margin:0;word-break:break-word}
 }
 
 .fiche__pastille{
@@ -443,7 +450,7 @@
   border-radius:$r-full;
   border:1px solid var(--bord-fort);
   vertical-align:-2px;
-  margin-right:6px;
+  margin-right:esp(2);
 }
 
 // -----------------------------------------------------------------------------
@@ -455,33 +462,30 @@
   .db-carte{grid-template-columns:minmax(300px, 380px) minmax(0, 1fr)}
   .qr-page{grid-template-columns:minmax(240px, 280px) minmax(0, 1fr)}
   .qr-page__cadre{margin-inline:0}
-  .fiche__ligne{grid-template-columns:180px minmax(0, 1fr);gap:16px;align-items:baseline}
-  .db-tete__titre{font-size:27px}
+  .fiche__ligne{grid-template-columns:180px minmax(0, 1fr);gap:esp(4);align-items:baseline}
+  .db-tete__titre{font-size:typo(h1)}
 }
 
 // Entre 1200 et 1400px le rail reprend de la place : la carte repasse
 // au-dessus des actions plutôt que de se comprimer.
-@media (min-width:1200px) and (max-width:1399px){
-  .db-carte{grid-template-columns:1fr}
-}
+// La carte reste sur une colonne jusqu'à ce que l'écran soit vraiment
+// large. `db-carte` est déjà en `1fr` par défaut : il n'y a donc rien à
+// défaire, seulement à ne pas passer en deux colonnes trop tôt.
 
 // Le rail rejoint le contenu à partir de 1200px, comme demandé.
 @media (min-width:1200px){
   .db-grille{grid-template-columns:minmax(0, 1fr) 320px}
 }
 
-@media (max-width:400px){
-  .stat-grid{grid-template-columns:1fr}
-  .db-card{padding:16px}
-}
+
 
 // Texte courant d'une carte du tableau de bord — le bloc « Ma carte physique »
 // en avait besoin, et rien n'existait : chaque bloc écrivait sa propre taille.
 .db-card__texte{
-  font-size:13.5px;
+  font-size:typo(caption);
   color:var(--texte-2, #{$gris-second});
   line-height:1.55;
-  margin:10px 0 14px;
+  margin:esp(3) 0 esp(4);
 
   strong{color:var(--texte, #{$texte});font-weight:600}
 }
