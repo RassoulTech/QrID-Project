@@ -94,6 +94,14 @@ return [
         'etat_systeme' => 'System health',
         'retour' => 'Back',
         'en_construction' => 'Screen under construction',
+
+        /* Short dock labels — eight characters maximum. */
+        'court' => [
+            'vue_ensemble' => 'Home',
+            'clients' => 'Clients',
+            'paiements' => 'Payments',
+            'cartes' => 'Cards',
+        ],
     ],
 
     'notifications' => [

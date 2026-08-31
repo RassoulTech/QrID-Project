@@ -71,6 +71,46 @@ $vert-accent-survol: #23D29A;   // #0A1F1A dessus : 8,79:1
 
 
 // =============================================================================
+// 1 BIS. L'ÉCHELLE DE VERTS — neuf degrés, une seule teinte
+// =============================================================================
+//
+// POURQUOI UNE ÉCHELLE, ALORS QU'IL Y AVAIT DÉJÀ TROIS VERTS.
+//
+// Trois valeurs — foncé, accent, clair — suffisent à colorer, pas à
+// COMPOSER. Dès qu'un écran demande deux surfaces vertes voisines qui se
+// distinguent (un panneau sur un aplat, une pastille sur un bandeau), il
+// n'y a rien entre `#0B3B2E` et `#1E9E7A` : l'écart est de sept degrés de
+// luminosité d'un coup. On se retrouve à inventer un `rgba()` local, et
+// c'est ainsi que la charte se dilue.
+//
+// Neuf degrés d'UNE SEULE teinte, et pas une seconde couleur d'accent :
+// c'est ce qui distingue une palette d'un assortiment. La référence
+// fournie fait exactement cela — un vert profond, un vert moyen pour les
+// panneaux, un vert pâle pour les fonds.
+//
+// LES DEUX VALEURS HISTORIQUES GARDENT LEUR PLACE EXACTE dans l'échelle :
+// $vert-fonce est le 800, $vert-accent le 500, $vert-clair le 50. Aucune
+// couleur existante ne bouge, on ne fait qu'ajouter les degrés manquants.
+//
+// USAGE, ET C'EST LA RÈGLE :
+//   900–700  fonds sombres qui portent du texte clair
+//   600      la plus claire qui porte encore du blanc à 4,5:1
+//   500–300  PANNEAUX, TRAITS, ICÔNES — jamais un fond de texte
+//   200–50   fonds doux qui portent du texte foncé
+
+$vert-900: #06251C;   // #FFFFFF dessus : 16,84:1
+$vert-800: #0B3B2E;   // = $vert-fonce      · #FFFFFF : 12,51:1
+$vert-700: #0F5040;   // #FFFFFF dessus :  9,04:1
+$vert-600: #157A5F;   // #FFFFFF dessus :  5,17:1 — LE DERNIER QUI PORTE DU BLANC
+$vert-500: #1E9E7A;   // = $vert-accent     · surface, jamais fond de texte
+$vert-400: #3DBE99;   // panneaux, traits
+$vert-300: #6FD3B7;   // panneaux clairs
+$vert-200: #A8E6D3;   // fonds doux · #0A1F1A dessus : 12,02:1
+$vert-100: #CFF0E4;   // fonds doux · #0A1F1A dessus : 14,29:1
+$vert-50:  #E4F2EC;   // = $vert-clair      · #0A1F1A dessus : 15,42:1
+
+
+// =============================================================================
 // 2. SURFACES ET TEXTES — deux thèmes
 // =============================================================================
 
@@ -367,6 +407,25 @@ $dock-icone:   22px;
   --ombre-2:     #{$c-ombre-2};
   --ombre-3:     #{$c-ombre-3};
   --ombre-4:     #{$c-ombre-4};
+
+  /*
+   | L'ÉCHELLE DE VERTS, DISPONIBLE PARTOUT.
+   |
+   | Elle NE CHANGE PAS avec le thème : ce sont les degrés d'une teinte de
+   | marque, pas des surfaces d'interface. Un composant qui veut « un vert
+   | un peu plus clair que le fond » prend le degré au-dessus, au lieu
+   | d'inventer un rgba() local — c'est ainsi que la charte se dilue.
+   */
+  --vert-900: #{$vert-900};
+  --vert-800: #{$vert-800};
+  --vert-700: #{$vert-700};
+  --vert-600: #{$vert-600};
+  --vert-500: #{$vert-500};
+  --vert-400: #{$vert-400};
+  --vert-300: #{$vert-300};
+  --vert-200: #{$vert-200};
+  --vert-100: #{$vert-100};
+  --vert-50:  #{$vert-50};
 
   // La marque ne change pas avec le thème : c'est ce qui la rend
   // reconnaissable. Seules les surfaces autour d'elle changent.

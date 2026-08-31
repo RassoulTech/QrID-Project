@@ -64,7 +64,9 @@
             <div class="tagline">{{ config('landing.brand.tagline') }}</div>
 
             <div class="qrbox">
-                <span class="qr">{!! $qr->plateformeSvg() !!}</span>
+                <span class="qrpanneau">
+                    <span class="qr">{!! $qr->plateformeSvg() !!}</span>
+                </span>
                 <div class="qrcap">{{ config('landing.brand.card_cta') }}</div>
             </div>
 
@@ -147,10 +149,16 @@
                      lecteurs récents, ignoré par les autres, et leur échec est
                      silencieux. Sur un objet imprimé qu'on ne peut plus
                      corriger, ce risque ne se prend pas. --}}
-                <span class="qr">
-                    @if ($profile?->slug)
-                        {!! $qr->svg($profile) !!}
-                    @endif
+                {{-- LE PANNEAU ENTOURE LE QR SUR LES DEUX VARIANTES.
+                     Il donne au code un fond clair même sur la carte verte,
+                     donc « sombre sur clair » partout, conformément à
+                     ISO/IEC 18004. Voir .qrpanneau dans _card.scss. --}}
+                <span class="qrpanneau">
+                    <span class="qr">
+                        @if ($profile?->slug)
+                            {!! $qr->svg($profile) !!}
+                        @endif
+                    </span>
                 </span>
             </div>
         </div>

@@ -65,8 +65,28 @@
   align-content: center;
   gap: esp(1);
 
+  // LARGEUR PLEINE PART. Sans elle, un `<button>` se dimensionne sur son
+  // contenu : l'entrée « Plus » faisait 34px là où les liens en font 68,
+  // et la cible tactile tombait sous la moitié de sa part.
+  width: 100%;
   min-height: $dock-hauteur;
   padding: esp(2) esp(1);
+
+  /*
+   | REMISE À ZÉRO DU BOUTON.
+   |
+   | « Plus » est un `<button>` — il ouvre le panneau, il ne mène pas à une
+   | adresse. Sans ces trois lignes, l'agent utilisateur lui pose son propre
+   | habillage : mesuré, `border: 2px outset black` et un fond gris
+   | `rgb(240,240,240)`. Au milieu de quatre liens sans bordure, il se
+   | lisait comme un défaut d'affichage.
+   */
+  appearance: none;
+  border: 0;
+  background: none;
+
+  font: inherit;
+  cursor: pointer;
 
   border-radius: rayon(full);
   text-decoration: none;

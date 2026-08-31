@@ -52,12 +52,25 @@
 @props([
     'entrees' => [],
     'jeu' => 'client',
+
+    /*
+     | L'IDENTIFIANT DU PANNEAU LATÉRAL — et c'est ce qui fait disparaître le
+     | hamburger.
+     |
+     | La barre du haut portait un bouton hamburger EN PLUS du dock : deux
+     | navigations concurrentes sur le même écran, dont une invisible tant
+     | qu'on ne l'ouvre pas. Le dock reprend ce rôle par une cinquième
+     | entrée, « Plus », au même endroit que les quatre autres — à portée du
+     | pouce, et non dans le coin le plus haut de l'écran.
+     */
+    'panneau' => null,
 ])
 
 @php
     /* CINQ AU MAXIMUM, coupées ici plutôt que dans chaque appelant : une
-       règle qu'on peut contourner depuis la vue n'est pas une règle. */
-    $entrees = array_slice($entrees, 0, 5);
+       règle qu'on peut contourner depuis la vue n'est pas une règle.
+       « Plus » occupe la cinquième part, donc quatre destinations. */
+    $entrees = array_slice($entrees, 0, $panneau ? 4 : 5);
 @endphp
 
 <nav class="dock" aria-label="{{ __('navigation.dock.aria') }}">
@@ -105,5 +118,31 @@
                 </a>
             </li>
         @endforeach
+
+        {{-- « PLUS » — la cinquième part, qui remplace le hamburger.
+             Elle ouvre le panneau latéral : toutes les destinations qui
+             n'entrent pas dans le dock y sont, plus l'aide, la langue, le
+             thème et la déconnexion.
+
+             C'est un bouton et non un lien, comme l'était le hamburger : il
+             ouvre l'offcanvas natif de Bootstrap par data-bs-*. Le
+             comportement sans JavaScript est donc INCHANGÉ par rapport au
+             hamburger qu'il remplace — ni meilleur, ni pire. --}}
+        @if ($panneau)
+            <li class="dock__item">
+                <button type="button" class="dock__lien dock__lien--plus"
+                        data-bs-toggle="offcanvas" data-bs-target="#{{ $panneau }}"
+                        aria-controls="{{ $panneau }}">
+                    <span class="dock__icone">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             aria-hidden="true">
+                            <path d="M4 7h16M4 12h16M4 17h16"/>
+                        </svg>
+                    </span>
+                    <span class="dock__libelle">{{ __('navigation.dock.plus') }}</span>
+                </button>
+            </li>
+        @endif
     </ul>
 </nav>

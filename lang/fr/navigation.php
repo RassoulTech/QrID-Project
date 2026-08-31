@@ -119,6 +119,15 @@ return [
         'etat_systeme' => 'État système',
         'retour' => 'Retour',
         'en_construction' => 'Écran en cours de construction',
+
+        /* Libellés courts du dock — huit caractères maximum, voir le
+           commentaire du bloc client. */
+        'court' => [
+            'vue_ensemble' => 'Accueil',
+            'clients' => 'Clients',
+            'paiements' => 'Paiements',
+            'cartes' => 'Cartes',
+        ],
     ],
 
     // -----------------------------------------------------------------

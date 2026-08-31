@@ -158,8 +158,45 @@
 
 .qrbox{grid-column:2;grid-row:1 / span 2;justify-self:end;align-self:start;text-align:center}
 
+/*
+ | LE PANNEAU DU QR — le geste central de la référence, et il répare un
+ | défaut fonctionnel.
+ |
+ | Le QR était posé À MÊME la carte : un carré blanc sur le fond. Sur la
+ | variante blanche, cela ne se voyait pas ; sur la verte, le code se
+ | retrouvait clair sur sombre.
+ |
+ | `App\Enums\VarianteCarte` le documente déjà, et c'est exact : la norme
+ | ISO/IEC 18004 décrit un QR SOMBRE SUR FOND CLAIR. Les lecteurs modernes
+ | gèrent l'inversion, d'autres non, et LEUR ÉCHEC EST SILENCIEUX — le
+ | porteur croit simplement que son code est mauvais.
+ |
+ | Le panneau règle les deux d'un coup : il pose un cadre vert moyen autour
+ | du QR, et le QR garde son fond blanc à l'intérieur. Le code redevient
+ | sombre sur clair SUR LES DEUX VARIANTES, et la carte gagne le repère
+ | visuel qui manquait.
+ |
+ | Le vert du panneau change selon la variante — c'est le seul endroit de
+ | la carte où la palette « joue » :
+ |   · sur la carte BLANCHE, un vert 500 ressort sur le blanc ;
+ |   · sur la carte VERTE, il faut monter au 400 pour se détacher du fond
+ |     800, sinon le panneau se fond dans la carte.
+ */
+.qrpanneau{
+  display:inline-block;
+  padding:2.6cqw;
+  border-radius:4.4cqw;
+  line-height:0;
+}
+.light .qrpanneau{background:$vert-500}
+.dark  .qrpanneau{background:$vert-400}
+
 .qr{
-  width:33cqw;height:33cqw;background:$blanc;padding:1.7cqw;
+  width:33cqw;height:33cqw;background:$blanc;
+  padding:1.7cqw;
+  // Le carré blanc suit le panneau : deux rayons concentriques, l'intérieur
+  // plus serré que l'extérieur, sinon le blanc « déborde » dans les coins.
+  border-radius:2.2cqw;
   display:block;
 }
 

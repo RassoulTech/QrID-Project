@@ -59,15 +59,11 @@
                 ->implode('');
         @endphp
 
+        {{-- PLUS DE HAMBURGER.
+             Il vivait ici, en haut à gauche — le coin le plus éloigné du
+             pouce sur un téléphone — et faisait double emploi avec le dock.
+             Son rôle est repris par l'entrée « Plus » du dock, en bas. --}}
         <header class="adm-top">
-            <button type="button" class="adm-top__burger"
-                    data-bs-toggle="offcanvas" data-bs-target="#menuLateral"
-                    aria-controls="menuLateral" aria-label="{{ __('navigation.ouvrir_menu') }}">
-                <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-                </svg>
-            </button>
-
             <span class="adm-top__section">{{ __('navigation.coque.section_client') }}</span>
 
             {{-- Recherche : formulaire GET, terme en query string.
@@ -162,12 +158,11 @@
      Le dock reprenait les libellés longs : à 320px, « Tableau de bord »,
      « Mon QR Code » et « Mon abonnement » s'affichaient tronqués — trois
      entrées sur cinq. Voir le commentaire dans lang/fr/navigation.php. --}}
-<x-dock jeu="client" :entrees="[
-    ['route' => 'dashboard',           'icone' => 'grille',         'libelle' => __('navigation.client.court.tableau_de_bord')],
-    ['route' => 'profil.index',        'icone' => 'personne',       'libelle' => __('navigation.client.court.mon_profil')],
-    ['route' => 'carte.qr',            'icone' => 'qr',             'libelle' => __('navigation.client.court.mon_qr')],
-    ['route' => 'statistiques',        'icone' => 'courbe',         'libelle' => __('navigation.client.court.statistiques')],
-    ['route' => 'abonnement.paiement', 'icone' => 'carte-bancaire', 'libelle' => __('navigation.client.court.mon_abonnement')],
+<x-dock jeu="client" panneau="menuLateral" :entrees="[
+    ['route' => 'dashboard',    'icone' => 'grille',   'libelle' => __('navigation.client.court.tableau_de_bord')],
+    ['route' => 'profil.index', 'icone' => 'personne', 'libelle' => __('navigation.client.court.mon_profil')],
+    ['route' => 'carte.qr',     'icone' => 'qr',       'libelle' => __('navigation.client.court.mon_qr')],
+    ['route' => 'statistiques', 'icone' => 'courbe',   'libelle' => __('navigation.client.court.statistiques')],
 ]" />
 
 <x-whatsapp-fab />

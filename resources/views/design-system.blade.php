@@ -54,7 +54,8 @@
             {{-- ---------------------------------------------------------- --}}
             <h2 class="section-title" style="margin-top:72px">Carte PVC</h2>
             <p class="section-sub">
-                Ratio 1,586 (85,6 × 54 mm, ISO/IEC 7810 ID-1) · coins à angle vif ·
+                Ratio 1,586 (85,6 × 54 mm, ISO/IEC 7810 ID-1) · rayon de coin 3,18 mm,
+                la valeur normative CR80 ·
                 typographie en unités de conteneur · deux variantes, verte et blanche.
             </p>
             <p class="section-sub">

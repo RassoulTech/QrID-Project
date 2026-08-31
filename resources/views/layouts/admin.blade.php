@@ -45,15 +45,10 @@
     {{-- ===================== COLONNE PRINCIPALE ===================== --}}
     <div class="adm-main">
 
+        {{-- PLUS DE HAMBURGER — voir le commentaire du gabarit client.
+             L'administration a douze destinations : « Plus » y est d'autant
+             plus utile, puisque huit d'entre elles vivent dans le panneau. --}}
         <header class="adm-top">
-            <button type="button" class="adm-top__burger"
-                    data-bs-toggle="offcanvas" data-bs-target="#menuAdmin"
-                    aria-controls="menuAdmin" aria-label="{{ __('navigation.ouvrir_menu') }}">
-                <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-                </svg>
-            </button>
-
             <span class="adm-top__section">{{ __('navigation.coque.section_admin') }}</span>
 
             {{-- Recherche globale : GET, terme en query string. Partageable,
@@ -139,12 +134,11 @@
      Douze destinations existent ; cinq entrent ici. Un dock qui déborde
      n'est plus un dock, c'est une barre de défilement — le reste demeure
      dans le panneau latéral, à un geste du bouton de la barre. --}}
-<x-dock jeu="admin" :entrees="[
-    ['route' => 'admin.overview',        'icone' => 'vue-ensemble', 'libelle' => __('navigation.admin.vue_ensemble')],
-    ['route' => 'admin.clients.index',   'icone' => 'clients',      'libelle' => __('navigation.admin.clients')],
-    ['route' => 'admin.payments.index',  'icone' => 'paiements',    'libelle' => __('navigation.admin.paiements')],
-    ['route' => 'admin.cards.index',     'icone' => 'modeles',      'libelle' => __('navigation.admin.cartes')],
-    ['route' => 'admin.statistics',      'icone' => 'statistiques', 'libelle' => __('navigation.admin.statistiques')],
+<x-dock jeu="admin" panneau="menuAdmin" :entrees="[
+    ['route' => 'admin.overview',        'icone' => 'vue-ensemble', 'libelle' => __('navigation.admin.court.vue_ensemble')],
+    ['route' => 'admin.clients.index',   'icone' => 'clients',      'libelle' => __('navigation.admin.court.clients')],
+    ['route' => 'admin.payments.index',  'icone' => 'paiements',    'libelle' => __('navigation.admin.court.paiements')],
+    ['route' => 'admin.cards.index',     'icone' => 'modeles',      'libelle' => __('navigation.admin.court.cartes')],
 ]" />
 </body>
 </html>
