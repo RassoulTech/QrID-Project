@@ -28,8 +28,17 @@ class ChampsObligatoiresTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Les composants qui ont LE DROIT de dessiner la marque. */
+    /**
+     * Les composants qui ont LE DROIT de dessiner la marque.
+     *
+     * `champ.blade.php` est désormais le SEUL à la dessiner réellement :
+     * les autres délèguent l'anatomie et ne portent plus que leur
+     * contrôle. Les noms restent dans la liste tant que la migration des
+     * vues n'est pas terminée — les retirer trop tôt ferait rougir le
+     * test sur des composants encore en transition.
+     */
     private const COMPOSANTS_AUTORISES = [
+        'champ.blade.php',
         'input.blade.php',
         'select.blade.php',
         'textarea.blade.php',

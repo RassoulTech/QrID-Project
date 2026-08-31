@@ -398,7 +398,11 @@ textarea {
 %select {
   @extend %champ;
   appearance: none;
-  padding-right: esp(9);
+
+  // PROPRIÉTÉS LOGIQUES, pas physiques. `padding-inline-end` suit le sens
+  // d'écriture ; `padding-right` le fige. Le reste du socle emploie déjà
+  // les logiques — cette règle était la seule à ne pas le faire.
+  padding-inline-end: esp(9);
   background-repeat: no-repeat;
   background-position: right esp(4) center;
   background-size: 14px;
@@ -427,9 +431,34 @@ select { background-image: var(--chevron); }
 // liste déroulante ouverte en thème sombre affiche du texte clair sur
 // fond clair sous Windows.
 select option,
-.form-select option {
+.form-select option,
+.f__select option {
   background: var(--carte);
   color: var(--texte);
+}
+
+/*
+ | LES GROUPES ET LES OPTIONS INACTIVES.
+ |
+ | Le sélecteur d'indicatif met l'Afrique de l'Ouest en tête : c'est
+ | exactement un cas d'`optgroup`, et il n'était pas habillé. Le titre d'un
+ | groupe non stylé s'affiche en italique gras dans une teinte que le
+ | système choisit — souvent illisible en thème sombre.
+ |
+ | Une option DÉSACTIVÉE est le marque-place : il nomme l'action, il n'est
+ | pas une réponse valable. Il doit donc se distinguer sans disparaître.
+ */
+select optgroup,
+.f__select optgroup {
+  background: var(--carte);
+  color: var(--texte-3);
+  font-style: normal;
+  font-weight: 700;
+}
+
+select option:disabled,
+.f__select option:disabled {
+  color: var(--texte-3);
 }
 
 
@@ -648,6 +677,55 @@ a.card,
 
 
 // =============================================================================
+// 7 bis. L'ÉTAT VIDE — il n'avait aucune classe
+// =============================================================================
+//
+// `x-empty-state` existait comme composant, mais SANS CSS dédié : chaque
+// page réinventait son vide, avec son espacement et sa taille d'icône.
+// L'audit a compté zéro racine pour cette famille — la seule à n'en avoir
+// aucune.
+//
+// Un état vide n'est pas une page ratée : c'est le PREMIER écran d'un
+// compte neuf. Il doit dire ce qui manque et donner l'action qui le
+// comble.
+
+.etat-vide {
+  display: grid;
+  justify-items: center;
+  gap: esp(4);
+  padding: esp(9) esp(5);
+  text-align: center;
+}
+
+.etat-vide__icone {
+  width: esp(10);
+  height: esp(10);
+  display: grid;
+  place-items: center;
+  border-radius: rayon(full);
+  background: var(--marque-doux);
+  color: var(--marque);
+}
+
+.etat-vide__titre {
+  margin: 0;
+  font-size: typo(h3);
+  font-weight: typo(h3, graisse);
+  color: var(--texte);
+}
+
+.etat-vide__texte {
+  margin: 0;
+  max-width: 46ch;
+  font-size: typo(body-sm);
+  line-height: typo(body-sm, interligne);
+  color: var(--texte-3);
+}
+
+.etat-vide__action { margin-top: esp(2); }
+
+
+// =============================================================================
 // 8. MESSAGES
 // =============================================================================
 
@@ -731,6 +809,40 @@ a.card,
 
 // Le nom de la marque reprenait le vert foncé sur fond sombre : 1,32:1.
 .theme-dark .brand__name { color: var(--texte); }
+
+
+// =============================================================================
+// 10 bis. LES CIBLES TACTILES RELEVÉES DANS LE NAVIGATEUR
+// =============================================================================
+//
+// Mesurées sur le DOM rendu, pas déduites du CSS. Chacune était sous les
+// 44px de la loi 5, et aucune ne se voyait à la lecture du code : c'est
+// la hauteur CALCULÉE qui compte, pas celle qu'on croit avoir écrite.
+
+// L'onglet Connexion / Créer un compte : 38px de haut.
+.auth-tabs__item { min-height: $tactile-min; }
+
+// La révélation du mot de passe : 34×34. C'est le contrôle qu'on vise le
+// plus mal, parce qu'il est collé au bord droit du champ.
+.f__eye,
+.auth-field__eye {
+  min-width: $tactile-min;
+  min-height: $tactile-min;
+  display: grid;
+  place-items: center;
+}
+
+// Une entrée du menu de langue : 40px.
+.langue__option { min-height: $tactile-min; }
+
+// La bascule de thème : 36×36, sur neuf pages.
+.theme-toggle {
+  min-width: $tactile-min;
+  min-height: $tactile-min;
+}
+
+// Un lien de pagination : 34px.
+.pagin__lien { min-height: $tactile-min; }
 
 
 // =============================================================================
