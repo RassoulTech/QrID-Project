@@ -132,4 +132,10 @@ return [
         'mentions' => 'Mentions légales',
         'conditions' => 'Conditions générales',
     ],
+
+    'dock' => [
+        'aria' => 'Navigation principale',
+        'en_attente' => ':compte élément en attente|:compte éléments en attente',
+        'plus' => 'Plus',
+    ],
 ];

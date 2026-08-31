@@ -30,7 +30,14 @@
 <div class="adm">
 
     {{-- ===================== COLONNE LATÉRALE ===================== --}}
-    <aside class="adm-side offcanvas-lg offcanvas-start" tabindex="-1"
+    {{-- `offcanvas-md` et non `offcanvas-lg` : la colonne redevient fixe à
+     768px, la rupture `lg` de `$ruptures`, et non à 992px — une borne de
+     Bootstrap qui n'appartient pas à notre échelle.
+
+     LE DÉCALAGE LAISSAIT UN TROU. Le dock disparaît à 768px ; la colonne
+     ne réapparaissait qu'à 992. Entre les deux, aucune navigation visible
+     — seulement un bouton hamburger. Le relevé l'a mesuré. --}}
+    <aside class="adm-side offcanvas-md offcanvas-start" tabindex="-1"
            id="menuLateral" aria-labelledby="menuLateralTitre">
 
         <div class="adm-side__marque" id="menuLateralTitre">
@@ -147,6 +154,18 @@
 {{-- ESPACE CLIENT — le message est déduit de l'écran exact : étape 2 de la
      création, paiement, QR Code, statistiques. C'est ce qui permet à l'équipe
      de savoir où la personne était sans avoir à le lui demander. --}}
+{{-- LE DOCK — navigation permanente sous 768px.
+     Cinq destinations : c'est exactement ce que compte l'espace client,
+     donc aucune n'est reléguée. Le panneau latéral reste accessible par
+     le bouton de la barre supérieure pour l'aide et la déconnexion. --}}
+<x-dock jeu="client" :entrees="[
+    ['route' => 'dashboard',           'icone' => 'grille',         'libelle' => __('navigation.client.tableau_de_bord')],
+    ['route' => 'profil.index',        'icone' => 'personne',       'libelle' => __('navigation.client.mon_profil')],
+    ['route' => 'carte.qr',            'icone' => 'qr',             'libelle' => __('navigation.client.mon_qr')],
+    ['route' => 'statistiques',        'icone' => 'courbe',         'libelle' => __('navigation.client.statistiques')],
+    ['route' => 'abonnement.paiement', 'icone' => 'carte-bancaire', 'libelle' => __('navigation.client.mon_abonnement')],
+]" />
+
 <x-whatsapp-fab />
 </body>
 </html>

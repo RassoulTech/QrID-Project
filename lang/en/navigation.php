@@ -110,4 +110,10 @@ return [
         'mentions' => 'Legal notice',
         'conditions' => 'Terms and conditions',
     ],
+
+    'dock' => [
+        'aria' => 'Main navigation',
+        'en_attente' => ':compte item pending|:compte items pending',
+        'plus' => 'More',
+    ],
 ];

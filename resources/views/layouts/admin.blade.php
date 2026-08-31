@@ -24,7 +24,14 @@
     {{-- ===================== COLONNE LATÉRALE =====================
          Hors mobile : colonne fixe. Sous 992px : offcanvas Bootstrap natif,
          aucune navigation ne dépend d'un script maison. --}}
-    <aside class="adm-side offcanvas-lg offcanvas-start" tabindex="-1"
+    {{-- `offcanvas-md` et non `offcanvas-lg` : la colonne redevient fixe à
+     768px, la rupture `lg` de `$ruptures`, et non à 992px — une borne de
+     Bootstrap qui n'appartient pas à notre échelle.
+
+     LE DÉCALAGE LAISSAIT UN TROU. Le dock disparaît à 768px ; la colonne
+     ne réapparaissait qu'à 992. Entre les deux, aucune navigation visible
+     — seulement un bouton hamburger. Le relevé l'a mesuré. --}}
+    <aside class="adm-side offcanvas-md offcanvas-start" tabindex="-1"
            id="menuAdmin" aria-labelledby="menuAdminTitre">
 
         <div class="adm-side__marque" id="menuAdminTitre">
@@ -127,5 +134,17 @@
         </main>
     </div>
 </div>
+
+{{-- LE DOCK DE L'ADMINISTRATION.
+     Douze destinations existent ; cinq entrent ici. Un dock qui déborde
+     n'est plus un dock, c'est une barre de défilement — le reste demeure
+     dans le panneau latéral, à un geste du bouton de la barre. --}}
+<x-dock jeu="admin" :entrees="[
+    ['route' => 'admin.overview',        'icone' => 'vue-ensemble', 'libelle' => __('navigation.admin.vue_ensemble')],
+    ['route' => 'admin.clients.index',   'icone' => 'clients',      'libelle' => __('navigation.admin.clients')],
+    ['route' => 'admin.payments.index',  'icone' => 'paiements',    'libelle' => __('navigation.admin.paiements')],
+    ['route' => 'admin.cards.index',     'icone' => 'modeles',      'libelle' => __('navigation.admin.cartes')],
+    ['route' => 'admin.statistics',      'icone' => 'statistiques', 'libelle' => __('navigation.admin.statistiques')],
+]" />
 </body>
 </html>

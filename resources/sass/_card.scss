@@ -35,7 +35,36 @@
 // LA CARTE
 // -----------------------------------------------------------------------------
 .card{
-  width:min(420px, 92vw);
+  /*
+   | LA CARTE SE MESURE SUR SON CONTENEUR, PLUS SUR LA FENÊTRE.
+   |
+   | `92vw` valait 1324px à 1440px de large : `min()` retenait donc 420px,
+   | et la carte sortait de la colonne qui l'accueille. Mesuré sur /profil :
+   | 30px de débordement de la PAGE — pas d'un conteneur qui défile.
+   |
+   | `100%` donne le même résultat partout où la carte tenait déjà : sur
+   | téléphone, la colonne fait la largeur de l'écran moins la gouttière,
+   | soit ce que 92vw approchait. La différence n'apparaît que là où la
+   | carte est placée dans une colonne étroite — c'est-à-dire là où elle
+   | débordait.
+   */
+  width:min(420px, 100%);
+
+  /*
+   | UN PLAFOND SUR LE CONTENEUR, pas seulement sur la fenêtre.
+   |
+   | `92vw` était pensé pour le mobile, où la carte occupe l'écran. Dans
+   | une colonne étroite au bureau, 92vw vaut 1324px : `min()` retient
+   | donc 420px, et la carte sort de sa colonne.
+   |
+   | Mesuré sur /profil à 1440px : 30px de débordement horizontal, sur la
+   | PAGE entière — pas dans un conteneur qui défile.
+   |
+   | `max-width:100%` ne change aucune taille voulue : à toutes les
+   | largeurs où la carte tenait, elle tient encore. Il ne fait que
+   | l'empêcher de dépasser ce qui lui est donné.
+   */
+  max-width:100%;
   aspect-ratio:1.586;          // format carte bancaire — jamais de hauteur fixe
   border-radius:0;             // angles vifs
   padding:5.5% 6%;
@@ -195,6 +224,20 @@
   flex-direction:column;
   align-items:center;
   gap:esp(4);
+
+  /*
+   | IL NE DÉPASSE JAMAIS CE QU'ON LUI DONNE.
+   |
+   | Sans largeur propre, ce conteneur prend celle de son plus large
+   | enfant — la carte, à 420px. Le plafond posé sur la carte ne servait
+   | donc à rien : il se mesurait contre un parent dont la largeur venait
+   | d'elle. Un raisonnement circulaire, qui se résolvait à 420px.
+   |
+   | `min-width:0` est le second morceau : un élément de grille ou de
+   | flex refuse par défaut de descendre sous la taille de son contenu.
+   */
+  max-width:100%;
+  min-width:0;
 }
 
 .card-duo__scene{
@@ -229,7 +272,15 @@
     position:relative;
     display:block;
     // La scène prend la place d'UNE carte : les faces se superposent.
-    width:min(420px, 92vw);
+    //
+    // MÊME CORRECTION QUE SUR `.card` : `92vw` se mesurait sur la FENÊTRE,
+    // pas sur la colonne. À 1440px, la scène restait à 420px dans un
+    // conteneur de 270 — un enfant plus large que son parent, qui sortait
+    // de la page de 30px.
+    //
+    // C'était la vraie cause : `.card` avait déjà été bornée, mais la
+    // scène portait sa propre largeur et la lui réimposait.
+    width:min(420px, 100%);
     aspect-ratio:1.586;
     perspective:1400px;
   }

@@ -321,6 +321,14 @@ $champ-hauteur: 48px;   // hauteur d'un champ sur mobile
 $action-mobile: 52px;   // barre d'actions de la page publique
 $tuile-reseau:  64px;   // grille des réseaux sociaux
 
+// LE DOCK — une dimension de produit, au même titre que la tuile.
+//
+// 56px de haut : au-dessus du minimum tactile, parce qu'une cible qu'on
+// vise EN MARCHANT, une carte à la main, demande plus de marge qu'une
+// cible qu'on vise assis devant un écran.
+$dock-hauteur: 56px;
+$dock-icone:   22px;
+
 
 // =============================================================================
 // 12. LA COUCHE ACTIVE — ce que les composants consomment
@@ -380,6 +388,19 @@ $tuile-reseau:  64px;   // grille des réseaux sociaux
   // assez discrets pour ne pas déborder visuellement du champ.
   --marque-halo: #{rgba($vert-fonce, .22)};
   --danger-halo: #{rgba($c-danger, .22)};
+
+  /*
+   | LE TEXTE POSÉ SUR --danger, et pourquoi il change avec le thème.
+   |
+   | En clair, --danger vaut #B42318 : du blanc dessus donne 5,62:1.
+   | En sombre, il vaut #E78E83 — un saumon CLAIR, choisi pour se lire
+   | sur une surface sombre. Du blanc dessus n'y donnerait que 1,9:1.
+   |
+   | Une pastille de comptage écrite en blanc en dur serait donc illisible
+   | dans la moitié des cas. C'est exactement le piège de --sur-accent,
+   | déjà documenté, sur une autre couleur.
+   */
+  --sur-danger: #FFFFFF;
 }
 
 .theme-dark {
@@ -430,6 +451,8 @@ $tuile-reseau:  64px;   // grille des réseaux sociaux
 
   --marque-halo: #{rgba($vert-accent-sombre, .30)};
   --danger-halo: #{rgba($s-danger, .30)};
+
+  --sur-danger: #{$s-texte-inv};   // encre sombre sur le saumon clair
 }
 
 

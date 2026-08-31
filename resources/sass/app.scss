@@ -45,3 +45,7 @@
 // surenchérir en !important — et un projet qui empile des !important a
 // perdu le contrôle de sa cascade.
 @import "socle";
+
+// LE DOCK APRÈS LE SOCLE : il consomme ses tokens et ses
+// fonctions, et doit gagner sur les règles de coque.
+@import "dock";

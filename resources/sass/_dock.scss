@@ -1,0 +1,159 @@
+// =============================================================================
+// LE DOCK — la navigation permanente sur téléphone
+// =============================================================================
+//
+// ─────────────────────────────────────────────────────────────────────────
+// POURQUOI PAS DE VERRE DÉPOLI
+// ─────────────────────────────────────────────────────────────────────────
+// La référence fournie montre une surface translucide et floutée. C'est le
+// seul point qu'on refuse, et le refus est technique.
+//
+// `backdrop-filter: blur()` oblige le compositeur à recalculer la zone
+// située DERRIÈRE l'élément à chaque image défilée. Sur les Android
+// d'entrée de gamme qui dominent le marché sénégalais, cela produit un
+// saccadement visible précisément PENDANT le défilement — c'est-à-dire au
+// moment où l'on regarde le plus la barre du bas.
+//
+// La même lecture « flottant au-dessus du contenu » s'obtient avec une
+// surface OPAQUE, une bordure et une ombre portée, pour zéro coût de
+// rendu. C'est la lecture qui compte, pas le procédé.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// IL DISPARAÎT À 768px
+// ─────────────────────────────────────────────────────────────────────────
+// Au-delà, la colonne latérale reprend la main : elle affiche douze
+// destinations là où le dock en porte cinq. Les deux ne coexistent jamais.
+// =============================================================================
+
+.dock {
+  position: fixed;
+  z-index: 1040;
+
+  // Flottant, pas collé : le dock est un objet POSÉ sur la page, et
+  // l'espace autour de lui est ce qui le dit.
+  inset-inline: esp(3);
+
+  // LA ZONE SÛRE D'iOS. Sans `env(safe-area-inset-bottom)`, le dock passe
+  // sous la barre de gestes de l'iPhone : la dernière entrée devient
+  // intouchable, et l'on croit que le bouton ne marche pas.
+  bottom: calc(#{esp(3)} + env(safe-area-inset-bottom, 0px));
+
+  background: var(--surelev);
+  border: 1px solid var(--bordure);
+  border-radius: rayon(full);
+  box-shadow: var(--ombre-3);
+
+  @include ecran(lg) { display: none; }
+}
+
+.dock__liste {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: stretch;
+
+  margin: 0;
+  padding: esp(1);
+  list-style: none;
+}
+
+.dock__item { min-width: 0; }
+
+.dock__lien {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: esp(1);
+
+  min-height: $dock-hauteur;
+  padding: esp(2) esp(1);
+
+  border-radius: rayon(full);
+  text-decoration: none;
+  color: var(--texte-3);
+
+  // Ni transform ni largeur : seule la couleur et le fond bougent, donc
+  // aucune ligne de mise en page n'est recalculée pendant la transition.
+  transition: background-color $d-rapide $courbe, color $d-rapide $courbe;
+
+  &:hover { color: var(--texte); }
+
+  // L'ÉTAT ACTIF SE LIT AU REPOS — fond ET couleur, jamais l'un des deux
+  // seul, et jamais une simple élévation qu'un écran mat ne rend pas.
+  &.is-actif {
+    background: var(--marque);
+    color: var(--texte-inv-marque);
+  }
+}
+
+.dock__icone {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: $dock-icone;
+  height: $dock-icone;
+
+  svg { width: 100%; height: 100%; }
+}
+
+.dock__libelle {
+  font-size: typo(overline);
+  font-weight: 600;
+  line-height: 1;
+
+  // Un libellé long ne pousse jamais ses voisins : il se coupe. Cinq
+  // colonnes de largeur égale valent mieux qu'une colonne qui déborde.
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// LA PASTILLE DE COMPTAGE.
+// Elle sort légèrement de l'icône : posée dedans, elle la masquerait.
+.dock__pastille {
+  position: absolute;
+  top: -#{esp(2)};
+  inset-inline-start: esp(3);
+
+  min-width: esp(4);
+  height: esp(4);
+  padding: 0 esp(1);
+
+  display: grid;
+  place-items: center;
+
+  border-radius: rayon(full);
+  background: var(--danger);
+  // Pas de blanc en dur : en thème sombre, --danger est un saumon CLAIR,
+  // et du blanc dessus ne donnerait que 1,9:1.
+  color: var(--sur-danger);
+
+  font-size: typo(overline);
+  font-weight: 700;
+  line-height: 1;
+}
+
+// L'entrée active porte déjà le fond de la marque : la pastille y perdrait
+// son alerte. On la retourne.
+.dock__lien.is-actif .dock__pastille {
+  background: var(--carte);
+  color: var(--danger);
+}
+
+// =============================================================================
+// LA PLACE QUE LE DOCK PREND
+// =============================================================================
+//
+// Un élément `fixed` ne pousse rien : sans cette réserve, le dock RECOUVRE
+// la fin du contenu. Le dernier bouton d'un formulaire devient inatteignable
+// — et c'est toujours le bouton d'envoi.
+
+body:has(.dock) {
+  // La hauteur du dock, plus l'espace au-dessus et en dessous : la
+  // réserve se DÉDUIT du dock au lieu d'être recopiée. Changer sa taille
+  // ne laissera donc pas cette valeur en arrière.
+  padding-bottom: calc(#{$dock-hauteur} + #{esp(6)} + env(safe-area-inset-bottom, 0px));
+
+  @include ecran(lg) { padding-bottom: 0; }
+}
