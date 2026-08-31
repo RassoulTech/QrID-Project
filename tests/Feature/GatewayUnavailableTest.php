@@ -101,7 +101,11 @@ class GatewayUnavailableTest extends TestCase
         $this->actingAs($this->user)
             ->get(route('abonnement.paiement'))
             ->assertOk()
-            ->assertSee('Paiement à la main, pour l\'instant', false);
+            // PAS de `false` en second argument : Blade échappe l'apostrophe
+            // en &#039;, donc chercher la forme brute ne trouve jamais rien.
+            // Avec l'échappement par défaut, l'attendu subit la même
+            // transformation que la page, et les deux se comparent enfin.
+            ->assertSee('Paiement à la main, pour l\'instant');
     }
 
     /**

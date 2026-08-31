@@ -17,7 +17,7 @@
  * puis se déconnecte entièrement quand le groupe est épuisé.
  */
 
-const STEP = 80; // ms entre deux éléments d'un même groupe
+const STEP = 60; // ms entre deux éléments d'un même groupe
 
 export default function scrollReveal() {
     const items = Array.from(document.querySelectorAll('[data-reveal]'));

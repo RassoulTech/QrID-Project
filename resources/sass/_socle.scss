@@ -1,0 +1,788 @@
+// =============================================================================
+// QrID — SOCLE
+// =============================================================================
+//
+// LA COUCHE QUI FAIT EXISTER LES TOKENS.
+//
+// L'étape précédente a posé `_tokens.scss` : des variables que RIEN ne
+// consommait. Le rendu n'avait donc pas bougé d'un pixel, ce qui était
+// exact mais inutile. Ce fichier est la contrepartie : il branche les
+// tokens sur le balisage réel.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// CE QU'IL RÉPARE, ET POURQUOI IL EST NÉCESSAIRE
+// ─────────────────────────────────────────────────────────────────────────
+// L'audit a relevé, sur le balisage réellement employé dans les vues :
+//
+//   · QUATRE systèmes de boutons  — .btn-pill, .btn--vert, .btn--clair,
+//     et les .btn-* de Bootstrap ;
+//   · CINQ systèmes de champs     — .f__control (parcours de création),
+//     .form-control (Bootstrap brut, via x-input), .adm-champ, .adm-select,
+//     .auth-fields.
+//
+// Deux composants Blade voisins produisent donc deux apparences
+// différentes pour le même objet. `x-field` rend `.f__control` ;
+// `x-input` rend du Bootstrap non habillé. C'est la cause directe du
+// « rien ne se ressemble » : ce n'est pas un défaut de goût, c'est un
+// défaut de plomberie.
+//
+// Le socle les ramène tous sur UNE apparence, décrite une seule fois.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// POURQUOI IL EST IMPORTÉ EN DERNIER
+// ─────────────────────────────────────────────────────────────────────────
+// Bootstrap et les feuilles historiques déclarent déjà ces sélecteurs.
+// À spécificité égale, c'est le dernier déclaré qui gagne. Importer le
+// socle en fin de chaîne évite d'avoir à surenchérir en `!important` —
+// et un projet qui commence à empiler des `!important` a perdu le
+// contrôle de sa cascade.
+//
+// =============================================================================
+
+
+// =============================================================================
+// 1. LE SHELL — la page prend enfin ses couleurs du thème
+// =============================================================================
+
+html {
+  // La propagation du fond : <html> transparent laisse le canvas prendre
+  // celui de <body>. On le pose ici pour que le rebond élastique d'iOS
+  // ne découvre pas une bande blanche sous une page sombre.
+  background: var(--page);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--page);
+  color: var(--texte);
+  font-family: $font;
+  font-size: typo(body);
+  line-height: typo(body, interligne);
+
+  // AUCUN ESPACE MORT : le fond du thème couvre toute la hauteur, quelle
+  // que soit la quantité de contenu. Sans ça, une page courte laisse un
+  // bloc blanc résiduel en bas — le défaut le plus visible d'un thème
+  // sombre mal posé.
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+// Les surfaces héritées qui forçaient du blanc en dur.
+.bg-white,
+.bg-light { background: var(--carte) !important; }
+
+::selection { background: var(--marque); color: #FFFFFF; }
+
+
+// =============================================================================
+// 2. TYPOGRAPHIE — l'échelle, appliquée
+// =============================================================================
+//
+// L'audit a relevé 41 tailles de police distinctes, dont 12,5px employé
+// 40 fois. Neuf tailles nommées les remplacent, chacune avec sa valeur
+// mobile et sa valeur bureau.
+
+@each $nom, $balise in (h1: 'h1', h2: 'h2', h3: 'h3') {
+  #{$balise}, .t-#{$nom} {
+    font-size: typo($nom);
+    font-weight: typo($nom, graisse);
+    line-height: typo($nom, interligne);
+    letter-spacing: typo($nom, espacement);
+    color: var(--texte);
+
+    @include ecran(lg) { font-size: typo($nom, bureau); }
+  }
+}
+
+h4, h5, h6 {
+  font-size: typo(h3);
+  font-weight: typo(h3, graisse);
+  line-height: typo(h3, interligne);
+  color: var(--texte);
+}
+
+.t-display {
+  font-size: typo(display);
+  font-weight: typo(display, graisse);
+  line-height: typo(display, interligne);
+  letter-spacing: typo(display, espacement);
+  @include ecran(lg) { font-size: typo(display, bureau); }
+}
+
+.t-lead    { font-size: typo(body-lg); line-height: typo(body-lg, interligne); color: var(--texte-2); }
+.t-sm      { font-size: typo(body-sm); line-height: typo(body-sm, interligne); }
+.t-caption { font-size: typo(caption); color: var(--texte-2); }
+.t-over {
+  font-size: typo(overline);
+  font-weight: typo(overline, graisse);
+  letter-spacing: typo(overline, espacement);
+  text-transform: uppercase;
+  color: var(--texte-3);
+}
+
+// Les utilitaires de texte de Bootstrap, ramenés sur les tokens : ils
+// écrivaient des gris fixes qui devenaient illisibles en thème sombre.
+.text-muted,
+.text-secondary { color: var(--texte-3) !important; }
+.text-body      { color: var(--texte) !important; }
+.text-success   { color: var(--succes) !important; }
+.text-danger    { color: var(--danger) !important; }
+.text-warning   { color: var(--alerte) !important; }
+.text-info      { color: var(--info) !important; }
+
+a { color: var(--marque); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--marque); }
+
+hr { border-color: var(--bordure); opacity: 1; }
+
+code, kbd, samp, pre {
+  // #D63384 sur fond sombre donnait 4,05:1 — sous le seuil. La couleur
+  // d'information passe les deux thèmes.
+  color: var(--info);
+  background: var(--surelev);
+  padding: 2px 6px;
+  border-radius: rayon(sm);
+  font-size: .9em;
+}
+pre { padding: esp(3); }
+pre code { background: none; padding: 0; }
+
+
+// =============================================================================
+// 3. LE FOCUS — visible, et le même partout
+// =============================================================================
+//
+// Un contour de focus n'est pas une décoration : c'est la seule chose qui
+// dit où l'on est quand on navigue au clavier. Bootstrap en pose un bleu
+// qui n'a rien à voir avec la charte ; on le remplace partout.
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--marque);
+  outline-offset: 2px;
+  border-radius: rayon(sm);
+}
+
+// On ne supprime le contour par défaut que là où l'on en repose un.
+:where(a, button, input, select, textarea, summary):focus:not(:focus-visible) {
+  outline: none;
+}
+
+
+// =============================================================================
+// 4. BOUTONS — quatre familles, une seule apparence
+// =============================================================================
+
+%bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: esp(2);
+
+  // 44px est le minimum tactile (WCAG 2.5.5). Le bouton du menu n'en
+  // faisait que 34, et un menu qu'on rate une fois sur trois n'est pas
+  // un menu.
+  min-height: $tactile-min;
+  padding: esp(3) esp(5);
+
+  font-family: $font;
+  font-size: typo(body-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+
+  border: 1px solid transparent;
+  border-radius: rayon(full);
+  cursor: pointer;
+
+  // Uniquement transform et opacity : aucun décalage de mise en page.
+  transition: background-color $d-rapide $courbe,
+              border-color $d-rapide $courbe,
+              color $d-rapide $courbe,
+              transform $d-rapide $courbe,
+              box-shadow $d-normal $courbe;
+
+  &:disabled,
+  &.disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  // L'enfoncement au clic : 1px, et seulement au clic. C'est le retour
+  // qui manque le plus sur mobile, où il n'y a pas de survol.
+  &:active:not(:disabled) { transform: translateY(1px); }
+}
+
+// ── La variante pleine ───────────────────────────────────────────────────
+%bouton-plein {
+  background: var(--marque);
+  border-color: var(--marque);
+  // Le texte inversé est calculé : blanc sur le vert foncé du thème clair
+  // (12,51:1), vert-très-sombre sur le vert remonté du thème sombre
+  // (7,04:1). Un blanc fixe donnerait 1,5:1 en sombre.
+  color: var(--texte-inv-marque);
+
+  &:hover:not(:disabled) {
+    background: var(--marque-survol);
+    border-color: var(--marque-survol);
+    color: var(--texte-inv-marque);
+    box-shadow: var(--ombre-2);
+  }
+}
+
+// ── La variante contour ──────────────────────────────────────────────────
+%bouton-contour {
+  // Le fond est TRANSPARENT, pas blanc. Un fond blanc figé donnait, en
+  // thème sombre, du texte clair sur du blanc : 1,18:1. Le défaut ne se
+  // voyait que dans un thème, celui qu'on regarde le moins.
+  background: transparent;
+  border-color: var(--bordure-f);
+  color: var(--texte);
+
+  &:hover:not(:disabled) {
+    background: var(--surelev);
+    border-color: var(--marque);
+    color: var(--texte);
+  }
+}
+
+%bouton-discret {
+  background: transparent;
+  border-color: transparent;
+  color: var(--texte-2);
+  &:hover:not(:disabled) { background: var(--surelev); color: var(--texte); }
+}
+
+%bouton-danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #FFFFFF;
+  &:hover:not(:disabled) { filter: brightness(1.08); color: #FFFFFF; }
+}
+
+// ── Le raccordement des quatre familles ──────────────────────────────────
+// Chaque nom historique retombe sur la même apparence. Aucun n'est
+// renommé : renommer 46 occurrences de `.btn` dans les vues aurait été
+// un chantier séparé, avec son propre risque de régression.
+.btn,
+.btn-pill,
+.adm-btn { @extend %bouton; }
+
+.btn-pill.btn-dark,
+.btn-primary,
+.btn-dark,
+.btn--vert,
+.adm-btn--vert,
+.adm-btn--primaire { @extend %bouton-plein; }
+
+.btn-pill.btn-outline,
+.btn-outline-secondary,
+.btn-outline-primary,
+.btn-light,
+.btn--clair,
+.adm-btn--clair { @extend %bouton-contour; }
+
+.btn-ghost-light,
+.btn-link,
+.adm-btn--discret { @extend %bouton-discret; }
+
+.btn-danger,
+.btn--danger,
+.adm-btn--danger { @extend %bouton-danger; }
+
+.btn-sm,
+.btn-sm-pill,
+.adm-btn--sm {
+  min-height: 38px;
+  padding: esp(2) esp(4);
+  font-size: typo(caption);
+}
+
+.btn-lg {
+  min-height: 56px;
+  padding: esp(4) esp(7);
+  font-size: typo(body);
+}
+
+.btn-block,
+.btn--block { display: flex; width: 100%; }
+
+
+// =============================================================================
+// 5. CHAMPS — cinq familles, une seule apparence
+// =============================================================================
+
+%champ {
+  display: block;
+  width: 100%;
+
+  // 48px sur mobile : la hauteur confortable au pouce. En dessous, on
+  // vise, et viser un champ est le meilleur moyen d'abandonner un
+  // formulaire.
+  min-height: $champ-hauteur;
+  padding: esp(3) esp(4);
+
+  font-family: $font;
+  // 16px EXACTEMENT, et ce n'est pas négociable : en dessous, iOS zoome
+  // tout seul à la mise au point et la page part de travers. Le zoom ne
+  // se défait pas ; l'utilisateur se retrouve à faire défiler
+  // horizontalement un formulaire.
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--texte);
+
+  background: var(--carte);
+  border: 1px solid var(--bordure-f);
+  border-radius: rayon(md);
+
+  transition: border-color $d-rapide $courbe,
+              box-shadow $d-rapide $courbe,
+              background-color $d-rapide $courbe;
+
+  &::placeholder { color: var(--texte-3); opacity: 1; }
+
+  &:hover:not(:disabled):not(:focus) { border-color: var(--marque); }
+
+  &:focus {
+    outline: none;
+    border-color: var(--marque);
+    // Le halo remplace le contour : il suit le rayon du champ, ce qu'un
+    // outline ne fait pas toujours sur les anciens moteurs.
+    box-shadow: 0 0 0 3px var(--marque-halo);
+  }
+
+  &:disabled,
+  &[readonly] {
+    background: var(--surelev);
+    color: var(--texte-3);
+    cursor: not-allowed;
+  }
+
+  &.is-invalid,
+  &[aria-invalid="true"] {
+    border-color: var(--danger);
+    &:focus { box-shadow: 0 0 0 3px var(--danger-halo); }
+  }
+}
+
+.f__control,
+.form-control,
+.adm-champ,
+.auth-field__input,
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input[type="date"],
+textarea { @extend %champ; }
+
+textarea {
+  min-height: 120px;
+  padding-top: esp(3);
+  resize: vertical;
+}
+
+
+// ── Selects — la flèche est à nous ───────────────────────────────────────
+//
+// La flèche native est dessinée par le système : elle ignore le thème et
+// reste noire sur fond sombre. On la remplace par un chevron en fond,
+// décliné pour chaque thème — une image encodée ne peut pas lire une
+// propriété CSS, il en faut donc deux.
+
+%select {
+  @extend %champ;
+  appearance: none;
+  padding-right: esp(9);
+  background-repeat: no-repeat;
+  background-position: right esp(4) center;
+  background-size: 14px;
+  cursor: pointer;
+}
+
+.f__select,
+.form-select,
+.adm-select,
+select { @extend %select; }
+
+:root {
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230A1F1A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+.theme-dark {
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EAF1EE' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.f__select,
+.form-select,
+.adm-select,
+select { background-image: var(--chevron); }
+
+// LES OPTIONS SONT DESSINÉES PAR LE SYSTÈME, PAS PAR NOUS. On ne peut
+// leur imposer que la couleur et le fond ; sans ces deux lignes, une
+// liste déroulante ouverte en thème sombre affiche du texte clair sur
+// fond clair sous Windows.
+select option,
+.form-select option {
+  background: var(--carte);
+  color: var(--texte);
+}
+
+
+// ── Libellés, aides, erreurs ─────────────────────────────────────────────
+
+.f__label,
+.form-label,
+.adm-label,
+label.form-label {
+  display: block;
+  margin-bottom: esp(2);
+  font-size: typo(body-sm);
+  font-weight: 600;
+  color: var(--texte);
+}
+
+// L'astérisque est ROUGE et porte le rouge du token, pas celui de
+// Bootstrap : #DC3545 sur fond clair passe tout juste, et échoue sur
+// certaines surfaces.
+.f__requis,
+.form-label .text-danger { color: var(--danger); font-weight: 700; }
+
+.f__opt,
+.optional {
+  margin-left: esp(1);
+  font-size: typo(caption);
+  font-weight: 400;
+  color: var(--texte-3);
+}
+
+.f__hint,
+.form-text,
+.adm-aide {
+  display: block;
+  margin-top: esp(2);
+  font-size: typo(caption);
+  color: var(--texte-3);
+}
+
+// L'ERREUR EST SOUS SON CHAMP, jamais regroupée en haut. Un message
+// d'erreur loin de sa cause oblige à chercher lequel des douze champs
+// est concerné.
+.f__error,
+.invalid-feedback,
+.adm-erreur {
+  display: block;
+  margin-top: esp(2);
+  font-size: typo(caption);
+  font-weight: 500;
+  color: var(--danger);
+}
+
+.f,
+.mb-3 { margin-bottom: esp(5); }
+
+// SUR MOBILE, ON EMPILE. Deux colonnes en dessous de 640px donnent des
+// champs de 140px de large où plus rien n'est lisible.
+.f-duo,
+.form-duo {
+  display: grid;
+  gap: esp(4);
+  @include ecran(md) { grid-template-columns: 1fr 1fr; }
+}
+
+
+// ── Cases et boutons radio ───────────────────────────────────────────────
+
+.form-check-input {
+  width: 20px;
+  height: 20px;
+  margin-top: .15em;
+  background-color: var(--carte);
+  border: 1px solid var(--bordure-f);
+  cursor: pointer;
+  transition: background-color $d-rapide $courbe, border-color $d-rapide $courbe;
+
+  &:checked { background-color: var(--marque); border-color: var(--marque); }
+  &:focus-visible { box-shadow: 0 0 0 3px var(--marque-halo); }
+}
+
+.form-check-label,
+.form-check label {
+  color: var(--texte);
+  cursor: pointer;
+  // La zone tactile couvre le libellé, pas seulement la case de 20px.
+  padding: esp(1) 0;
+}
+
+.form-check { min-height: $tactile-min; display: flex; align-items: center; gap: esp(2); }
+
+
+// =============================================================================
+// 6. SURFACES — cartes, panneaux, listes
+// =============================================================================
+
+.card,
+.adm-fiche,
+.adm-carte,
+.panneau {
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+  border-radius: rayon(lg);
+  color: var(--texte);
+}
+
+.card-body { padding: esp(6); }
+
+// L'élévation au survol ne s'applique QU'AUX cartes cliquables. Une
+// carte qui se soulève sans être cliquable ment sur ce qu'elle est.
+a.card,
+.card--cliquable,
+.adm-fiche--cliquable {
+  text-decoration: none;
+  transition: transform $d-normal $courbe, box-shadow $d-normal $courbe,
+              border-color $d-normal $courbe;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ombre-3);
+    border-color: var(--marque);
+  }
+}
+
+.dropdown-menu,
+.adm-menu {
+  background: var(--carte);
+  border: 1px solid var(--bordure-f);
+  border-radius: rayon(md);
+  box-shadow: var(--ombre-3);
+  padding: esp(2);
+  color: var(--texte);
+}
+
+.dropdown-item {
+  border-radius: rayon(sm);
+  padding: esp(3) esp(4);
+  color: var(--texte);
+  min-height: $tactile-min;
+  display: flex;
+  align-items: center;
+  transition: background-color $d-rapide $courbe, transform $d-rapide $courbe;
+
+  &:hover,
+  &:focus {
+    background: var(--surelev);
+    color: var(--texte);
+    // Le décalage de 2px sur une ligne de liste : assez pour se voir,
+    // trop peu pour déranger la lecture.
+    transform: translateX(2px);
+  }
+}
+
+.offcanvas,
+.modal-content {
+  background: var(--carte);
+  color: var(--texte);
+  border-color: var(--bordure);
+}
+
+.offcanvas-header,
+.modal-header,
+.modal-footer { border-color: var(--bordure); }
+
+// Le bouton de fermeture de Bootstrap est une image noire : invisible
+// sur fond sombre. On l'inverse plutôt que de le redessiner.
+.theme-dark .btn-close { filter: invert(1) grayscale(1) brightness(2); }
+
+
+// =============================================================================
+// 7. BADGES — le défaut le plus grave de l'audit
+// =============================================================================
+//
+// `.badge.text-bg-light` gardait son fond clair #F2F3F1 Y COMPRIS en
+// thème sombre, et écrivait dessus les couleurs d'état de Bootstrap.
+// Mesuré : « En attente » en #FFC107 sur #F2F3F1 donnait 1,46:1 —
+// illisible, affiché 23 fois sur trois écrans dont la liste des
+// paiements.
+//
+// Chaque teinte est maintenant calculée pour passer 4,5:1 sur son
+// propre fond doux, dans les deux thèmes.
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: esp(1);
+  padding: esp(1) esp(3);
+  border-radius: rayon(full);
+  font-size: typo(caption);
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+@each $nom in (succes, alerte, danger, info, neutre) {
+  .badge--#{$nom} {
+    background: var(--#{$nom}-fond);
+    color: var(--#{$nom});
+  }
+}
+
+// Les noms de Bootstrap, ramenés sur les mêmes valeurs.
+.badge.text-bg-light,
+.badge.bg-light,
+.badge.text-bg-secondary { background: var(--neutre-fond) !important; color: var(--neutre) !important; }
+.badge.text-bg-success,
+.badge.bg-success        { background: var(--succes-fond) !important; color: var(--succes) !important; }
+.badge.text-bg-warning,
+.badge.bg-warning        { background: var(--alerte-fond) !important; color: var(--alerte) !important; }
+.badge.text-bg-danger,
+.badge.bg-danger         { background: var(--danger-fond) !important; color: var(--danger) !important; }
+.badge.text-bg-info,
+.badge.bg-info           { background: var(--info-fond) !important; color: var(--info) !important; }
+.badge.text-bg-primary,
+.badge.bg-primary        { background: var(--marque-doux) !important; color: var(--marque) !important; }
+
+
+// =============================================================================
+// 8. MESSAGES
+// =============================================================================
+
+.alert,
+.alerte {
+  display: flex;
+  gap: esp(3);
+  padding: esp(4) esp(5);
+  border-radius: rayon(md);
+  border: 1px solid transparent;
+  font-size: typo(body-sm);
+  line-height: 1.55;
+}
+
+@each $nom in (succes, alerte, danger, info) {
+  .alerte--#{$nom} {
+    background: var(--#{$nom}-fond);
+    color: var(--#{$nom});
+    border-color: var(--#{$nom});
+  }
+}
+
+.alert-success { background: var(--succes-fond); color: var(--succes); border-color: var(--succes); }
+.alert-warning { background: var(--alerte-fond); color: var(--alerte); border-color: var(--alerte); }
+.alert-danger  { background: var(--danger-fond); color: var(--danger); border-color: var(--danger); }
+.alert-info    { background: var(--info-fond);  color: var(--info);  border-color: var(--info); }
+
+
+// =============================================================================
+// 9. TABLEAUX — et leur bascule en cartes sur mobile
+// =============================================================================
+
+.table,
+.adm-table {
+  width: 100%;
+  color: var(--texte);
+  border-color: var(--bordure);
+
+  th {
+    font-size: typo(overline);
+    font-weight: 700;
+    letter-spacing: typo(overline, espacement);
+    text-transform: uppercase;
+    color: var(--texte-3);
+    border-bottom: 1px solid var(--bordure-f);
+    padding: esp(3) esp(4);
+  }
+
+  td {
+    padding: esp(4);
+    border-bottom: 1px solid var(--bordure);
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: background-color $d-rapide $courbe;
+    &:hover { background: var(--surelev); }
+  }
+}
+
+
+// =============================================================================
+// 10. LE MÉDAILLON DE MARQUE — 3,37:1 sur dix-huit pages
+// =============================================================================
+//
+// Il écrivait du blanc sur le vert ACCENT. Le vert accent est une
+// couleur de trait, pas un fond de texte : #FFFFFF dessus plafonne à
+// 3,37:1, et l'assombrir assez pour passer le changerait de couleur.
+//
+// On inverse : fond vert FONCÉ, blanc dessus, 12,51:1. Un seul endroit,
+// dix-huit pages corrigées.
+
+.brand__mark {
+  background: $vert-fonce !important;
+  color: #FFFFFF !important;
+}
+.theme-dark .brand__mark {
+  background: var(--marque) !important;
+  color: var(--texte-inv-marque) !important;
+}
+
+// Le nom de la marque reprenait le vert foncé sur fond sombre : 1,32:1.
+.theme-dark .brand__name { color: var(--texte); }
+
+
+// =============================================================================
+// 11. ANIMATIONS — discrètes, et désactivables
+// =============================================================================
+//
+// L'animation accompagne, elle ne se remarque pas. Uniquement `transform`
+// et `opacity` : toute autre propriété force un recalcul de mise en page
+// à chaque image, et le défilement saccade sur un téléphone d'entrée de
+// gamme — exactement l'appareil de la majorité de nos visiteurs.
+
+@keyframes monte {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.anim-entree {
+  animation: monte $d-normal $courbe both;
+}
+
+// Le décalage progressif : 60ms entre les éléments d'un même groupe.
+// Uniquement sur les blocs principaux — appliqué à chaque ligne de
+// texte, l'effet devient un défaut.
+@for $i from 1 through 8 {
+  .anim-entree:nth-child(#{$i}) { animation-delay: #{($i - 1) * 60}ms; }
+}
+
+// LA RÉVÉLATION AU DÉFILEMENT EST VISIBLE PAR DÉFAUT DANS LE HTML.
+// C'est la classe qui MASQUE qui est ajoutée par le script au
+// chargement. Sans JavaScript, la page reste entièrement lisible —
+// l'inverse produirait une page vide chez qui bloque les scripts.
+// La convention est celle du module `scroll-reveal.js`, qui existait
+// déjà : `[data-reveal]` dans le HTML, `.is-hidden` posée par le script.
+// En inventer une seconde aurait ajouté au désordre que ce chantier
+// doit supprimer.
+[data-reveal] {
+  transition: opacity $d-lent $courbe, transform $d-lent $courbe;
+}
+[data-reveal].is-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+// prefers-reduced-motion coupe TOUT, sans exception. Ce n'est pas une
+// préférence esthétique : le mouvement déclenche des nausées chez les
+// personnes sujettes au mal des transports vestibulaire.
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal].is-hidden { opacity: 1; transform: none; }
+}

@@ -57,6 +57,13 @@ $vert-clair:  #E4F2EC;   // fonds doux, badges, appel à l'action final
 // couleur de marque : c'est la même, rendue lisible sur fond sombre.
 $vert-accent-sombre: #1FBC8A;
 
+// LES TEINTES DE SURVOL. Elles ne sont pas « la même en plus clair » au
+// jugé : le texte posé dessus doit rester lisible, sinon le survol
+// devient le seul état non conforme de l'interface — celui qu'aucun
+// audit automatique ne visite.
+$vert-fonce-survol:  #0E4C3B;   // blanc dessus : 9,93:1
+$vert-accent-survol: #23D29A;   // #0A1F1A dessus : 8,79:1
+
 // Le vert accent porte mal le texte : #FFFFFF dessus ne donne que 3,37:1.
 // C'est ce qui rendait le médaillon « QI » non conforme sur 18 pages. Il
 // reste une couleur de TRAIT et d'ICÔNE ; pour un fond de texte, on prend
@@ -332,9 +339,24 @@ $tuile-reseau:  64px;   // grille des réseaux sociaux
 
   // La marque ne change pas avec le thème : c'est ce qui la rend
   // reconnaissable. Seules les surfaces autour d'elle changent.
-  --marque:      #{$vert-fonce};
-  --accent:      #{$vert-accent};
-  --marque-doux: #{$vert-clair};
+  --marque:        #{$vert-fonce};
+  --marque-survol: #{$vert-fonce-survol};
+  // `--accent-trait` et non `--accent` : dans _theme.scss, `--accent`
+  // porte depuis toujours le vert FONCÉ, celui qui sert de fond de
+  // bouton. Deux sens opposés sous un même nom auraient produit une
+  // régression silencieuse sur chaque bouton du produit.
+  --accent-trait:  #{$vert-accent};
+  --marque-doux:   #{$vert-clair};
+
+  // Le texte posé SUR la marque. Il change avec le thème parce que la
+  // marque change de luminosité : un blanc figé donnerait 1,5:1 sur le
+  // vert remonté du thème sombre.
+  --texte-inv-marque: #FFFFFF;                    // 12,51:1 sur #0B3B2E
+
+  // Les halos de focus. Assez opaques pour se voir sur les deux fonds,
+  // assez discrets pour ne pas déborder visuellement du champ.
+  --marque-halo: #{rgba($vert-fonce, .22)};
+  --danger-halo: #{rgba($c-danger, .22)};
 }
 
 .theme-dark {
@@ -377,6 +399,12 @@ $tuile-reseau:  64px;   // grille des réseaux sociaux
   // même teinte éclaircie passe les deux. C'est le piège qu'on ne voit
   // pas : un fond teinté à 16 % éclaircit la surface, et le texte perd
   // du contraste contre son PROPRE fond.
-  --marque:      #{$vert-accent-sombre};
-  --marque-doux: #{rgba($vert-accent-sombre, .16)};
+  --marque:        #{$vert-accent-sombre};
+  --marque-survol: #{$vert-accent-survol};
+  --marque-doux:   #{rgba($vert-accent-sombre, .16)};
+
+  --texte-inv-marque: #{$s-texte-inv};            // 7,04:1 sur #1FBC8A
+
+  --marque-halo: #{rgba($vert-accent-sombre, .30)};
+  --danger-halo: #{rgba($s-danger, .30)};
 }

@@ -33,3 +33,12 @@
 // EN DERNIER, impérativement. Ce fichier redéclare les surfaces de tout ce qui
 // précède : il doit gagner par l'ordre de cascade, jamais par !important.
 @import "theme-dark";
+
+// LE SOCLE EN DERNIER, ET C'EST DÉLIBÉRÉ.
+//
+// Bootstrap et les feuilles historiques déclarent déjà .btn, .form-control,
+// .badge et .card. À spécificité égale, c'est le DERNIER déclaré qui gagne.
+// Importer le socle en fin de chaîne le fait gagner sans qu'on ait à
+// surenchérir en !important — et un projet qui empile des !important a
+// perdu le contrôle de sa cascade.
+@import "socle";

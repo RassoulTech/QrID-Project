@@ -181,8 +181,11 @@
 
 .pubc__info{
   display:flex;align-items:center;gap:12px;
-  padding:11px 14px;
-  min-height:44px;          // cible tactile
+  padding:esp(3) esp(4);
+  // 56px et non 44 : cette ligne n'est pas un bouton parmi d'autres,
+  // c'est LA cible qu'on vise en marchant, une carte à la main. Les
+  // 12px de plus se paient en défilement, et se gagnent en fiabilité.
+  min-height:56px;
   text-decoration:none;
   min-width:0;
 
@@ -234,10 +237,14 @@
 
 .pubc__tuile{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:6px;
+  gap:esp(2);
   aspect-ratio:1;
-  min-width:0;
-  padding:8px 4px;
+  // 64px de côté au minimum. En dessous, le logo devient un pictogramme
+  // qu'on identifie mal et qu'on rate au pouce — or c'est par ces
+  // tuiles que passe tout le trafic sortant de la carte.
+  min-width:64px;
+  min-height:64px;
+  padding:esp(2) esp(1);
   border-radius:$r-sm;
   background:var(--surface-3);
   border:1px solid var(--bord);
@@ -278,8 +285,10 @@
 // « Enregistrer » qui termine le parcours, « Partager » n'est qu'un service.
 .pubc__action{
   display:flex;align-items:center;justify-content:center;gap:8px;
-  min-height:46px;
-  padding:12px 14px;
+  // 52px : ce sont les deux seules actions de la page — « Enregistrer »
+  // et « Partager ». Elles doivent se toucher sans viser.
+  min-height:52px;
+  padding:esp(3) esp(4);
   border-radius:$r-full;
   font-size:13px;font-weight:700;
   letter-spacing:.02em;
@@ -349,7 +358,10 @@
   .pubc__grille,.pubc__barre{padding-left:10px;padding-right:10px;gap:8px}
   .pubc__medaillon{left:14px;width:96px;height:96px;bottom:-48px}
   .pubc__couverture{margin-bottom:56px}
-  .pubc__nom{font-size:20px}
+  // Le nom suit l'échelle typographique, comme n'importe quel h1. Il
+  // n'est JAMAIS tronqué : overflow-wrap:anywhere plus haut s'en charge,
+  // quelle que soit la longueur.
+  .pubc__nom{font-size:typo(h1)}
   .pubc__tuile-nom{font-size:9.5px}
 }
 

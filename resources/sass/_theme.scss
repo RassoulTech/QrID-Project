@@ -17,96 +17,85 @@
 //            secondaire #9BB0A8 sur #16211D .....  6,6:1
 // =============================================================================
 
-:root{
-  --surface:        #{$blanc};        // fond des cartes
-  --surface-2:      #{$gris-fond};    // fond de page et zones creuses
-  --surface-3:      #{$blanc};        // surfaces surélevées (menus déroulants)
-  --survol:         #{$gris-fond};    // fond des éléments cliquables au survol
-  --bord:           #{$bordure};
-  --bord-fort:      #{$bordure-forte};
-  --texte:          #{$texte};
-  --texte-2:        #{$gris-second};
-  --accent:         #{$vert-fonce};
-  --accent-doux:    #{$vert-clair};
-  --accent-vif:     #{$vert-accent};
+// =============================================================================
+// ALIAS — les noms historiques, branchés sur les tokens
+// =============================================================================
+//
+// CE FICHIER NE CONTIENT PLUS AUCUNE VALEUR. Toutes sont dans
+// `_tokens.scss`, qui est la source unique.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// POURQUOI DES ALIAS PLUTÔT QU'UN RENOMMAGE
+// ─────────────────────────────────────────────────────────────────────────
+// Ces noms sont employés dans 448 lignes de `_carte-publique.scss` et dans
+// une dizaine d'autres feuilles. Les renommer aurait été un chantier
+// séparé, avec son propre risque de régression, pour un gain nul : un
+// alias coûte zéro octet une fois compilé, et fait converger les deux
+// systèmes immédiatement.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// CE QUE LA FUSION CORRIGE
+// ─────────────────────────────────────────────────────────────────────────
+// Cinq noms étaient déclarés DEUX FOIS — --texte, --texte-2, --danger,
+// --ombre-1, --ombre-2 — dans deux fichiers importés l'un après l'autre.
+// C'est le dernier qui gagnait, donc la valeur appliquée dépendait de
+// l'ordre des @import. Un ordre d'import n'est pas une décision de design.
+//
+// Deux valeurs changent au passage, et dans le bon sens :
+//   · --texte-2 en thème clair : #5C6B66 -> #42524C (5,03:1 -> 7,42:1)
+//   · --texte-2 en thème sombre : #9BB0A8 -> #B8C7C1 (7,04:1 -> 8,40:1)
+//
+// =============================================================================
 
-  /*
-   | LE FOND DE SURVOL D'UN BOUTON PLEIN — et pourquoi ce n'est pas --accent-vif.
-   |
-   | --accent-vif est un vert MOYEN : très bien pour un trait, un liseré ou une
-   | icône, illisible sous du blanc. Le bouton « Enregistrer » de la page
-   | publique s'en servait au survol et tombait à 3,37:1 — le seul moment où
-   | le visiteur regarde ce bouton étant précisément celui où il le survole.
-   |
-   | En thème clair le survol FONCE, en thème sombre il ÉCLAIRCIT : dans les
-   | deux cas il s'écarte du fond de page, et --sur-accent reste lisible.
-   */
-  --accent-survol:  #0F5240;          // 9,29:1 sous du blanc
-  --danger:         #{$rouge-erreur};   // asterisque et erreurs de champ
+:root {
+  // ── Surfaces ───────────────────────────────────────────────────────────
+  --surface:        var(--carte);
+  --surface-2:      var(--page);
+  --surface-3:      var(--surelev);
+  --survol:         var(--surelev);
 
-  /*
-   | TEXTE POSÉ SUR --accent. Le jeton qui manquait, et son absence a produit
-   | le pire défaut de lisibilité de l'application.
-   |
-   | --accent n'est PAS la même couleur selon le thème : vert foncé en clair
-   | (#0B3B2E), vert vif en sombre (#2FBF92). Une couleur de texte écrite en
-   | dur est donc forcément fausse dans l'un des deux. Le compteur des onglets
-   | portait #06231B : 7,11:1 en sombre, 1,33:1 en clair — un chiffre
-   | invisible sur la moitié des écrans.
-   |
-   | RÈGLE : partout où --accent sert de FOND, le texte prend --sur-accent.
-   */
-  --sur-accent:     #{$blanc};        // 12,51:1 sur le vert foncé
-  --ombre-1:        0 1px 2px rgba(10, 31, 26, .05);
-  --ombre-2:        0 12px 32px rgba(10, 31, 26, .10);
+  // ── Bordures ───────────────────────────────────────────────────────────
+  --bord:           var(--bordure);
+  --bord-fort:      var(--bordure-f);
 
-  // Fonds pastel des quatre cartes de statistiques.
-  --pastel-1:       #E4F2EC;
-  --pastel-2:       #E6EDF7;
-  --pastel-3:       #FBEFE4;
+  // ── Marque ─────────────────────────────────────────────────────────────
+  // --accent porte le vert FONCÉ : c'est lui qui sert de fond de bouton.
+  // --accent-vif porte le vert moyen, réservé aux traits et aux icônes —
+  // il ne passe pas 4,5:1 sous du blanc, mesuré à 3,37:1.
+  --accent:         var(--marque);
+  --accent-doux:    var(--marque-doux);
+  --accent-vif:     var(--accent-trait);
+  --accent-survol:  var(--marque-survol);
+
+  // RÈGLE INCHANGÉE : partout où --accent sert de FOND, le texte prend
+  // --sur-accent. C'est le jeton dont l'absence avait produit un compteur
+  // d'onglets invisible sur la moitié des écrans.
+  --sur-accent:     var(--texte-inv-marque);
+
+  // ── Teintes de catégorie ───────────────────────────────────────────────
+  // Décoratives : elles n'accueillent jamais de texte long. La première
+  // rejoint la marque, les trois autres restent des teintes propres.
+  --pastel-1:       var(--marque-doux);
+  --pastel-2:       var(--info-fond);
+  --pastel-3:       var(--alerte-fond);
   --pastel-4:       #F1EAF7;
 }
 
-.theme-dark{
-  --surface:        #16211D;
-  --surface-2:      #0F1714;
-  --surface-3:      #1D2B26;
-
-  // Le survol S'ÉCLAIRCIT en clair et S'ÉCLAIRCIT aussi en sombre — mais très
-  // peu. Reprendre le gris clair du thème clair produisait une pastille
-  // presque blanche sous un texte presque blanc : le nom du compte
-  // disparaissait au passage de la souris.
-  --survol:         rgba(232, 237, 235, .08);
-  --bord:           rgba(232, 237, 235, .10);
-  --bord-fort:      rgba(232, 237, 235, .20);
-  --texte:          #E8EDEB;
-  --texte-2:        #9BB0A8;          // 7,3:1 sur le fond de page
-  --accent:         #2FBF92;          // le vert foncé serait illisible ici
-  --sur-accent:     #06231B;          // 7,11:1 sur ce vert vif
-  --accent-doux:    rgba(47, 191, 146, .16);
-  --accent-vif:     #3FD3A4;
-  --accent-survol:  #3FD3A4;          // 9,04:1 sous l'encre sombre
-  --danger:         #FF9A8F;          // le rouge fonce serait illisible ici
-  --ombre-1:        0 1px 2px rgba(0, 0, 0, .40);
-  --ombre-2:        0 12px 32px rgba(0, 0, 0, .45);
-
-  // Pastels ramenés à des teintes profondes : les mêmes couleurs claires
-  // deviendraient éblouissantes et le chiffre foncé posé dessus illisible.
-  --pastel-1:       rgba(47, 191, 146, .14);
-  --pastel-2:       rgba(96, 150, 220, .14);
-  --pastel-3:       rgba(214, 150, 80, .14);
+.theme-dark {
   --pastel-4:       rgba(160, 120, 214, .14);
 
-  background-color: var(--surface-2);
-  color-scheme: dark;                 // barres de défilement et champs natifs
+  // Les barres de défilement et les champs natifs suivent le thème. Sans
+  // cette ligne, un sélecteur de date ouvert en thème sombre s'affiche en
+  // blanc éclatant au milieu d'une page sombre.
+  color-scheme: dark;
+  background-color: var(--page);
 }
 
-// Le corps suit les jetons. Tout ce qui ne les utilise pas reste en thème
-// clair — c'est volontaire : on bascule progressivement, écran par écran.
-.theme-dark body{
-  background-color: var(--surface-2);
+.theme-dark body {
+  background-color: var(--page);
   color: var(--texte);
 }
+
 
 // -----------------------------------------------------------------------------
 // Bascule de thème — un bouton dans un formulaire, jamais un lien
