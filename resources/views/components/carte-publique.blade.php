@@ -101,7 +101,7 @@
                             </span>
                             <span class="pubc__info-texte">
                                 <span class="pubc__info-valeur">{{ $profile->public_email }}</span>
-                                <span class="pubc__info-etiquette">E-mail</span>
+                                <span class="pubc__info-etiquette">{{ __('card.publique.email') }}</span>
                             </span>
                         </a>
                     </li>

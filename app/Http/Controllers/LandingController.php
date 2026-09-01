@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Plan;
 use App\Models\Profile;
+use App\Models\SocialLink;
 use Illuminate\View\View;
 
 /**
@@ -62,6 +63,29 @@ class LandingController extends Controller
      */
     private function mockupProfile(string $cle): Profile
     {
-        return new Profile(config('landing.'.$cle));
+        $donnees = config('landing.'.$cle);
+        $reseaux = $donnees['reseaux'] ?? [];
+        unset($donnees['reseaux']);
+
+        $profile = new Profile($donnees);
+
+        /*
+         | LA RELATION EST POSÉE À LA MAIN, JAMAIS INTERROGÉE.
+         |
+         | `x-phone` ne lit `socialLinks` que si la relation est déjà chargée —
+         | c'est ce qui garantit qu'aucune requête ne part d'une vue. En la
+         | posant ici avec des objets construits en mémoire, la maquette
+         | obtient de vrais réseaux sans toucher la base.
+         |
+         | Sans cela, le composant complétait la grille jusqu'à six tuiles avec
+         | des réseaux inventés à l'affichage : la maquette montrait alors trois
+         | comptes que le profil illustré ne possède pas.
+         */
+        $profile->setRelation(
+            'socialLinks',
+            collect($reseaux)->map(fn (array $r) => new SocialLink($r))
+        );
+
+        return $profile;
     }
 }

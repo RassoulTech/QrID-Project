@@ -957,29 +957,55 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 
 // --- Lien public : champ readonly + copie ---------------------------------------
 .board-link{display:block;margin-top:esp(5)}
+
+// Le libellé et le bouton partagent la ligne du haut ; le champ prend toute
+// la largeur en dessous. Le champ recevait 261px sur 339 — le reste allait au
+// bouton — et tronquait l'adresse à « https://... ».
+.board-link__tete{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:esp(3);
+  margin-bottom:esp(2);
+}
+
 .board-link__label{
-  display:block;font-size:typo(overline);font-weight:600;
-  color:$gris-second;margin-bottom:esp(2);
+  font-size:typo(overline);font-weight:600;
+  letter-spacing:typo(overline,espacement);
+  text-transform:uppercase;
+  color:var(--texte-3);
 }
-.board-link__row{display:flex;gap:esp(2)}
+
 .board-link__input{
-  flex:1 1 auto;min-width:0;
-  padding:esp(3) esp(3);
-  font-family:inherit;font-size:typo(caption);
-  color:$texte;background:$gris-fond;
-  border:1px solid $bordure-champ;
-  border-radius:$r-sm;
-  text-overflow:ellipsis;
-  &:focus{outline:0;border-color:$vert-accent;box-shadow:0 0 0 3px rgba($vert-accent,.18)}
+  display:block;
+  width:100%;
+  min-width:0;
+  padding:esp(3) esp(4);
+  font-family:inherit;font-size:typo(body-sm);
+  color:var(--texte);background:var(--surelev);
+  border:1px solid var(--bordure-f);
+  border-radius:rayon(sm);
+  // Plus d'ellipse : l'adresse tient désormais. Si elle dépasse malgré tout,
+  // on la fait défiler dans le champ plutôt que d'en cacher la fin.
+  text-overflow:clip;
+  &:focus{outline:0;border-color:var(--marque);box-shadow:0 0 0 3px var(--marque-halo)}
 }
+
 .board-link__copy{
   flex:0 0 auto;
-  padding:0 esp(4);
+  display:inline-flex;align-items:center;gap:esp(2);
+  // 32px : c'est un bouton d'appoint posé sur une ligne de libellé, pas une
+  // action principale. Il reste au-dessus du minimum confortable à la souris,
+  // et la cible réelle englobe son libellé.
+  min-height:32px;
+  padding:0 esp(3);
   font-size:typo(caption);font-weight:600;
-  color:$vert-fonce;background:$vert-clair;
-  border:0;border-radius:$r-sm;
+  color:var(--marque);background:var(--marque-doux);
+  border:0;border-radius:rayon(full);
   cursor:pointer;
-  &:hover{background:darken($vert-clair,4%)}
+  transition:background-color $d-rapide $courbe;
+  &:hover{background:var(--vert-100)}
+  &:focus-visible{outline:2px solid var(--marque);outline-offset:2px}
 }
 
 // --- Statistiques ---------------------------------------------------------------
@@ -1121,9 +1147,34 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   margin-bottom:esp(3);
 }
 
+/*
+ | LES BOUTONS DE TÉLÉCHARGEMENT — LARGEURS ÉGALES.
+ |
+ | `.board-downloads` n'avait AUCUNE règle : les trois boutons prenaient la
+ | largeur de leur texte. Mesuré : 100, 97 et 139px, repliés sur deux lignes,
+ | alignés à gauche. Trois actions du même ordre affichées à trois tailles
+ | différentes se lisent comme trois importances différentes.
+ |
+ | Une grille à colonnes égales le règle sans toucher aux boutons eux-mêmes.
+ */
+.board-downloads{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:esp(2);
+
+  // Deux colonnes dès que la colonne de droite a la place : en dessous, deux
+  // boutons côte à côte tronqueraient « Carte imprimable ».
+  @include ecran(ms){ grid-template-columns:repeat(2,1fr); }
+
+  > *{ width:100%; }
+}
+
 .board-media{
   display:inline-flex;align-items:center;gap:esp(2);
-  padding:esp(2) esp(3);
+  // UN ÉTAT N'EST PAS UNE ACTION. Il portait esp(2) esp(3) et montait à la
+  // hauteur d'un bouton : on cliquait dessus. À esp(1), il redevient un
+  // badge — et le curseur reste une flèche.
+  padding:esp(1) esp(3);
   border-radius:$r-full;
   font-size:typo(overline);font-weight:600;
   background:var(--accent-doux, #{$vert-clair});

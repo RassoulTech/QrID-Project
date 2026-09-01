@@ -15,6 +15,8 @@
 return [
 
     'publique' => [
+        'email' => 'Email',
+        'telephone' => 'Phone',
         'site_web' => 'Website',
         'localisation' => 'Location',
         'grille_aria' => 'Get in touch and follow',

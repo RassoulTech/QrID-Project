@@ -148,6 +148,23 @@ return [
         'public_email' => 'contact@exemple.sn',
         'address' => 'Dakar, Sénégal',
         'primary_color' => '#0B3B2E',
+    
+        /*
+         | LES RÉSEAUX DE LA MAQUETTE — déclarés, plus inventés à l'affichage.
+         |
+         | Le composant complétait la grille jusqu'à SIX tuiles avec LinkedIn,
+         | Instagram et Facebook, « pour que les deux rangées soient pleines ».
+         | La maquette montrait donc trois réseaux que le profil illustré ne
+         | possède pas — et une grille toujours complète, ce qu'une vraie page
+         | ne rend que par hasard.
+         |
+         | Ils sont désormais déclarés ici : ce que la maquette affiche est ce
+         | que le profil illustré déclare, exactement comme sur une vraie page.
+         */
+        'reseaux' => [
+            ['platform' => 'linkedin',  'url' => 'https://linkedin.com/in/exemple'],
+            ['platform' => 'instagram', 'url' => 'https://instagram.com/exemple'],
+        ],
     ],
 
     /*
@@ -166,6 +183,23 @@ return [
         'public_email' => 'bonjour@exemple.sn',
         'address' => 'Dakar, Sénégal',
         'primary_color' => '#0B3B2E',
+    
+        /*
+         | LES RÉSEAUX DE LA MAQUETTE — déclarés, plus inventés à l'affichage.
+         |
+         | Le composant complétait la grille jusqu'à SIX tuiles avec LinkedIn,
+         | Instagram et Facebook, « pour que les deux rangées soient pleines ».
+         | La maquette montrait donc trois réseaux que le profil illustré ne
+         | possède pas — et une grille toujours complète, ce qu'une vraie page
+         | ne rend que par hasard.
+         |
+         | Ils sont désormais déclarés ici : ce que la maquette affiche est ce
+         | que le profil illustré déclare, exactement comme sur une vraie page.
+         */
+        'reseaux' => [
+            ['platform' => 'linkedin',  'url' => 'https://linkedin.com/in/exemple'],
+            ['platform' => 'instagram', 'url' => 'https://instagram.com/exemple'],
+        ],
     ],
 
     /*

@@ -18,6 +18,8 @@ return [
     // LA CARTE PUBLIQUE
     // =================================================================
     'publique' => [
+        'email' => 'E-mail',
+        'telephone' => 'Téléphone',
         'site_web' => 'Site web',
         'localisation' => 'Localisation',
         'grille_aria' => 'Contacter et suivre',

@@ -73,21 +73,25 @@
     }
 
     /*
-     | LA GRILLE EST TOUJOURS COMPLÈTE — six entrées, deux rangées pleines.
+     | LA GRILLE N'EST PLUS COMPLÉTÉE ARTIFICIELLEMENT.
      |
-     | Avec cinq, la dernière rangée laissait un trou à droite, et un trou
-     | dans une grille se lit comme un défaut d'affichage, jamais comme un
-     | choix. Les plateformes de complément sont les plus courantes chez les
-     | professionnels sénégalais.
+     | Elle l'était jusqu'à SIX entrées, avec LinkedIn, Instagram et Facebook
+     | ajoutés à l'affichage « pour que les deux rangées soient pleines ». La
+     | maquette montrait donc trois comptes que le profil illustré ne possède
+     | pas — et une grille toujours pleine, ce qu'une vraie page ne rend que
+     | par hasard.
+     |
+     | Une maquette qui s'arrange est une promesse fausse : le visiteur qui
+     | s'inscrit obtient une grille qui, elle, a des trous.
+     |
+     | Les réseaux de la maquette sont désormais DÉCLARÉS dans
+     | config/landing.php et posés en relation par LandingController. Ce que la
+     | grille affiche est ce que le profil déclare, exactement comme sur
+     | /p/{slug}.
+     |
+     | Le plafond de six demeure : au-delà, une troisième rangée sortirait de
+     | l'écran du téléphone. C'est une contrainte de place, pas un maquillage.
      */
-    foreach (['linkedin' => 'LinkedIn', 'instagram' => 'Instagram', 'facebook' => 'Facebook'] as $cle => $nom) {
-        if (count($actions) >= 6) {
-            break;
-        }
-
-        $actions[] = [$cle, $nom];
-    }
-
     $actions = array_slice($actions, 0, 6);
 @endphp
 
@@ -170,7 +174,10 @@
                                 <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>
                             </svg>
                         </span>
-                        <span class="phc__info-texte">{{ $profile->public_email }}</span>
+                        <span class="phc__info-texte">
+                            <span class="phc__info-valeur">{{ $profile->public_email }}</span>
+                            <span class="phc__info-etiquette">{{ __('card.publique.email') }}</span>
+                        </span>
                     </span>
                 @endif
 
@@ -181,7 +188,10 @@
                                 <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58z"/>
                             </svg>
                         </span>
-                        <span class="phc__info-texte">{{ $profile->formatted_phone }}</span>
+                        <span class="phc__info-texte">
+                            <span class="phc__info-valeur">{{ $profile->formatted_phone }}</span>
+                            <span class="phc__info-etiquette">{{ __('card.publique.telephone') }}</span>
+                        </span>
                     </span>
                 @endif
 
@@ -193,7 +203,10 @@
                                 <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>
                             </svg>
                         </span>
-                        <span class="phc__info-texte">{{ $profile->address }}</span>
+                        <span class="phc__info-texte">
+                            <span class="phc__info-valeur">{{ $profile->address }}</span>
+                            <span class="phc__info-etiquette">{{ __('card.publique.localisation') }}</span>
+                        </span>
                     </span>
                 @endif
             </div>

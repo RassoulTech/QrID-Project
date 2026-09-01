@@ -72,7 +72,7 @@ $ease: cubic-bezier(.2,.8,.2,1);
     .phone__screen{border-radius:31px}
     .phone__notch{width:76px;height:20px}
     // La carte se resserre : mêmes proportions, deux points de moins.
-    .phc__couverture{height:92px}
+    .phc__couverture{height:104px}
     .phc__medaillon{width:46px;height:46px}
     .phc__nom{font-size:11.5px}
     .phc__role,.phc__entreprise{font-size:8.5px}
@@ -88,7 +88,7 @@ $ease: cubic-bezier(.2,.8,.2,1);
 
     .phone__screen{border-radius:31px}
     .phone__notch{width:70px;height:19px}
-    .phc__couverture{height:86px}
+    .phc__couverture{height:96px}
     .phc__medaillon{width:42px;height:42px}
     .phc__nom{font-size:11px}
     .phc__action{height:21px}
@@ -217,7 +217,7 @@ $ease: cubic-bezier(.2,.8,.2,1);
   // 56px et l'identité en dessous, sur fond blanc — ce que la page publique
   // ne rend nulle part. Sur .pubc la couverture occupe environ le tiers de la
   // carte et PORTE le nom. 104px tient la même proportion à cette échelle.
-  height:104px;
+  height:118px;
   flex:0 0 auto;
   // Plus de marge : l'identité est dedans, elle ne déborde plus.
   margin-bottom:0;
@@ -338,11 +338,28 @@ $ease: cubic-bezier(.2,.8,.2,1);
 // La troncature est ACCEPTABLE ICI, et seulement ici : c'est une maquette,
 // pas une fiche qu'on doit pouvoir lire. Sur la vraie page publique,
 // .pubc__info-valeur passe à la ligne plutôt que de couper une adresse.
+// LA VALEUR ET SON ÉTIQUETTE, comme sur .pubc__info-texte.
+//
+// La maquette n'affichait que la valeur. La vraie page en montre DEUX lignes :
+// l'adresse, puis « E-MAIL » en dessous. Mesuré : 64px de haut sur la vraie
+// page contre 50px d'équivalent ici — la maquette annonçait donc une ligne de
+// contact plus pauvre que celle qu'on livre.
 .phc__info-texte{
+  display:flex;flex-direction:column;
+  min-width:0;
+}
+
+.phc__info-valeur{
   font-size:8.5px;font-weight:600;
   color:$texte;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  min-width:0;
+}
+
+.phc__info-etiquette{
+  font-size:6px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:$gris-second;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
 // -----------------------------------------------------------------------------

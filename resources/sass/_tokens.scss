@@ -325,6 +325,21 @@ $d-normal: 250ms;   // apparition, survol, ouverture
 $d-lent:   400ms;   // révélation au défilement
 $d-carte:  600ms;   // permutation 3D de la carte PVC
 
+/*
+ | LE DÉFILEMENT CONTINU — une échelle de temps qui n'a rien à voir.
+ |
+ | Le bandeau des métiers employait $d-carte : 600 MILLISECONDES pour
+ | parcourir la moitié de la liste. Les mots passaient plus vite qu'on ne
+ | les lit, et un bandeau qu'on ne peut pas lire ne dit rien — il agite.
+ |
+ | 45 secondes donnent une dérive lente, qu'on remarque à peine et qui
+ | laisse le temps de lire chaque métier. C'est le seul endroit du produit
+ | où une durée se compte en secondes, d'où son propre jeton : le mettre
+ | dans la même famille que les micro-interactions inviterait à le
+ | confondre avec elles, ce qui vient précisément d'arriver.
+ */
+$d-defile: 45s;
+
 $courbe: cubic-bezier(.2, .8, .2, 1);
 
 // Une courbe unique n'est pas une simplification : deux courbes

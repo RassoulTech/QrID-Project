@@ -130,33 +130,33 @@
 // -----------------------------------------------------------------------------
 // VERSO
 // -----------------------------------------------------------------------------
-.back{
+.card .back{
   display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto;
   column-gap:5%;height:100%;
 }
 
-.brand{display:flex;align-items:center;gap:3.2cqw;grid-column:1;grid-row:1}
+.card .brand{display:flex;align-items:center;gap:3.2cqw;grid-column:1;grid-row:1}
 
-.mark{
+.card .mark{
   width:12cqw;height:12cqw;border-radius:2.4cqw;
   display:grid;place-items:center;
   font-weight:800;font-size:5.4cqw;letter-spacing:-.02em;flex:0 0 auto;
 }
-.light .mark{background:$vert-fonce;color:$blanc}
-.dark  .mark{background:$vert-accent;color:$blanc}
+.card.light .mark{background:$vert-fonce;color:$blanc}
+.card.dark .mark{background:$vert-accent;color:$blanc}
 
-.wordmark{font-weight:800;font-size:11cqw;line-height:1;letter-spacing:-.035em}
+.card .wordmark{font-weight:800;font-size:11cqw;line-height:1;letter-spacing:-.035em}
 
 // Alignée sur le bord gauche du logo, jamais centrée.
-.tagline{
+.card .tagline{
   grid-column:1;grid-row:2;text-align:left;
   font-size:5.2cqw;font-weight:600;line-height:1.3;letter-spacing:-.01em;
   margin-top:4cqw;max-width:22ch;align-self:start;
 }
-.light .tagline{color:#2B4A40}
-.dark  .tagline{color:rgba(255,255,255,.9)}
+.card.light .tagline{color:#2B4A40}
+.card.dark .tagline{color:rgba(255,255,255,.9)}
 
-.qrbox{grid-column:2;grid-row:1 / span 2;justify-self:end;align-self:start;text-align:center}
+.card .qrbox{grid-column:2;grid-row:1 / span 2;justify-self:end;align-self:start;text-align:center}
 
 /*
  | LE PANNEAU DU QR — le geste central de la référence, et il répare un
@@ -182,16 +182,16 @@
  |   · sur la carte VERTE, il faut monter au 400 pour se détacher du fond
  |     800, sinon le panneau se fond dans la carte.
  */
-.qrpanneau{
+.card .qrpanneau{
   display:inline-block;
   padding:2.6cqw;
   border-radius:4.4cqw;
   line-height:0;
 }
-.light .qrpanneau{background:$vert-500}
-.dark  .qrpanneau{background:$vert-400}
+.card.light .qrpanneau{background:$vert-500}
+.card.dark .qrpanneau{background:$vert-400}
 
-.qr{
+.card .qr{
   width:33cqw;height:33cqw;background:$blanc;
   padding:1.7cqw;
   // Le carré blanc suit le panneau : deux rayons concentriques, l'intérieur
@@ -200,26 +200,26 @@
   display:block;
 }
 
-.qr img,.qr svg{width:100%;height:100%;display:block}
+.card .qr img,.card .qr svg{width:100%;height:100%;display:block}
 
-.qrcap{font-size:3.2cqw;font-weight:700;margin-top:1.8cqw}
-.light .qrcap{color:$vert-fonce}
-.dark  .qrcap{color:$blanc}
+.card .qrcap{font-size:3.2cqw;font-weight:700;margin-top:1.8cqw}
+.card.light .qrcap{color:$vert-fonce}
+.card.dark .qrcap{color:$blanc}
 
-.foot{
+.card .foot{
   grid-column:1 / -1;grid-row:3;display:flex;justify-content:space-between;
   align-items:flex-end;font-size:2.9cqw;font-weight:700;letter-spacing:.12em;
   text-transform:uppercase;
 }
-.light .foot .l{color:#8FA39A}
-.light .foot .r{color:$vert-fonce}
-.dark  .foot .l{color:rgba(255,255,255,.55)}
-.dark  .foot .r{color:$blanc}
+.card.light .foot .l{color:#8FA39A}
+.card.light .foot .r{color:$vert-fonce}
+.card.dark .foot .l{color:rgba(255,255,255,.55)}
+.card.dark .foot .r{color:$blanc}
 
 // -----------------------------------------------------------------------------
 // RECTO
 // -----------------------------------------------------------------------------
-.front{
+.card .front{
   display:grid;grid-template-columns:1fr auto;
   column-gap:5%;height:100%;align-items:center;
 }
@@ -237,7 +237,7 @@
  | et il tombe juste quelle que soit la longueur du nom. justify-self place
  | ensuite le bloc entier au milieu de sa colonne.
  */
-.who{
+.card .who{
   grid-column:1;
   justify-self:center;
   display:inline-block;
@@ -246,39 +246,39 @@
 
 // Nom : UNE seule ligne, occupant toute la largeur de la colonne.
 // Taille réduite en conséquence. Blade ajuste la classe selon la longueur.
-.who .name{
+.card .who .name{
   font-weight:800;font-size:6.2cqw;line-height:1.06;letter-spacing:-.02em;
   text-transform:uppercase;white-space:nowrap;
 }
 // Nom court (1 mot) : peut être plus grand.
-.who .name--short{font-size:9cqw}
+.card .who .name--short{font-size:9cqw}
 // Nom long (3 mots et plus) : plus petit pour rester sur une ligne.
-.who .name--long{font-size:4.8cqw;letter-spacing:-.01em}
+.card .who .name--long{font-size:4.8cqw;letter-spacing:-.01em}
 
-.who .role{
+.card .who .role{
   font-size:3.4cqw;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
   margin-top:2.6cqw;
 }
-.who .org{font-size:3.2cqw;font-weight:600;margin-top:1.4cqw}
+.card .who .org{font-size:3.2cqw;font-weight:600;margin-top:1.4cqw}
 
-.light .who .name{color:$vert-fonce}
-.light .who .role{color:$vert-accent}
-.light .who .org{color:$gris-second}
-.dark  .who .name{color:$blanc}
-.dark  .who .role{color:#8FD9C2}
-.dark  .who .org{color:rgba(255,255,255,.7)}
+.card.light .who .name{color:$vert-fonce}
+.card.light .who .role{color:$vert-accent}
+.card.light .who .org{color:$gris-second}
+.card.dark .who .name{color:$blanc}
+.card.dark .who .role{color:#8FD9C2}
+.card.dark .who .org{color:rgba(255,255,255,.7)}
 
-.access{grid-column:2;justify-self:end;text-align:center;position:relative;overflow:visible}
+.card .access{grid-column:2;justify-self:end;text-align:center;position:relative;overflow:visible}
 
 // Icône : juste au-dessus du QR, alignée sur son bord droit.
-.nfc{
+.card .nfc{
   position:absolute;display:block;width:7cqw;height:7cqw;
   transform:rotate(45deg);bottom:100%;right:-3cqw;
 }
-.light .nfc{color:$vert-accent}
-.dark  .nfc{color:#8FD9C2}
+.card.light .nfc{color:$vert-accent}
+.card.dark .nfc{color:#8FD9C2}
 
-.access .qr{width:24cqw;height:24cqw}
+.card .access .qr{width:24cqw;height:24cqw}
 
 // =============================================================================
 // LA PERMUTATION RECTO / VERSO — voir x-card-duo
