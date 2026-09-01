@@ -21,7 +21,21 @@ export default function copyToClipboard() {
             if (!source) return;
 
             const value = source.value ?? source.textContent.trim();
-            const original = button.textContent;
+
+            /*
+             | LE LIBELLÉ SE CHANGE, PAS LE BOUTON ENTIER.
+             |
+             | On écrivait `button.textContent = done`, ce qui remplace TOUT le
+             | contenu — y compris une icône SVG. Le bouton « Copier » en porte
+             | une : après la première copie, elle disparaissait
+             | définitivement, puisque `original` ne capture que le texte.
+             |
+             | `[data-copy-label]` désigne la seule partie à remplacer. Sans cet
+             | élément, on retombe sur l'ancien comportement, qui reste juste
+             | pour un bouton sans icône.
+             */
+            const cible = button.querySelector('[data-copy-label]') ?? button;
+            const original = cible.textContent;
             const done = button.dataset.copyDone || 'Copié';
 
             try {
@@ -35,9 +49,9 @@ export default function copyToClipboard() {
                     document.execCommand('copy');
                 }
 
-                button.textContent = done;
+                cible.textContent = done;
                 button.setAttribute('aria-live', 'polite');
-                setTimeout(() => { button.textContent = original; }, 2000);
+                setTimeout(() => { cible.textContent = original; }, 2000);
             } catch {
                 // Échec : on sélectionne au moins la valeur pour l'utilisateur.
                 source.select?.();

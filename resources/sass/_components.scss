@@ -192,7 +192,25 @@
 
 .btn-pill.is-disabled{pointer-events:none}
 
-.btn-sm-pill{height:40px;padding:0 esp(5);font-size:typo(caption)}
+/*
+ | `min-height` ET NON `height`.
+ |
+ | Une hauteur FIXE de 40px n'a pas de sortie de secours : dès que le libellé
+ | passe à la ligne — colonne étroite, langue plus verbeuse, police plus
+ | grande — le texte sort du bouton par le bas. C'est ce qu'on voyait sur
+ | « QR en SVG » et « Modifier ma carte » dans la colonne du tableau de bord.
+ |
+ | Avec `min-height`, le bouton grandit au lieu de laisser fuir son contenu.
+ | Il fait toujours 40px dans l'immense majorité des cas ; il fait 56 quand le
+ | libellé l'exige, ce qui est toujours préférable à un texte coupé.
+ */
+.btn-sm-pill{
+  min-height:40px;
+  padding:esp(2) esp(5);
+  font-size:typo(caption);
+  // La ligne se centre quand elle se replie, au lieu de partir à gauche.
+  text-align:center;
+}
 .btn-block{width:100%}
 
 // -----------------------------------------------------------------------------

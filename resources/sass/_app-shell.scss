@@ -956,17 +956,27 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 
 // --- Lien public : champ readonly + copie ---------------------------------------
-.board-link{display:block;margin-top:esp(5)}
-
-// Le libellé et le bouton partagent la ligne du haut ; le champ prend toute
-// la largeur en dessous. Le champ recevait 261px sur 339 — le reste allait au
-// bouton — et tronquait l'adresse à « https://... ».
-.board-link__tete{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:esp(3);
-  margin-bottom:esp(2);
+/*
+ | LE LIEN PUBLIC — TROIS LIGNES EMPILÉES, PLUS RIEN CÔTE À CÔTE.
+ |
+ | Historique de ce bloc, parce qu'il a fallu deux essais :
+ |
+ |   1. Champ et bouton sur la MÊME ligne : le champ recevait 261px sur 339,
+ |      et l'adresse s'affichait « https://... ».
+ |   2. Bouton monté sur la ligne du libellé, champ en pleine largeur : mieux,
+ |      mais toujours coupé — « https://qrid-uutz.onr ». Un <input> NE PASSE
+ |      JAMAIS À LA LIGNE. Quelle que soit la largeur qu'on lui donne, une
+ |      adresse plus longue finit tronquée. Le format était le problème, pas
+ |      la place.
+ |
+ | D'où un bloc de TEXTE, qui se replie. L'adresse est lisible en entier à
+ | toute largeur, et c'est la seule chose que ce bloc a à montrer.
+ */
+.board-link{
+  display:grid;
+  gap:esp(2);
+  margin-top:esp(5);
+  justify-items:start;
 }
 
 .board-link__label{
@@ -976,29 +986,40 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   color:var(--texte-3);
 }
 
-.board-link__input{
+.board-link__valeur{
   display:block;
   width:100%;
-  min-width:0;
   padding:esp(3) esp(4);
-  font-family:inherit;font-size:typo(body-sm);
-  color:var(--texte);background:var(--surelev);
+
+  font-family:inherit;
+  font-size:typo(body-sm);
+  line-height:1.5;
+  color:var(--texte);
+  background:var(--surelev);
   border:1px solid var(--bordure-f);
   border-radius:rayon(sm);
-  // Plus d'ellipse : l'adresse tient désormais. Si elle dépasse malgré tout,
-  // on la fait défiler dans le champ plutôt que d'en cacher la fin.
-  text-overflow:clip;
-  &:focus{outline:0;border-color:var(--marque);box-shadow:0 0 0 3px var(--marque-halo)}
+
+  // L'adresse se coupe où il faut plutôt que de déborder : une URL n'a pas
+  // d'espace, donc sans cette règle elle force la largeur du conteneur.
+  overflow-wrap:anywhere;
+
+  /*
+   | UN SEUL GESTE SÉLECTIONNE TOUT.
+   |
+   | Le champ `readonly` garantissait la copie manuelle sans JavaScript — un
+   | clic, Ctrl+A, Ctrl+C. `user-select:all` rend le même service sur un bloc
+   | de texte : un clic sélectionne l'adresse entière. La garantie est
+   | conservée, et le repli du module de copie lit `textContent`.
+   */
+  user-select:all;
+  -webkit-user-select:all;
 }
 
 .board-link__copy{
-  flex:0 0 auto;
   display:inline-flex;align-items:center;gap:esp(2);
-  // 32px : c'est un bouton d'appoint posé sur une ligne de libellé, pas une
-  // action principale. Il reste au-dessus du minimum confortable à la souris,
-  // et la cible réelle englobe son libellé.
-  min-height:32px;
-  padding:0 esp(3);
+  // 36px : bouton d'appoint. La cible englobe l'icône ET le libellé.
+  min-height:36px;
+  padding:0 esp(4);
   font-size:typo(caption);font-weight:600;
   color:var(--marque);background:var(--marque-doux);
   border:0;border-radius:rayon(full);
@@ -1159,14 +1180,29 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
  */
 .board-downloads{
   display:grid;
-  grid-template-columns:1fr;
   gap:esp(2);
 
-  // Deux colonnes dès que la colonne de droite a la place : en dessous, deux
-  // boutons côte à côte tronqueraient « Carte imprimable ».
-  @include ecran(ms){ grid-template-columns:repeat(2,1fr); }
+  /*
+   | `auto-fit` ET NON UNE RUPTURE DE FENÊTRE.
+   |
+   | La règle précédente passait à deux colonnes dès 480px de FENÊTRE. Or ce
+   | bloc vit dans la colonne de droite du tableau de bord, qui ne fait que
+   | 339px à 1440px de large : elle demandait donc deux colonnes de 166px à un
+   | bouton qui écrit « Carte imprimable ». Le libellé passait à la ligne, et
+   | comme `.btn-sm-pill` impose une HAUTEUR FIXE de 40px, il sortait du
+   | bouton — c'est le débordement visible sur « QR en SVG » et « Modifier ma
+   | carte ».
+   |
+   | `auto-fit` mesure le CONTENEUR, pas la fenêtre : deux colonnes seulement
+   | s'il y a vraiment 150px pour chacune, une seule sinon. Aucune largeur
+   | d'écran ne peut plus produire une colonne trop étroite.
+   */
+  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
 
-  > *{ width:100%; }
+  > *{
+    width:100%;
+    min-width:0;
+  }
 }
 
 .board-media{

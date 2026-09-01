@@ -171,12 +171,30 @@
 // -----------------------------------------------------------------------------
 // COORDONNÉES — un bloc teinté, lu d'un seul regard
 // -----------------------------------------------------------------------------
+/*
+ | LES COORDONNÉES — transposition de la carte de référence.
+ |
+ | Elles vivaient dans un bloc teinté, indifférenciées : trois lignes posées
+ | sur un aplat gris, séparées par rien. La référence les structure autrement,
+ | et c'est le gain de sérieux le plus net de toute la page :
+ |
+ |   · une PASTILLE RONDE PLEINE devant chaque ligne, qui donne un point
+ |     d'entrée à l'œil et un rythme à la colonne ;
+ |   · un TRAIT FIN entre les lignes, jamais après la dernière.
+ |
+ | Le bloc perd donc son fond et sa bordure : ce sont les traits qui
+ | structurent maintenant, pas un cadre. Une liste encadrée ET séparée porte
+ | deux fois la même information.
+ */
 .pubc__infos{
   list-style:none;
-  margin:esp(4) esp(5) 0;padding:2px 0;
-  background:var(--surface-3);
-  border:1px solid var(--bord);
-  border-radius:$r-sm;
+  margin:esp(4) esp(5) 0;
+  padding:0;
+
+  // Le trait de séparation appartient à la ligne SUIVANTE, jamais à la
+  // précédente : c'est ce qui garantit qu'il n'y en a pas après la dernière,
+  // quel que soit le nombre de coordonnées renseignées.
+  > li + li{ border-top:1px solid var(--bord); }
 }
 
 .pubc__info{
@@ -192,20 +210,47 @@
   &:hover,&:focus-visible{background:var(--accent-doux)}
 }
 
+/*
+ | LA PASTILLE EST PLEINE, PAS TEINTÉE.
+ |
+ | Elle portait `--accent-doux` en fond et `--accent` en icône : un disque
+ | vert pâle avec un dessin vert dessus. À 30px, deux verts voisins ne se
+ | séparent pas — la pastille se lisait comme une tache, et l'icône dedans
+ | comme un défaut d'impression.
+ |
+ | La référence les remplit : disque vert PLEIN, icône BLANCHE. Le couple
+ | passe de moins de 2:1 à 12,51:1 — c'est un couple déjà mesuré, celui du
+ | bouton principal — et la colonne gagne le rythme qui lui manquait.
+ |
+ | 36px et non 30 : la pastille fait face à DEUX lignes de texte. À 30 elle
+ | paraissait écrasée entre la valeur et son étiquette.
+ */
 .pubc__info-icone{
   flex:0 0 auto;
-  width:30px;height:30px;
+  width:36px;height:36px;
   display:grid;place-items:center;
   border-radius:$r-full;
-  background:var(--accent-doux);
-  color:var(--accent);
+  background:var(--marque);
+  color:var(--texte-inv-marque);
 }
 
 .pubc__info-texte{display:grid;gap:1px;min-width:0}
 
+/*
+ | LA VALEUR REVIENT AU TEXTE COURANT.
+ |
+ | Elle était en `--accent`. Sur une ligne qui porte désormais une pastille
+ | verte pleine, cela faisait deux verts empilés et plus aucune hiérarchie :
+ | l'œil ne savait plus si le sujet était la catégorie ou la valeur.
+ |
+ | C'est le CONTENU qu'on vient lire — l'adresse, le numéro. Ce qui signale
+ | que la ligne est cliquable, c'est la pastille et le fond au survol ; la
+ | couleur du texte n'a jamais porté cette information ici, puisque c'est la
+ | ligne ENTIÈRE qui est le lien.
+ */
 .pubc__info-valeur{
-  font-size:typo(caption);font-weight:600;
-  color:var(--accent);
+  font-size:typo(body-sm);font-weight:600;
+  color:var(--texte);
   overflow-wrap:anywhere;
 }
 

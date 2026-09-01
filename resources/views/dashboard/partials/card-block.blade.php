@@ -24,32 +24,30 @@
         </div>
 
         <div class="db-carte__cote">
-            {{-- LE LIEN NE PARTAGE PLUS SA LIGNE AVEC LE BOUTON.
-                 Mesuré à 1440px : le champ ne recevait que 261px pour une
-                 adresse de 42 caractères, et affichait « https://... ». Le
-                 client ne pouvait pas lire son propre lien — la seule chose
-                 que ce bloc a à lui montrer.
+            {{-- L'ADRESSE EST LUE EN ENTIER, OU ELLE NE SERT À RIEN.
+                 Un <input> ne passe jamais à la ligne : quelle que soit la
+                 largeur qu'on lui donne, une adresse plus longue finit coupée.
+                 C'est ce qui affichait « https://qrid-uutz.onr ».
 
-                 Le bouton monte sur la ligne du libellé, où il y a de la
-                 place ; le champ prend la largeur entière en dessous. --}}
-            <label class="board-link">
-                <span class="board-link__tete">
-                    <span class="board-link__label">{{ __('dashboard.carte.lien_public') }}</span>
-                    <button type="button" class="board-link__copy"
-                            data-copy="lienPublic" data-copy-done="{{ __('dashboard.carte.copie') }}">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <rect x="9" y="9" width="13" height="13" rx="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                        </svg>
-                        {{ __('dashboard.carte.copier') }}
-                    </button>
-                </span>
+                 Un bloc de texte, lui, se replie. `user-select:all` rend la
+                 sélection d'un seul geste — donc la copie manuelle reste
+                 possible sans JavaScript, ce que le champ garantissait. --}}
+            <div class="board-link">
+                <span class="board-link__label">{{ __('dashboard.carte.lien_public') }}</span>
 
-                <input type="text" class="board-link__input" readonly
-                       id="lienPublic" value="{{ $publicUrl }}"
-                       aria-label="{{ __('dashboard.carte.lien_aria') }}">
-            </label>
+                <output class="board-link__valeur" id="lienPublic"
+                        aria-label="{{ __('dashboard.carte.lien_aria') }}">{{ $publicUrl }}</output>
+
+                <button type="button" class="board-link__copy"
+                        data-copy="lienPublic" data-copy-done="{{ __('dashboard.carte.copie') }}">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="9" y="9" width="13" height="13" rx="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <span data-copy-label>{{ __('dashboard.carte.copier') }}</span>
+                </button>
+            </div>
 
             {{-- ═══════════════ ÉTAT DES IMAGES ═══════════════
                  IL FAUT POUVOIR VÉRIFIER SANS ALLER SUR LA PAGE PUBLIQUE.

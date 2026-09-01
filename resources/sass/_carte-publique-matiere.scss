@@ -169,18 +169,22 @@
 // -----------------------------------------------------------------------------
 // Il était un cadre gris neutre, c'est-à-dire rien. Une teinte de marque très
 // pâle suffit à le rattacher au reste sans le faire crier.
-.pubc__infos{
-  background:color-mix(in srgb, var(--accent) 5%, var(--surface));
-  border-color:color-mix(in srgb, var(--accent) 16%, transparent);
-  padding:2px 0;
-  overflow:hidden;
-}
+/*
+ | CETTE COUCHE REDÉCLARAIT TROIS RÈGLES DÉJÀ ÉCRITES DANS
+ | `_carte-publique.scss`, ET ELLE GAGNAIT — elle est importée après.
+ |
+ | Le bloc y reprenait son cadre teinté, le filet y était posé une SECONDE
+ | fois sur un autre élément, et la pastille y retrouvait son fond pâle. Le
+ | résultat mesuré à l'écran : un disque #DFE6E4 portant une icône #FFFFFF,
+ | soit 1,1:1. Les icônes avaient purement et simplement disparu.
+ |
+ | Le cadre et le filet sortent d'ici : la structure appartient au fichier de
+ | composition, cette couche ne pose plus que la MATIÈRE — reliefs, ombres,
+ | textures. C'est sa seule raison d'être.
+ */
 
-// Le filet entre deux lignes : plus discret qu'une bordure pleine, et absent
-// sous la dernière — un trait qui ne sépare rien est un trait de trop.
-.pubc__infos li + li .pubc__info{
-  border-top:1px solid color-mix(in srgb, var(--accent) 12%, transparent);
-}
+// Le filet vit désormais sur le <li> dans _carte-publique.scss. En laisser un
+// second ici, sur .pubc__info, en dessinait deux à un pixel d'écart.
 
 .pubc__info{
   transition:background 200ms ease, transform 200ms ease;
@@ -197,19 +201,22 @@
 // La pastille de l'icône reçoit un relief : un liseré interne clair en haut,
 // une ombre interne en bas. C'est ce qui la fait lire comme un bouton creusé
 // plutôt que comme un rond de couleur.
+// LE RELIEF RESTE, LE FOND SORT.
+//
+// La taille et le fond appartiennent à la composition ; seuls les reliefs
+// restent ici. Le liseré interne passe de .55 à .18 : sur un disque vert
+// PLEIN, un trait blanc à 55 % ne se lit plus comme une lumière rasante mais
+// comme une entaille.
 .pubc__info-icone{
-  width:34px;height:34px;
-  background:color-mix(in srgb, var(--accent) 13%, var(--surface));
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.55),
-    inset 0 -1px 2px rgba(11,59,46,.10),
-    0 1px 2px rgba(11,59,46,.06);
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 1px 2px rgba(11,59,46,.14);
 }
 
 .theme-dark .pubc__info-icone{
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.10),
-    inset 0 -1px 2px rgba(0,0,0,.40);
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 1px 2px rgba(0,0,0,.40);
 }
 
 // -----------------------------------------------------------------------------
@@ -356,7 +363,9 @@
   .pubc__grille{gap:7px}
   .pubc__tuile{min-height:60px;padding:8px 3px;border-radius:13px}
   .pubc__tuile-nom{font-size:9.5px}
-  .pubc__info-icone{width:30px;height:30px}
+  // 32 et non 30 : la pastille fait face à deux lignes de texte, et sous 32
+  // elle redevient un point au lieu d'un repère.
+  .pubc__info-icone{width:32px;height:32px}
   .pubc__action{min-height:48px;font-size:12.5px}
   .pubc__initiales{font-size:34px}
 }

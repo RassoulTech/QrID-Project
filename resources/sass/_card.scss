@@ -111,12 +111,41 @@
   font-family:$font-base;
 }
 
+/*
+ | LE LISERÉ — la signature de marque, sur le bord de départ.
+ |
+ | La référence fournie porte une bande verte sur le bord gauche du verso.
+ | C'est ce qui fait reconnaître la carte de loin, avant même d'en lire le
+ | nom : une carte blanche sans signature est une carte blanche.
+ |
+ | `inset-inline-start` et non `left` : la bande suit le sens de lecture.
+ |
+ | 1,6 % de la largeur — soit 6,7px sur une carte de 420, 4,8 sur une de 300.
+ | En `cqw` plutôt qu'en px pour la même raison que tout le reste du fichier :
+ | une valeur fixe deviendrait un trait à la vignette et une barre à
+ | l'impression.
+ */
+.card::before{
+  content:"";
+  position:absolute;
+  inset-block:0;
+  inset-inline-start:0;
+  width:1.6cqw;
+  // Au-dessus du fond, sous le contenu : le liseré ne doit jamais passer
+  // par-dessus le nom d'un porteur au patronyme long.
+  z-index:0;
+  pointer-events:none;
+}
+
 // Variante blanche (par défaut).
 .card.light{
   background:$blanc;
   border:1px solid #DCE1DE;
   box-shadow:0 6px 18px rgba(10,31,26,.07);   // légère, non salissante
   color:$vert-fonce;
+
+  // Sur le blanc, le liseré prend le vert de marque : c'est lui qui signe.
+  &::before{ background:$vert-800; }
 }
 
 // Variante verte.
@@ -125,6 +154,10 @@
   border:1px solid rgba(255,255,255,.08);
   box-shadow:0 6px 18px rgba(10,31,26,.18);
   color:$blanc;
+
+  // Sur le vert profond, le vert de marque disparaîtrait dans le fond. Le
+  // liseré monte de trois degrés — même teinte, même rôle, lisible.
+  &::before{ background:$vert-400; }
 }
 
 // -----------------------------------------------------------------------------
@@ -184,8 +217,25 @@
  */
 .card .qrpanneau{
   display:inline-block;
-  padding:2.6cqw;
-  border-radius:4.4cqw;
+
+  /*
+   | L'ÉPAISSEUR DU CADRE — 2,6 puis 1,4 cqw.
+   |
+   | À 2,6 cqw, le cadre faisait 11px sur une carte de 420 : il pesait autant
+   | que le QR qu'il entoure, et la carte se lisait comme deux blocs verts
+   | plutôt que comme un code posé sur une carte. Sur la variante verte
+   | c'était pire — un aplat clair de cette taille au milieu d'un fond sombre
+   | attire l'œil avant le nom du porteur.
+   |
+   | 1,4 cqw donne 5,9px à 420 et 2,7px à la vignette : le cadre se voit,
+   | remplit son rôle — rendre le QR sombre sur clair sur les deux variantes —
+   | et cesse d'être un élément de composition à lui seul.
+   |
+   | Le rayon suit : un cadre plus fin garde des coins plus serrés, sinon
+   | l'arrondi extérieur mange l'épaisseur restante.
+   */
+  padding:1.4cqw;
+  border-radius:3.2cqw;
   line-height:0;
 }
 .card.light .qrpanneau{background:$vert-500}
