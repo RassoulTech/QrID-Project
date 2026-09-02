@@ -126,6 +126,7 @@ return [
 
     'divers' => [
         'chargement' => 'Loading…',
+        'envoi_en_cours' => 'Sending…',
         'sur' => 'of',
         'ou' => 'or',
         'et' => 'and',

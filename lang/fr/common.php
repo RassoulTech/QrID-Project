@@ -132,6 +132,7 @@ return [
 
     'divers' => [
         'chargement' => 'Chargement…',
+        'envoi_en_cours' => 'Envoi…',
         'sur' => 'sur',
         'ou' => 'ou',
         'et' => 'et',

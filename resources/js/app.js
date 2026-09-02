@@ -32,6 +32,7 @@ import telephone from './modules/telephone';
 import langue from './modules/langue';
 import enregistrerContact from './modules/enregistrer-contact';
 import selectRiche from './modules/select-riche';
+import envoiUnique from './modules/envoi-unique';
 
 const modules = [
     scrollReveal,
@@ -54,6 +55,10 @@ const modules = [
     /* EN DERNIER : il enveloppe les <select> déjà en place, y compris ceux
        que telephone.js vient de renseigner. */
     selectRiche,
+
+    /* Il écoute au niveau du document : l'ordre ne compte pas pour lui, et
+       il couvre donc aussi les formulaires ajoutés après le chargement. */
+    envoiUnique,
 ];
 
 // Chaque module renvoie tôt s'il n'a rien à faire sur la page courante.

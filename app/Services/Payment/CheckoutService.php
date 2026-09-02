@@ -34,6 +34,52 @@ class CheckoutService
      */
     public function start(User $user, Plan $plan, string $method): Payment
     {
+        /*
+         | UN DOUBLE CLIC NE DOIT PAS OUVRIR DEUX PAIEMENTS.
+         |
+         | ═══════════════════════════════════════════════════════════════
+         | CE QUE CETTE LIGNE MANQUANTE PRODUISAIT
+         | ═══════════════════════════════════════════════════════════════
+         | Cette méthode créait un Payment à chaque appel, sans jamais
+         | regarder s'il en existait déjà un. Deux clics sur « Payer » —
+         | le geste le plus naturel du monde quand une page met une seconde
+         | à répondre sur une connexion lente — laissaient donc DEUX lignes
+         | `pending` derrière eux.
+         |
+         | Personne ne confirmera jamais la seconde. Elle reste en base, et
+         | c'est exactement ce que `app:reconcilier-paiements` signale
+         | ensuite comme « paiement en attente prolongée » : une alerte qui
+         | fait chercher un client lésé là où il n'y a qu'un doublon.
+         |
+         | ═══════════════════════════════════════════════════════════════
+         | POURQUOI DEUX MINUTES, ET PAS TRENTE
+         | ═══════════════════════════════════════════════════════════════
+         | La fenêtre couvre le geste, pas l'intention. Un double clic, un
+         | rechargement impatient, un retour arrière suivi d'un nouveau clic
+         | tiennent tous dans quelques secondes.
+         |
+         | Au-delà, revenir sur la page de paiement est une DÉCISION, et une
+         | nouvelle tentative mérite sa propre trace : c'est ce qui permet
+         | de dire plus tard « il a essayé trois fois ». Réutiliser une
+         | ligne d'il y a une demi-heure effacerait cette histoire.
+         |
+         | Le montant est vérifié en plus du plan : si le tarif a changé
+         | entre les deux clics, la ligne d'avant ne dit plus la vérité et
+         | l'on repart de zéro.
+         */
+        $recent = Payment::query()
+            ->where('user_id', $user->id)
+            ->where('status', Payment::STATUS_PENDING)
+            ->where('method', $method)
+            ->where('amount_fcfa', $plan->price_fcfa)
+            ->where('created_at', '>=', now()->subMinutes(2))
+            ->latest('created_at')
+            ->first();
+
+        if ($recent && ($recent->payload['plan_slug'] ?? null) === $plan->slug) {
+            return $recent;
+        }
+
         return Payment::create([
             'user_id' => $user->id,
             'subscription_id' => null,

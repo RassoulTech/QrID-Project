@@ -53,6 +53,63 @@ class CheckoutTest extends TestCase
     // OUVERTURE
     // =======================================================================
 
+    /**
+     * UN DOUBLE CLIC N'OUVRE PAS DEUX PAIEMENTS.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI CE TEST EXISTE
+     * ═══════════════════════════════════════════════════════════════════
+     * start() créait un Payment à chaque appel, sans jamais regarder s'il
+     * en existait déjà un. Deux clics sur « Payer » — le geste le plus
+     * naturel du monde quand la page met une seconde à répondre sur une
+     * connexion lente — laissaient deux lignes `pending` derrière eux.
+     *
+     * Personne ne confirme jamais la seconde. Elle reste en base, et
+     * app:reconcilier-paiements la signale ensuite comme « paiement en
+     * attente prolongée » : une alerte qui fait chercher un client lésé là
+     * où il n'y a qu'un doublon.
+     */
+    public function test_clicking_pay_twice_opens_only_one_payment(): void
+    {
+        $this->payer()->assertRedirect();
+        $this->payer()->assertRedirect();
+
+        $this->assertSame(1, Payment::count(),
+            'Un second clic a ouvert un paiement de plus, que personne ne confirmera.');
+    }
+
+    /**
+     * MAIS UN AUTRE MOYEN DE PAIEMENT EST UNE AUTRE TENTATIVE.
+     *
+     * Changer d'opérateur après un échec est une décision, pas un doublon :
+     * elle mérite sa propre trace.
+     */
+    public function test_choosing_another_method_opens_its_own_payment(): void
+    {
+        $this->payer(method: 'wave')->assertRedirect();
+        $this->payer(method: 'orange_money')->assertRedirect();
+
+        $this->assertSame(2, Payment::count());
+    }
+
+    /**
+     * ET PASSÉ LA FENÊTRE, UNE NOUVELLE TENTATIVE EST UNE VRAIE TENTATIVE.
+     *
+     * La fenêtre couvre le geste, pas l'intention : revenir sur la page de
+     * paiement une demi-heure plus tard est une décision, et c'est ce qui
+     * permet de dire plus tard « il a essayé trois fois ».
+     */
+    public function test_a_later_attempt_gets_its_own_payment(): void
+    {
+        $this->payer()->assertRedirect();
+
+        Payment::query()->update(['created_at' => now()->subMinutes(30)]);
+
+        $this->payer()->assertRedirect();
+
+        $this->assertSame(2, Payment::count());
+    }
+
     public function test_a_pending_payment_is_written_before_leaving_for_the_operator(): void
     {
         $this->payer()->assertRedirect();

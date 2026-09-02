@@ -12,4 +12,9 @@
 {{-- `lang` était figé sur « fr ». Un lecteur d'écran s'y fie pour choisir sa
      voix : il lisait donc l'anglais avec une prononciation française, mot à
      mot. Et Chrome proposait de traduire une page déjà traduite. --}}
-<html lang="{{ App\Support\Langue::active() }}" @class(['theme-dark' => App\Support\Theme::estSombre()])>
+{{-- LE LIBELLÉ D'ATTENTE VIT ICI, ET NON DANS LE JAVASCRIPT.
+     Un module qui écrirait « Envoi… » en dur imposerait le français à un
+     visiteur anglophone, sans qu'aucun test de traduction ne le voie : la
+     chaîne serait dans un fichier .js, hors de portée du vérificateur. --}}
+<html lang="{{ App\Support\Langue::active() }}" @class(['theme-dark' => App\Support\Theme::estSombre()])
+      data-libelle-envoi="{{ __('common.divers.envoi_en_cours') }}">
