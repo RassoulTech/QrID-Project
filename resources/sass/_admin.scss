@@ -16,7 +16,12 @@ $adm-top-h: 62px;
 
 // Vert plus profond que $vert-fonce : la colonne doit rester en retrait du
 // contenu, pas rivaliser avec lui.
-$adm-nuit: #0A2A21;
+// LE VERT DU PANNEAU VIENT DE L'ÉCHELLE.
+//
+// Il valait #0A2A21 — une teinte inventée ici, dans aucun nuancier du
+// projet, et donc impossible à retrouver ailleurs. $vert-900 est le degré
+// le plus profond de la charte : c'est sa place.
+$adm-nuit: $panneau;
 
 .adm {
   display: flex;
@@ -53,7 +58,7 @@ body:has(> .adm){
 .adm-side {
   width: $adm-side-w;
   flex: 0 0 $adm-side-w;
-  color: rgba($blanc, .74);
+  color: var(--panneau-texte-2);
   display: flex;
   flex-direction: column;
   padding:esp(5) esp(4) esp(4);
@@ -100,7 +105,7 @@ body:has(> .adm){
   gap:esp(2);
   padding:2px esp(3) esp(5);
   margin-bottom:esp(4);
-  border-bottom: 1px solid rgba($blanc, .10);
+  border-bottom: 1px solid var(--panneau-bord);
 }
 
 .adm-side__portail {
@@ -108,7 +113,7 @@ body:has(> .adm){
   font-weight: 700;
   letter-spacing: .13em;
   text-transform: uppercase;
-  color: rgba($blanc, .52);
+  color: var(--panneau-texte-3);
   // Aucune indentation : la mention s'aligne sur la pastille, pas sur le nom.
 }
 
@@ -122,8 +127,8 @@ body:has(> .adm){
 }
 
 // Intitulé de section. Il doit être DISCRET, pas invisible : à 36 % de blanc
-// sur ce vert, il tombait sous 2:1 et disparaissait. 62 % le tient au-dessus
-// de 4,5:1 tout en le laissant clairement en retrait des entrées.
+// sur ce vert, il tombait sous 2:1 et disparaissait. `--panneau-texte-2` le
+// tient à 7,64:1 tout en le laissant clairement en retrait des entrées.
 .adm-nav__titre {
   margin:esp(4) 0 esp(2);
   padding:0 esp(3);
@@ -131,7 +136,7 @@ body:has(> .adm){
   font-weight: 700;
   letter-spacing: .15em;
   text-transform: uppercase;
-  color: rgba($blanc, .62);
+  color: var(--panneau-texte-2);
 
   &:first-child { margin-top:0; }
 }
@@ -162,21 +167,21 @@ body:has(> .adm){
 
   // La couleur est déclarée pour TOUS les états : aucune entrée de menu ne
   // doit attendre un survol pour devenir lisible.
-  // 88 % de blanc : une entrée de menu se lit en diagonale, elle ne se
-  // déchiffre pas. À 74 % elle passait tout juste, et la moindre luminosité
-  // d'écran basse la faisait décrocher.
+  // `--panneau-texte` — 12,82:1. Une entrée de menu se lit en diagonale, elle
+  // ne se déchiffre pas. Les 74 % de blanc d'avant passaient tout juste, et
+  // la moindre luminosité d'écran basse les faisait décrocher.
   &, &:link, &:visited, &:hover, &:focus, &:focus-visible {
-    color: rgba($blanc, .88);
+    color: var(--panneau-texte);
     text-decoration: none;
   }
 
-  &:hover { background: rgba($blanc, .09); color: $blanc; }
+  &:hover { background: var(--panneau-survol); color: var(--panneau-texte); }
   &:focus-visible { outline: 2px solid $vert-accent; outline-offset: 2px; }
 
   &.is-active {
     &, &:link, &:visited, &:hover, &:focus, &:focus-visible {
       background: $vert-accent;
-      color: #06231B;          // 8,4:1 sur le vert accent
+      color: var(--sur-vert-500);   // 8,40:1 — jeton, voir _tokens.scss
       font-weight: 600;
     }
     .adm-nav__icone { opacity: 1; }
@@ -186,17 +191,18 @@ body:has(> .adm){
    | Écran non encore construit : non cliquable, mais LISIBLE.
    |
    | À 28 % de blanc, ces huit entrées étaient illisibles — le menu paraissait
-   | vide. Une entrée désactivée doit se lire : c'est elle qui annonce ce que
-   | le produit contiendra. C'est l'opacité de l'icône et le curseur qui
-   | disent l'indisponibilité, pas l'effacement du texte.
+   | vide. `--panneau-texte-3` les tient à 5,33:1. Une entrée désactivée doit
+   | se lire : c'est elle qui annonce ce que le produit contiendra. C'est
+   | l'opacité de l'ICÔNE et le curseur qui disent l'indisponibilité, pas
+   | l'effacement du texte.
    */
   &.is-muted {
-    color: rgba($blanc, .58);
+    color: var(--panneau-texte-3);
     cursor: not-allowed;
 
     .adm-nav__icone { opacity: .45; }
 
-    &:hover { background: transparent; color: rgba($blanc, .58); }
+    &:hover { background: transparent; color: var(--panneau-texte-3); }
   }
 }
 
@@ -207,7 +213,7 @@ body:has(> .adm){
 .adm-nav__bas {
   margin-top: auto;
   padding-top:esp(3);
-  border-top: 1px solid rgba($blanc, .10);
+  border-top: 1px solid var(--panneau-bord);
   display: flex;
   flex-direction: column;
   gap:2px;
@@ -332,7 +338,7 @@ body:has(> .adm){
   flex: 0 0 30px;
   border-radius: $r-full;
   background: $vert-accent;
-  color: #06231B;
+  color: var(--sur-vert-500);
   display: grid;
   place-items: center;
   font-size:typo(overline);
@@ -478,12 +484,12 @@ body:has(> .adm){
   background: $vert-fonce;
   border-color: $vert-fonce;
 
-  .adm-stat__libelle { color: rgba($blanc, .68); }
+  .adm-stat__libelle { color: var(--panneau-texte-2); }
   .adm-stat__valeur  { color: $blanc; }
-  .adm-stat__ref     { color: rgba($blanc, .60); }
-  .adm-stat__var.is-hausse { color: #7BE3BE; }
-  .adm-stat__var.is-baisse { color: #FFB4AC; }
-  .adm-stat__var.is-neutre { color: rgba($blanc, .60); }
+  .adm-stat__ref     { color: var(--panneau-texte-3); }
+  .adm-stat__var.is-hausse { color: var(--panneau-hausse); }
+  .adm-stat__var.is-baisse { color: var(--panneau-baisse); }
+  .adm-stat__var.is-neutre { color: var(--panneau-texte-3); }
 }
 
 .adm-stat__libelle {
@@ -515,8 +521,20 @@ body:has(> .adm){
   align-items: baseline;
   gap:esp(1);
 
-  &.is-hausse { color: $vert-accent; }
-  &.is-baisse { color: $rouge-erreur; }
+  /*
+   | LE VERT ACCENT NE PORTE PAS DE TEXTE — la règle est écrite dans
+   | _tokens.scss, et elle était enfreinte ici.
+   |
+   | Mesuré sur /admin/vue-ensemble : « +400,0 % » en $vert-accent sur blanc
+   | rendait 3,37:1. C'est exactement le ratio qui rendait le médaillon « QI »
+   | non conforme sur dix-huit pages, sur un autre élément.
+   |
+   | --succes est le jeton d'une tendance positive, et il vaut 5,27:1 sur
+   | blanc. Il dit aussi la bonne chose : une hausse est un succès, pas un
+   | accent de marque.
+   */
+  &.is-hausse { color: var(--succes); }
+  &.is-baisse { color: var(--danger); }
   &.is-neutre { color: var(--texte-2); font-weight: 500; }
 }
 
@@ -652,12 +670,13 @@ body:has(> .adm){
 
 .adm-alerte--attention {
   background: var(--pastel-3);
-  border-color: rgba(214, 150, 80, .38);
+  // Dérivée de l'état, plus d'un orange inventé sur place.
+  border-color: #{rgba($c-alerte, .38)};
 }
 
 .adm-alerte--info {
   background: var(--accent-doux);
-  border-color: rgba(30, 158, 122, .30);
+  border-color: #{rgba($vert-500, .30)};
 }
 
 .adm-alerte__titre {
@@ -812,7 +831,8 @@ body:has(> .adm){
   width: 100%;
   box-shadow: var(--ombre-2);
 
-  &::backdrop { background: rgba(6, 20, 16, .55); }
+  // Le voile de modale est un jeton : il doit suivre le thème.
+  &::backdrop { background: var(--overlay); }
 }
 
 .adm-modale__corps,

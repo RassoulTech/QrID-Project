@@ -111,6 +111,64 @@ $vert-50:  #E4F2EC;   // = $vert-clair      · #0A1F1A dessus : 15,42:1
 
 
 // =============================================================================
+// 1 TER. LE PANNEAU SOMBRE — la colonne de l'administration et du client
+// =============================================================================
+//
+// C'EST UNE SURFACE INVERSÉE, ET ELLE NE SUIT PAS LE THÈME. Le menu latéral
+// reste vert profond en thème clair comme en sombre : c'est ce qui dit à
+// l'exploitant qu'il change d'espace. Il lui faut donc ses propres jetons de
+// texte, mesurés contre SON fond — pas contre `--carte`.
+//
+// ─────────────────────────────────────────────────────────────────────────
+// POURQUOI DES TEINTES PLEINES ET PLUS DES OPACITÉS
+// ─────────────────────────────────────────────────────────────────────────
+// Le panneau écrivait son texte en `rgba($blanc, …)`, avec SIX valeurs
+// différentes relevées dans le fichier : .52, .58, .60, .62, .68, .74, .88.
+// Personne n'a choisi .58 contre .60 ; c'est le résultat d'ajustements
+// successifs jamais repris — exactement la dérive que l'échelle supprime.
+//
+// Surtout : une opacité sur du TEXTE fait chuter le contraste sans qu'aucun
+// outil ne le signale, parce que la valeur déclarée reste `#FFFFFF`. Trois
+// teintes pleines, mesurées, remplacent les sept.
+//
+// L'opacité reste légitime pour un FOND ou une BORDURE : elle n'y porte
+// aucune information, et un survol translucide s'adapte au fond qu'il
+// recouvre. Seul le texte exige une valeur pleine.
+
+$panneau:         $vert-900;   // #06251C
+$panneau-texte:   #E1E5E4;     // 12,82:1  — entrées actives, titres
+$panneau-texte-2: #A9B4B1;     //  7,64:1  — entrées au repos
+// LE NIVEAU 3 EST MESURÉ SUR LES DEUX VERTS SOMBRES, pas seulement sur le
+// plus profond. La tuile vedette du tableau de bord pose ce texte sur
+// $vert-800, plus clair que le panneau : #8B9692 y tombait à 4,09:1 — sous
+// le seuil, et invisible dans un audit qui n'aurait regardé que la colonne.
+$panneau-texte-3: #9CA7A3;     //  6,57:1 sur $vert-900 · 5,04:1 sur $vert-800
+
+// Les deux seules opacités conservées : ni l'une ni l'autre ne porte de texte.
+$panneau-bord:    rgba(#FFFFFF, .10);
+$panneau-survol:  rgba(#FFFFFF, .09);
+
+// Les tendances, sur ce fond-là. Elles ne peuvent pas venir de --succes /
+// --danger : ceux-ci sont calibrés pour les surfaces du thème, pas pour un
+// vert profond qui ne bascule jamais.
+$panneau-hausse:  #7BE3BE;     // 10,53:1
+$panneau-baisse:  #FFB4AC;     //  9,60:1
+
+
+// L'ENCRE POSÉE SUR LE VERT ACCENT — et c'est un piège documenté.
+//
+// `--sur-accent` existe, mais il pointe vers `--texte-inv-marque`, qui vaut
+// #FFFFFF en thème clair : sur $vert-500, cela ne donne que 3,37:1. C'est
+// précisément le défaut qui rendait le médaillon « QI » non conforme sur
+// dix-huit pages.
+//
+// $vert-500 ne bascule jamais avec le thème — c'est une couleur de marque.
+// L'encre qu'il porte n'a donc pas à basculer non plus, et elle mérite son
+// propre jeton plutôt qu'un #06231B recopié à la main à chaque emploi.
+$sur-vert-500: #06231B;        // 8,40:1 sur $vert-500
+
+
+// =============================================================================
 // 2. SURFACES ET TEXTES — deux thèmes
 // =============================================================================
 
@@ -441,6 +499,18 @@ $dock-icone:   22px;
   --vert-200: #{$vert-200};
   --vert-100: #{$vert-100};
   --vert-50:  #{$vert-50};
+
+  // LE PANNEAU SOMBRE — il ne bascule pas avec le thème, donc il vit ici et
+  // n'est pas redéclaré sous .theme-dark.
+  --panneau:         #{$panneau};
+  --panneau-texte:   #{$panneau-texte};
+  --panneau-texte-2: #{$panneau-texte-2};
+  --panneau-texte-3: #{$panneau-texte-3};
+  --panneau-bord:    #{$panneau-bord};
+  --panneau-survol:  #{$panneau-survol};
+  --panneau-hausse:  #{$panneau-hausse};
+  --panneau-baisse:  #{$panneau-baisse};
+  --sur-vert-500:    #{$sur-vert-500};
 
   // La marque ne change pas avec le thème : c'est ce qui la rend
   // reconnaissable. Seules les surfaces autour d'elle changent.
