@@ -172,8 +172,29 @@
 // chaque ligne répond à une ligne ci-dessus.
 @include ecran(lg){
   .adm-side.offcanvas-start{
-    inset:auto;
+    /*
+     | `inset: auto` ÉTAIT UNE RÉGRESSION, ET ELLE A ÉTÉ EN LIGNE.
+     |
+     | La feuille pose `inset: auto 0 0 0`. Pour l'annuler j'avais écrit
+     | `inset: auto` — ce qui remet les QUATRE côtés à `auto`, dont le `top`.
+     |
+     | Or `.adm-side` est `position: sticky; top: 0` : c'est ce `top` qui la
+     | fait tenir en place. Avec `top: auto`, sticky n'a plus de seuil et se
+     | comporte comme `static` — la colonne défilait donc avec la page, dans
+     | les deux espaces.
+     |
+     | On rend le `top`, et l'on remet à `auto` les trois autres seulement.
+     | La leçon est générale : un raccourci qui écrit quatre valeurs pour en
+     | annuler trois en écrase une quatrième qu'on n'avait pas en tête.
+     */
+    top:0;
+    inset-inline:auto;
+    bottom:auto;
+
     width:$adm-side-w;
+    // La colonne occupe la hauteur de l'écran et défile SEULE : c'est ce qui
+    // lui donne son propre défilement, indépendant de celui du contenu.
+    height:100vh;
     max-height:none;
     border-radius:0;
     border-top:0;

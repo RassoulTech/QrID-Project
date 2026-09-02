@@ -117,6 +117,40 @@ class CardPresentationTest extends TestCase
     }
 
     /**
+     * LA COLONNE GARDE SON PROPRE DÉFILEMENT.
+     *
+     * `.adm-side` est `position: sticky; top: 0` : c'est ce `top` qui la fait
+     * tenir en place pendant que le contenu défile. La feuille du bas pose
+     * `inset: auto 0 0 0` sur téléphone, et il faut l'annuler au-dessus de
+     * 768px.
+     *
+     * Écrire `inset: auto` pour cela remet les QUATRE côtés à `auto`, dont le
+     * `top` — sticky perd son seuil et se comporte comme `static`. La colonne
+     * défile alors avec la page, dans les deux espaces. C'est arrivé, et
+     * c'est parti en production.
+     *
+     * Le raccourci qui écrit quatre valeurs pour en annuler trois écrase
+     * toujours la quatrième qu'on n'avait pas en tête.
+     */
+    public function test_the_sidebar_keeps_its_own_scroll_on_desktop(): void
+    {
+        $css = file_get_contents(resource_path('sass/_panneau-mobile.scss'));
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/^\s*inset\s*:\s*auto\s*;/m',
+            $css,
+            "`inset: auto` remet aussi le `top` à auto et casse le sticky de la colonne : "
+            ."annuler les côtés un par un."
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/@include ecran\(lg\).*?\.adm-side\.offcanvas-start\s*\{[^}]*top\s*:\s*0/s',
+            $css,
+            'La remise à zéro pour écran large ne rend plus son `top: 0` à la colonne.'
+        );
+    }
+
+    /**
      * LA COULEUR DE LA CARTE NE DÉPEND PAS DU THÈME — RÈGLE MÉTIER.
      *
      * Le client CHOISIT sa variante — blanche ou verte — à la dernière étape
