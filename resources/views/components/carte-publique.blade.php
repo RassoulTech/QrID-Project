@@ -76,7 +76,9 @@
     }
 @endphp
 
-<div class="pubc{{ $apercu ? ' pubc--apercu' : '' }}">
+{{-- L'ancre de retour de la feuille de partage. Elle ferme la feuille sans
+     recourir à `href="#"`, qui est un lien mort. --}}
+<div id="carte" class="pubc{{ $apercu ? ' pubc--apercu' : '' }}">
     <article class="pubc__carte">
 
         {{-- ═══════════════ COUVERTURE ═══════════════
@@ -176,18 +178,21 @@
              casse sur iOS où Safari refuse d'ouvrir Contacts depuis un
              blob. --}}
         <div class="pubc__barre">
-            @if (! empty($qrSvg))
-                <a href="{{ $apercu ? '#' : '#qr' }}" class="pubc__action pubc__action--clair">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="3" y="3" width="7" height="7" rx="1"/>
-                        <rect x="14" y="3" width="7" height="7" rx="1"/>
-                        <rect x="3" y="14" width="7" height="7" rx="1"/>
-                        <path d="M14 14h3v3h-3zM19 19h2v2h-2z"/>
-                    </svg>
-                    Partager
-                </a>
-            @endif
+            {{-- L'ICÔNE EST CELLE DU PARTAGE, plus celle d'un QR Code.
+                 Le bouton ouvre désormais une feuille qui propose trois
+                 moyens — la feuille système, la copie, et le QR — et non plus
+                 le seul QR. Une icône de QR sur un bouton qui fait autre
+                 chose annonce le mauvais geste.
+
+                 « Partager » était écrit en dur ici, en français. --}}
+            <a href="{{ $apercu ? '#carte' : '#partage' }}" class="pubc__action pubc__action--clair">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                    <path d="M16 6l-4-4-4 4M12 2v14"/>
+                </svg>
+                {{ __('card.publique.partager') }}
+            </a>
 
             {{-- LES DONNÉES SONT PORTÉES PAR LE LIEN, en data-*.
                  Le module enregistrer-contact.js les relit pour composer

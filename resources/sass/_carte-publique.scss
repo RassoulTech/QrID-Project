@@ -370,26 +370,131 @@
 }
 
 // -----------------------------------------------------------------------------
-// QR EN PLEIN ÉCRAN — sans une ligne de JavaScript
+// FEUILLE DE PARTAGE — sans une ligne de JavaScript
 // -----------------------------------------------------------------------------
-.pubc__qr-plein{
+//
+// Elle ne montrait QUE le QR Code. Faire scanner un code suppose pourtant que
+// l'autre personne soit en face de vous : c'est le cas d'usage le plus étroit.
+// Le geste le plus fréquent est d'envoyer le lien dans une conversation.
+//
+// LE MÉCANISME RESTE `:target` : la feuille s'ouvre sans JavaScript, comme
+// avant. Le script n'ajoute que le bouton de partage système et la copie en un
+// geste — deux améliorations, aucune dépendance.
+.pubc__partage{
   display:none;
   position:fixed;inset:0;z-index:60;
-  background:rgba(6,20,16,.94);
-  padding:esp(6);text-align:center;
+  background:var(--overlay);
+  padding:esp(4);
 
-  &:target{display:grid;place-content:center;gap:esp(4)}
+  &:target{
+    display:grid;
+    // Calée en bas sur téléphone — c'est là qu'arrive le pouce, et c'est la
+    // convention des feuilles système que cette feuille imite.
+    align-content:end;
+    justify-items:center;
+  }
 
-  svg,img{
-    width:min(74vw,290px);height:auto;
-    // Le QR reste sur fond BLANC quel que soit le thème : un module clair sur
-    // fond sombre sort de la norme et échoue sur certains lecteurs.
-    background:#FFF;padding:esp(4);border-radius:$r-sm;
+  @include ecran(md){
+    &:target{ align-content:center; }
   }
 }
 
-.pubc__qr-nom{color:#FFF;font-weight:700;margin:0}
-.pubc__qr-fermer{color:#FFF;font-size:typo(caption);font-weight:600;text-decoration:underline}
+.pubc__partage-panneau{
+  width:100%;
+  max-width:420px;
+  display:flex;
+  flex-direction:column;
+  gap:esp(2);
+
+  padding:esp(5);
+  background:var(--surface);
+  border-radius:rayon(lg);
+  box-shadow:var(--ombre-4);
+
+  // L'arrivée par le bas, comme une feuille système. `transform` et `opacity`
+  // seulement : aucune ligne de mise en page n'est recalculée.
+  animation:pubc-partage-monte $d-normal $courbe;
+}
+
+@keyframes pubc-partage-monte{
+  from{opacity:0;transform:translateY(esp(4))}
+  to  {opacity:1;transform:translateY(0)}
+}
+
+.pubc__partage-titre{
+  margin:0 0 esp(2);
+  font-size:typo(h3);font-weight:700;
+  color:var(--texte);
+}
+
+// Chaque moyen de partage est une ligne pleine largeur, haute de 56px comme
+// les lignes de coordonnées : c'est la même cible, visée dans les mêmes
+// conditions — debout, une carte à la main.
+.pubc__partage-action{
+  display:flex;align-items:center;gap:esp(4);
+  width:100%;
+  min-height:56px;
+  padding:esp(3) esp(4);
+
+  appearance:none;
+  border:1px solid var(--bord);
+  border-radius:rayon(md);
+  background:var(--surface);
+  color:var(--texte);
+  font:inherit;
+  text-align:start;
+  cursor:pointer;
+
+  transition:background-color $d-rapide $courbe, border-color $d-rapide $courbe;
+
+  &:hover,&:focus-visible{background:var(--accent-doux);border-color:var(--marque)}
+  &:focus-visible{outline:2px solid var(--marque);outline-offset:2px}
+
+  > svg{flex:0 0 auto;color:var(--marque)}
+  > span{display:flex;flex-direction:column;min-width:0}
+}
+
+.pubc__partage-nom{font-size:typo(body-sm);font-weight:600}
+
+.pubc__partage-aide{
+  margin:0;
+  font-size:typo(caption);
+  color:var(--texte-3);
+}
+
+// L'adresse en clair. Elle se replie plutôt que d'être coupée : c'est elle
+// qui rend la copie manuelle possible quand le script est absent.
+.pubc__partage-url{
+  font-size:typo(caption);
+  color:var(--texte-3);
+  overflow-wrap:anywhere;
+  user-select:all;
+  -webkit-user-select:all;
+}
+
+.pubc__partage-qr{
+  display:grid;
+  justify-items:center;
+  gap:esp(2);
+  padding-top:esp(3);
+  border-top:1px solid var(--bord);
+
+  svg,img{
+    width:min(58vw,220px);height:auto;
+    // Le QR reste sur fond BLANC quel que soit le thème : un module clair sur
+    // fond sombre sort de la norme et échoue sur certains lecteurs.
+    background:#FFF;padding:esp(3);border-radius:$r-sm;
+  }
+}
+
+.pubc__partage-fermer{
+  align-self:center;
+  min-height:44px;
+  display:flex;align-items:center;
+  padding:0 esp(4);
+  font-size:typo(body-sm);font-weight:600;
+  color:var(--texte-2);
+}
 
 // -----------------------------------------------------------------------------
 // TRÈS PETITS ÉCRANS — 320px

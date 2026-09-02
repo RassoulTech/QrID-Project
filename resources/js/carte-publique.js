@@ -30,8 +30,19 @@
 // =============================================================================
 
 import enregistrerContact from './modules/enregistrer-contact';
+import partage from './modules/partage';
 
-const demarrer = () => enregistrerContact();
+/*
+ | DEUX MODULES, ET PAS UN DE PLUS.
+ |
+ | `partage` n'ajoute que le bouton de partage système et la copie en un
+ | geste : la feuille elle-même s'ouvre par `:target`, sans script. Les deux
+ | modules renvoient tôt s'ils n'ont rien à faire sur la page.
+ */
+const demarrer = () => {
+    enregistrerContact();
+    partage();
+};
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', demarrer);

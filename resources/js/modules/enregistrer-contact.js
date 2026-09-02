@@ -37,7 +37,17 @@
 export default function enregistrerContact() {
     const lien = document.querySelector('[data-enregistrer-contact]');
 
-    if (!lien || !/Android/i.test(navigator.userAgent)) {
+    if (!lien) {
+        return;
+    }
+
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        iOS(lien);
+
+        return;
+    }
+
+    if (!/Android/i.test(navigator.userAgent)) {
         return;
     }
 
@@ -98,4 +108,80 @@ export default function enregistrerContact() {
 
 function escapeHex(caractere) {
     return '%' + caractere.charCodeAt(0).toString(16).toUpperCase();
+}
+
+
+/*
+ | ═══════════════════════════════════════════════════════════════════════
+ | iOS — LA FEUILLE DE PARTAGE, PARCE QUE SAFARI A CHANGÉ D'AVIS
+ | ═══════════════════════════════════════════════════════════════════════
+ | La réponse vCard est servie SANS Content-Disposition précisément pour que
+ | Safari se fie au type MIME et ouvre sa fiche de contact. Cela a fonctionné,
+ | puis a cessé : les versions récentes rangent le fichier dans Fichiers et
+ | laissent l'utilisateur le rouvrir à la main. Deux gestes de plus, et le
+ | second se perd dans un dossier que personne ne consulte.
+ |
+ | LA FEUILLE DE PARTAGE AVEC FICHIER est la voie qui reste. `navigator.share`
+ | avec un fichier .vcf ouvre la feuille du système, où « Contacts » figure :
+ | on y arrive sur l'écran d'ajout, prérempli.
+ |
+ | IL N'EXISTE TOUJOURS AUCUNE API QUI ÉCRIT DIRECTEMENT DANS LE CARNET.
+ | Ni sur iOS, ni sur Android. Ce que l'on peut faire de mieux, des deux
+ | côtés, c'est ouvrir l'écran de création prérempli — un seul geste restant.
+ |
+ | STRICTEMENT ADDITIF. On n'empêche le lien de suivre son cours qu'une fois
+ | le fichier récupéré ET le partage jugé possible. À la moindre difficulté —
+ | pas de `canShare`, réseau coupé, refus — on ne fait rien, et le lien
+ | fonctionne exactement comme avant.
+ */
+function iOS(lien) {
+    if (typeof navigator.canShare !== 'function' || typeof navigator.share !== 'function') {
+        return;
+    }
+
+    lien.addEventListener('click', async (evenement) => {
+        let fichier;
+
+        try {
+            const reponse = await fetch(lien.href, { headers: { Accept: 'text/vcard' } });
+
+            if (!reponse.ok) {
+                return;
+            }
+
+            const texte = await reponse.text();
+
+            fichier = new File(
+                [texte],
+                (lien.dataset.nom || 'contact').replace(/\s+/g, '-').toLowerCase() + '.vcf',
+                { type: 'text/vcard' }
+            );
+        } catch {
+            return;   // le lien suit son cours : comportement d'avant
+        }
+
+        if (!navigator.canShare({ files: [fichier] })) {
+            return;
+        }
+
+        /*
+         | LE preventDefault N'ARRIVE QU'ICI, et c'est délibéré.
+         |
+         | À ce point seulement on sait que le fichier existe et que le
+         | système accepte de le partager. L'annuler plus tôt aurait laissé
+         | l'utilisateur sans rien si l'une des deux conditions manquait.
+         |
+         | Safari exige que `share` parte d'un geste de l'utilisateur. Le
+         | `await` du fetch consomme ce geste sur certaines versions ; le
+         | repli reste alors le lien, que l'on n'a pas encore annulé.
+         */
+        evenement.preventDefault();
+
+        try {
+            await navigator.share({ files: [fichier], title: lien.dataset.nom });
+        } catch {
+            // Annulation ou refus : la page reste où elle est, la carte
+            // entière est toujours à l'écran. Rien à dire.
+        }
+    });
 }

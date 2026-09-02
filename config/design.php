@@ -31,7 +31,7 @@ return [
         // Reste : les couleurs, dont le rôle ne s'automatise pas (un même
         // #0A1F1A est l'encre du thème clair ET le fond volontairement
         // sombre de l'en-tête d'administration).
-        'valeurs' => 418,
+        'valeurs' => 392,
 
         /*
          | `!important` — plafonné, pas interdit.
@@ -83,13 +83,13 @@ return [
         // 1 aujourd'hui : la fermeture de la surcouche QR de la page
         // publique, un motif `:target` qui fonctionne sans JavaScript.
         // L'intention est bonne, la forme est à reprendre — Lot 4.
-        'lien-mort' => 1,
+        'lien-mort' => 0,
 
         // Soulignement : la loi 8 fait porter la distinction par la couleur.
         // 9 aujourd'hui, tous dans les feuilles historiques. Ils
         // disparaissent au Lot 2, où la distinction repassera par la
         // couleur.
-        'souligne' => 9,
+        'souligne' => 8,
     ],
 
     /*
