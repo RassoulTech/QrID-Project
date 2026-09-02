@@ -76,8 +76,7 @@ final class Planificateur
         return Schedule::command($commande)
             ->everyFiveMinutes()
             ->timezone(self::FUSEAU)
-            ->when(fn () => self::estDueAujourdhui($commande, $heure))
-            ->after(fn () => self::marquer($commande));
+            ->when(fn () => self::reclamerAujourdhui($commande, $heure));
     }
 
     /**
@@ -94,8 +93,7 @@ final class Planificateur
         return Schedule::command($commande)
             ->everyFiveMinutes()
             ->timezone(self::FUSEAU)
-            ->when(fn () => self::estDueCetteSemaine($commande, $heure))
-            ->after(fn () => self::marquer($commande));
+            ->when(fn () => self::reclamerCetteSemaine($commande, $heure));
     }
 
     /**
@@ -145,6 +143,95 @@ final class Planificateur
         } catch (Throwable) {
             return $maintenant->copy()->startOfDay();
         }
+    }
+
+    /**
+     * RÉCLAMER LA JOURNÉE — et savoir si on l'a emportée.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI « LIRE PUIS ÉCRIRE » NE SUFFISAIT PAS
+     * ═══════════════════════════════════════════════════════════════════
+     * Le dispositif lisait le marqueur pour décider, puis l'écrivait une
+     * fois la tâche finie. Entre les deux, une seconde exécution pouvait
+     * lire le même « pas encore fait » et partir elle aussi.
+     *
+     * Ce n'est pas théorique. Deux appelants coexistent :
+     *
+     *   · `schedule:work`, dans le conteneur, chaque minute ;
+     *   · la route /automation/schedule, appelée de l'extérieur — elle
+     *     existait AVANT ce dispositif et reste un filet utile le jour où
+     *     le conteneur dort.
+     *
+     * Deux récapitulatifs Discord de la même journée, ou deux salves de
+     * relances aux mêmes clients : voilà ce que la course produisait.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * COMMENT LA BASE TRANCHE À NOTRE PLACE
+     * ═══════════════════════════════════════════════════════════════════
+     * Un seul UPDATE conditionnel. Le moteur verrouille la ligne le temps
+     * de l'écriture : le premier arrivant voit sa condition satisfaite et
+     * obtient une ligne modifiée ; le second trouve la condition déjà
+     * fausse et en obtient zéro. Personne n'arbitre — la base le fait.
+     *
+     * Le marquage a donc lieu AVANT l'exécution, et non après. C'est la
+     * même décision qu'auparavant, poussée à sa conclusion : une tâche qui
+     * échoue attend le lendemain plutôt que de repartir toutes les cinq
+     * minutes. Réclamer d'abord, c'est aussi ce qui rend la réclamation
+     * atomique — on ne peut pas verrouiller ce qu'on n'a pas encore écrit.
+     */
+    public static function reclamerAujourdhui(string $cle, string $heure): bool
+    {
+        $maintenant = Carbon::now(self::FUSEAU);
+
+        if ($maintenant->lt(self::seuilDuJour($maintenant, $heure))) {
+            return false;
+        }
+
+        return self::reclamer($cle, $maintenant->toDateString(), fn ($q) => $q
+            ->whereNull('dernier_jour')
+            ->orWhere('dernier_jour', '<>', $maintenant->toDateString()));
+    }
+
+    /** Idem, sur une fenêtre de sept jours. */
+    public static function reclamerCetteSemaine(string $cle, string $heure): bool
+    {
+        $maintenant = Carbon::now(self::FUSEAU);
+
+        if ($maintenant->lt(self::seuilDuJour($maintenant, $heure))) {
+            return false;
+        }
+
+        $ilYASeptJours = $maintenant->copy()->subDays(7)->toDateString();
+
+        return self::reclamer($cle, $maintenant->toDateString(), fn ($q) => $q
+            ->whereNull('dernier_jour')
+            ->orWhere('dernier_jour', '<=', $ilYASeptJours));
+    }
+
+    /**
+     * L'écriture qui tranche.
+     *
+     * `insertOrIgnore` d'abord : l'UPDATE ne peut rien verrouiller si la
+     * ligne n'existe pas encore. Il n'écrase jamais un marqueur existant —
+     * c'est tout l'intérêt du « ignore ».
+     */
+    private static function reclamer(string $cle, string $jour, \Closure $condition): bool
+    {
+        DB::table(self::TABLE)->insertOrIgnore([
+            'cle' => $cle,
+            'dernier_jour' => null,
+            'mis_a_jour_le' => null,
+        ]);
+
+        $lignes = DB::table(self::TABLE)
+            ->where('cle', $cle)
+            ->where($condition)
+            ->update([
+                'dernier_jour' => $jour,
+                'mis_a_jour_le' => Carbon::now(),
+            ]);
+
+        return $lignes === 1;
     }
 
     /** Le dernier jour où la tâche a été tentée, au format « 2026-09-02 ». */

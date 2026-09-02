@@ -139,6 +139,63 @@ class PlanificateurTest extends TestCase
     }
 
     /**
+     * DEUX APPELANTS SIMULTANÉS, UNE SEULE EXÉCUTION.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI CE CAS EST RÉEL ET NON THÉORIQUE
+     * ═══════════════════════════════════════════════════════════════════
+     * Deux choses appellent le planificateur :
+     *
+     *   · `schedule:work`, dans le conteneur, chaque minute ;
+     *   · la route /automation/schedule, appelée de l'extérieur — elle
+     *     existait avant ce dispositif et reste un filet le jour où le
+     *     conteneur dort.
+     *
+     * Si les deux passent dans la même minute, « lire puis écrire »
+     * laisserait les deux partir : chacun lit « pas encore fait ». Deux
+     * récapitulatifs Discord de la même journée, ou deux salves de relances
+     * aux mêmes clients.
+     *
+     * La réclamation est donc un seul UPDATE conditionnel : le premier
+     * obtient une ligne modifiée, le second zéro.
+     */
+    public function test_two_callers_in_the_same_minute_yield_one_run(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-09-02 21:00', Planificateur::FUSEAU));
+
+        $premier = Planificateur::reclamerAujourdhui('report:daily', '21:00');
+        $second = Planificateur::reclamerAujourdhui('report:daily', '21:00');
+
+        $this->assertTrue($premier, 'Le premier appelant doit obtenir la journée.');
+        $this->assertFalse($second,
+            'Le second appelant a lui aussi obtenu la journée : le récapitulatif '.
+            'partirait deux fois.');
+    }
+
+    /** La réclamation ne part pas avant l'heure, même concurrente. */
+    public function test_claiming_before_the_hour_grants_nothing(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-09-02 20:59', Planificateur::FUSEAU));
+
+        $this->assertFalse(Planificateur::reclamerAujourdhui('report:daily', '21:00'));
+        $this->assertNull(Planificateur::dernierJour('report:daily'),
+            'Une réclamation refusée ne doit rien écrire : sinon la tâche serait '.
+            'marquée faite sans avoir tourné.');
+    }
+
+    /** L'hebdomadaire se réclame aussi une seule fois. */
+    public function test_a_weekly_task_is_claimed_once(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-09-02 04:30', Planificateur::FUSEAU));
+
+        $this->assertTrue(Planificateur::reclamerCetteSemaine('app:sauvegarder', '04:00'));
+        $this->assertFalse(Planificateur::reclamerCetteSemaine('app:sauvegarder', '04:00'));
+
+        Carbon::setTestNow(Carbon::parse('2026-09-09 04:30', Planificateur::FUSEAU));
+        $this->assertTrue(Planificateur::reclamerCetteSemaine('app:sauvegarder', '04:00'));
+    }
+
+    /**
      * LE BATTEMENT DE CŒUR — sans lui, un planificateur arrêté ressemble à un
      * planificateur qui n'a rien à faire.
      */
