@@ -311,28 +311,49 @@ $ease: cubic-bezier(.2,.8,.2,1);
 // -----------------------------------------------------------------------------
 // COORDONNÉES — un bloc teinté, lu d'un seul regard
 // -----------------------------------------------------------------------------
+/*
+ | LE BLOC DE COORDONNEES — transpose de .pubc__infos, a l'echelle.
+ |
+ | Il portait un CADRE : fond gris, bordure, coins arrondis. La page publique
+ | a abandonne ce cadre — ce sont des TRAITS FINS qui structurent la liste, et
+ | une pastille ronde pleine qui donne le point d'entree a l'oeil. Une liste
+ | encadree ET separee porterait deux fois la meme information.
+ |
+ | La maquette montrait donc une composition que le produit ne rend plus.
+ */
 .phc__infos{
   margin:8px 10px 0;
-  padding:3px 0;
-  background:$gris-fond;
-  border:1px solid $bordure;
-  border-radius:9px;
+  padding:0;
   display:flex;flex-direction:column;
+
+  // Le trait appartient a la ligne SUIVANTE : jamais de trait apres la
+  // derniere, quel que soit le nombre de coordonnees renseignees. Meme regle
+  // que `.pubc__infos > li + li`.
+  > * + *{ border-top:1px solid $bordure; }
 }
 
 .phc__info{
   display:flex;align-items:center;gap:7px;
-  padding:4px 8px;
+  padding:5px 6px;
   min-width:0;
 }
 
+/*
+ | LA PASTILLE ETAIT L'INVERSE DE CELLE DE LA PAGE.
+ |
+ |   maquette    : 17px, fond vert PALE, icone vert FONCE
+ |   page reelle : 36px, fond vert FONCE, icone BLANCHE   (mesure au rendu)
+ |
+ | 36px sur une carte de 375 valent 9,6 % de sa largeur ; a l'echelle de la
+ | maquette, cela fait 18px.
+ */
 .phc__info-icone{
   flex:0 0 auto;
-  width:17px;height:17px;
+  width:18px;height:18px;
   display:grid;place-items:center;
   border-radius:999px;
-  background:$vert-clair;
-  color:$vert-fonce;
+  background:$vert-fonce;
+  color:$blanc;
 }
 
 // La troncature est ACCEPTABLE ICI, et seulement ici : c'est une maquette,
@@ -372,26 +393,43 @@ $ease: cubic-bezier(.2,.8,.2,1);
   padding:8px 10px 0;
 }
 
+/*
+ | LA TUILE — transposee de .pubc__tuile, MEME TECHNIQUE DE TEINTE.
+ |
+ | Elle portait un fond gris uniforme et une bordure grise. La page publique
+ | teinte chaque tuile de la couleur de SA plateforme, a 9 % sur la surface,
+ | avec un liseré de la meme couleur a 18 % — mesure au rendu, la tuile
+ | WhatsApp y ressort en vert tres pale, la tuile Instagram en rose.
+ |
+ | La maquette annoncait donc une grille grise la ou le produit rend une
+ | grille teintee. `--marque` est pose par la vue sur chaque tuile, comme sur
+ | la page publique : la meme declaration produit donc le meme resultat.
+ |
+ | 16px de rayon sur une carte de 375 valent 4,3 % de sa largeur ; a
+ | l'echelle de la maquette, cela fait 8px.
+ */
 .phc__tuile{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;
+  gap:3.5px;
   aspect-ratio:1;
   min-width:0;
-  padding:3px 2px;
-  border-radius:9px;
-  background:$gris-fond;
-  border:1px solid $bordure;
-  color:$gris-second;
+  padding:5px 3px;
+  border-radius:8px;
 
-  // La couleur officielle de chaque plateforme, posée par x-social-icon. La
-  // page publique ne la révèle qu'au survol ; ici rien ne se survole — la
-  // maquette est une image — et les logos éteints se liraient comme des
-  // boutons désactivés.
+  background:color-mix(in srgb, var(--marque, #{$vert-fonce}) 9%, #{$blanc});
+  border:1px solid color-mix(in srgb, var(--marque, #{$vert-fonce}) 18%, transparent);
+  box-shadow:0 1px 2px rgba(11,59,46,.05);
+
+  color:$texte;
+
+  // Le logo garde la couleur officielle de sa plateforme, comme sur la page.
   .social-svg{color:var(--marque, #{$vert-fonce})}
 }
 
 .phc__tuile-nom{
-  font-size:6.5px;font-weight:600;
+  // 700 comme .pubc__tuile-nom, pas 600 : sur un fond teinte, une graisse
+  // de moins fait decrocher le libelle.
+  font-size:6.5px;font-weight:700;
   text-align:center;line-height:1.1;
   color:$texte;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
