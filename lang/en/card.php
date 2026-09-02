@@ -26,6 +26,8 @@ return [
         'partage_titre' => 'Share this card',
         'partage_natif' => 'Share…',
         'partage_natif_aide' => 'WhatsApp, Messages, email…',
+        'partage_whatsapp' => 'Share on WhatsApp',
+        'partage_whatsapp_aide' => 'The message is ready, you pick the recipient',
         'copier_lien' => 'Copy link',
         'lien_copie' => 'Link copied',
         'voir_qr' => 'Show QR code',

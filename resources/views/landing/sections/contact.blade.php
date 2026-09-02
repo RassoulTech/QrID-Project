@@ -48,7 +48,10 @@
         </p>
 
         @if (config('landing.support.whatsapp'))
-          <a href="https://wa.me/{{ preg_replace('/\D+/', '', config('landing.support.whatsapp')) }}"
+          {{-- Le lien passe par le service : il portait ici son propre nettoyage
+                 de numéro, sans message pré-rempli — la personne arrivait donc
+                 sur une conversation vide, à écrire elle-même. --}}
+          <a href="{{ \App\Support\Whatsapp::assistance() }}"
              class="contact__wa" target="_blank" rel="noopener noreferrer">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12.04 2a9.9 9.9 0 0 0-8.5 15.02L2 22.5l5.62-1.47A9.9 9.9 0 1 0 12.04 2m0 1.67a8.23 8.23 0 1 1-4.19 15.31l-.3-.18-3.34.87.89-3.25-.2-.31A8.23 8.23 0 0 1 12.04 3.67"/>

@@ -7,6 +7,7 @@ use App\Models\ProfileEvent;
 use App\Services\QrCodeService;
 use App\Services\SharePreviewService;
 use App\Services\VCardService;
+use App\Support\Whatsapp;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -40,6 +41,21 @@ class PublicProfileController extends Controller
 
         return view('public.profile', [
             'profile' => $profile,
+
+            /*
+             | LE LIEN DE PARTAGE WHATSAPP, CONSTRUIT CÔTÉ SERVEUR.
+             |
+             | Il pourrait être assemblé dans le gabarit — c'est ce que
+             | faisaient les quatre autres endroits du produit qui parlent à
+             | WhatsApp, chacun à sa façon. Le construire ici met le texte
+             | dans les fichiers de langue, l'encodage dans un seul endroit,
+             | et laisse la vue afficher au lieu de calculer.
+             |
+             | Il ne porte QUE ce qui est déjà public sur cette page : le nom
+             | affiché et son adresse. Voir la règle en tête de
+             | App\Support\Whatsapp.
+             */
+            'partageWhatsapp' => Whatsapp::partageDeLaCarte($profile, url()->current()),
 
             /*
              | L'IMAGE DE PARTAGE. C'est elle qui rend le lien visible dans une

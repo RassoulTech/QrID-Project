@@ -29,6 +29,8 @@ return [
         'partage_titre' => 'Partager cette carte',
         'partage_natif' => 'Partager…',
         'partage_natif_aide' => 'WhatsApp, Messages, e-mail…',
+        'partage_whatsapp' => 'Partager sur WhatsApp',
+        'partage_whatsapp_aide' => 'Le message est prêt, vous choisissez le destinataire',
         'copier_lien' => 'Copier le lien',
         'lien_copie' => 'Lien copié',
         'voir_qr' => 'Afficher le QR Code',

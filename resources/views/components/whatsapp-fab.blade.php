@@ -33,20 +33,23 @@
 ])
 
 @php
-    $numero = trim((string) config('landing.support.whatsapp'));
+    /*
+     | LE LIEN VIENT DU SERVICE, PLUS DU GABARIT.
+     |
+     | Ce bloc nettoyait le numéro et encodait le texte lui-même. C'était la
+     | quatrième copie de la même logique dans le produit — et la seule à
+     | corriger le jour où l'une des trois autres se trompe.
+     |
+     | `assistance()` rend null quand aucun numéro n'est configuré : un bouton
+     | d'aide qui mène à une conversation avec un numéro inexistant est pire
+     | que pas de bouton — quelqu'un qui a un problème en rencontre un second.
+     */
+    $lien = $message !== null
+        ? \App\Support\Whatsapp::lien(config('landing.support.whatsapp'), $message)
+        : \App\Support\Whatsapp::assistance();
 @endphp
 
-@if ($numero !== '')
-    @php
-        // wa.me n'accepte QUE des chiffres : un « + » ou une espace dans le
-        // numéro produit un lien qui s'ouvre sur une erreur WhatsApp.
-        $chiffres = preg_replace('/\D+/', '', $numero);
-
-        // Le message vient de la PAGE, sauf demande explicite du contraire.
-        $texte = $message ?? \App\Support\AideContextuelle::message();
-
-        $lien = 'https://wa.me/'.$chiffres.'?text='.rawurlencode($texte);
-    @endphp
+@if ($lien !== null)
 
     <a href="{{ $lien }}"
        class="wa-fab"
