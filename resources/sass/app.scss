@@ -49,6 +49,10 @@
 // APRÈS LE SOCLE, parce qu'il étend `%champ` : le placeholder doit exister.
 @import "select-riche";
 
+// LA FEUILLE DU BAS, après Bootstrap : elle redéfinit la géométrie de
+// `.offcanvas-start` sous 768px et gagne par l'ordre, sans !important.
+@import "panneau-mobile";
+
 // LA POLITIQUE DE MOUVEMENT EN TOUT DERNIER.
 //
 // Ce fichier n'était PAS IMPORTÉ — d'où soixante-six lignes qui n'ont jamais

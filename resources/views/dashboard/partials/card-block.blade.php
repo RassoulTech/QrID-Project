@@ -100,17 +100,24 @@
     <div class="board-link board-link--large">
         <span class="board-link__label">{{ __('dashboard.carte.lien_public') }}</span>
 
-        <output class="board-link__valeur" id="lienPublic"
-                aria-label="{{ __('dashboard.carte.lien_aria') }}">{{ $publicUrl }}</output>
+        {{-- UN SEUL CONTRÔLE, PAS TROIS OBJETS.
+             Le libellé, une boîte grise et un bouton posé en dessous : trois
+             éléments pour un seul geste, celui de copier. Le bouton entre
+             donc DANS le cadre, séparé par un trait — la forme qu'ont tous
+             les champs « copier ce lien », et qu'on reconnaît sans lire. --}}
+        <div class="board-link__champ">
+            <output class="board-link__valeur" id="lienPublic"
+                    aria-label="{{ __('dashboard.carte.lien_aria') }}">{{ $publicUrl }}</output>
 
-        <button type="button" class="board-link__copy"
-                data-copy="lienPublic" data-copy-done="{{ __('dashboard.carte.copie') }}">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="9" y="9" width="13" height="13" rx="2"/>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-            </svg>
-            <span data-copy-label>{{ __('dashboard.carte.copier') }}</span>
-        </button>
+            <button type="button" class="board-link__copy"
+                    data-copy="lienPublic" data-copy-done="{{ __('dashboard.carte.copie') }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                <span data-copy-label>{{ __('dashboard.carte.copier') }}</span>
+            </button>
+        </div>
     </div>
 </section>

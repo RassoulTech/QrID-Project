@@ -979,29 +979,39 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   justify-items:start;
 }
 
-/*
- | EN PLEINE LARGEUR, SOUS LA CARTE.
- |
- | Dans la colonne de droite — 339px à 1440px de large — l'adresse se
- | repliait sur trois lignes. Sous la carte, elle dispose du bloc entier.
- |
- | À partir de 640px, le bouton se pose À CÔTÉ de l'adresse plutôt qu'en
- | dessous : les deux appartiennent au même geste, et les empiler quand il
- | y a la place ajoute une ligne pour rien.
- */
+// EN PLEINE LARGEUR, SOUS LA CARTE. Dans la colonne de droite — 339px à
+// 1440px — l'adresse se repliait sur trois lignes étroites.
 .board-link--large{
   margin-top:esp(6);
   padding-top:esp(5);
   border-top:1px solid var(--bordure);
+}
 
-  @include ecran(md){
-    grid-template-columns:1fr auto;
-    align-items:end;
-    column-gap:esp(4);
+/*
+ | LE CHAMP — UN SEUL OBJET, PAS TROIS.
+ |
+ | L'adresse vivait dans une boîte, et le bouton en dessous : deux blocs
+ | séparés pour un seul geste. Le bouton entre dans le cadre, séparé par un
+ | simple trait — c'est la forme de tous les champs « copier ce lien », et
+ | on la reconnaît sans avoir à la lire.
+ |
+ | `align-items:stretch` : le bouton prend TOUTE la hauteur du champ, quelle
+ | que soit le nombre de lignes de l'adresse. Une cible qui grandit avec son
+ | voisin vaut mieux qu'un bouton de 36px flottant à côté de deux lignes.
+ */
+.board-link__champ{
+  display:flex;
+  align-items:stretch;
+  width:100%;
+  min-width:0;
 
-    // Le libellé garde sa ligne au-dessus des deux.
-    .board-link__label{grid-column:1 / -1}
-  }
+  background:var(--surelev);
+  border:1px solid var(--bordure-f);
+  border-radius:rayon(sm);
+  overflow:hidden;
+
+  transition:border-color $d-rapide $courbe;
+  &:focus-within{border-color:var(--marque)}
 }
 
 .board-link__label{
@@ -1012,17 +1022,16 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 
 .board-link__valeur{
-  display:block;
-  width:100%;
+  display:flex;
+  align-items:center;
+  flex:1 1 auto;
+  min-width:0;
   padding:esp(3) esp(4);
 
   font-family:inherit;
   font-size:typo(body-sm);
   line-height:1.5;
   color:var(--texte);
-  background:var(--surelev);
-  border:1px solid var(--bordure-f);
-  border-radius:rayon(sm);
 
   // L'adresse se coupe où il faut plutôt que de déborder : une URL n'a pas
   // d'espace, donc sans cette règle elle force la largeur du conteneur.
@@ -1041,17 +1050,32 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
 }
 
 .board-link__copy{
-  display:inline-flex;align-items:center;gap:esp(2);
-  // 36px : bouton d'appoint. La cible englobe l'icône ET le libellé.
-  min-height:36px;
+  display:inline-flex;align-items:center;justify-content:center;gap:esp(2);
+  flex:0 0 auto;
+  // Il prend la hauteur du champ. 44px au minimum quand l'adresse tient sur
+  // une seule ligne — la cible du projet.
+  min-height:$tactile-min;
   padding:0 esp(4);
+
   font-size:typo(caption);font-weight:600;
-  color:var(--marque);background:var(--marque-doux);
-  border:0;border-radius:rayon(full);
+  color:var(--marque);
+  background:var(--marque-doux);
+
+  // Un seul trait le sépare de l'adresse : ni bordure complète, ni rayon.
+  // C'est un segment du champ, pas un bouton posé dessus.
+  border:0;
+  border-inline-start:1px solid var(--bordure-f);
+  border-radius:0;
+
   cursor:pointer;
   transition:background-color $d-rapide $courbe;
   &:hover{background:var(--vert-100)}
-  &:focus-visible{outline:2px solid var(--marque);outline-offset:2px}
+  &:focus-visible{outline:2px solid var(--marque);outline-offset:-2px}
+
+  // Sous 480px, le libellé sort et l'icône reste : « Copier » plus l'adresse
+  // sur deux lignes ne laissent pas 44px au texte.
+  > [data-copy-label]{display:none}
+  @include ecran(ms){ > [data-copy-label]{display:inline} }
 }
 
 // --- Statistiques ---------------------------------------------------------------

@@ -1,0 +1,213 @@
+// =============================================================================
+// LE PANNEAU « PLUS » — UNE FEUILLE QUI MONTE, PAS UN TIROIR LATÉRAL
+// =============================================================================
+//
+// CE QUE CELA REMPLACE
+// -----------------------------------------------------------------------------
+// La colonne se repliait dans un `offcanvas-start` : un tiroir pleine hauteur
+// qui glisse depuis la GAUCHE. C'est la convention d'un site, pas celle d'une
+// application mobile — et le geste ne correspond à rien : on appuie sur un
+// bouton situé EN BAS À DROITE, et le panneau surgit du bord opposé.
+//
+// Sur téléphone, la convention est la FEUILLE DU BAS : elle monte depuis le
+// bord où le pouce vient d'appuyer, ne couvre que ce qu'il lui faut, et laisse
+// voir la page derrière. C'est ce que font les applications natives, et c'est
+// ce que le dock imite déjà.
+//
+// LES DESTINATIONS DEVIENNENT DES TUILES
+// -----------------------------------------------------------------------------
+// Une liste verticale de onze lignes demande de lire pour choisir. Une grille
+// d'icônes se balaie du regard : c'est l'écran « Plus » de n'importe quelle
+// application. Les mêmes entrées, la même icône que dans le dock — donc rien
+// de nouveau à apprendre.
+//
+// POURQUOI PAS `offcanvas-bottom` DE BOOTSTRAP
+// -----------------------------------------------------------------------------
+// L'élément porte `offcanvas-md`, la variante RESPONSIVE : il redevient une
+// colonne normale à partir de 768px. On ne peut pas lui donner en même temps
+// `offcanvas-start` et `offcanvas-bottom` — la seconde classe n'existe qu'en
+// version non responsive. On garde donc la mécanique de Bootstrap, et l'on
+// redéfinit seulement la GÉOMÉTRIE sous 768px.
+//
+// Aucun `!important` : ces règles arrivent après Bootstrap dans la chaîne
+// d'import, et gagnent par l'ordre de cascade à spécificité égale.
+// =============================================================================
+
+// MOBILE FIRST, ET LE CLIQUET L'A EXIGÉ.
+//
+// Ces règles étaient enfermées dans `@media (max-width: 767.98px)`. C'était
+// commode — elles ne touchaient que le téléphone — et c'était contraire à la
+// loi 3 : les `@media` AJOUTENT, ils ne défont pas. `design:check` a refusé le
+// commit, et il avait raison : une requête `max-width` oblige à connaître ce
+// qu'on annule, donc à lire deux règles pour en comprendre une.
+//
+// La feuille est donc l'état PAR DÉFAUT, et `ecran(lg)` rend sa colonne à
+// l'écran large. Chaque propriété posée ici est reprise là-bas : c'est la
+// contrepartie du mobile first sur un composant qui change de nature.
+
+
+.adm-side.offcanvas-start {
+  /*
+   | LA GÉOMÉTRIE D'UNE FEUILLE DU BAS.
+   |
+   | Bootstrap pose `top:0; left:0; bottom:0; width:400px` et un
+   | `translateX(-100%)`. On remplace les quatre, et la translation.
+   */
+  inset: auto 0 0 0;
+  width: auto;
+  // 85dvh et non 100 : on laisse voir la page derrière, c'est ce qui
+  // distingue une feuille d'un écran. `dvh` parce que la barre d'adresse
+  // mobile change de hauteur.
+  height: auto;
+  max-height: 85dvh;
+
+  border-radius: rayon(xl) rayon(xl) 0 0;
+  // Le bord haut est le seul visible : les trois autres touchent l'écran.
+  border-top: 1px solid var(--panneau-bord);
+
+  // Elle monte, elle ne glisse plus de côté.
+  transform: translateY(100%);
+
+  // Le contenu défile dans la feuille, jamais la page derrière.
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  // La zone sûre du bas — la barre d'accueil de l'iPhone passe dessous.
+  padding: esp(5) esp(4) calc(#{esp(5)} + env(safe-area-inset-bottom));
+
+  &.showing,
+  &.show:not(.hiding) {
+    transform: none;
+  }
+}
+
+/*
+ | LA POIGNÉE — le trait qui dit « ça se tire ».
+ |
+ | Elle ne fait rien : c'est un repère de convention. Sans elle, une feuille
+ | du bas se lit comme un panneau collé, et l'on cherche le bouton de
+ | fermeture au lieu de balayer vers le bas.
+ */
+.adm-side.offcanvas-start::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 0 auto esp(4);
+  border-radius: rayon(full);
+  background: var(--panneau-texte-3);
+}
+
+// L'en-tête de marque n'a plus lieu d'être : on sait où l'on est, on vient
+// d'y appuyer. Il prenait 80px en haut d'une feuille qui doit rester courte.
+.adm-side__marque { display: none; }
+
+// ── LES DESTINATIONS EN GRILLE ──────────────────────────────────────────
+.adm-nav__liste {
+  display: grid;
+  // `auto-fill` plutôt qu'un nombre fixe : quatre colonnes à 375px, trois
+  // à 320px, sans requête média supplémentaire.
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: esp(2);
+}
+
+.adm-nav__lien {
+  // La tuile : icône au-dessus, libellé en dessous, comme le dock.
+  flex-direction: column;
+  justify-content: center;
+  gap: esp(2);
+  min-height: 84px;
+  padding: esp(3) esp(2);
+  border-radius: rayon(md);
+  text-align: center;
+
+  background: var(--panneau-survol);
+
+  &.is-active {
+    background: var(--marque);
+    color: var(--texte-inv-marque);
+  }
+}
+
+.adm-nav__icone {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+}
+
+.adm-nav__titre {
+  // Le titre de section reprend toute la largeur de la grille.
+  grid-column: 1 / -1;
+  margin: esp(4) 0 esp(1);
+}
+
+/*
+ | LE BAS DE PANNEAU RESTE UNE LISTE.
+ |
+ | Aide et Déconnexion ne sont pas des destinations : ce sont des actions,
+ | et la dernière est irréversible. Les mettre en tuiles au milieu des
+ | pages ferait cliquer sur « Déconnexion » en visant « Paramètres ».
+ */
+.adm-nav__bas {
+  margin-top: esp(5);
+  padding-top: esp(4);
+  border-top: 1px solid var(--panneau-bord);
+
+  .adm-nav__lien {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: start;
+    min-height: 48px;
+    background: none;
+    border-radius: rayon(full);
+  }
+}
+
+// =============================================================================
+// À PARTIR DE 768px — LA FEUILLE REDEVIENT UNE COLONNE
+// =============================================================================
+//
+// Bootstrap rend déjà `.offcanvas-md` à son état normal au-dessus de cette
+// borne. Ce qui suit annule ce que la feuille avait posé — et rien d'autre :
+// chaque ligne répond à une ligne ci-dessus.
+@include ecran(lg){
+  .adm-side.offcanvas-start{
+    inset:auto;
+    width:$adm-side-w;
+    max-height:none;
+    border-radius:0;
+    border-top:0;
+    transform:none;
+    overflow-y:auto;
+    padding:esp(5) esp(4) esp(4);
+  }
+
+  // La poignée n'a plus de sens : rien ne se tire.
+  .adm-side.offcanvas-start::before{content:none}
+
+  .adm-side__marque{display:flex}
+
+  .adm-nav__liste{display:flex;flex-direction:column;gap:2px}
+
+  .adm-nav__lien{
+    flex-direction:row;
+    justify-content:flex-start;
+    gap:esp(3);
+    min-height:0;
+    padding:esp(3) esp(3);
+    border-radius:$r-full;
+    text-align:left;
+    background:transparent;
+
+    &.is-active{background:$vert-accent;color:var(--sur-vert-500)}
+  }
+
+  .adm-nav__icone{width:auto;height:auto;flex:0 0 16px}
+
+  .adm-nav__titre{margin:esp(4) 0 esp(2)}
+
+  .adm-nav__bas{
+    margin-top:auto;
+    padding-top:esp(3);
+  }
+}
