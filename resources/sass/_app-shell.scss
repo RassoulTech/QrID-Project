@@ -979,6 +979,31 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
   justify-items:start;
 }
 
+/*
+ | EN PLEINE LARGEUR, SOUS LA CARTE.
+ |
+ | Dans la colonne de droite — 339px à 1440px de large — l'adresse se
+ | repliait sur trois lignes. Sous la carte, elle dispose du bloc entier.
+ |
+ | À partir de 640px, le bouton se pose À CÔTÉ de l'adresse plutôt qu'en
+ | dessous : les deux appartiennent au même geste, et les empiler quand il
+ | y a la place ajoute une ligne pour rien.
+ */
+.board-link--large{
+  margin-top:esp(6);
+  padding-top:esp(5);
+  border-top:1px solid var(--bordure);
+
+  @include ecran(md){
+    grid-template-columns:1fr auto;
+    align-items:end;
+    column-gap:esp(4);
+
+    // Le libellé garde sa ligne au-dessus des deux.
+    .board-link__label{grid-column:1 / -1}
+  }
+}
+
 .board-link__label{
   font-size:typo(overline);font-weight:600;
   letter-spacing:typo(overline,espacement);

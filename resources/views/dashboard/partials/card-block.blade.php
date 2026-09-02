@@ -24,30 +24,6 @@
         </div>
 
         <div class="db-carte__cote">
-            {{-- L'ADRESSE EST LUE EN ENTIER, OU ELLE NE SERT À RIEN.
-                 Un <input> ne passe jamais à la ligne : quelle que soit la
-                 largeur qu'on lui donne, une adresse plus longue finit coupée.
-                 C'est ce qui affichait « https://qrid-uutz.onr ».
-
-                 Un bloc de texte, lui, se replie. `user-select:all` rend la
-                 sélection d'un seul geste — donc la copie manuelle reste
-                 possible sans JavaScript, ce que le champ garantissait. --}}
-            <div class="board-link">
-                <span class="board-link__label">{{ __('dashboard.carte.lien_public') }}</span>
-
-                <output class="board-link__valeur" id="lienPublic"
-                        aria-label="{{ __('dashboard.carte.lien_aria') }}">{{ $publicUrl }}</output>
-
-                <button type="button" class="board-link__copy"
-                        data-copy="lienPublic" data-copy-done="{{ __('dashboard.carte.copie') }}">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="9" y="9" width="13" height="13" rx="2"/>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                    </svg>
-                    <span data-copy-label>{{ __('dashboard.carte.copier') }}</span>
-                </button>
-            </div>
 
             {{-- ═══════════════ ÉTAT DES IMAGES ═══════════════
                  IL FAUT POUVOIR VÉRIFIER SANS ALLER SUR LA PAGE PUBLIQUE.
@@ -103,5 +79,38 @@
                 </x-button>
             </div>
         </div>
+    </div>
+
+    {{-- ═══════════════ LE LIEN PUBLIC ═══════════════
+         IL PASSE SOUS LA CARTE, EN PLEINE LARGEUR.
+
+         Il vivait dans la colonne de droite, qui ne fait que 339px à 1440px
+         de large : l'adresse s'y repliait sur trois lignes étroites, serrée
+         entre les pastilles d'état et les boutons. C'est pourtant la seule
+         chose que le client vient chercher ici.
+
+         Sous la carte, il dispose de toute la largeur du bloc : l'adresse
+         tient sur une ligne dès qu'il y a la place, et le bouton se pose à
+         côté plutôt qu'en dessous.
+
+         L'ADRESSE EST UN BLOC DE TEXTE, jamais un <input> : un champ ne passe
+         pas à la ligne, et finit donc toujours par tronquer. `user-select:all`
+         conserve ce que le champ garantissait — un geste sélectionne tout,
+         donc la copie manuelle reste possible sans JavaScript. --}}
+    <div class="board-link board-link--large">
+        <span class="board-link__label">{{ __('dashboard.carte.lien_public') }}</span>
+
+        <output class="board-link__valeur" id="lienPublic"
+                aria-label="{{ __('dashboard.carte.lien_aria') }}">{{ $publicUrl }}</output>
+
+        <button type="button" class="board-link__copy"
+                data-copy="lienPublic" data-copy-done="{{ __('dashboard.carte.copie') }}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            <span data-copy-label>{{ __('dashboard.carte.copier') }}</span>
+        </button>
     </div>
 </section>

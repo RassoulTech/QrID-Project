@@ -62,7 +62,32 @@
   // ---------------------------------------------------------------------------
   // Cartes et blocs
   // ---------------------------------------------------------------------------
-  .card,
+  /*
+   | ═══════════════════════════════════════════════════════════════════
+   | LA CARTE DE VISITE NE SUIT PAS LE THÈME, ET C'EST UNE RÈGLE MÉTIER
+   | ═══════════════════════════════════════════════════════════════════
+   | `.card` désigne DEUX objets dans ce projet : une surface d'interface,
+   | et la carte de visite PVC de `_card.scss`. La règle ci-dessous visait
+   | la première et attrapait la seconde.
+   |
+   | LE DÉFAUT QUE CELA PRODUISAIT, mesuré en thème sombre :
+   | la carte BLANCHE recevait `background: var(--surface)` — un fond
+   | sombre — pendant que `.card.light .who .name` gardait son vert foncé,
+   | avec une spécificité de (0,3,0) qui bat le (0,2,0) d'ici. Résultat :
+   | vert foncé sur fond sombre, le nom du porteur illisible.
+   |
+   | MAIS LA VRAIE RAISON N'EST PAS TECHNIQUE. La couleur de la carte est
+   | CHOISIE PAR LE CLIENT à la dernière étape de la création de son
+   | profil — blanche ou verte. C'est une décision de produit, imprimée
+   | sur du PVC. Le thème d'affichage du visiteur n'a rien à y voir : une
+   | carte blanche reste blanche, qu'on la regarde en clair ou en sombre,
+   | exactement comme l'objet qu'on recevra par la poste.
+   |
+   | Les deux variantes portent toujours `.light` ou `.dark` : c'est ce
+   | qui permet de les exclure ici, comme `_socle.scss` le fait déjà pour
+   | le rayon et la bordure.
+   */
+  .card:not(.light):not(.dark),
   .board-card,
   .step-card,
   .board-empty__card{

@@ -117,6 +117,31 @@ class CardPresentationTest extends TestCase
     }
 
     /**
+     * LA COULEUR DE LA CARTE NE DÉPEND PAS DU THÈME — RÈGLE MÉTIER.
+     *
+     * Le client CHOISIT sa variante — blanche ou verte — à la dernière étape
+     * de la création de son profil. C'est une décision de produit, imprimée
+     * sur du PVC. Le thème d'affichage du visiteur n'a rien à y voir : une
+     * carte blanche reste blanche en thème sombre, comme l'objet qu'on
+     * recevra par la poste.
+     *
+     * `_theme-dark.scss` visait `.card` pour habiller les surfaces
+     * d'interface, et attrapait la carte de visite au passage : elle
+     * recevait un fond sombre pendant que `.card.light .who .name` gardait
+     * son vert foncé, avec une spécificité supérieure. Le nom du porteur
+     * devenait illisible.
+     */
+    public function test_the_dark_theme_never_repaints_the_business_card(): void
+    {
+        $this->assertStringContainsString(
+            '.card:not(.light):not(.dark)',
+            file_get_contents(resource_path('sass/_theme-dark.scss')),
+            'Le thème sombre a recommencé à repeindre la carte de visite : '
+            .'sa couleur est choisie par le client, elle ne suit pas le thème.'
+        );
+    }
+
+    /**
      * LE SOCLE NE REVENDIQUE PAS LA CARTE DE VISITE.
      *
      * `.card` désigne deux objets : une surface d'interface dans le socle, la

@@ -312,7 +312,19 @@
 .card .who .org{font-size:3.2cqw;font-weight:600;margin-top:1.4cqw}
 
 .card.light .who .name{color:$vert-fonce}
-.card.light .who .role{color:$vert-accent}
+/*
+ | LA FONCTION NE PEUT PAS ÊTRE EN VERT ACCENT SUR BLANC.
+ |
+ | $vert-accent sur #FFFFFF rend 3,37:1 — la règle de _tokens.scss est
+ | explicite : ce vert est une couleur de TRAIT et d'ICÔNE, jamais un texte.
+ | Et ici l'enjeu dépasse l'écran : la carte part à l'impression. Un texte à
+ | 3,37:1 sur du PVC ne se rattrape pas par un réglage de luminosité.
+ |
+ | $vert-600 est le degré juste au-dessus dans l'échelle — même teinte, 5,28:1
+ | sur blanc. Le vert de la variante verte, lui, est déjà bon : #8FD9C2 rend
+ | 6,23:1 sur le fond dégradé.
+ */
+.card.light .who .role{color:$vert-600}
 .card.light .who .org{color:$gris-second}
 .card.dark .who .name{color:$blanc}
 .card.dark .who .role{color:#8FD9C2}
