@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Concerns\FormatsSenegalPhone;
 use App\Mail\ResetPasswordMail;
+use App\Support\Courrier;
 use App\Support\Langue;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -13,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail
@@ -313,29 +313,15 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
 
         $ttl = config('auth.passwords.users.expire', 60);
 
-        try {
-            Mail::to($this->email)->send(
-                new ResetPasswordMail($url, $ttl, $this->email)
-            );
-        } catch (\Throwable $e) {
-            // Trace en base : c'est ce que l'écran « État système » affiche,
-            // et le seul endroit où l'on constate une panne d'envoi.
-            MailLog::create([
-                'recipient' => $this->email,
-                'subject' => 'Réinitialisation du mot de passe',
-                'mailable' => ResetPasswordMail::class,
-                'mailer' => config('mail.default'),
-                'status' => 'failed',
-                'error' => mb_substr($e->getMessage(), 0, 500),
-                'sent_at' => null,
-            ]);
-
-            Log::channel('mail')->error('Envoi du lien de réinitialisation impossible', [
-                'to' => $this->email,
-                'error' => $e->getMessage(),
-            ]);
-
-            throw $e;
-        }
+        /*
+         | LA TRACE ET LA RELANCE VIENNENT DÉSORMAIS DU MÊME ENDROIT.
+         |
+         | Ce bloc reproduisait à la main ce que Courrier::exiger() fait : un
+         | envoi immédiat, une ligne dans mail_logs si le transport refuse, et
+         | l'exception relancée pour qu'une panne se voie. Trois envois
+         | portaient ce besoin, chacun l'ayant résolu à sa façon — et deux
+         | d'entre eux avaient oublié la trace.
+         */
+        Courrier::exiger($this->email, new ResetPasswordMail($url, $ttl, $this->email));
     }
 }

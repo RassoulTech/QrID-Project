@@ -69,6 +69,59 @@ final class Courrier
     }
 
     /**
+     * ENVOIE UN E-MAIL QUE QUELQU'UN ATTEND. L'échec est tracé, PUIS RELANCÉ.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI DEUX MÉTHODES, ET NON UNE
+     * ═══════════════════════════════════════════════════════════════════
+     * `informer()` avale l'échec : un récapitulatif qui ne part pas ne doit
+     * pas casser l'action de celui qui l'a déclenchée sans le savoir.
+     *
+     * Mais certains messages sont la RÉPONSE ATTENDUE à un geste précis :
+     * le lien de confirmation d'inscription, le lien de réinitialisation.
+     * Les avaler afficherait « vérifiez votre boîte » à quelqu'un dont le
+     * message n'est jamais parti. Il attendrait, puis recommencerait, puis
+     * conclurait que le produit ne fonctionne pas — et rien, nulle part,
+     * n'aurait signalé la panne.
+     *
+     * Ceux-là doivent échouer BRUYAMMENT. Mais bruyamment ne veut pas dire
+     * sans trace : l'exception remonte, ET la ligne part dans `mail_logs`,
+     * où l'écran « État système » la lit.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * CE QUE CETTE MÉTHODE UNIFIE
+     * ═══════════════════════════════════════════════════════════════════
+     * Trois envois contournaient déjà `Courrier`, chacun pour cette raison,
+     * et chacun à sa façon :
+     *
+     *   User::sendPasswordResetNotification   journalisait puis relançait
+     *   RegistrationService (deux envois)     ne faisait NI l'un NI l'autre
+     *
+     * Les deux e-mails d'inscription — les plus décisifs du produit, ceux
+     * sans lesquels aucun compte ne peut exister — tombaient donc sans
+     * laisser la moindre trace sur l'écran d'état.
+     */
+    public static function exiger(string|array $destinataire, BaseMailable $message): void
+    {
+        $adresses = array_filter((array) $destinataire);
+
+        if ($adresses === []) {
+            return;   // rien à faire, et surtout rien à signaler
+        }
+
+        try {
+            Mail::to($adresses)->send($message);
+        } catch (Throwable $e) {
+            self::consigner($adresses, $message, $e);
+
+            // Relancée telle quelle : l'appelant décide quoi en faire, et
+            // la remplacer par une exception maison perdrait le message du
+            // transport, qui est le seul à dire ce qui a réellement cloché.
+            throw $e;
+        }
+    }
+
+    /**
      * Trace de l'échec — en base d'abord, car c'est elle que l'écran
      * « État système » interroge, puis dans le canal de log dédié.
      *
@@ -82,7 +135,7 @@ final class Courrier
     {
         $sujet = self::sujet($message);
 
-        Log::channel('mail')->error('E-mail d\'information non parti', [
+        Log::channel('mail')->error('E-mail non parti', [
             'to' => $adresses,
             'mailable' => $message::class,
             'error' => $e->getMessage(),

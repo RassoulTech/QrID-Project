@@ -7,6 +7,7 @@ use App\Mail\AlreadyRegisteredMail;
 use App\Mail\ConfirmRegistrationMail;
 use App\Models\PendingRegistration;
 use App\Models\User;
+use App\Support\Courrier;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -72,7 +73,7 @@ class RegistrationService
             // Immédiat, comme la confirmation : c'est la seule réponse que
             // recevra quelqu'un dont l'adresse est déjà prise. Différée, elle
             // le laisse devant un écran qui ne dit rien.
-            Mail::to($email)->send(new AlreadyRegisteredMail(
+            Courrier::exiger($email, new AlreadyRegisteredMail(
                 loginUrl: route('login'),
                 resetUrl: route('password.request'),
                 recipient: $email,
@@ -200,8 +201,19 @@ class RegistrationService
          | Quelqu'un qui vient de s'inscrire attend devant sa boîte. Une
          | seconde d'attente sur la requête vaut mieux qu'un lien qui
          | n'arrive pas.
+         |
+         | `exiger` ET NON `informer`, pour la même raison : avaler l'échec
+         | afficherait « vérifiez votre boîte » à quelqu'un dont le message
+         | n'est jamais parti. Il attendrait, recommencerait, puis conclurait
+         | que le produit ne marche pas.
+         |
+         | Cet envoi et celui du compte déjà existant ne laissaient AUCUNE
+         | trace en cas de panne — ni dans mail_logs, ni sur l'écran « État
+         | système ». Les deux e-mails les plus décisifs du produit étaient
+         | les moins observables.
          */
-        Mail::to($pending->email)->send(
+        Courrier::exiger(
+            $pending->email,
             new ConfirmRegistrationMail(
                 $pending->name,
                 route('registration.confirm', ['token' => $rawToken]),
