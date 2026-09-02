@@ -4,24 +4,41 @@ namespace App\Http\Controllers\Profile;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProfileEvent;
+use App\Services\StatistiquesLecture;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 /**
  * « Statistiques » — les chiffres réels, agrégés en SQL.
  *
- * Trois requêtes bornées, quel que soit le volume d'événements : les totaux,
+ * Trois lectures bornées, quel que soit le volume d'événements : les totaux,
  * la série par jour, et les derniers événements. Aucune boucle de requêtes,
  * aucun comptage en PHP sur des milliers de lignes.
  *
  * Sans aucune donnée, on n'affiche PAS un graphique vide : on explique quoi
  * faire pour qu'il se remplisse.
+ *
+ * ═══════════════════════════════════════════════════════════════════════
+ * LES CHIFFRES VIENNENT DU SERVICE, PLUS DE LA TABLE BRUTE
+ * ═══════════════════════════════════════════════════════════════════════
+ * Cet écran interrogeait `profile_events` directement, en groupant sur
+ * `DATE(created_at)`. Une fonction appliquée à une colonne interdit tout
+ * index : c'est la requête que `StatistiquesLecture` a été écrite pour
+ * supprimer, mesurée à 1,9 s sur un million de lignes. Le correctif avait
+ * été appliqué à l'administration, et à elle seule.
+ *
+ * Il ne reste ici que ce qui relève de la PRÉSENTATION — le libellé d'un
+ * axe, le choix d'un état vide. Les chiffres eux-mêmes ont une seule
+ * source, partagée avec l'administration.
  */
 class StatisticsController extends Controller
 {
     private const PERIODES = [7, 30, 90];
+
+    public function __construct(private readonly StatistiquesLecture $lecture) {}
 
     public function __invoke(Request $request): View|RedirectResponse
     {
@@ -46,72 +63,65 @@ class StatisticsController extends Controller
     }
 
     /**
-     * Totaux de la période, en UNE requête à agrégats conditionnels.
+     * Totaux de la période — agrégats pour l'histoire, source pour le jour.
+     *
+     * `views` et non `vues` : la vue lit cette clé-là depuis toujours, et la
+     * renommer obligerait à toucher un gabarit pour un changement qui ne le
+     * concerne pas.
      *
      * @return array{views:int, scans:int, saves:int, total:int}
      */
     private function totaux(int $profileId, int $jours): array
     {
-        $ligne = ProfileEvent::query()
-            ->where('profile_id', $profileId)
-            ->where('created_at', '>=', now()->startOfDay()->subDays($jours - 1))
-            ->selectRaw('COUNT(*) as total')
-            ->selectRaw('SUM(type = ?) as vues', [ProfileEvent::TYPE_VIEW])
-            ->selectRaw('SUM(type = ?) as scans', [ProfileEvent::TYPE_SCAN])
-            ->selectRaw('SUM(type = ?) as saves', [ProfileEvent::TYPE_SAVE])
-            ->first();
+        $totaux = $this->lecture->totaux($this->depuis($jours), $profileId);
 
         return [
-            'views' => (int) ($ligne?->vues ?? 0),
-            'scans' => (int) ($ligne?->scans ?? 0),
-            'saves' => (int) ($ligne?->saves ?? 0),
-            'total' => (int) ($ligne?->total ?? 0),
+            'views' => $totaux['vues'],
+            'scans' => $totaux['scans'],
+            'saves' => $totaux['saves'],
+            'total' => $totaux['total'],
         ];
     }
 
     /**
      * Série journalière, vues et scans séparés.
      *
-     * Le groupBy SQL ne renvoie que les jours ayant un événement : on repart
-     * d'une série pleine et on y verse les comptes, sinon les barres se
-     * tasseraient et le graphique mentirait sur les creux.
+     * Le service rend une série PLEINE — un point par jour, trous comblés à
+     * zéro. Sans cela les barres se tasseraient et le graphique mentirait
+     * sur les creux.
+     *
+     * On rend `null`, et non une série de zéros, quand rien n'a été
+     * enregistré : la vue affiche alors quoi faire pour la remplir, ce qui
+     * vaut mieux qu'un graphique plat sans explication.
      *
      * @return list<array{jour:string, libelle:string, vues:int, scans:int}>|null
      */
     private function serie(int $profileId, int $jours): ?array
     {
-        $depuis = now()->startOfDay()->subDays($jours - 1);
+        $points = $this->lecture->serieDetaillee($this->depuis($jours), $jours, $profileId);
 
-        $lignes = ProfileEvent::query()
-            ->where('profile_id', $profileId)
-            ->where('created_at', '>=', $depuis)
-            ->selectRaw('DATE(created_at) as jour')
-            ->selectRaw('SUM(type = ?) as vues', [ProfileEvent::TYPE_VIEW])
-            ->selectRaw('SUM(type = ?) as scans', [ProfileEvent::TYPE_SCAN])
-            ->groupBy('jour')
-            ->get()
-            ->keyBy('jour');
-
-        if ($lignes->isEmpty()) {
+        if ($points->every(fn (array $jour) => $jour['total'] === 0)) {
             return null;
         }
 
-        $serie = [];
+        return $points->map(fn (array $jour, string $date) => [
+            'jour' => $date,
+            // Le libellé de l'axe est de la présentation : il reste ici.
+            'libelle' => Carbon::parse($date)->translatedFormat($jours <= 7 ? 'D' : 'j/m'),
+            'vues' => $jour['vues'],
+            'scans' => $jour['scans'],
+        ])->values()->all();
+    }
 
-        for ($i = 0; $i < $jours; $i++) {
-            $date = $depuis->copy()->addDays($i);
-            $cle = $date->toDateString();
-            $ligne = $lignes->get($cle);
-
-            $serie[] = [
-                'jour' => $cle,
-                'libelle' => $date->translatedFormat($jours <= 7 ? 'D' : 'j/m'),
-                'vues' => (int) ($ligne?->vues ?? 0),
-                'scans' => (int) ($ligne?->scans ?? 0),
-            ];
-        }
-
-        return $serie;
+    /**
+     * Le premier jour de la fenêtre.
+     *
+     * `$jours - 1` parce que la fenêtre INCLUT aujourd'hui : sur sept jours,
+     * on remonte de six.
+     */
+    private function depuis(int $jours): Carbon
+    {
+        return Carbon::today()->subDays($jours - 1);
     }
 
     /** @return Collection<int, ProfileEvent> */

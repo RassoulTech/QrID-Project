@@ -22,13 +22,33 @@ use Illuminate\Support\Facades\DB;
  * Ne lire que la source, à l'inverse, est exactement le problème qu'on
  * vient de corriger : 32 secondes sur un million d'événements.
  *
- * On lit donc les DEUX, et on additionne :
+ * On lit donc les DEUX, séparés par une FRONTIÈRE MOBILE :
  *
- *   historique  →  profile_stats_daily, une ligne par profil et par jour
- *   aujourd'hui →  profile_events, borné à la journée en cours
+ *   avant la frontière  →  profile_stats_daily, un compteur par jour
+ *   après la frontière  →  profile_events, la source
  *
- * La seconde requête ne touche que quelques centaines de lignes, quel que
- * soit l'âge du produit. C'est la borne qui rend l'ensemble prévisible.
+ * La frontière n'est pas « minuit » mais LE LENDEMAIN DU DERNIER JOUR
+ * RÉELLEMENT AGRÉGÉ. La nuance est tout le sujet : l'agrégation est une
+ * tâche planifiée, et une tâche planifiée peut ne pas tourner. Placer la
+ * frontière à minuit reviendrait à parier qu'elle a tourné — et le jour où
+ * elle ne tourne pas, l'historique du client disparaît de son écran sans
+ * qu'aucune erreur ne le signale.
+ *
+ * En régime normal la portion lue dans la source vaut UN JOUR. Si la tâche
+ * a manqué N nuits, elle vaut N+1 jours : le service ralentit, il ne ment
+ * pas. Et parce que la frontière est unique, aucune journée n'est lue dans
+ * les deux tables — un jour agrégé dont les événements bruts n'ont pas
+ * encore été purgés n'est jamais compté deux fois.
+ *
+ * ═══════════════════════════════════════════════════════════════════════
+ * UNE SEULE SÉRIE, TOUT LE RESTE EN DÉCOULE
+ * ═══════════════════════════════════════════════════════════════════════
+ * `serieDetaillee()` est le seul chemin de lecture. `serie()` en est une
+ * projection, `totaux()` en est la somme, et les trois écrans qui affichent
+ * ces chiffres — tableau de bord, statistiques du client, administration —
+ * passent tous par ici. Chacun entretenait auparavant sa propre requête,
+ * groupée sur `DATE(created_at)` : trois définitions du même mot, dont deux
+ * qu'on oubliait de corriger.
  *
  * ═══════════════════════════════════════════════════════════════════════
  * MESURES QUI JUSTIFIENT CE SERVICE
@@ -52,41 +72,91 @@ class StatistiquesLecture
      */
     public function totaux(Carbon $depuis, ?int $profileId = null): array
     {
-        $agregats = ProfileStatDaily::query()
-            ->where('jour', '>=', $depuis->toDateString())
-            ->where('jour', '<', Carbon::today()->toDateString())
-            ->when($profileId, fn ($q) => $q->where('profile_id', $profileId))
-            ->selectRaw('COALESCE(SUM(vues),0) v, COALESCE(SUM(scans),0) s, COALESCE(SUM(saves),0) e, COALESCE(SUM(total),0) t')
-            ->first();
+        /*
+         | LES TOTAUX SONT LA SOMME DE LA SÉRIE, et non une requête de plus.
+         |
+         | Deux requêtes qui comptent la même chose finissent par ne plus
+         | dire la même chose — l'une est corrigée, l'autre est oubliée.
+         | Sommer une série de quatre-vingt-dix entiers en PHP ne coûte rien
+         | de mesurable ; en revanche, garder deux définitions du mot
+         | « total » coûte un jour de recherche le jour où elles divergent.
+         */
+        $jours = (int) $depuis->copy()->startOfDay()->diffInDays(Carbon::today()) + 1;
 
-        $aujourdhui = $this->totauxDuJour($profileId);
+        $serie = $this->serieDetaillee($depuis, $jours, $profileId);
 
         return [
-            'vues' => (int) $agregats->v + $aujourdhui['vues'],
-            'scans' => (int) $agregats->s + $aujourdhui['scans'],
-            'saves' => (int) $agregats->e + $aujourdhui['saves'],
-            'total' => (int) $agregats->t + $aujourdhui['total'],
+            'vues' => (int) $serie->sum('vues'),
+            'scans' => (int) $serie->sum('scans'),
+            'saves' => (int) $serie->sum('saves'),
+            'total' => (int) $serie->sum('total'),
         ];
     }
 
-    /** @return array{total:int, vues:int, scans:int, saves:int} */
-    private function totauxDuJour(?int $profileId = null): array
+    /**
+     * JUSQU'OÙ L'AGRÉGATION A-T-ELLE RÉELLEMENT TOURNÉ ?
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI CETTE QUESTION EST POSÉE À CHAQUE LECTURE
+     * ═══════════════════════════════════════════════════════════════════
+     * L'agrégation est une tâche planifiée. Une tâche planifiée peut ne pas
+     * tourner : le planificateur n'existe pas encore en production, et le
+     * jour où il existera il pourra tomber en panne une nuit sans que
+     * personne le remarque.
+     *
+     * Si l'on se contentait de lire les agrégats, cette panne se
+     * traduirait par un historique qui DISPARAÎT de l'écran du client,
+     * sans erreur, sans trace, sans que rien ne l'annonce. L'exactitude
+     * d'un chiffre affiché ne doit pas dépendre du bon fonctionnement
+     * silencieux d'un processus d'exploitation.
+     *
+     * On mesure donc où l'agrégation s'est arrêtée, et l'on relit la
+     * SOURCE pour tout ce qui vient après. Le service reste rapide quand
+     * la tâche tourne — un seul jour à lire — et reste JUSTE quand elle ne
+     * tourne pas, au prix de la lenteur d'avant. Se dégrader en lenteur
+     * est acceptable ; se dégrader en mensonge ne l'est pas.
+     *
+     * La borne est GLOBALE et non par profil, à dessein : un profil sans
+     * la moindre visite un mardi n'a pas de ligne d'agrégat ce mardi-là.
+     * L'absence de ligne ne dit donc rien sur l'agrégation ; seule la date
+     * la plus avancée de la table le dit.
+     */
+    private function dernierJourAgrege(): ?string
     {
-        $ligne = ProfileEvent::query()
-            ->where('created_at', '>=', Carbon::today())
+        $max = ProfileStatDaily::query()->max('jour');
+
+        return $max ? Carbon::parse($max)->toDateString() : null;
+    }
+
+    /**
+     * Les journées lues DANS LA SOURCE, depuis `$depuis` et jusqu'à ce jour.
+     *
+     * C'est la requête coûteuse — celle qui groupe sur `DATE(created_at)` et
+     * ne peut donc s'appuyer sur aucun index. Elle n'est appelée que sur la
+     * portion NON AGRÉGÉE de la fenêtre : un seul jour en régime normal.
+     *
+     * @return Collection<string, array{vues:int, scans:int, saves:int, total:int}>
+     */
+    private function depuisLaSource(Carbon $depuis, ?int $profileId = null): Collection
+    {
+        return ProfileEvent::query()
+            ->where('created_at', '>=', $depuis->copy()->startOfDay())
             ->when($profileId, fn ($q) => $q->where('profile_id', $profileId))
+            ->selectRaw('DATE(created_at) jour')
             ->selectRaw('COUNT(*) t')
             ->selectRaw('SUM(type = ?) v', [ProfileEvent::TYPE_VIEW])
             ->selectRaw('SUM(type = ?) s', [ProfileEvent::TYPE_SCAN])
             ->selectRaw('SUM(type = ?) e', [ProfileEvent::TYPE_SAVE])
-            ->first();
-
-        return [
-            'total' => (int) ($ligne->t ?? 0),
-            'vues' => (int) ($ligne->v ?? 0),
-            'scans' => (int) ($ligne->s ?? 0),
-            'saves' => (int) ($ligne->e ?? 0),
-        ];
+            ->groupBy('jour')
+            ->get()
+            ->mapWithKeys(fn ($ligne) => [
+                Carbon::parse($ligne->jour)->toDateString() => [
+                    'vues' => (int) $ligne->v,
+                    'scans' => (int) $ligne->s,
+                    'saves' => (int) $ligne->e,
+                    'total' => (int) $ligne->t,
+                ],
+            ]);
     }
 
     /**
@@ -101,25 +171,96 @@ class StatistiquesLecture
      */
     public function serie(Carbon $depuis, int $jours, ?int $profileId = null): Collection
     {
-        $brut = ProfileStatDaily::query()
-            ->where('jour', '>=', $depuis->toDateString())
+        // Au-delà de 60 jours, une barre par jour devient illisible : le
+        // tableau de bord de l'administration ne garde que les 60 derniers
+        // points. Ce plafond appartient à CET appelant, pas à la série
+        // elle-même — l'espace client affiche jusqu'à 90 jours.
+        return $this->serieDetaillee($depuis, min($jours, 60), $profileId)
+            ->map(fn (array $jour) => $jour['total']);
+    }
+
+    /**
+     * La même série, ventilée par type d'événement.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI CETTE MÉTHODE EXISTE
+     * ═══════════════════════════════════════════════════════════════════
+     * L'espace client traçait sa propre courbe en groupant sur
+     * `DATE(created_at)` dans `profile_events` — c'est-à-dire exactement
+     * l'anti-patron que ce service a été écrit pour supprimer, et qui
+     * coûtait 1,9 s sur un million de lignes. Le correctif avait été
+     * appliqué à l'administration seulement.
+     *
+     * Une seule série existe désormais, et `serie()` n'en est plus qu'une
+     * projection. Deux chemins de lecture pour un même chiffre finissent
+     * toujours par diverger : celui qu'on optimise et celui qu'on oublie.
+     *
+     * @return Collection<string, array{vues:int, scans:int, saves:int, total:int}>
+     */
+    public function serieDetaillee(Carbon $depuis, int $jours, ?int $profileId = null): Collection
+    {
+        $fenetre = max(1, $jours);
+        $premierJour = Carbon::today()->subDays($fenetre - 1);
+
+        /*
+         | OÙ PASSE LA FRONTIÈRE ENTRE L'AGRÉGAT ET LA SOURCE
+         |
+         | Tout ce qui est agrégé se lit dans `profile_stats_daily`. Tout ce
+         | qui vient APRÈS le dernier jour agrégé se lit dans la source —
+         | y compris le jour en cours, qui n'est jamais agrégé puisqu'il
+         | n'est pas terminé.
+         |
+         | En régime normal, cette portion vaut UN JOUR. Si le planificateur
+         | est tombé, elle s'élargit d'autant de jours qu'il en a manqué, et
+         | les chiffres restent exacts.
+         */
+        $dernierAgrege = $this->dernierJourAgrege();
+
+        $debutSource = $dernierAgrege === null
+            ? $premierJour                                  // rien n'a jamais été agrégé
+            : Carbon::parse($dernierAgrege)->addDay();
+
+        // Jamais avant le début de la fenêtre : on ne lit pas ce qu'on
+        // n'affichera pas. Jamais après aujourd'hui non plus.
+        if ($debutSource->lt($premierJour)) {
+            $debutSource = $premierJour->copy();
+        }
+
+        if ($debutSource->gt(Carbon::today())) {
+            $debutSource = Carbon::today();
+        }
+
+        $agregats = ProfileStatDaily::query()
+            ->where('jour', '>=', $premierJour->toDateString())
+            ->where('jour', '<', $debutSource->toDateString())
             ->when($profileId, fn ($q) => $q->where('profile_id', $profileId))
             ->groupBy('jour')
-            ->selectRaw('jour, SUM(total) as total')
-            ->pluck('total', 'jour')
-            ->mapWithKeys(fn ($total, $jour) => [Carbon::parse($jour)->toDateString() => (int) $total]);
+            ->selectRaw('jour')
+            ->selectRaw('SUM(vues) vues, SUM(scans) scans, SUM(saves) saves, SUM(total) total')
+            ->get()
+            ->mapWithKeys(fn ($ligne) => [
+                Carbon::parse($ligne->jour)->toDateString() => [
+                    'vues' => (int) $ligne->vues,
+                    'scans' => (int) $ligne->scans,
+                    'saves' => (int) $ligne->saves,
+                    'total' => (int) $ligne->total,
+                ],
+            ]);
 
-        // Le jour en cours vient de la source : il n'est pas encore agrégé.
-        $brut[Carbon::today()->toDateString()] = $this->totauxDuJour($profileId)['total'];
+        $source = $this->depuisLaSource($debutSource, $profileId);
 
-        // Au-delà de 60 jours, une barre par jour devient illisible : on ne
-        // garde que les 60 derniers points, les plus utiles.
+        $vide = ['vues' => 0, 'scans' => 0, 'saves' => 0, 'total' => 0];
         $points = collect();
-        $depart = max(1, min($jours, 60));
 
-        for ($i = $depart - 1; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i);
-            $points[$date->toDateString()] = (int) ($brut[$date->toDateString()] ?? 0);
+        // Du plus ancien au plus récent, sans trou : un jour sans événement
+        // vaut zéro et doit occuper sa place, sinon les barres se tassent et
+        // le graphique ment sur les creux.
+        for ($i = $fenetre - 1; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i)->toDateString();
+
+            $points[$date] = $date >= $debutSource->toDateString()
+                ? ($source[$date] ?? $vide)
+                : ($agregats[$date] ?? $vide);
         }
 
         return $points;

@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\Profile;
 use App\Models\ProfileEvent;
 use App\Services\ProfileWizardService;
+use App\Services\StatistiquesLecture;
 use App\Services\QrCodeService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -36,6 +37,7 @@ class DashboardController extends Controller
     public function __construct(
         private ProfileWizardService $wizard,
         private QrCodeService $qr,
+        private StatistiquesLecture $lecture,
     ) {}
 
     public function __invoke(Request $request): View
@@ -125,34 +127,29 @@ class DashboardController extends Controller
      */
     private function serie(int $profileId, int $jours): ?array
     {
-        $depuis = now()->startOfDay()->subDays($jours - 1);
+        /*
+         | LA SÉRIE VIENT DU SERVICE, comme celle de l'écran Statistiques et
+         | celle de l'administration. C'était la TROISIÈME copie de la même
+         | requête, groupée sur `DATE(created_at)` — la forme que ce service
+         | existe précisément pour supprimer.
+         |
+         | Le tableau de bord ne trace que les VUES : c'est la seule courbe
+         | qui répond à « est-ce que ma carte circule ? ». Les scans et les
+         | enregistrements ont leur écran dédié.
+         */
+        $points = $this->lecture->serieDetaillee(
+            Carbon::today()->subDays($jours - 1), $jours, $profileId,
+        );
 
-        $comptes = ProfileEvent::query()
-            ->where('profile_id', $profileId)
-            ->where('type', ProfileEvent::TYPE_VIEW)
-            ->where('created_at', '>=', $depuis)
-            ->selectRaw('DATE(created_at) as jour, COUNT(*) as total')
-            ->groupBy('jour')
-            ->pluck('total', 'jour');
-
-        if ($comptes->sum() === 0) {
+        if ($points->sum('vues') === 0) {
             return null;   // aucun graphique plat : la vue invite à partager
         }
 
-        $serie = [];
-
-        for ($i = 0; $i < $jours; $i++) {
-            $date = $depuis->copy()->addDays($i);
-            $cle = $date->toDateString();
-
-            $serie[] = [
-                'jour' => $cle,
-                'libelle' => $date->translatedFormat($jours <= 7 ? 'D' : 'j/m'),
-                'total' => (int) ($comptes[$cle] ?? 0),
-            ];
-        }
-
-        return $serie;
+        return $points->map(fn (array $jour, string $date) => [
+            'jour' => $date,
+            'libelle' => Carbon::parse($date)->translatedFormat($jours <= 7 ? 'D' : 'j/m'),
+            'total' => $jour['vues'],
+        ])->values()->all();
     }
 
     /**
