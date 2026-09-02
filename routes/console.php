@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Planificateur;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -9,7 +10,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Purge quotidienne des demandes d'inscription expirées depuis plus de 24 h.
-Schedule::command('registrations:purge')->dailyAt('03:00');
+Planificateur::quotidienne('registrations:purge', '03:00');
 
 // Surveillance de la file mail : émet QueueBusy au-delà de 50 jobs en attente.
 Schedule::command('queue:monitor database:mail --max=50')->everyMinute();
@@ -50,9 +51,7 @@ Schedule::command('queue:monitor database:mail --max=50')->everyMinute();
  | il est rejouable — mais deux balayages simultanés de la table
  | d'événements se disputeraient les mêmes pages de disque pour rien.
  */
-Schedule::command('app:agreger-statistiques --purger')
-    ->dailyAt('02:30')
-    ->timezone('Africa/Dakar')
+Planificateur::quotidienne('app:agreger-statistiques --purger', '02:30')
     ->withoutOverlapping();
 
 /*
@@ -66,9 +65,7 @@ Schedule::command('app:agreger-statistiques --purger')
  | quotidiennes. Celle-ci est le filet du jour où le compte Aiven lui-même
  | devient inaccessible, et ce risque-là ne se matérialise pas en un jour.
  */
-Schedule::command('app:sauvegarder')
-    ->weeklyOn(0, '04:00')
-    ->timezone('Africa/Dakar')
+Planificateur::hebdomadaire('app:sauvegarder', '04:00')
     ->withoutOverlapping();
 
 /*
@@ -78,12 +75,10 @@ Schedule::command('app:sauvegarder')
  | quelqu'un qui a payé et attend un service. Le second cas ne se voit pas
  | tout seul : il faut aller le chercher.
  */
-Schedule::command('app:reconcilier-paiements')
-    ->dailyAt('08:45')
-    ->timezone('Africa/Dakar');
+Planificateur::quotidienne('app:reconcilier-paiements', '08:45');
 
-Schedule::command('profiles:remind')->dailyAt('09:00')->timezone('Africa/Dakar');
-Schedule::command('subscriptions:notify')->dailyAt('09:15')->timezone('Africa/Dakar');
+Planificateur::quotidienne('profiles:remind', '09:00');
+Planificateur::quotidienne('subscriptions:notify', '09:15');
 
 /*
 |------------------------------------------------------------------------------
@@ -102,7 +97,26 @@ Schedule::command('subscriptions:notify')->dailyAt('09:15')->timezone('Africa/Da
 | Deux récapitulatifs de la même journée dans le salon feraient douter de tous
 | les autres.
 */
-Schedule::command('report:daily')
-    ->dailyAt(config('notifications.discord.heure', '21:00'))
-    ->timezone(config('notifications.discord.fuseau', 'Africa/Dakar'))
+Planificateur::quotidienne('report:daily', config('notifications.discord.heure', '21:00'))
+    ->withoutOverlapping();
+
+/*
+|------------------------------------------------------------------------------
+| LE BATTEMENT DE CŒUR DU PLANIFICATEUR
+|------------------------------------------------------------------------------
+| Un planificateur arrêté ressemble en tout point à un planificateur qui n'a
+| rien à faire : ni l'un ni l'autre ne produit quoi que ce soit. Sans preuve
+| de vie, la panne se découvre des jours plus tard, en constatant qu'une
+| statistique n'a pas bougé.
+|
+| Cette ligne met à jour un horodatage à chaque passage. L'écran « État
+| système » peut alors dire « dernier passage il y a 3 minutes » — ou « aucun
+| depuis 14 heures », ce qui est une information et non une devinette.
+|
+| Elle ne porte PAS de rattrapage : un battement en retard n'a aucun sens à
+| rattraper, c'est justement le retard qu'on cherche à mesurer.
+*/
+Schedule::call(fn () => Planificateur::battre())
+    ->everyFiveMinutes()
+    ->name('battement-planificateur')
     ->withoutOverlapping();

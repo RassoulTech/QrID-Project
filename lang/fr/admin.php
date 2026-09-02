@@ -254,6 +254,13 @@ return [
 
     'sante' => [
         'titre' => 'État système',
+
+        // LE PLANIFICATEUR — un processus arrêté ressemble à un processus qui
+        // n'a rien à faire : ni l'un ni l'autre ne produit quoi que ce soit.
+        'planificateur' => 'Planificateur',
+        'planificateur_battement' => 'dernier passage il y a :minutes min',
+        'planificateur_jamais' => 'aucun passage enregistré',
+        'planificateur_muet' => 'Le planificateur est resté muet pendant :minutes minutes. Sur le plan gratuit, cela reste normal juste après un réveil du conteneur : il bat toutes les cinq minutes. Au-delà de quinze, vérifiez les journaux du service.',
         'jobs_echec' => ':compte job(s) en échec. Inspectez-les puis relancez avec :commande.',
         'file_engorgee' => 'File « mail » engorgée (:compte en attente). Vérifiez que le worker tourne.',
         'file_mail' => 'File « mail »',

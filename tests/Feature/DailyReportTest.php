@@ -10,9 +10,12 @@ use App\Models\Profile;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Services\RapportQuotidien;
+use App\Support\Planificateur;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schedule;
 use Tests\TestCase;
 
 /**
@@ -424,16 +427,53 @@ class DailyReportTest extends TestCase
     /**
      * LA TÂCHE EST DÉCLARÉE, AVEC SON FUSEAU.
      *
-     * Le serveur tourne en UTC. Sans ->timezone(), le message partirait à 21 h
-     * UTC — ce qui donne bien 21 h à Dakar aujourd'hui, mais cesserait d'être
-     * vrai au premier changement de région d'hébergement.
+     * Le serveur tourne en UTC. Sans fuseau explicite, le message partirait à
+     * 21 h UTC — ce qui donne bien 21 h à Dakar aujourd'hui, mais cesserait
+     * d'être vrai au premier changement de région d'hébergement.
+     *
+     * ═══════════════════════════════════════════════════════════════════════
+     * CE TEST LISAIT LE FICHIER SOURCE. IL LIT MAINTENANT LA PLANIFICATION.
+     * ═══════════════════════════════════════════════════════════════════════
+     * Il cherchait la chaîne « Schedule::command('report:daily') » dans
+     * routes/console.php. C'était commode et c'était fragile : la déclaration
+     * passe désormais par Planificateur::quotidienne(), qui pose le fuseau
+     * lui-même — la garantie est intacte, mais le texte a changé, et le test
+     * a échoué pour la seule raison qu'il regardait la forme et non le fond.
+     *
+     * Interroger la planification réelle vérifie ce qui compte : que la tâche
+     * existe, qu'elle porte le bon fuseau, et qu'elle ne se superpose pas à
+     * elle-même. Cette version-là survit à la prochaine réécriture.
      */
     public function test_the_report_is_scheduled_with_an_explicit_timezone(): void
     {
-        $console = (string) file_get_contents(base_path('routes/console.php'));
+        $evenement = collect(Schedule::events())
+            ->first(fn ($e) => str_contains((string) $e->command, 'report:daily'));
 
-        $this->assertStringContainsString("Schedule::command('report:daily')", $console);
-        $this->assertStringContainsString('->timezone(', $console);
-        $this->assertStringContainsString('withoutOverlapping', $console);
+        $this->assertNotNull($evenement,
+            'Le récapitulatif quotidien n\'est plus déclaré au planificateur.');
+
+        $this->assertSame('Africa/Dakar', (string) $evenement->timezone,
+            'Sans fuseau explicite, le message partirait à 21 h UTC.');
+
+        $this->assertTrue($evenement->withoutOverlapping,
+            'Deux récapitulatifs de la même journée feraient douter de tous les autres.');
+    }
+
+    /**
+     * ET IL RATTRAPE — la garantie ajoutée avec le planificateur interne.
+     *
+     * Le conteneur dort quand personne ne visite le site. Une tâche épinglée
+     * à la minute 21:00 ne serait pas retardée : elle serait sautée.
+     */
+    public function test_the_report_catches_up_when_its_hour_has_passed(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-09-02 23:40', Planificateur::FUSEAU));
+
+        $this->assertTrue(
+            Planificateur::estDueAujourdhui('report:daily', config('notifications.discord.heure', '21:00')),
+            'Le récapitulatif doit encore partir même si personne n\'a visité le site à 21 h.'
+        );
+
+        Carbon::setTestNow();
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MailLog;
 use App\Models\PendingRegistration;
+use App\Support\Planificateur;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -47,6 +48,19 @@ class SystemHealthController extends Controller
         $pilote = config('queue.default');
 
         return view('admin.system-health', [
+            /*
+             | LE PLANIFICATEUR EST-IL VIVANT ?
+             |
+             | Un processus arrêté ressemble en tout point à un processus qui
+             | n'a rien à faire : les deux ne produisent rien. Sans cette
+             | mesure, une panne du planificateur se découvre des jours plus
+             | tard, en constatant qu'une statistique n'a pas bougé.
+             |
+             | `null` — jamais battu — n'est PAS la même chose que « vient de
+             | battre », et la vue doit pouvoir les distinguer.
+             */
+            'planificateurMinutes' => Planificateur::minutesDepuisLeDernierBattement(),
+
             'mailQueue' => $enFile,
             'totalJobs' => DB::table('jobs')->count(),
             'failedJobs' => DB::table('failed_jobs')->count(),

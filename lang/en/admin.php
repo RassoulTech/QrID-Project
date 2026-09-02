@@ -253,6 +253,11 @@ return [
 
     'sante' => [
         'titre' => 'System health',
+
+        'planificateur' => 'Scheduler',
+        'planificateur_battement' => 'last pass :minutes min ago',
+        'planificateur_jamais' => 'no pass recorded',
+        'planificateur_muet' => 'The scheduler has been silent for :minutes minutes. On the free plan this is normal just after the container wakes — it beats every five minutes. Beyond fifteen, check the service logs.',
         'jobs_echec' => ':compte failed job(s). Inspect them, then retry with :commande.',
         'file_engorgee' => 'The "mail" queue is backing up (:compte waiting). Check that the worker is running.',
         'file_mail' => '"mail" queue',

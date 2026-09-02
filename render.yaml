@@ -185,64 +185,46 @@ services:
         value: qrid.sn
 
   # ---------------------------------------------------------------------------
-  # SERVICE WORKER — la file d'attente
+  # PAS DE SERVICE WORKER, PAS DE SERVICE CRON — ET C'EST UN CHOIX
   # ---------------------------------------------------------------------------
   #
-  # ═══════════════════════════════════════════════════════════════════════
-  # POURQUOI IL EXISTE
-  # ═══════════════════════════════════════════════════════════════════════
-  # Sans lui, tout part dans la requête HTTP : chaque e-mail, chaque appel
-  # réseau, chaque PDF. Le client attend le SMTP, et un SMTP lent devient une
-  # inscription lente.
+  # Ce fichier declarait un worker `starter` pour la file d'attente, et
+  # signalait plus bas qu'il manquait un service `cron` pour le
+  # planificateur. Les deux exigent un plan payant, et aucun des deux n'a
+  # jamais ete cree : le code etait ecrit, teste, et ne tournait pas.
   #
-  # ═══════════════════════════════════════════════════════════════════════
-  # LES FILES SONT ORDONNÉES, ET L'ORDRE COMPTE
-  # ═══════════════════════════════════════════════════════════════════════
-  #   mail     confirmations d'inscription, reçus de paiement. Quelqu'un
-  #            ATTEND devant son écran.
-  #   default  le reste du travail applicatif.
-  #   low      récapitulatifs, nettoyages. Personne n'attend.
+  # LES DEUX PROCESSUS VIVENT DESORMAIS DANS LE CONTENEUR WEB.
   #
-  # `queue:work` vide les files DANS L'ORDRE DONNÉ : une seule tâche `mail`
-  # en attente passe avant cent tâches `low`. Sans cet ordre, un lot de
-  # récapitulatifs retarderait la confirmation d'un compte qui vient d'être
-  # créé.
+  # `docker/supervisord.conf` en surveillait deja deux — nginx et php-fpm.
+  # Il en surveille quatre : le planificateur (`schedule:work`) et la file
+  # (`queue:work`) s'y ajoutent. supervisor les relance s'ils tombent, et
+  # arrete tout s'il n'y parvient pas, ce qui fait remplacer le conteneur
+  # par Render.
   #
-  # --tries=3 --backoff=10,60,300 : trois tentatives espacées de dix
-  # secondes, une minute, cinq minutes. Un SMTP indisponible l'est rarement
-  # plus de cinq minutes ; au-delà, la tâche part dans `failed_jobs` où elle
-  # reste relançable.
+  # CE QUE CELA COUTE : rien. CE QUE CELA NE REGLE PAS : le conteneur
+  # s'endort apres quinze minutes sans visiteur sur le plan gratuit, et les
+  # deux processus s'endorment avec lui.
   #
-  # --max-time=3600 : le processus se termine de lui-même toutes les heures
-  # et Render le relance. C'est le remède le plus simple aux fuites mémoire
-  # d'un processus PHP de longue durée.
-  - type: worker
-    name: qrid-worker
-    runtime: docker
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
-    region: frankfurt
-
-    # Un worker ne peut pas être `free` : Render arrête les services gratuits
-    # après quinze minutes d'inactivité, et une file vide est de l'inactivité.
-    plan: starter
-
-    branch: main
-
-    dockerCommand: >-
-      php artisan queue:work
-      --queue=mail,default,low
-      --tries=3
-      --backoff=10,60,300
-      --timeout=120
-      --max-time=3600
-      --sleep=3
-
-    envVars:
-      # Le worker partage TOUTES les variables du service web : même base,
-      # même stockage, même SMTP. `fromService` évite de les recopier — et
-      # deux copies d'une même valeur finissent toujours par diverger.
-      - fromGroup: qrid-partage
+  # Pour le planificateur, ce n'etait pas tenable : `dailyAt('02:30')` ne
+  # part que si on l'interroge pendant cette minute-la, et une nuit sans
+  # visiteur la faisait SAUTER — sans erreur ni trace. Les taches demandent
+  # donc maintenant « ai-je tourne aujourd'hui, et l'heure est-elle
+  # passee ? ». Voir `App\Support\Planificateur`. Un conteneur endormi les
+  # retarde ; il ne les saute plus.
+  #
+  # QUAND REVENIR A UN SERVICE SEPARE : le jour ou un traitement lourd
+  # concurrencera les requetes web sur le meme demi-processeur. On le verra
+  # aux temps de reponse, pas en le supposant. Le bloc supprime ici est dans
+  # l'historique Git, pret a etre repris.
+  #
+  # LE RESTE DU CHEMIN, POUR MEMOIRE :
+  #   · le reveil a froid des cartes publiques subsiste. Aucune astuce
+  #     interne ne le corrige : il faut du trafic venu de l'exterieur, donc
+  #     un service de ping gratuit ou le plan payant.
+  #   · QUEUE_CONNECTION vaut encore `sync`. Le worker tourne a vide,
+  #     volontairement : il doit etre OBSERVE avant qu'on lui confie les
+  #     e-mails. Basculer d'abord et esperer ensuite, c'est la panne deja
+  #     vecue sur ce produit.
 
 # =============================================================================
 # LE GROUPE DE VARIABLES PARTAGÉES
