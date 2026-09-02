@@ -117,12 +117,19 @@
             {{-- Facultatif, et dit comme tel : exiger un numéro ferait
                  renoncer ceux qui ne veulent pas être appelés, pour une
                  information dont on n'a pas besoin pour répondre. --}}
-            <x-input name="phone" type="tel"
-                     :label="__('common.champs.telephone')"
-                     :value="old('phone', auth()->user()?->phone)"
-                     placeholder="77 000 00 00"
-                     inputmode="numeric" autocomplete="tel"
-                     :optional="true" />
+            {{-- LE MÊME CHAMP QUE PARTOUT AILLEURS.
+                 C'était un <x-input> libre, plafonné à trente caractères et
+                 validé par rien : le seul formulaire du produit à ne pas
+                 passer par le sélecteur de pays et la règle
+                 TelephoneInternational. Un visiteur ivoirien y saisissait un
+                 numéro que personne ne pouvait rappeler, et rien ne le lui
+                 disait. Il reste facultatif — c'est le contrôle qui change,
+                 pas l'exigence. --}}
+            <x-phone-field name="phone"
+                           :label="__('common.champs.telephone')"
+                           :value="old('phone', auth()->user()?->phone)"
+                           :required="false"
+                           :optional="true" />
 
             {{-- LE MOTIF PEUT ÊTRE PRÉSÉLECTIONNÉ PAR L'URL : /#contact?motif=commande.
                  Un lien « Nous écrire » posé ailleurs amène ainsi la personne

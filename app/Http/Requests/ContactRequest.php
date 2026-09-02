@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\TelephoneInternational;
+use App\Support\IndicatifsPays;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -58,10 +60,27 @@ class ContactRequest extends FormRequest
             'name' => ['required', 'string', 'min:2', 'max:120'],
             'email' => ['required', 'email:rfc', 'max:190'],
 
-            // Facultatif, et c'est voulu : exiger un numéro ferait renoncer
-            // ceux qui ne veulent pas être appelés, pour une information dont
-            // on n'a pas besoin pour répondre.
-            'phone' => ['nullable', 'string', 'max:30'],
+            /*
+             | FACULTATIF, MAIS PLUS LIBRE POUR AUTANT.
+             |
+             | Il valait `['nullable','string','max:30']` : n'importe quelle
+             | suite de trente caractères passait. C'était le SEUL formulaire
+             | du produit à ne pas utiliser la règle partagée — l'inscription,
+             | l'adresse de livraison et l'étape 2 de la carte l'appliquent
+             | toutes les trois.
+             |
+             | La conséquence n'était pas théorique : un visiteur laissait un
+             | numéro tronqué ou mal préfixé, le formulaire l'acceptait, et
+             | l'on découvrait à l'appel qu'il ne menait nulle part. Personne
+             | ne pouvait plus le joindre, et lui croyait avoir été contacté.
+             |
+             | Il reste FACULTATIF : exiger un numéro ferait renoncer ceux qui
+             | ne veulent pas être appelés, pour une information dont on n'a
+             | pas besoin pour répondre. C'est le contrôle qui change, pas
+             | l'exigence.
+             */
+            'phone_pays' => ['nullable', 'string', 'size:2'],
+            'phone' => ['nullable', 'string', 'max:32', new TelephoneInternational],
 
             'subject' => ['required', Rule::in(self::SUJETS)],
 
@@ -94,11 +113,33 @@ class ContactRequest extends FormRequest
         ];
     }
 
+    /**
+     * Normalisation avant validation.
+     *
+     * LE NUMÉRO PART AU FORMAT INTERNATIONAL. Le visiteur saisit
+     * « 77 383 13 64 » et choisit son pays ; ce qui atteint la base est
+     * « +221773831364 » — un seul format, quel que soit l'écran d'origine.
+     * Sans cette étape, la table contiendrait autant de graphies que de
+     * visiteurs, et aucune recherche ne les retrouverait.
+     *
+     * Un champ vide reste vide : `filled()` distingue « rien saisi » de
+     * « saisi mais illisible », et seul le second doit produire une erreur.
+     * Un numéro illisible est laissé TEL QUEL pour que la règle le refuse
+     * avec son message ; le remplacer par null le ferait passer pour absent.
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([
             'email' => mb_strtolower(trim((string) $this->input('email'))),
             'name' => trim((string) $this->input('name')),
         ]);
+
+        if ($this->filled('phone')) {
+            $this->merge([
+                'phone' => IndicatifsPays::normaliser(
+                    $this->input('phone_pays'), $this->input('phone'),
+                ) ?? $this->input('phone'),
+            ]);
+        }
     }
 }

@@ -101,9 +101,29 @@ class ReconcilierPaiements extends Command
             'jours' => $jours,
         ]);
 
-        // Code non nul : une surveillance externe s'y branche sans lire la
-        // sortie. Ce n'est pas une erreur du programme, c'est une anomalie
-        // métier — et c'est précisément ce qu'on veut voir remonter.
-        return self::FAILURE;
+        /*
+         | ELLE REND SUCCESS, MÊME QUAND ELLE TROUVE QUELQUE CHOSE.
+         |
+         | Elle rendait FAILURE, pour qu'une surveillance externe puisse s'y
+         | brancher sans lire la sortie. L'intention était bonne ; la
+         | surveillance externe, elle, n'a jamais existé — et rien
+         | n'exécutait cette commande.
+         |
+         | Depuis que le planificateur tourne, ce code non nul produit une
+         | ligne `production.ERROR: Scheduled command [...] failed` CHAQUE
+         | JOUR où un paiement traîne. Or trouver un paiement en attente
+         | n'est pas une panne : c'est le travail de cette commande, et
+         | c'est même son seul résultat utile.
+         |
+         | Une erreur quotidienne qui n'en est pas une apprend à ignorer les
+         | erreurs. Le jour où le planificateur tombera vraiment, sa ligne
+         | rouge se perdra au milieu de celles-ci.
+         |
+         | Le signal reste entier, et à deux endroits : le Log::warning
+         | ci-dessus, que le récapitulatif quotidien relaie, et la sortie de
+         | la commande — désormais visible dans les journaux du service,
+         | puisque les tâches planifiées n'écrivent plus vers /dev/null.
+         */
+        return self::SUCCESS;
     }
 }

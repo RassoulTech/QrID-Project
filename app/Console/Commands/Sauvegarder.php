@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Process;
 
@@ -97,7 +98,49 @@ class Sauvegarder extends Command
 
         $this->rotation((int) $this->option('garder'));
 
+        $this->avertirSiLeDisqueEstEphemere();
+
         return self::SUCCESS;
+    }
+
+    /**
+     * UNE SAUVEGARDE QUI DISPARAÎT AU PROCHAIN DÉPLOIEMENT N'EN EST PAS UNE.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI CET AVERTISSEMENT EXISTE
+     * ═══════════════════════════════════════════════════════════════════
+     * Le fichier est déposé sur le disque `local`, c'est-à-dire le disque
+     * du conteneur. Sur Render, ce disque est ÉPHÉMÈRE : il est recréé à
+     * chaque mise en ligne. Une sauvegarde hebdomadaire y survit donc
+     * jusqu'au prochain déploiement, et pas au-delà.
+     *
+     * La commande réussit — elle a bien produit un dump valide — mais son
+     * succès serait trompeur si personne ne disait où il atterrit. Une
+     * sauvegarde en laquelle on croit à tort est pire que pas de
+     * sauvegarde du tout : elle fait renoncer à en chercher une vraie.
+     *
+     * Aiven conserve par ailleurs ses propres sauvegardes quotidiennes.
+     * Celle-ci est le filet du jour où le compte Aiven lui-même devient
+     * inaccessible — et c'est précisément ce jour-là qu'un fichier resté
+     * dans le conteneur ne servira à rien.
+     *
+     * L'avertissement disparaîtra de lui-même le jour où FILESYSTEM_DISK
+     * pointera vers un stockage objet.
+     */
+    private function avertirSiLeDisqueEstEphemere(): void
+    {
+        if (config('filesystems.default') !== 'local' || ! app()->environment('production')) {
+            return;
+        }
+
+        $message = 'Sauvegarde déposée sur le disque du conteneur, qui est '
+            .'recréé à chaque déploiement : elle ne lui survivra pas. '
+            .'Configurez un stockage objet (FILESYSTEM_DISK) pour lui donner '
+            .'une valeur réelle.';
+
+        $this->warn('  '.$message);
+
+        Log::warning('Sauvegarde sur disque éphémère', ['fichier' => 'sauvegardes/']);
     }
 
     /**

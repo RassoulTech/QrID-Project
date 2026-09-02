@@ -91,10 +91,16 @@ FROM php:8.3-fpm-alpine
 #              (nginx et php-fpm), d'où ce chef d'orchestre
 # gettext    : fournit envsubst, qui injecte le port imposé par Render
 #              dans la configuration nginx au démarrage
+# mariadb-client : fournit mysqldump, dont app:sauvegarder a besoin. Il
+#              MANQUAIT, et la commande echouait a chaque passage avec un
+#              code 1 opaque. Aucun planificateur ne tournant, personne ne
+#              l'avait jamais vue echouer : la panne est apparue le jour
+#              meme de la mise en service du planificateur.
 RUN apk add --no-cache \
         nginx \
         supervisor \
         gettext \
+        mariadb-client \
         libpng \
         libjpeg-turbo \
         freetype \
