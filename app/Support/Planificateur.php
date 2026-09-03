@@ -73,9 +73,7 @@ final class Planificateur
      */
     public static function quotidienne(string $commande, string $heure): Event
     {
-        return Schedule::command($commande)
-            ->everyFiveMinutes()
-            ->timezone(self::FUSEAU)
+        return self::visible(Schedule::command($commande))
             ->when(fn () => self::reclamerAujourdhui($commande, $heure));
     }
 
@@ -90,9 +88,7 @@ final class Planificateur
      */
     public static function hebdomadaire(string $commande, string $heure): Event
     {
-        return Schedule::command($commande)
-            ->everyFiveMinutes()
-            ->timezone(self::FUSEAU)
+        return self::visible(Schedule::command($commande))
             ->when(fn () => self::reclamerCetteSemaine($commande, $heure));
     }
 
@@ -143,6 +139,49 @@ final class Planificateur
         } catch (Throwable) {
             return $maintenant->copy()->startOfDay();
         }
+    }
+
+    /**
+     * LA SORTIE D'UNE TÂCHE PLANIFIÉE NE DOIT PAS PARTIR AU NÉANT.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * CE QUE CE DÉFAUT A COÛTÉ — DEUX FOIS
+     * ═══════════════════════════════════════════════════════════════════
+     * Laravel exécute une tâche planifiée en redirigeant sa sortie vers
+     * `/dev/null`. Le journal ne garde alors qu'une ligne :
+     *
+     *     Scheduled command [...] failed with exit code [1]
+     *
+     * Un code de sortie et rien d'autre. Ni le message, ni la cause, ni ce
+     * qui manquait. À la mise en service du planificateur, deux tâches ont
+     * échoué — et il a fallu lire leur code source pour deviner pourquoi,
+     * alors qu'elles l'avaient EXPLIQUÉ dans une sortie que personne ne
+     * lisait.
+     *
+     * LA SECONDE FOIS, C'EST MOI QUI L'AI SUPPRIMÉE. Une réécriture de
+     * `quotidienne()` et `hebdomadaire()` — pour rendre la réclamation
+     * atomique — a remplacé l'appel à cette méthode par la chaîne
+     * d'origine. Aucun test ne la couvrait : la régression est partie en
+     * production sans que rien ne la signale, et la sortie des tâches est
+     * retournée au néant pendant une journée entière.
+     *
+     * C'est exactement la classe de panne que ce fichier existe pour
+     * supprimer. `PlanificateurTest` la verrouille désormais.
+     *
+     * `/dev/stdout` parce que LOG_CHANNEL vaut `stderr` en production :
+     * Render collecte les deux flux du conteneur. Ce qu'une commande écrit
+     * arrive donc dans les journaux du service, à côté de l'erreur qu'il
+     * explique.
+     *
+     * `appendOutputTo` et non `sendOutputTo` : le second TRONQUE sa cible
+     * avant d'écrire, ce qui n'a aucun sens sur un flux.
+     */
+    private static function visible(Event $tache): Event
+    {
+        return $tache
+            ->everyFiveMinutes()
+            ->timezone(self::FUSEAU)
+            ->appendOutputTo('/dev/stdout');
     }
 
     /**

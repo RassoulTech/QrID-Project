@@ -196,6 +196,64 @@ class PlanificateurTest extends TestCase
     }
 
     /**
+     * LA SORTIE DES TÂCHES NE PART PAS AU NÉANT.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * CE TEST EXISTE PARCE QUE J'AI SUPPRIMÉ CE CORRECTIF SANS LE VOIR
+     * ═══════════════════════════════════════════════════════════════════
+     * Laravel redirige la sortie d'une tâche planifiée vers `/dev/null`. Le
+     * journal ne garde alors qu'un code de sortie : ni le message d'erreur,
+     * ni la cause. Le correctif — `appendOutputTo('/dev/stdout')` — a été
+     * posé après que deux tâches ont échoué sans rien dire.
+     *
+     * Une réécriture ultérieure, pour un tout autre sujet, l'a effacé. La
+     * régression est partie en production et personne ne l'a vue pendant
+     * une journée : elle ne casse rien, elle rend seulement les pannes
+     * futures indéchiffrables. C'est la définition même de ce que ce
+     * fichier protège.
+     *
+     * On vérifie donc la PLANIFICATION RÉELLE, pas le code source : c'est
+     * elle qui décide où la sortie atterrit.
+     */
+    public function test_no_scheduled_task_sends_its_output_to_nowhere(): void
+    {
+        $muettes = [];
+
+        foreach (Schedule::events() as $tache) {
+            // Le battement est une fermeture, pas une commande : il n'écrit
+            // rien et n'a donc pas de sortie à router.
+            if (! str_contains((string) $tache->command, 'artisan')) {
+                continue;
+            }
+
+            /*
+             | ON VÉRIFIE POSITIVEMENT, ET C'EST INDISPENSABLE.
+             |
+             | La première version cherchait « /dev/null » dans la sortie.
+             | Elle passait MÊME avec la régression reproduite à la main :
+             | la sortie par défaut de Laravel dépend du SYSTÈME — `/dev/null`
+             | sur Linux, `NUL` sur Windows. Le test était donc vert sur la
+             | machine de développement et n'aurait crié qu'en production,
+             | c'est-à-dire trop tard.
+             |
+             | Exiger la destination ATTENDUE ne dépend d'aucun système :
+             | soit elle est là, soit elle ne l'est pas.
+             */
+            if (! str_contains($tache->output, '/dev/stdout')) {
+                $muettes[] = trim(str_replace(['php', 'artisan', "'"], '', (string) $tache->command));
+            }
+        }
+
+        $this->assertSame([], $muettes,
+            'La sortie de ces tâches part vers /dev/null. Le jour où elles '.
+            "échoueront, le journal ne dira qu'un code de sortie — et il ".
+            'faudra lire leur code source pour deviner pourquoi :
+  - '.
+            implode('
+  - ', $muettes));
+    }
+
+    /**
      * LE BATTEMENT DE CŒUR — sans lui, un planificateur arrêté ressemble à un
      * planificateur qui n'a rien à faire.
      */

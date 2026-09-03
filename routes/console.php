@@ -13,7 +13,20 @@ Artisan::command('inspire', function () {
 Planificateur::quotidienne('registrations:purge', '03:00');
 
 // Surveillance de la file mail : émet QueueBusy au-delà de 50 jobs en attente.
-Schedule::command('queue:monitor database:mail --max=50')->everyMinute();
+/*
+ | LA SURVEILLANCE DE LA FILE — chaque minute, sans rattrapage.
+ |
+ | Elle ne passe pas par Planificateur, et c'est correct : un contrôle de
+ | profondeur en retard n'a aucun sens à rejouer, c'est justement l'instant
+ | qu'il mesure.
+ |
+ | Mais elle doit dire ce qu'elle trouve. Sans `appendOutputTo`, elle était
+ | la SEULE tâche du produit à écrire encore vers /dev/null — et le jour où
+ | la file s'engorge, son alerte serait partie au néant.
+ */
+Schedule::command('queue:monitor database:mail --max=50')
+    ->everyMinute()
+    ->appendOutputTo('/dev/stdout');
 
 /*
 |------------------------------------------------------------------------------
