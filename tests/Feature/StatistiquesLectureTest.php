@@ -209,6 +209,59 @@ class StatistiquesLectureTest extends TestCase
     }
 
     /**
+     * UN PARTAGE NE GONFLE PAS LE TOTAL.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI CE TEST EXISTE
+     * ═══════════════════════════════════════════════════════════════════
+     * `total` valait COUNT(*) — le même nombre que vues + scans + saves,
+     * tant que ces trois types étaient les seuls. L'arrivée des partages
+     * y aurait ajouté une quatrième catégorie EN SILENCE : le total affiché
+     * au client aurait augmenté du jour au lendemain sans qu'aucune de ses
+     * trois tuiles ne bouge.
+     *
+     * Changer la signification d'un chiffre que quelqu'un regarde depuis
+     * des mois est pire que de ne pas l'enrichir.
+     */
+    public function test_a_share_is_counted_apart_and_never_inflates_the_total(): void
+    {
+        ProfileEvent::factory()->count(2)->view()->create([
+            'profile_id' => $this->profil->id,
+            'created_at' => Carbon::today()->addHours(9),
+        ]);
+
+        ProfileEvent::factory()->count(3)->create([
+            'profile_id' => $this->profil->id,
+            'type' => ProfileEvent::TYPE_SHARE,
+            'canal' => 'whatsapp',
+            'created_at' => Carbon::today()->addHours(10),
+        ]);
+
+        $totaux = $this->lecture->totaux(Carbon::today()->subDays(6), $this->profil->id);
+
+        $this->assertSame(3, $totaux['partages']);
+        $this->assertSame(2, $totaux['vues']);
+        $this->assertSame(2, $totaux['total'],
+            'Les partages sont entrés dans le total : le chiffre affiché au client '.
+            'a changé de définition sans que rien ne le dise.');
+    }
+
+    /** Et l'agrégat les conserve séparés après la nuit. */
+    public function test_the_aggregate_keeps_shares_out_of_the_total_too(): void
+    {
+        ProfileStatDaily::create([
+            'profile_id' => $this->profil->id,
+            'jour' => Carbon::yesterday()->toDateString(),
+            'vues' => 4, 'scans' => 1, 'saves' => 0, 'partages' => 7, 'total' => 5,
+        ]);
+
+        $totaux = $this->lecture->totaux(Carbon::today()->subDays(6), $this->profil->id);
+
+        $this->assertSame(7, $totaux['partages']);
+        $this->assertSame(5, $totaux['total']);
+    }
+
+    /**
      * Le cloisonnement vaut aussi pour les chiffres : la série d'un profil
      * ne contient jamais les visites d'un autre.
      */

@@ -298,4 +298,45 @@ Route::middleware('throttle:60,1')->group(function () {
 
     Route::get('/p/{slug}', [PublicProfileController::class, 'show'])
         ->name('profile.public');
+
+    /*
+     | LE PARTAGE, ENREGISTRÉ.
+     |
+     | Elle n'écrit qu'un compteur : ni donnée du visiteur, ni contenu du
+     | message — l'application ne le voit jamais, il se compose dans
+     | WhatsApp.
+     |
+     | Une limite PLUS BASSE que celle du groupe : consulter une carte
+     | soixante fois par minute reste plausible derrière une sortie
+     | Internet partagée ; la partager vingt fois ne l'est pas. Au-delà,
+     | c'est un script, et un script gonflerait un compteur que le client
+     | croira vrai.
+     |
+     | ═══════════════════════════════════════════════════════════════════
+     | SANS JETON CSRF, ET C'EST UNE DÉCISION
+     | ═══════════════════════════════════════════════════════════════════
+     | Le CSRF protège d'une chose précise : qu'un site tiers fasse
+     | exécuter au NAVIGATEUR D'UNE VICTIME une action AUTHENTIFIÉE à son
+     | insu. Ici il n'y a ni authentification, ni victime, ni action —
+     | seulement un compteur anonyme qu'on peut de toute façon incrémenter
+     | avec un `curl`. Le jeton n'écarterait aucune attaque.
+     |
+     | Il coûterait, en revanche. La carte publique est la page la plus
+     | fréquentée du produit et celle qu'on voudra mettre en cache : un
+     | jeton par session obligerait à ouvrir une session pour chaque
+     | visiteur anonyme, et rendrait le HTML non cachable. C'est d'ailleurs
+     | pourquoi elle ne porte AUCUNE balise csrf-token aujourd'hui — ce que
+     | la première tentative d'écrire ce compteur a révélé, par un 419.
+     |
+     | Le contrôle qui vaut ici est la LIMITE DE CADENCE ci-dessus. Elle ne
+     | rend pas le chiffre infalsifiable — aucun compteur posé dans un
+     | navigateur ne l'est — elle le borne. C'est le même arbitrage que
+     | pour /automation/schedule, à ceci près que celle-là porte un jeton
+     | parce qu'elle DÉCLENCHE des envois : elle a quelque chose à
+     | protéger, ce compteur n'a rien.
+     */
+    Route::post('/p/{slug}/partage', [PublicProfileController::class, 'partage'])
+        ->middleware('throttle:20,1')
+        ->withoutMiddleware([VerifyCsrfToken::class])
+        ->name('profile.partage');
 });

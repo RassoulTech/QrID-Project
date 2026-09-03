@@ -66,9 +66,13 @@ use Illuminate\Support\Facades\DB;
 class StatistiquesLecture
 {
     /**
-     * Les quatre compteurs d'une période, tous profils confondus.
+     * Les compteurs d'une période, tous profils confondus.
      *
-     * @return array{total:int, vues:int, scans:int, saves:int}
+     * `total` NE COMPREND PAS LES PARTAGES : il vaut vues + scans +
+     * enregistrements, exactement ce qu'il valait avant leur arrivée. Voir
+     * la note dans AgregerStatistiques.
+     *
+     * @return array{total:int, vues:int, scans:int, saves:int, partages:int}
      */
     public function totaux(Carbon $depuis, ?int $profileId = null): array
     {
@@ -89,6 +93,7 @@ class StatistiquesLecture
             'vues' => (int) $serie->sum('vues'),
             'scans' => (int) $serie->sum('scans'),
             'saves' => (int) $serie->sum('saves'),
+            'partages' => (int) $serie->sum('partages'),
             'total' => (int) $serie->sum('total'),
         ];
     }
@@ -135,7 +140,7 @@ class StatistiquesLecture
      * ne peut donc s'appuyer sur aucun index. Elle n'est appelée que sur la
      * portion NON AGRÉGÉE de la fenêtre : un seul jour en régime normal.
      *
-     * @return Collection<string, array{vues:int, scans:int, saves:int, total:int}>
+     * @return Collection<string, array{vues:int, scans:int, saves:int, partages:int, total:int}>
      */
     private function depuisLaSource(Carbon $depuis, ?int $profileId = null): Collection
     {
@@ -143,10 +148,16 @@ class StatistiquesLecture
             ->where('created_at', '>=', $depuis->copy()->startOfDay())
             ->when($profileId, fn ($q) => $q->where('profile_id', $profileId))
             ->selectRaw('DATE(created_at) jour')
-            ->selectRaw('COUNT(*) t')
+            // `t` compte les trois types historiques, jamais les partages :
+            // voir la note dans AgregerStatistiques. Un total qui change de
+            // définition est un total auquel on ne peut plus se fier.
+            ->selectRaw('SUM(type IN (?, ?, ?)) t', [
+                ProfileEvent::TYPE_VIEW, ProfileEvent::TYPE_SCAN, ProfileEvent::TYPE_SAVE,
+            ])
             ->selectRaw('SUM(type = ?) v', [ProfileEvent::TYPE_VIEW])
             ->selectRaw('SUM(type = ?) s', [ProfileEvent::TYPE_SCAN])
             ->selectRaw('SUM(type = ?) e', [ProfileEvent::TYPE_SAVE])
+            ->selectRaw('SUM(type = ?) p', [ProfileEvent::TYPE_SHARE])
             ->groupBy('jour')
             ->get()
             ->mapWithKeys(fn ($ligne) => [
@@ -154,6 +165,7 @@ class StatistiquesLecture
                     'vues' => (int) $ligne->v,
                     'scans' => (int) $ligne->s,
                     'saves' => (int) $ligne->e,
+                    'partages' => (int) $ligne->p,
                     'total' => (int) $ligne->t,
                 ],
             ]);
@@ -195,7 +207,7 @@ class StatistiquesLecture
      * projection. Deux chemins de lecture pour un même chiffre finissent
      * toujours par diverger : celui qu'on optimise et celui qu'on oublie.
      *
-     * @return Collection<string, array{vues:int, scans:int, saves:int, total:int}>
+     * @return Collection<string, array{vues:int, scans:int, saves:int, partages:int, total:int}>
      */
     public function serieDetaillee(Carbon $depuis, int $jours, ?int $profileId = null): Collection
     {
@@ -236,20 +248,21 @@ class StatistiquesLecture
             ->when($profileId, fn ($q) => $q->where('profile_id', $profileId))
             ->groupBy('jour')
             ->selectRaw('jour')
-            ->selectRaw('SUM(vues) vues, SUM(scans) scans, SUM(saves) saves, SUM(total) total')
+            ->selectRaw('SUM(vues) vues, SUM(scans) scans, SUM(saves) saves, SUM(partages) partages, SUM(total) total')
             ->get()
             ->mapWithKeys(fn ($ligne) => [
                 Carbon::parse($ligne->jour)->toDateString() => [
                     'vues' => (int) $ligne->vues,
                     'scans' => (int) $ligne->scans,
                     'saves' => (int) $ligne->saves,
+                    'partages' => (int) $ligne->partages,
                     'total' => (int) $ligne->total,
                 ],
             ]);
 
         $source = $this->depuisLaSource($debutSource, $profileId);
 
-        $vide = ['vues' => 0, 'scans' => 0, 'saves' => 0, 'total' => 0];
+        $vide = ['vues' => 0, 'scans' => 0, 'saves' => 0, 'partages' => 0, 'total' => 0];
         $points = collect();
 
         // Du plus ancien au plus récent, sans trou : un jour sans événement

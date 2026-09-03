@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PublicProfileController extends Controller
@@ -127,7 +128,7 @@ class PublicProfileController extends Controller
      * d'empêcher une carte de s'afficher : c'est la page qui prend tout le
      * trafic du produit, et un compteur ne vaut pas une visite perdue.
      */
-    private function enregistrerVisite(Request $request, Profile $profile, ?string $type = null): void
+    private function enregistrerVisite(Request $request, Profile $profile, ?string $type = null, ?string $canal = null): void
     {
         try {
             ProfileEvent::create([
@@ -135,6 +136,10 @@ class PublicProfileController extends Controller
                 'type' => $type ?? ($request->query('src') === 'qr'
                     ? ProfileEvent::TYPE_SCAN
                     : ProfileEvent::TYPE_VIEW),
+
+                // Nul pour les trois types historiques : une vue n'a pas de
+                // moyen. Renseigné pour un partage, où il dit lequel.
+                'canal' => $canal,
 
                 // L'adresse IP n'est jamais stockée en clair : on ne garde
                 // qu'une empreinte, suffisante pour dédoublonner, inutilisable
@@ -150,6 +155,47 @@ class PublicProfileController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * « PARTAGER » A ÉTÉ ACTIONNÉ.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * CE QUE CETTE ROUTE ENREGISTRE, ET CE QU'ELLE REFUSE DE PRÉTENDRE
+     * ═══════════════════════════════════════════════════════════════════
+     * Un partage INITIÉ : quelqu'un a appuyé, WhatsApp ou la feuille du
+     * système s'est ouvert. Rien de plus.
+     *
+     * Ce qui se passe ensuite échappe entièrement à l'application. Elle ne
+     * voit pas le message, ne connaît pas le destinataire, et ne saura
+     * jamais si l'envoi a eu lieu. Un compteur nommé « messages envoyés »
+     * serait un chiffre inventé — et un chiffre inventé sur un tableau de
+     * bord fait douter de tous les autres.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * ELLE REND TOUJOURS 204, MÊME QUAND ELLE N'ÉCRIT RIEN
+     * ═══════════════════════════════════════════════════════════════════
+     * Un slug inconnu ou une carte hors ligne ne donnent PAS 404. Cette
+     * route est publique et sans authentification : un 404 permettrait de
+     * demander « ce slug existe-t-il ? » autant de fois qu'on veut, et
+     * d'énumérer les cartes du produit une par une.
+     *
+     * Le navigateur, lui, n'a rien à faire de la réponse : il envoie et
+     * poursuit. Ne rien dire ne lui coûte rien et ne renseigne personne.
+     */
+    public function partage(Request $request, string $slug): Response
+    {
+        $valide = $request->validate([
+            'canal' => ['required', Rule::in(ProfileEvent::CANAUX)],
+        ]);
+
+        $profile = Profile::query()->where('slug', $slug)->first();
+
+        if ($profile && $profile->isPubliclyVisible()) {
+            $this->enregistrerVisite($request, $profile, ProfileEvent::TYPE_SHARE, $valide['canal']);
+        }
+
+        return response()->noContent();
     }
 
     /**

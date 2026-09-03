@@ -81,7 +81,25 @@ class AgregerStatistiques extends Command
             ->selectRaw('SUM(type = ?) as vues', [ProfileEvent::TYPE_VIEW])
             ->selectRaw('SUM(type = ?) as scans', [ProfileEvent::TYPE_SCAN])
             ->selectRaw('SUM(type = ?) as saves', [ProfileEvent::TYPE_SAVE])
-            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('SUM(type = ?) as partages', [ProfileEvent::TYPE_SHARE])
+
+            /*
+             | `total` RESTE LA SOMME DES TROIS PREMIERS, et ce n'est pas un
+             | détail d'arithmétique.
+             |
+             | Il valait COUNT(*) — ce qui donnait le même nombre tant que
+             | seuls trois types existaient. L'arrivée des partages y aurait
+             | ajouté silencieusement une quatrième catégorie : le « total »
+             | affiché au client aurait augmenté du jour au lendemain sans
+             | qu'aucune de ses trois tuiles ne bouge.
+             |
+             | Changer la signification d'un chiffre que quelqu'un regarde
+             | depuis des mois est pire que de ne pas l'enrichir. Les partages
+             | ont leur propre colonne.
+             */
+            ->selectRaw('SUM(type IN (?, ?, ?)) as total', [
+                ProfileEvent::TYPE_VIEW, ProfileEvent::TYPE_SCAN, ProfileEvent::TYPE_SAVE,
+            ])
             ->get();
 
         if ($agregats->isEmpty()) {
@@ -96,6 +114,7 @@ class AgregerStatistiques extends Command
             'vues' => (int) $a->vues,
             'scans' => (int) $a->scans,
             'saves' => (int) $a->saves,
+            'partages' => (int) $a->partages,
             'total' => (int) $a->total,
             'created_at' => $maintenant,
             'updated_at' => $maintenant,

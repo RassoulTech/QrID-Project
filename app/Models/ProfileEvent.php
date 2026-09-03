@@ -23,9 +23,33 @@ class ProfileEvent extends Model
 
     public const TYPE_SAVE = 'save';
 
+    /**
+     * UN PARTAGE INITIÉ — et rien de plus.
+     *
+     * Quelqu'un a appuyé sur le bouton, WhatsApp ou la feuille système s'est
+     * ouvert. Ce qui se passe ensuite échappe entièrement à l'application :
+     * elle ne sait pas, et ne peut pas savoir, si un message est parti.
+     *
+     * Le jour où l'on affichera ce chiffre, il devra être nommé « partages
+     * lancés » et non « messages envoyés ». Un compteur inventé sur un
+     * tableau de bord fait douter de tous les autres.
+     */
+    public const TYPE_SHARE = 'share';
+
+    /**
+     * Les moyens de partage, tels que la base les accepte.
+     *
+     * `natif` est la feuille du système : elle propose WhatsApp parmi tout
+     * le reste, et l'on ne saura jamais ce qui a été choisi ensuite. La
+     * distinguer de `whatsapp` est une honnêteté — l'un dit « elle a choisi
+     * WhatsApp », l'autre « elle a ouvert le choix ».
+     */
+    public const CANAUX = ['whatsapp', 'natif', 'copie', 'qr'];
+
     protected $fillable = [
         'profile_id',
         'type',
+        'canal',
         'ip_hash',
         'user_agent',
         'referer',

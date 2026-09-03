@@ -25,7 +25,7 @@ class ProfileStatDaily extends Model
 {
     protected $table = 'profile_stats_daily';
 
-    protected $fillable = ['profile_id', 'jour', 'vues', 'scans', 'saves', 'total'];
+    protected $fillable = ['profile_id', 'jour', 'vues', 'scans', 'saves', 'partages', 'total'];
 
     protected function casts(): array
     {
@@ -34,6 +34,7 @@ class ProfileStatDaily extends Model
             'vues' => 'integer',
             'scans' => 'integer',
             'saves' => 'integer',
+            'partages' => 'integer',
             'total' => 'integer',
         ];
     }

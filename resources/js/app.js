@@ -33,6 +33,7 @@ import langue from './modules/langue';
 import enregistrerContact from './modules/enregistrer-contact';
 import selectRiche from './modules/select-riche';
 import envoiUnique from './modules/envoi-unique';
+import suiviPartage from './modules/suivi-partage';
 
 const modules = [
     scrollReveal,
@@ -59,6 +60,7 @@ const modules = [
     /* Il écoute au niveau du document : l'ordre ne compte pas pour lui, et
        il couvre donc aussi les formulaires ajoutés après le chargement. */
     envoiUnique,
+    suiviPartage,
 ];
 
 // Chaque module renvoie tôt s'il n'a rien à faire sur la page courante.
