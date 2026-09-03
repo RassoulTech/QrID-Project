@@ -64,8 +64,31 @@ class CardOrderController extends Controller
     public function batch(Request $request): RedirectResponse
     {
         $valide = $request->validate([
-            'commandes' => ['required', 'array', 'min:1'],
-            'commandes.*' => ['integer'],
+            /*
+             | UNE BORNE HAUTE, ET ELLE MANQUAIT.
+             |
+             | La règle disait « un tableau, au moins un élément » et rien de
+             | plus. Le `whereIn` juste en dessous recevait donc une liste de
+             | taille illimitée : MySQL construit une clause IN aussi longue
+             | que ce qu'on lui envoie, et le `filter()` en PHP charge tout
+             | en mémoire avant de trier.
+             |
+             | Ce n'est pas un trou de sécurité — l'écran est derrière
+             | ['auth','verified','admin'] — mais c'est une porte ouverte sur
+             | un plantage : un administrateur qui coche « tout sélectionner »
+             | sur une page de mille commandes suffit, sans la moindre
+             | mauvaise intention.
+             |
+             | 200 est le seuil de lot du produit multiplié par une marge
+             | confortable. Au-delà, l'écran demande de traiter en plusieurs
+             | fois, ce qui est de toute façon ce qu'on fait à l'imprimeur.
+             */
+            'commandes' => ['required', 'array', 'min:1', 'max:200'],
+
+            // `exists` en plus de `integer` : un identifiant inventé
+            // traversait la validation et n'était écarté que par la requête
+            // suivante. Le refuser ici rend le message d'erreur exact.
+            'commandes.*' => ['integer', 'exists:card_orders,id'],
         ]);
 
         $lot = 'LOT-'.now()->format('Ymd').'-'.Str::upper(Str::random(4));
