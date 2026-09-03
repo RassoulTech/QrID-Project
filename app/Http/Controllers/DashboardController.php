@@ -7,8 +7,8 @@ use App\Models\Payment;
 use App\Models\Profile;
 use App\Models\ProfileEvent;
 use App\Services\ProfileWizardService;
-use App\Services\StatistiquesLecture;
 use App\Services\QrCodeService;
+use App\Services\StatistiquesLecture;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -97,19 +97,29 @@ class DashboardController extends Controller
      */
     private function stats(int $profileId, ?int $joursRestants): array
     {
-        $ligne = ProfileEvent::query()
-            ->where('profile_id', $profileId)
-            ->selectRaw('SUM(type = ?) as vues', [ProfileEvent::TYPE_VIEW])
-            ->selectRaw('SUM(type = ?) as scans', [ProfileEvent::TYPE_SCAN])
-            ->selectRaw('SUM(type = ?) as saves', [ProfileEvent::TYPE_SAVE])
-            ->first();
+        /*
+         | CES CHIFFRES SONT CUMULÉS, ET C'ÉTAIT UN BALAYAGE SANS BORNE.
+         |
+         | La requête sommait TOUTE la table d'événements du profil, sans
+         | aucune limite de date. Instantané sur un profil ouvert la semaine
+         | dernière ; sur un profil très consulté depuis deux ans, un
+         | balayage qui grossit indéfiniment — et c'est la page la plus
+         | ouverte de l'espace client.
+         |
+         | Le service lit les agrégats jusqu'au dernier jour traité et ne
+         | relit la source qu'au-delà : le coût cesse de dépendre de l'âge
+         | du profil.
+         */
+        $cumules = $this->lecture->totauxCumules($profileId);
 
-        $valeur = fn (?string $n) => ((int) $n) > 0 ? (int) $n : null;
+        // null et non zéro : la tuile affiche alors son état d'attente —
+        // « partagez votre carte » — au lieu d'un « 0 » qui décourage.
+        $valeur = fn (int $n) => $n > 0 ? $n : null;
 
         return [
-            'views' => $valeur($ligne?->vues),
-            'scans' => $valeur($ligne?->scans),
-            'saves' => $valeur($ligne?->saves),
+            'views' => $valeur($cumules['vues']),
+            'scans' => $valeur($cumules['scans']),
+            'saves' => $valeur($cumules['saves']),
             'days' => $joursRestants,
         ];
     }

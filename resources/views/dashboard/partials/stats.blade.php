@@ -26,11 +26,18 @@
 <section class="db-card">
     <h2 class="db-card__titre">{{ __('dashboard.apercu.titre') }}</h2>
 
-    <div class="stat-grid">
+    {{-- `data-compteurs-url` porte l'adresse de relecture. Elle est ici et
+         non dans le module : une adresse écrite en dur dans un fichier .js
+         cesse d'être vraie au premier changement de route, sans rien signaler. --}}
+    <div class="stat-grid" data-compteurs-url="{{ route('dashboard.compteurs') }}">
         @foreach ($cartes as $carte)
             @php $valeur = $stats[$carte['cle']] ?? null; @endphp
 
-            <div class="stat-tuile stat-tuile--{{ $carte['pastel'] }}">
+            {{-- `days` n'est pas un compteur d'audience mais un décompte
+                 d'abonnement : il ne bouge pas quand on scanne une carte, et
+                 n'a donc rien à relire. --}}
+            <div class="stat-tuile stat-tuile--{{ $carte['pastel'] }}"
+                 @if ($carte['cle'] !== 'days') data-compteur="{{ $carte['cle'] }}" @endif>
                 <span class="stat-tuile__icone" aria-hidden="true">
                     @switch($carte['icone'])
                         @case('oeil')
@@ -47,11 +54,11 @@
                     @endswitch
                 </span>
 
-                <span class="stat-tuile__n">{{ number_format((int) $valeur, 0, ',', ' ') }}</span>
+                <span class="stat-tuile__n" data-compteur-valeur>{{ number_format((int) $valeur, 0, ',', ' ') }}</span>
                 <span class="stat-tuile__l">{{ __('dashboard.apercu.'.$carte['cle'].'_libelle') }}</span>
 
                 @if ($valeur === null || $valeur === 0)
-                    <span class="stat-tuile__attente">{{ __('dashboard.apercu.'.$carte['cle'].'_attente') }}</span>
+                    <span class="stat-tuile__attente" data-compteur-attente>{{ __('dashboard.apercu.'.$carte['cle'].'_attente') }}</span>
                 @endif
             </div>
         @endforeach

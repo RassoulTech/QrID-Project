@@ -11,6 +11,7 @@ use App\Http\Controllers\LegalController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Profile\CardController;
 use App\Http\Controllers\Profile\CardOrderController;
+use App\Http\Controllers\Profile\CompteursController;
 use App\Http\Controllers\Profile\PaymentController;
 use App\Http\Controllers\Profile\ProfileActivationController;
 use App\Http\Controllers\Profile\ProfilePageController;
@@ -111,6 +112,20 @@ require __DIR__.'/admin.php';
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    /*
+     | LES COMPTEURS SEULS, EN JSON.
+     |
+     | Appelée quand l'onglet du tableau de bord redevient visible — le
+     | moment où le client revient d'avoir scanné sa propre carte. Elle
+     | rend trois entiers, jamais une donnée nominative.
+     |
+     | `throttle:30,1` : un retour sur l'onglet est un geste humain. Trente
+     | par minute laisse toute la marge nécessaire et borne un script.
+     */
+    Route::get('/dashboard/compteurs', CompteursController::class)
+        ->middleware('throttle:30,1')
+        ->name('dashboard.compteurs');
 
     /*
      |-------------------------------------------------------------------------

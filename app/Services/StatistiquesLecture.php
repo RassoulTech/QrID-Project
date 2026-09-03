@@ -99,6 +99,65 @@ class StatistiquesLecture
     }
 
     /**
+     * LES TOTAUX DEPUIS TOUJOURS — sans série intermédiaire.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI CETTE MÉTHODE EXISTE À CÔTÉ DE `totaux()`
+     * ═══════════════════════════════════════════════════════════════════
+     * Le tableau de bord affiche des compteurs CUMULÉS : « 342 vues », pas
+     * « 342 vues sur trente jours ». Il les calculait par un SUM sur toute
+     * la table d'événements du profil, sans aucune borne de date.
+     *
+     * Sur un profil ouvert la semaine dernière, c'est instantané. Sur un
+     * profil très consulté depuis deux ans, c'est un balayage qui grossit
+     * indéfiniment — et c'est la page la plus ouverte de l'espace client.
+     *
+     * Passer par `totaux()` aurait marché, mais construirait une série d'un
+     * point PAR JOUR depuis la création du profil : sept cents entiers en
+     * mémoire pour n'en additionner que quatre. On somme donc directement.
+     *
+     * La frontière reste la même que partout ailleurs : agrégats jusqu'au
+     * dernier jour traité, source au-delà.
+     *
+     * @return array{total:int, vues:int, scans:int, saves:int, partages:int}
+     */
+    public function totauxCumules(?int $profileId = null): array
+    {
+        $dernierAgrege = $this->dernierJourAgrege();
+
+        $debutSource = $dernierAgrege === null
+            ? null                                        // rien n'a jamais été agrégé
+            : Carbon::parse($dernierAgrege)->addDay();
+
+        $agregats = ProfileStatDaily::query()
+            ->when($profileId, fn ($q) => $q->where('profile_id', $profileId))
+            ->when($debutSource, fn ($q) => $q->where('jour', '<', $debutSource->toDateString()))
+            ->selectRaw('COALESCE(SUM(vues),0) v, COALESCE(SUM(scans),0) s')
+            ->selectRaw('COALESCE(SUM(saves),0) e, COALESCE(SUM(partages),0) p, COALESCE(SUM(total),0) t')
+            ->first();
+
+        $source = ProfileEvent::query()
+            ->when($profileId, fn ($q) => $q->where('profile_id', $profileId))
+            ->when($debutSource, fn ($q) => $q->where('created_at', '>=', $debutSource->startOfDay()))
+            ->selectRaw('SUM(type IN (?, ?, ?)) t', [
+                ProfileEvent::TYPE_VIEW, ProfileEvent::TYPE_SCAN, ProfileEvent::TYPE_SAVE,
+            ])
+            ->selectRaw('SUM(type = ?) v', [ProfileEvent::TYPE_VIEW])
+            ->selectRaw('SUM(type = ?) s', [ProfileEvent::TYPE_SCAN])
+            ->selectRaw('SUM(type = ?) e', [ProfileEvent::TYPE_SAVE])
+            ->selectRaw('SUM(type = ?) p', [ProfileEvent::TYPE_SHARE])
+            ->first();
+
+        return [
+            'vues' => (int) $agregats->v + (int) ($source->v ?? 0),
+            'scans' => (int) $agregats->s + (int) ($source->s ?? 0),
+            'saves' => (int) $agregats->e + (int) ($source->e ?? 0),
+            'partages' => (int) $agregats->p + (int) ($source->p ?? 0),
+            'total' => (int) $agregats->t + (int) ($source->t ?? 0),
+        ];
+    }
+
+    /**
      * JUSQU'OÙ L'AGRÉGATION A-T-ELLE RÉELLEMENT TOURNÉ ?
      *
      * ═══════════════════════════════════════════════════════════════════

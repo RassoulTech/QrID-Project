@@ -78,11 +78,17 @@
   --pastel-1:       var(--marque-doux);
   --pastel-2:       var(--info-fond);
   --pastel-3:       var(--alerte-fond);
-  --pastel-4:       #F1EAF7;
+  --pastel-4:       #{$pastel-violet};
+
+  // La cinquième porte les PARTAGES. Teinte propre et non reprise de la
+  // marque : les partages ne sont pas une consultation de plus, et la
+  // couleur doit le dire avant le libellé.
+  --pastel-5:       #{$pastel-ambre};
 }
 
 .theme-dark {
-  --pastel-4:       rgba(160, 120, 214, .14);
+  --pastel-4:       #{$pastel-violet-sombre};
+  --pastel-5:       #{$pastel-ambre-sombre};
 
   // Les barres de défilement et les champs natifs suivent le thème. Sans
   // cette ligne, un sélecteur de date ouvert en thème sombre s'affiche en

@@ -109,6 +109,21 @@ $vert-200: #A8E6D3;   // fonds doux · #0A1F1A dessus : 12,02:1
 $vert-100: #CFF0E4;   // fonds doux · #0A1F1A dessus : 14,29:1
 $vert-50:  #E4F2EC;   // = $vert-clair      · #0A1F1A dessus : 15,42:1
 
+// ── TEINTES DE CATÉGORIE ────────────────────────────────────────────────────
+// Décoratives : elles n'accueillent jamais de texte long, seulement un
+// chiffre et son libellé court, tous deux en encre du thème.
+//
+// La cinquième porte les PARTAGES. Teinte propre, et non une reprise de la
+// marque : un partage n'est pas une consultation de plus, et la couleur doit
+// le dire avant que le libellé ne soit lu.
+$pastel-violet: #F1EAF7;   // consultations cumulées
+$pastel-ambre:  #FDF0E3;   // partages lancés
+
+// Leurs équivalents en thème sombre. Un aplat clair y brûlerait l'écran :
+// on garde la teinte, on la pose en voile sur le fond.
+$pastel-violet-sombre: rgba(160, 120, 214, .14);
+$pastel-ambre-sombre:  rgba(214, 150, 80, .14);
+
 
 // =============================================================================
 // 1 TER. LE PANNEAU SOMBRE — la colonne de l'administration et du client

@@ -69,7 +69,7 @@ class StatisticsController extends Controller
      * renommer obligerait à toucher un gabarit pour un changement qui ne le
      * concerne pas.
      *
-     * @return array{views:int, scans:int, saves:int, total:int}
+     * @return array{views:int, scans:int, saves:int, partages:int, total:int}
      */
     private function totaux(int $profileId, int $jours): array
     {
@@ -79,6 +79,7 @@ class StatisticsController extends Controller
             'views' => $totaux['vues'],
             'scans' => $totaux['scans'],
             'saves' => $totaux['saves'],
+            'partages' => $totaux['partages'],
             'total' => $totaux['total'],
         ];
     }

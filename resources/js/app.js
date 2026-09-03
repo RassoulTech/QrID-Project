@@ -34,6 +34,7 @@ import enregistrerContact from './modules/enregistrer-contact';
 import selectRiche from './modules/select-riche';
 import envoiUnique from './modules/envoi-unique';
 import suiviPartage from './modules/suivi-partage';
+import compteursFrais from './modules/compteurs-frais';
 
 const modules = [
     scrollReveal,
@@ -61,6 +62,7 @@ const modules = [
        il couvre donc aussi les formulaires ajoutés après le chargement. */
     envoiUnique,
     suiviPartage,
+    compteursFrais,
 ];
 
 // Chaque module renvoie tôt s'il n'a rien à faire sur la page courante.

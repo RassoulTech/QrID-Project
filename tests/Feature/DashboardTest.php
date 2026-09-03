@@ -83,9 +83,19 @@ class DashboardTest extends TestCase
         $html = $this->html();
 
         // Les trois compteurs d'événements sont à zéro et l'affichent.
+        /*
+         | ON COMPTE SUR `data-compteur-valeur`, PAS SUR LA CLASSE.
+         |
+         | Le test cherchait `stat-tuile__n">0<`. La chaîne a cessé de
+         | correspondre à l'ajout d'un attribut sur la même balise, sans
+         | que rien d'observable n'ait changé pour le client.
+         |
+         | L'attribut est un marqueur DESTINÉ à être trouvé par du code :
+         | il ne bougera pas au gré des classes de style.
+         */
         $this->assertSame(
             3,
-            substr_count($html, 'stat-tuile__n">0<'),
+            substr_count($html, 'data-compteur-valeur>0<'),
             'Un compteur à zéro n\'affiche pas son chiffre : la carte paraît cassée.'
         );
 
