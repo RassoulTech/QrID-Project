@@ -148,7 +148,7 @@ return [
         'public_email' => 'contact@exemple.sn',
         'address' => 'Dakar, Sénégal',
         'primary_color' => '#0B3B2E',
-    
+
         /*
          | LES RÉSEAUX DE LA MAQUETTE — déclarés, plus inventés à l'affichage.
          |
@@ -183,7 +183,7 @@ return [
         'public_email' => 'bonjour@exemple.sn',
         'address' => 'Dakar, Sénégal',
         'primary_color' => '#0B3B2E',
-    
+
         /*
          | LES RÉSEAUX DE LA MAQUETTE — déclarés, plus inventés à l'affichage.
          |
@@ -232,5 +232,21 @@ return [
         'name' => '',
         'role' => '',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEUIL DE LA VITRINE
+    |--------------------------------------------------------------------------
+    |
+    | En dessous de ce nombre de cartes en ligne, la page d'accueil n'affiche
+    | AUCUN chiffre : elle dit « des professionnels qui ont déjà leur carte ».
+    |
+    | Une preuve sociale ne vaut que si elle est vraie. « +7 » dessert autant
+    | qu'un mensonge — mais pour la raison inverse : il dit que personne ne
+    | s'en sert. Au-delà du seuil, le chiffre réel devient meilleur que
+    | n'importe quel arrondi, parce qu'il est vérifiable.
+    |
+    */
+    'seuil_vitrine' => env('LANDING_SEUIL_VITRINE', 50),
 
 ];

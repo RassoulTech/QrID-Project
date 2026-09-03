@@ -77,6 +77,30 @@
                 <x-button :href="route('profile.edit')" variant="outline" size="sm">
                     {{ __('dashboard.carte.modifier') }}
                 </x-button>
+
+                {{-- ═══════════════ PARTAGER SA PROPRE CARTE ═══════════════
+                     LE GESTE QUE LE PRODUIT VEND, ET IL MANQUAIT ICI.
+
+                     Le client pouvait copier son lien, télécharger son QR
+                     Code, imprimer sa carte — mais pas la partager. Il lui
+                     fallait ouvrir sa page publique pour y trouver le bouton,
+                     c'est-à-dire faire un détour pour l'action la plus
+                     fréquente de tout son parcours.
+
+                     Le message est construit côté serveur par
+                     App\Support\Whatsapp : il porte le nom affiché et
+                     l'adresse publique, rien d'autre.
+
+                     Il n'apparaît QUE si la carte est en ligne. Partager un
+                     lien qui répond « carte indisponible » est pire que ne
+                     pas proposer le partage : le prospect a déjà cliqué. --}}
+                @if ($profile->isPubliclyVisible())
+                    <x-button :href="\App\Support\Whatsapp::partageDeLaCarte($profile, $publicUrl)"
+                              variant="outline" size="sm"
+                              target="_blank" rel="noopener noreferrer">
+                        {{ __('dashboard.carte.partager_whatsapp') }}
+                    </x-button>
+                @endif
             </div>
         </div>
     </div>

@@ -65,6 +65,7 @@ return [
         'qr_svg' => 'QR as SVG',
         'imprimable' => 'Printable card',
         'modifier' => 'Edit my card',
+        'partager_whatsapp' => 'Share on WhatsApp',
     ],
 
     'physique' => [

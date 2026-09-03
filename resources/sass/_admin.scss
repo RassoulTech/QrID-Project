@@ -407,6 +407,24 @@ body:has(> .adm){
   display: inline-flex;
   align-items: center;
   gap:esp(2);
+
+  /*
+   | 35px ICI, 44px À L'ÉCRAN — ET CE N'EST PAS UNE CONTRADICTION.
+   |
+   | Cette hauteur ressemble à une violation de la loi 5 (44px minimum pour
+   | une cible tactile). Elle n'en est pas une : `_socle.scss` déclare
+   | `.adm-btn { @extend %bouton; }`, et `%bouton` porte
+   | `min-height: $tactile-min`. Le socle étant importé APRÈS cette feuille,
+   | il gagne par ordre de cascade — et `min-height` l'emporte sur `height`.
+   |
+   | Mesuré au rendu : 44px, à 375px comme à 1280px de large.
+   |
+   | LA NOTE EST ICI PARCE QUE J'AI FAIT L'ERREUR. Un `grep height: 3` sur
+   | ce fichier désigne cette ligne comme un défaut, et « corriger » ce
+   | faux défaut en posant une règle locale casserait la vraie garantie le
+   | jour où l'ordre d'import change. Ne pas toucher : voir
+   | CiblesTactilesTest, qui vérifie la hauteur RÉELLE plutôt que la déclarée.
+   */
   height: 35px;
   padding:0 esp(4);
   border-radius: $r-full;
@@ -1100,6 +1118,9 @@ $adm-controle-h: 38px;
   display: inline-flex;
   align-items: center;
   gap:esp(2);
+
+  // Comme .adm-btn : `_socle.scss` pose `min-height: $tactile-min` sur ce
+  // sélecteur et gagne par ordre de cascade. Mesuré à 44px au rendu.
   height: 34px;
   padding:0 esp(4);
   border: 1px solid var(--bord-fort);

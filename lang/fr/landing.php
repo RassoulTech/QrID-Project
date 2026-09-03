@@ -90,7 +90,8 @@ return [
             .'identité numérique. Pas de frais cachés, pas d\'engagement immédiat. Testez la '
             .'puissance de :marque gratuitement.',
         'scanner' => 'Scanner &amp; Voir',
-        'professionnels' => 'Plus de 500 professionnels',
+        'professionnels' => 'Plus de :compte professionnels',
+        'professionnels_debut' => 'Des professionnels qui ont déjà leur carte',
     ],
 
     // -----------------------------------------------------------------

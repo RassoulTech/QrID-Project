@@ -74,6 +74,7 @@ return [
         'qr_svg' => 'QR en SVG',
         'imprimable' => 'Carte imprimable',
         'modifier' => 'Modifier ma carte',
+        'partager_whatsapp' => 'Partager sur WhatsApp',
     ],
 
     // -----------------------------------------------------------------

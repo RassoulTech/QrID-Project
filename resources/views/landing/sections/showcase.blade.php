@@ -25,11 +25,32 @@
           <div class="scan-badge__label">{!! __('landing.demo.scanner') !!}</div>
         </div>
 
-        <div class="avatars" aria-label="{{ __('landing.demo.professionnels') }}">
+        {{-- ═══════════════ LE NOMBRE DE CARTES EN LIGNE ═══════════════
+             COMPTÉ, ET AFFICHÉ SEULEMENT QUAND IL PARLE.
+
+             Cette pastille disait « +500 » et l'étiquette « Plus de 500
+             professionnels ». Rien ne mesurait ce nombre : il était écrit
+             dans un fichier de langue.
+
+             Un visiteur qui découvre ensuite que le produit compte trois
+             clients ne se dit pas « ils ont arrondi ». Il se dit qu'on lui a
+             menti, et cesse de croire le reste de la page — tarifs compris.
+
+             En dessous du seuil, la même idée sans nombre : la preuve
+             sociale ne vaut que si elle est vraie, et une formulation
+             qualitative n'engage rien de faux. Au-dessus, le chiffre réel
+             devient une bien meilleure preuve que n'importe quel arrondi. --}}
+        <div class="avatars"
+             aria-label="{{ $cartesEnLigne >= $seuilVitrine
+                ? __('landing.demo.professionnels', ['compte' => $cartesEnLigne])
+                : __('landing.demo.professionnels_debut') }}">
           <span class="avatars__item">AD</span>
           <span class="avatars__item">MF</span>
           <span class="avatars__item">FS</span>
-          <span class="avatars__item avatars__more">+500</span>
+
+          @if ($cartesEnLigne >= $seuilVitrine)
+            <span class="avatars__item avatars__more">+{{ $cartesEnLigne }}</span>
+          @endif
         </div>
       </div>
     </div>

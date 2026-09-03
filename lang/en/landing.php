@@ -66,7 +66,8 @@ return [
         'texte' => 'See exactly how your digital identity will look, right away. No hidden fees, '
             .'no commitment up front. Try :marque for free.',
         'scanner' => 'Scan &amp; View',
-        'professionnels' => 'More than 500 professionals',
+        'professionnels' => 'Over :compte professionals',
+        'professionnels_debut' => 'Professionals who already have their card',
     ],
 
     'tarifs' => [
