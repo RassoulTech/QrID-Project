@@ -91,7 +91,7 @@ class PublicProfileController extends Controller
             /*
              | LA PHOTO — VÉRIFIÉE SUR LE DISQUE, PAS EN BASE.
              |
-             | photo_path renseigné ne veut pas dire fichier présent. Sur un
+             | cover_path renseigné ne veut pas dire fichier présent. Sur un
              | stockage éphémère — FILESYSTEM_DISK=local dans un conteneur
              | Render — chaque déploiement efface les photos téléversées : la
              | colonne reste, le fichier disparaît.
@@ -227,52 +227,36 @@ class PublicProfileController extends Controller
     }
 
     /**
-     * L'adresse de la photo, ou null si le fichier n'est pas là.
+     * L'ADRESSE DE LA COUVERTURE — l'unique image d'une carte.
      *
-     * La vérification coûte un accès disque par affichage. C'est le prix d'un
-     * repli fiable : sans elle, la page promet une image qu'elle ne peut pas
-     * servir, et le visiteur voit un cadre brisé au lieu d'un visage.
-     */
-    private function photo(Profile $profile): ?string
-    {
-        return $this->urlDuMedia($profile, 'photo');
-    }
-
-    /**
-     * L'ADRESSE DE LA BANNIÈRE DE COUVERTURE, ou null.
+     * ═══════════════════════════════════════════════════════════════════
+     * IL Y AVAIT DEUX MÉCANIQUES POUR DEUX IMAGES. IL N'EN RESTE QU'UNE.
+     * ═══════════════════════════════════════════════════════════════════
+     * Le produit demandait autrefois un portrait ET une bannière. L'assistant
+     * n'en demande plus qu'une, mais ce contrôleur cherchait encore les deux :
+     * une méthode `photo()`, un paramètre `$genre`, deux branches à chaque
+     * lecture. La branche « photo » ne pouvait plus rien trouver.
      *
-     * Facultative : sans elle, x-couverture rend le décor de la marque.
+     * ═══════════════════════════════════════════════════════════════════
+     * ON TESTE LES OCTETS, PAS LE FICHIER
+     * ═══════════════════════════════════════════════════════════════════
+     * `couvertureBinaire()` lit la base quand le disque est vide — et remet
+     * le fichier en place au passage. Tester l'existence du FICHIER privait
+     * d'image toutes les cartes servies après un déploiement, alors que
+     * l'image était bel et bien conservée.
      */
     private function couvertureUrl(Profile $profile): ?string
     {
-        return $this->urlDuMedia($profile, 'couverture');
-    }
-
-    /**
-     * UNE SEULE MÉCANIQUE POUR LES DEUX IMAGES.
-     *
-     * On ne teste pas l'existence du FICHIER mais la disponibilité des
-     * OCTETS : photoBinaire() et couvertureBinaire() lisent la base quand le
-     * disque est vide — et remettent le fichier en place au passage. Tester
-     * le fichier privait d'image toutes les cartes servies après un
-     * déploiement, alors que l'image était bel et bien conservée.
-     */
-    private function urlDuMedia(Profile $profile, string $genre): ?string
-    {
-        $chemin = $genre === 'photo' ? $profile->photo_path : $profile->cover_path;
-
-        if (blank($chemin)) {
+        if (blank($profile->cover_path)) {
             return null;
         }
 
         try {
-            $octets = $genre === 'photo'
-                ? $profile->photoBinaire()
-                : $profile->couvertureBinaire();
-
-            return $octets !== null ? Storage::url($chemin) : null;
+            return $profile->couvertureBinaire() !== null
+                ? Storage::url($profile->cover_path)
+                : null;
         } catch (\Throwable $e) {
-            Log::warning('Photo de profil illisible', [
+            Log::warning('Couverture de carte illisible', [
                 'slug' => $profile->slug,
                 'error' => $e->getMessage(),
             ]);

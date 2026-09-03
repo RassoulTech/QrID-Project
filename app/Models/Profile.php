@@ -33,8 +33,6 @@ class Profile extends Model
         'website',
         'address',
         'maps_url',
-        'photo_path',
-        'photo_data',
         'cover_path',
         'cover_data',
         'template_id',
@@ -188,50 +186,28 @@ class Profile extends Model
      * Un profil désactivé a `is_active` à false : la coupure administrative
      * passe donc déjà par ce test, sans condition supplémentaire.
      */
-    /**
-     * LA PHOTO EXISTE-T-ELLE VRAIMENT SUR LE DISQUE ?
-     *
-     * ═══════════════════════════════════════════════════════════════════
-     * TESTER LA COLONNE NE SUFFIT PAS
-     * ═══════════════════════════════════════════════════════════════════
-     * La vue publique testait `photo_path`, c'est-à-dire la BASE. Elle rendait
-     * donc une balise <img> cassée chaque fois que le fichier avait disparu du
-     * disque — et le repli par initiales, écrit juste à côté, ne se
-     * déclenchait jamais. C'est ainsi qu'on obtient un bandeau vide.
-     *
-     * Or le disque de Render est ÉPHÉMÈRE : les photos téléversées sont
-     * effacées à chaque déploiement. Vérifié en production — dans le même
-     * dossier /storage/, l'aperçu de partage répond 200 et la photo 404, parce
-     * que l'application REGÉNÈRE l'un et pas l'autre.
-     *
-     * Ce test est donc la seule chose qui distingue « pas de photo » de
-     * « photo perdue » — et pour le visiteur, les deux doivent produire le
-     * même repli propre.
+    /*
+     |--------------------------------------------------------------------------
+     | UNE SEULE IMAGE, ET C'EST LA COUVERTURE
+     |--------------------------------------------------------------------------
+     |
+     | Le produit demandait autrefois DEUX images : un portrait et une
+     | bannière. L'assistant n'en demande plus qu'une depuis longtemps — le
+     | commentaire de l'étape 1 le dit en toutes lettres — mais la moitié du
+     | code continuait de chercher un portrait qui n'existe plus.
+     |
+     | Conséquences visibles, toutes constatées :
+     |   · le tableau de bord affichait « Aucune photo » pour une photo qu'on
+     |     ne demande plus, donc que personne ne pouvait fournir ;
+     |   · l'appareil de la page d'accueil réservait une place à un portrait
+     |     absent, et ne ressemblait donc pas à la vraie page publique ;
+     |   · le fichier de contact et l'aperçu de partage cherchaient d'abord le
+     |     portrait, et retombaient sur rien.
+     |
+     | `aUnePhoto()` et `photoBinaire()` sont supprimées. La couverture EST la
+     | photo — c'est ce que le visiteur voit en haut de la carte, et c'est la
+     | seule image que le porteur a jamais l'occasion de choisir.
      */
-    public function aUnePhoto(): bool
-    {
-        return $this->photoBinaire() !== null;
-    }
-
-    /**
-     * LES OCTETS DE LA PHOTO — la base d'abord, le disque ensuite.
-     *
-     * ═══════════════════════════════════════════════════════════════════
-     * LA BASE EST LA SOURCE, LE DISQUE EST UN CACHE
-     * ═══════════════════════════════════════════════════════════════════
-     * Le disque de Render est éphémère : chaque déploiement le remet à zéro.
-     * La colonne photo_path survivait, le fichier non — et le visiteur voyait
-     * les initiales d'un profil qui avait bel et bien une photo.
-     *
-     * On lit donc le disque en premier, parce que c'est le chemin rapide, mais
-     * on retombe sur la base dès qu'il est vide. Et l'on REMET le fichier en
-     * place au passage : le déploiement suivant repart d'un cache chaud sans
-     * qu'aucune tâche n'ait à y penser.
-     */
-    public function photoBinaire(): ?string
-    {
-        return $this->mediaBinaire('photo_path', 'photo_data');
-    }
 
     /** Y a-t-il une bannière de couverture choisie par le porteur ? */
     public function aUneCouverture(): bool

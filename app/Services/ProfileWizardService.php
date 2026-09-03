@@ -222,7 +222,6 @@ class ProfileWizardService
                 'last_name' => $profile->last_name,
                 'job_title' => $profile->job_title,
                 'company' => $profile->company,
-                'photo_path' => $profile->photo_path,
                 'cover_path' => $profile->cover_path,
                 'phone' => $profile->phone,
                 'whatsapp' => $profile->whatsapp,
@@ -274,7 +273,7 @@ class ProfileWizardService
     public function clear(): void
     {
         // Les images déposées mais jamais confirmées partent avec l'état.
-        foreach (['data.photo_path', 'data.cover_path'] as $clef) {
+        foreach (['data.cover_path'] as $clef) {
             if ($chemin = $this->get($clef)) {
                 Storage::disk('public')->delete($chemin);
             }
@@ -309,49 +308,24 @@ class ProfileWizardService
     // Photo
     // -----------------------------------------------------------------------
 
-    /**
-     * Dépose la photo, recadrée en carré, et renvoie son chemin relatif.
-     *
-     * Un fichier ne tient pas en session : on l'écrit tout de suite sur le
-     * disque public et on ne garde que le chemin. L'ancienne version est
-     * supprimée dans la foulée pour ne pas accumuler d'orphelins.
-     *
-     * ═══════════════════════════════════════════════════════════════════
-     * LES OCTETS SORTENT AVEC LE CHEMIN, ET C'EST LE POINT
-     * ═══════════════════════════════════════════════════════════════════
-     * Ils ont d'abord voyagé par la session, encodés en base64 : un maillon
-     * fragile, supprimé. Ils ont ensuite été RELUS SUR LE DISQUE au moment
-     * d'écrire le profil — plus court, mais pas plus sûr : toute lecture qui
-     * échoue (disque plein, droits, conteneur remplacé entre deux requêtes)
-     * fait écrire un profil avec un chemin et sans octets, sans que rien ne
-     * le signale.
-     *
-     * Or les octets sont ICI, en mémoire, à l'instant où on les calcule. Les
-     * rendre coûte une variable et supprime toute une classe de pannes : ce
-     * qu'on écrit est ce qu'on vient de produire, pas ce qu'on espère
-     * retrouver.
-     *
-     * @return array{chemin:string, octets:?string} octets null si trop lourd
+    /*
+     |--------------------------------------------------------------------------
+     | `storePhoto()` A ÉTÉ SUPPRIMÉE
+     |--------------------------------------------------------------------------
+     |
+     | Elle enregistrait le PORTRAIT, une image que l'assistant ne demande
+     | plus. Plus aucun appelant : le produit n'a qu'une seule image, la
+     | couverture, et `storeCover()` s'en occupe.
+     |
+     | `toSquareJpeg()` part avec elle — elle recadrait en carré pour une
+     | pastille ronde qui n'existe plus.
      */
-    public function storePhoto(UploadedFile $file): array
-    {
-        if ($old = $this->get('data.photo_path')) {
-            Storage::disk('public')->delete($old);
-        }
-
-        $path = 'profils/'.Str::uuid()->toString().'.jpg';
-        $octets = $this->toSquareJpeg($file);
-
-        Storage::disk('public')->put($path, $octets);
-
-        return ['chemin' => $path, 'octets' => $this->octetsConservables($octets, $path)];
-    }
 
     /**
      * LES OCTETS D'UN FICHIER DÉPOSÉ, s'ils tiennent en base.
      *
      * AU-DELÀ DU PLAFOND, LE DISQUE SEUL. Le cas ne survient que par les
-     * replis de toSquareJpeg() et toBannerJpeg() — GD absent, ou image
+     * repli de toBannerJpeg() — GD absent, ou image
      * indécodable — où le fichier d'origine est rendu intact et peut peser
      * plusieurs mégaoctets. Écrire cela dans chaque lecture de profil
      * coûterait plus que la garantie qu'on cherche. Le média garde alors son
@@ -362,7 +336,7 @@ class ProfileWizardService
      * Les octets, s'ils tiennent en base ; null sinon, et c'est tracé.
      *
      * AU-DELÀ DU PLAFOND, LE DISQUE SEUL. Le cas ne survient que par les
-     * replis de toSquareJpeg() et toBannerJpeg() — GD absent, ou image
+     * repli de toBannerJpeg() — GD absent, ou image
      * indécodable — où le fichier d'origine est rendu intact et peut peser
      * plusieurs mégaoctets. Le média garde alors son ancien comportement :
      * il vit sur le disque et ne survit pas au déploiement. C'est une
@@ -544,88 +518,6 @@ class ProfileWizardService
     }
 
     /**
-     * Recadrage centré en carré puis compression JPEG, en GD pur.
-     *
-     * Aucune dépendance ajoutée : GD est présent dans toute installation PHP
-     * standard. Si l'extension venait à manquer, on retombe sur le fichier
-     * d'origine — un profil sans recadrage vaut mieux qu'une erreur 500.
-     */
-    private function toSquareJpeg(UploadedFile $file): string
-    {
-        // LES DEUX REPLIS RENDENT LE FICHIER D'ORIGINE, qui n'a subi aucun
-        // recadrage ni aucune compression : il peut peser plusieurs mégaoctets.
-        // Un profil sans recadrage vaut mieux qu'une erreur 500, mais il ne
-        // vaut pas une ligne de base de données de cette taille — c'est
-        // storePhoto() qui décidera de ne pas l'écrire en base.
-        if (! function_exists('imagecreatetruecolor')) {
-            return (string) file_get_contents($file->getRealPath());
-        }
-
-        $source = @imagecreatefromstring((string) file_get_contents($file->getRealPath()));
-
-        if ($source === false) {
-            return (string) file_get_contents($file->getRealPath());
-        }
-
-        $w = imagesx($source);
-        $h = imagesy($source);
-        $side = min($w, $h);
-
-        $canvas = imagecreatetruecolor(self::PHOTO_SIZE, self::PHOTO_SIZE);
-
-        // Fond blanc : une image transparente ne doit pas virer au noir en JPEG.
-        imagefill($canvas, 0, 0, imagecolorallocate($canvas, 255, 255, 255));
-
-        imagecopyresampled(
-            $canvas, $source,
-            0, 0,
-            (int) (($w - $side) / 2), (int) (($h - $side) / 2),
-            self::PHOTO_SIZE, self::PHOTO_SIZE,
-            $side, $side
-        );
-
-        /*
-         | LA QUALITÉ DESCEND JUSQU'À CE QUE LE POIDS TIENNE.
-         |
-         | 82 convient à la quasi-totalité des portraits : 20 à 40 Ko. Mais
-         | une image très détaillée — feuillage en arrière-plan, vêtement à
-         | motifs, photo prise en basse lumière — atteint 180 Ko et davantage
-         | au même réglage. Mesuré sur du bruit pur, le pire cas monte à
-         | 184 Ko.
-         |
-         | Plutôt que de refuser la photo ou de la laisser grossir sans
-         | borne, on recomprime. Trois paliers suffisent : entre 82 et 60, un
-         | portrait perd un peu de grain et rien de reconnaissable, là où un
-         | refus obligerait le client à retoucher son image lui-même — ce
-         | qu'il ne fera pas, et il partira sans photo.
-         |
-         | Le dernier palier est renvoyé tel quel : mieux vaut une photo un
-         | peu lourde qu'aucune photo. Le plafond de la base, lui, est trente
-         | fois plus haut.
-         */
-        $binary = '';
-
-        foreach ([82, 70, 60] as $qualite) {
-            ob_start();
-            imagejpeg($canvas, null, $qualite);
-            $binary = (string) ob_get_clean();
-
-            if (strlen($binary) <= self::PHOTO_MAX_OCTETS) {
-                break;
-            }
-        }
-
-        imagedestroy($canvas);
-        imagedestroy($source);
-
-        return $binary;
-    }
-
-    // -----------------------------------------------------------------------
-    // Persistance finale
-    // -----------------------------------------------------------------------
-
-    /**
      * Écrit le profil et ses liens sociaux en UNE SEULE transaction.
      * Le profil naît inactif : il ne devient public qu'après activation.
      */
@@ -651,7 +543,6 @@ class ProfileWizardService
                 'public_email' => $data['public_email'] ?? null,
                 'website' => $data['website'] ?? null,
                 'address' => $data['address'] ?? null,
-                'photo_path' => $data['photo_path'] ?? null,
                 'cover_path' => $data['cover_path'] ?? null,
 
                 /*
@@ -670,9 +561,6 @@ class ProfileWizardService
                  | déjà. Corriger une faute dans son nom ne doit pas effacer
                  | sa photo.
                  */
-                'photo_data' => $this->octetsDuFichier($data['photo_path'] ?? null)
-                    ?? $existing?->photo_data,
-
                 'cover_data' => $this->octetsDuFichier($data['cover_path'] ?? null)
                     ?? $existing?->cover_data,
                 'template_id' => $data['template_id'] ?? null,

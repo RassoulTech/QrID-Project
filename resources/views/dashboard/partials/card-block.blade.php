@@ -42,8 +42,14 @@
                      construisaient par concaténation : l'accord de l'adjectif y
                      était figé au féminin, et l'anglais n'y aurait rien accordé
                      du tout. --}}
+                {{-- UN SEUL MÉDIA, PARCE QU'ON N'EN DEMANDE QU'UN.
+
+                     Cette liste en affichait deux : « photo » et « bannière ».
+                     Or l'assistant ne demande plus de portrait depuis
+                     longtemps — le client lisait donc « Aucune photo » pour
+                     une image que rien ne lui permettait de fournir, et
+                     concluait que le produit avait perdu son téléversement. --}}
                 @foreach ([
-                    ['photo', $profile->aUnePhoto()],
                     ['banniere', $profile->aUneCouverture()],
                 ] as [$genre, $presente])
                     <span @class(['board-media', 'board-media--absente' => ! $presente])>

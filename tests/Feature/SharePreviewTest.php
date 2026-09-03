@@ -54,7 +54,7 @@ class SharePreviewTest extends TestCase
             'last_name' => 'Ndiaye',
             'job_title' => 'Consultante en gestion',
             'company' => 'Teranga Conseil',
-            'photo_path' => null,
+            'cover_path' => null,
             'is_active' => true,
         ]);
     }
@@ -87,7 +87,7 @@ class SharePreviewTest extends TestCase
      */
     public function test_a_preview_exists_even_without_a_photo(): void
     {
-        $this->assertNull($this->profile->photo_path);
+        $this->assertNull($this->profile->cover_path);
 
         $png = app(SharePreviewService::class)->png($this->profile);
 

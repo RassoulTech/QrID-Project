@@ -1272,3 +1272,79 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
     color:var(--texte-2, #{$gris-second});
   }
 }
+
+// =============================================================================
+// LA PHOTO DE COMPTE
+// =============================================================================
+//
+// Elle remplace les initiales dans l'espace client, et nulle part ailleurs :
+// la carte publique a sa propre image, choisie dans l'assistant.
+//
+// MOBILE D'ABORD : l'aperçu et les actions s'empilent, parce qu'un médaillon
+// de 72px à côté d'un champ de fichier ne laisse pas assez de largeur pour
+// lire le nom du fichier choisi sur un écran de 320px.
+.compte-avatar{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:esp(4);
+
+  @include ecran(ms){
+    flex-direction:row;
+    align-items:flex-start;
+    gap:esp(5);
+  }
+}
+
+.compte-avatar__apercu{
+  flex:0 0 auto;
+  width:72px;
+  height:72px;
+  border-radius:$r-full;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  background:var(--marque-doux);
+  border:1px solid var(--bordure-f);
+}
+
+.compte-avatar__image{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.compte-avatar__initiales{
+  font-weight:600;
+  font-size:24px;
+  letter-spacing:.02em;
+  color:var(--marque-encre);
+}
+
+.compte-avatar__actions{
+  flex:1 1 auto;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:esp(3);
+  width:100%;
+}
+
+// Les deux boutons se suivent sur téléphone et se posent côte à côte dès
+// qu'il y a la largeur. `wrap` plutôt qu'une requête média : le point de
+// rupture est la place disponible, pas la taille de l'écran.
+.compte-avatar__boutons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:esp(2);
+  margin-top:esp(2);
+}
+
+// L'AVATAR DE LA BARRE, quand c'est une photo et non des initiales.
+// `object-fit` parce qu'une image non carrée s'écraserait autrement, et un
+// visage déformé est pire qu'un rond de couleur.
+.adm-avatar--photo{
+  object-fit:cover;
+  padding:0;
+}

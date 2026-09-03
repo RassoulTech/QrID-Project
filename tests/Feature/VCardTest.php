@@ -62,7 +62,7 @@ class VCardTest extends TestCase
             'phone' => '+221770000001',
             'whatsapp' => '+221770000001',
             'public_email' => 'awa@exemple.sn',
-            'photo_path' => null,
+            'cover_path' => null,
             'is_active' => true,
         ]);
     }
@@ -273,8 +273,8 @@ class VCardTest extends TestCase
      */
     public function test_the_photo_is_embedded_when_it_exists(): void
     {
-        Storage::disk('public')->put('photos/awa.jpg', 'contenu-binaire-fictif');
-        $this->profile->update(['photo_path' => 'photos/awa.jpg']);
+        Storage::disk('public')->put('couvertures/awa.jpg', 'contenu-binaire-fictif');
+        $this->profile->update(['cover_path' => 'couvertures/awa.jpg']);
 
         $fiche = $this->get(route('profile.vcard', 'awa-ndiaye'))->getContent();
 
@@ -291,7 +291,7 @@ class VCardTest extends TestCase
      */
     public function test_a_missing_photo_never_breaks_the_download(): void
     {
-        $this->profile->update(['photo_path' => 'photos/effacee-par-un-deploiement.jpg']);
+        $this->profile->update(['cover_path' => 'couvertures/effacee-par-un-deploiement.jpg']);
 
         $fiche = $this->get(route('profile.vcard', 'awa-ndiaye'))->assertOk()->getContent();
 

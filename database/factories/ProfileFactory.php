@@ -28,7 +28,6 @@ class ProfileFactory extends Factory
             'public_email' => fake()->unique()->safeEmail(),
             'website' => null,
             'address' => fake()->city(),
-            'photo_path' => null,
             'template_id' => Template::factory(),
             // Toujours une variante réelle : une fabrique qui produirait une
             // teinte inexistante ferait passer des tests sur un état

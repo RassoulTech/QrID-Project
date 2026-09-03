@@ -82,6 +82,24 @@
 
 .db-card__tete .db-card__titre{margin:0}
 
+// Un titre SUIVI d'un sous-titre resserre sa marge : les deux forment une
+// seule unité de sens, et l'écart normal les séparerait en deux blocs.
+.db-card__titre:has(+ .db-card__sous){margin-bottom:esp(1)}
+
+// LE SOUS-TITRE D'UN BLOC — une phrase qui dit ce que le bloc fait, sous son
+// titre. La page « Mon compte » en a besoin pour chacune de ses sections :
+// « supprimer mon compte » sans explication ressemble à un piège.
+.db-card__sous{
+  // Le titre pose déjà sa marge basse ; on la reprend à zéro plutôt que
+  // d'inventer un espacement négatif, que l'échelle du projet refuse — et
+  // elle a raison : une marge négative est une rustine, pas une mesure.
+  margin:0 0 esp(4);
+  color:var(--texte-2);
+  font-size:14px;
+  line-height:1.55;
+  max-width:60ch;
+}
+
 // -----------------------------------------------------------------------------
 // GROUPE D'ENTRAIDE — dernière carte de la colonne, volontairement discrète
 //

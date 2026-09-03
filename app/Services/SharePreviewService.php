@@ -126,7 +126,7 @@ class SharePreviewService
             $profile->full_name,
             $profile->job_title,
             $profile->company,
-            $profile->photo_path,
+            $profile->cover_path,
             config('app.name'),
         ])), 0, 8);
     }
@@ -223,8 +223,9 @@ class SharePreviewService
     /** La photo, en rond, à droite. Rend false s'il n'y en a pas. */
     private function photo(\GdImage $image, Profile $profile): bool
     {
-        // photoBinaire() : le disque s'il l'a, la base sinon. Voir Profile.
-        $octets = $profile->photoBinaire();
+        // couvertureBinaire() : le disque s'il l'a, la base sinon. Le produit
+        // n'a qu'UNE image, et c'est elle. Voir Profile.
+        $octets = $profile->couvertureBinaire();
 
         if ($octets === null) {
             return false;

@@ -35,7 +35,7 @@ use Throwable;
 class ProfileObserver
 {
     /** Champs affichés PAR l'aperçu de partage. */
-    private const CHAMPS_APERCU = ['first_name', 'last_name', 'job_title', 'company', 'photo_path'];
+    private const CHAMPS_APERCU = ['first_name', 'last_name', 'job_title', 'company', 'cover_path'];
 
     public function __construct(
         private QrCodeService $qr,

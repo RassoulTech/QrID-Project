@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail
 {
@@ -30,6 +32,7 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
         'name',
         'email',
         'phone',
+        'avatar_path',
         'role',
         'password',
         'theme',
@@ -276,6 +279,86 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function isOnTrial(): bool
     {
         return $this->activeSubscription()?->isTrial() ?? false;
+    }
+
+    /**
+     * LES INITIALES, ou la photo importée si elle existe.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * LE REPLI EST LE CAS NORMAL, PAS UNE PANNE
+     * ═══════════════════════════════════════════════════════════════════
+     * « MD », « AD » : deux lettres sur un rond de couleur. La plupart des
+     * comptes n'auront jamais autre chose, et c'est très bien — un avatar
+     * n'est pas ce pour quoi on achète une carte de visite.
+     *
+     * L'ordre des replis suit ce que le compte POSSÈDE réellement : une
+     * image importée d'abord, l'adresse Google ensuite quand le compte
+     * vient de là, les initiales enfin.
+     */
+    public function initiales(): string
+    {
+        return collect(explode(' ', trim($this->name)))
+            ->filter()
+            ->take(2)
+            ->map(fn (string $mot) => mb_strtoupper(mb_substr($mot, 0, 1)))
+            ->implode('');
+    }
+
+    /**
+     * L'adresse de la photo de compte, ou null s'il n'y en a pas.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * ON TESTE LES OCTETS, PAS LE FICHIER
+     * ═══════════════════════════════════════════════════════════════════
+     * Le disque du conteneur est recréé à chaque déploiement. Tester
+     * l'existence du fichier priverait d'avatar tous les comptes servis
+     * après une mise en ligne, alors que l'image est en base.
+     *
+     * C'est le même dispositif que pour la couverture d'une carte, et il
+     * existe pour la même raison.
+     */
+    public function avatarUrl(): ?string
+    {
+        if (filled($this->avatar_path) && $this->avatarBinaire() !== null) {
+            return Storage::url($this->avatar_path);
+        }
+
+        // Une adresse chez Google, pas une image qu'on détient : elle vaut
+        // ce que vaut le lien, et disparaît si le compte Google change.
+        return $this->google_avatar ?: null;
+    }
+
+    /**
+     * Les octets de la photo de compte — le disque d'abord, la base sinon.
+     *
+     * Le cache se reconstitue tout seul au passage, sans bloquer
+     * l'affichage si le disque refuse l'écriture.
+     */
+    public function avatarBinaire(): ?string
+    {
+        if (filled($this->avatar_path)) {
+            try {
+                if (Storage::disk('public')->exists($this->avatar_path)) {
+                    return Storage::disk('public')->get($this->avatar_path);
+                }
+            } catch (Throwable) {
+                // Un disque injoignable ne doit pas casser une page.
+            }
+        }
+
+        $octets = $this->avatar_data;
+
+        if (blank($octets)) {
+            return null;
+        }
+
+        try {
+            Storage::disk('public')->put($this->avatar_path, $octets);
+        } catch (Throwable) {
+            // Le cache se reconstruira au prochain passage.
+        }
+
+        return $octets;
     }
 
     /**

@@ -11,8 +11,16 @@
 <div class="phone">
   <div class="phone__screen">
     <div class="pf-avatar">
-      @if ($profile->photo_path)
-        <img src="{{ Storage::url($profile->photo_path) }}"
+      {{-- LA COUVERTURE, COMME SUR LA VRAIE PAGE PUBLIQUE.
+
+           Cet appareil montrait un portrait dans une pastille ronde. Le
+           produit ne demande plus de portrait : la carte réelle affiche une
+           SEULE image, en bandeau, et le nom par-dessus.
+
+           Un aperçu qui ne ressemble pas à ce qu'on livre promet autre chose
+           que le produit — c'est la pire forme de démonstration. --}}
+      @if ($profile->cover_path)
+        <img src="{{ Storage::url($profile->cover_path) }}"
              alt="{{ $profile->full_name }}"
              width="64" height="64" style="width:100%;height:100%;object-fit:cover">
       @else

@@ -15,7 +15,19 @@ use Tests\TestCase;
  * LE DÉFAUT, ET POURQUOI IL A MIS DU TEMPS À SE VOIR
  * ═══════════════════════════════════════════════════════════════════════
  * Le conteneur de production a un disque ÉPHÉMÈRE : il est reconstruit à
- * chaque déploiement. La colonne photo_path, elle, est en base et survit.
+ * chaque déploiement. La colonne cover_path, elle, est en base et survit.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CE FICHIER PORTAIT SUR LE PORTRAIT. IL PORTE SUR LA COUVERTURE.
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Le produit demandait autrefois deux images. Il n'en demande plus qu'une, et
+ * c'est la couverture : elle occupe le bandeau de la carte, et c'est la seule
+ * que le porteur ait jamais l'occasion de choisir.
+ *
+ * Le mécanisme testé ici — disque d'abord, base ensuite, cache reconstruit au
+ * passage — n'a pas changé d'un octet. Seule la colonne qu'il protège a
+ * changé de nom, et la garantie compte autant : une carte qui perd son image
+ * au déploiement est une carte que son porteur croit cassée.
  * Le profil gardait donc un chemin qui ne menait plus nulle part.
  *
  * En local, rien ne se voyait jamais : le disque persiste. En production,
@@ -27,7 +39,7 @@ use Tests\TestCase;
  * ═══════════════════════════════════════════════════════════════════════
  * LA BASE EST LA SOURCE, LE DISQUE EST UN CACHE
  * ═══════════════════════════════════════════════════════════════════════
- * Les octets sont écrits dans photo_data. photoBinaire() lit le disque
+ * Les octets sont écrits dans cover_data. couvertureBinaire() lit le disque
  * quand il les a encore, la base sinon — et REMET le fichier en place au
  * passage, pour que les requêtes suivantes soient servies par le disque.
  *
@@ -54,8 +66,8 @@ class PhotoDurableTest extends TestCase
     {
         Storage::fake('public');
 
-        $profile = Profile::factory()->create(['photo_path' => 'photos/test.jpg']);
-        $profile->forceFill(['photo_data' => $this->octets()])->save();
+        $profile = Profile::factory()->create(['cover_path' => 'couvertures/test.jpg']);
+        $profile->forceFill(['cover_data' => $this->octets()])->save();
 
         return $profile->fresh();
     }
@@ -70,9 +82,9 @@ class PhotoDurableTest extends TestCase
     {
         $profile = $this->profilAvecPhoto();
 
-        Storage::disk('public')->put('photos/test.jpg', 'octets-du-disque');
+        Storage::disk('public')->put('couvertures/test.jpg', 'octets-du-disque');
 
-        $this->assertSame('octets-du-disque', $profile->photoBinaire());
+        $this->assertSame('octets-du-disque', $profile->couvertureBinaire());
     }
 
     /** LE DÉPLOIEMENT EFFACE LE DISQUE — la photo reste. */
@@ -80,10 +92,10 @@ class PhotoDurableTest extends TestCase
     {
         $profile = $this->profilAvecPhoto();
 
-        Storage::disk('public')->delete('photos/test.jpg');
+        Storage::disk('public')->delete('couvertures/test.jpg');
 
-        $this->assertTrue($profile->aUnePhoto());
-        $this->assertSame($this->octets(), $profile->photoBinaire());
+        $this->assertTrue($profile->aUneCouverture());
+        $this->assertSame($this->octets(), $profile->couvertureBinaire());
     }
 
     /**
@@ -97,12 +109,12 @@ class PhotoDurableTest extends TestCase
     {
         $profile = $this->profilAvecPhoto();
 
-        Storage::disk('public')->delete('photos/test.jpg');
-        Storage::disk('public')->assertMissing('photos/test.jpg');
+        Storage::disk('public')->delete('couvertures/test.jpg');
+        Storage::disk('public')->assertMissing('couvertures/test.jpg');
 
-        $profile->photoBinaire();
+        $profile->couvertureBinaire();
 
-        Storage::disk('public')->assertExists('photos/test.jpg');
+        Storage::disk('public')->assertExists('couvertures/test.jpg');
     }
 
     /** SANS PHOTO, aucune invention : l'appelant doit pouvoir replier. */
@@ -110,10 +122,10 @@ class PhotoDurableTest extends TestCase
     {
         Storage::fake('public');
 
-        $profile = Profile::factory()->create(['photo_path' => null]);
+        $profile = Profile::factory()->create(['cover_path' => null]);
 
-        $this->assertFalse($profile->aUnePhoto());
-        $this->assertNull($profile->photoBinaire());
+        $this->assertFalse($profile->aUneCouverture());
+        $this->assertNull($profile->couvertureBinaire());
     }
 
     /**
@@ -127,7 +139,7 @@ class PhotoDurableTest extends TestCase
     {
         $profile = $this->profilAvecPhoto();
 
-        Storage::disk('public')->delete('photos/test.jpg');
+        Storage::disk('public')->delete('couvertures/test.jpg');
 
         $this->assertStringContainsString(
             'PHOTO;ENCODING=b;TYPE=JPEG:',

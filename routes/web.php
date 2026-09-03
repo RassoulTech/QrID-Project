@@ -9,6 +9,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LanguePreferenceController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Profile\AvatarController;
 use App\Http\Controllers\Profile\CardController;
 use App\Http\Controllers\Profile\CardOrderController;
 use App\Http\Controllers\Profile\CompteursController;
@@ -251,6 +252,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/compte', [AccountController::class, 'edit'])->name('compte.edit');
     Route::patch('/compte', [AccountController::class, 'update'])->name('compte.update');
     Route::delete('/compte', [AccountController::class, 'destroy'])->name('compte.destroy');
+
+    /*
+     | LA PHOTO DE COMPTE — l'avatar de l'espace client.
+     |
+     | Distincte de la couverture de la carte : celle-ci n'est vue que par
+     | son porteur, en haut de ses propres écrans. Le repli reste les
+     | initiales, qui suffisent à la plupart des comptes.
+     |
+     | `throttle:10,1` : téléverser une image dix fois par minute n'est pas
+     | un geste humain, et chaque envoi écrit en base.
+     */
+    Route::post('/compte/photo', [AvatarController::class, 'update'])
+        ->middleware('throttle:10,1')
+        ->name('compte.avatar.update');
+
+    Route::delete('/compte/photo', [AvatarController::class, 'destroy'])
+        ->name('compte.avatar.destroy');
 });
 
 require __DIR__.'/auth.php';

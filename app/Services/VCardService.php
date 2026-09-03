@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Profile;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * La fiche contact téléchargeable — « Enregistrer le contact ».
@@ -144,7 +143,7 @@ class VCardService
      */
     private function photo(Profile $profile): ?string
     {
-        if (! $profile->photo_path) {
+        if (! $profile->cover_path && blank($profile->cover_data)) {
             return null;
         }
 
@@ -152,18 +151,19 @@ class VCardService
             /*
              | ON DEMANDE LES OCTETS, PAS LE FICHIER.
              |
-             | photoBinaire() lit le disque quand il l'a encore, la base sinon.
+             | couvertureBinaire() lit le disque quand il l'a encore, la base sinon.
+             | Le produit n'a qu'UNE image : la couverture est la photo.
              | Tester l'existence du fichier privait de portrait toutes les
              | fiches enregistrées après un déploiement, alors que la photo
              | était bel et bien conservée.
              */
-            $binaire = (string) $profile->photoBinaire();
+            $binaire = (string) $profile->couvertureBinaire();
 
             if ($binaire === '' || strlen($binaire) > self::PHOTO_MAX_OCTETS) {
                 return null;
             }
 
-            $type = str_ends_with(strtolower($profile->photo_path), '.png') ? 'PNG' : 'JPEG';
+            $type = str_ends_with(strtolower((string) $profile->cover_path), '.png') ? 'PNG' : 'JPEG';
 
             return $this->plier('PHOTO;ENCODING=b;TYPE='.$type.':'.base64_encode($binaire));
         } catch (\Throwable $e) {

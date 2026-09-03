@@ -111,6 +111,17 @@ return [
     ],
 
     'compte' => [
+        'avatar_carte' => 'Account photo',
+        'avatar_carte_sous' => 'It only appears in your workspace, never on your public card.',
+        'avatar_titre' => 'Your photo',
+        'avatar_optionnel' => 'optional',
+        'avatar_aide' => 'JPG, PNG or WEBP, 2 MB maximum. Without a photo, your initials are shown.',
+        'avatar_enregistrer' => 'Save photo',
+        'avatar_retirer' => 'Back to initials',
+        'avatar_enregistre' => 'Your account photo has been saved.',
+        'avatar_retire' => 'Your initials are shown again.',
+        'avatar_requis' => 'Choose an image to upload.',
+        'avatar_echec' => 'The image could not be saved. Please try again in a moment.',
         'titre' => 'My account',
 
         'informations' => 'Account details',

@@ -88,7 +88,16 @@
                     <button class="adm-top__user" type="button" id="menuCompte"
                             data-bs-toggle="dropdown" aria-expanded="false">
                         <span class="d-none d-sm-inline">{{ $u->name }}</span>
-                        <span class="adm-avatar" aria-hidden="true">{{ $initiales }}</span>
+                        {{-- LA PHOTO DU COMPTE, ou les initiales à défaut.
+                             Le repli est le cas NORMAL : la plupart des comptes
+                             n'importeront jamais d'image, et deux lettres sur un
+                             rond sont une identité suffisante. --}}
+                        @if ($avatarUrl = $u->avatarUrl())
+                            <img src="{{ $avatarUrl }}" alt="" class="adm-avatar adm-avatar--photo"
+                                 width="32" height="32" loading="lazy">
+                        @else
+                            <span class="adm-avatar" aria-hidden="true">{{ $initiales }}</span>
+                        @endif
                     </button>
 
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuCompte">

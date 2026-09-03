@@ -184,10 +184,9 @@ class ProfileWizardController extends Controller
          */
         $noms = [];
 
-        if (array_key_exists('photo_path', $images)) {
-            $noms[] = __('votre photo');
-        }
-
+        // Une seule image demandée, donc un seul nom possible. Le produit
+        // a cessé de demander un portrait ; le message ne doit plus en
+        // nommer un que personne ne peut fournir.
         if (array_key_exists('cover_path', $images)) {
             $noms[] = __('votre bannière');
         }
@@ -202,14 +201,14 @@ class ProfileWizardController extends Controller
          | voyait plus, sans que rien ne le lui ait dit.
          */
         $perdues = array_keys(array_filter(
-            ['photo_data' => $images['photo_data'] ?? true, 'cover_data' => $images['cover_data'] ?? true],
+            ['cover_data' => $images['cover_data'] ?? true],
             fn ($octets) => $octets === null
         ));
 
         if ($perdues !== []) {
             session()->flash('warning', __(
-                "Votre image a été enregistrée, mais elle est trop lourde pour être conservée durablement. ".
-                "Choisissez une image plus légère si elle venait à disparaître."
+                'Votre image a été enregistrée, mais elle est trop lourde pour être conservée durablement. '.
+                'Choisissez une image plus légère si elle venait à disparaître.'
             ));
 
             return;

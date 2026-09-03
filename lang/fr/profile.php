@@ -131,6 +131,17 @@ return [
     // MON COMPTE
     // =================================================================
     'compte' => [
+        'avatar_carte' => 'Photo de compte',
+        'avatar_carte_sous' => 'Elle n\'apparaît que dans votre espace, jamais sur votre carte publique.',
+        'avatar_titre' => 'Votre photo',
+        'avatar_optionnel' => 'optionnel',
+        'avatar_aide' => 'JPG, PNG ou WEBP, 2 Mo au maximum. Sans photo, vos initiales sont affichées.',
+        'avatar_enregistrer' => 'Enregistrer la photo',
+        'avatar_retirer' => 'Revenir aux initiales',
+        'avatar_enregistre' => 'Votre photo de compte est enregistrée.',
+        'avatar_retire' => 'Vos initiales sont de nouveau affichées.',
+        'avatar_requis' => 'Choisissez une image à importer.',
+        'avatar_echec' => 'L\'image n\'a pas pu être enregistrée. Réessayez dans un instant.',
         'titre' => 'Mon compte',
 
         'informations' => 'Informations du compte',

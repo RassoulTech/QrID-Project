@@ -60,6 +60,10 @@ class ValidationDesEcrituresTest extends TestCase
             'notifications.read-all' => 'aucun corps, agit sur les alertes du compte connecté',
             'logout' => 'aucun corps',
 
+            // Aucun corps : revenir aux initiales est le retour à l'état par
+            // défaut du compte connecté, pas une donnée à valider.
+            'compte.avatar.destroy' => 'aucun corps, remet le compte connecté à ses initiales',
+
             // Aucun corps : l'état vient de la base, jamais de la requête.
             'abonnement.checkout' => 'aucun corps, lit le profil du compte connecté',
 
