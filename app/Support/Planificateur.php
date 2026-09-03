@@ -311,6 +311,58 @@ final class Planificateur
                 'mis_a_jour_le' => Carbon::now(),
             ],
         );
+
+        self::direOuEnEstLaFile();
+    }
+
+    /**
+     * LA PROFONDEUR DE LA FILE, DITE À VOIX HAUTE À CHAQUE BATTEMENT.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * POURQUOI CETTE LIGNE EXISTE
+     * ═══════════════════════════════════════════════════════════════════
+     * Le produit a un worker qui tourne, et aucun moyen de savoir s'il
+     * CONSOMME. Les deux états se ressemblent exactement de l'extérieur :
+     * un processus vivant qui avale les tâches et un processus vivant qui
+     * regarde ailleurs produisent le même silence dans les journaux.
+     *
+     * La différence n'apparaît qu'au moment de basculer QUEUE_CONNECTION —
+     * et si l'on s'est trompé, elle apparaît sous la forme « plus personne
+     * ne peut créer de compte », sans la moindre erreur nulle part. C'est
+     * la panne que ce produit a déjà vécue.
+     *
+     * Deux entiers toutes les cinq minutes suffisent à la rendre visible :
+     * si `en_attente` monte sans jamais redescendre, le worker ne consomme
+     * pas. S'il reste à zéro pendant que des e-mails partent, il consomme.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * ELLE NE DOIT JAMAIS CASSER LE BATTEMENT
+     * ═══════════════════════════════════════════════════════════════════
+     * Le battement sert à prouver que le planificateur tourne. Si la
+     * lecture de la file échoue — table absente sur une installation
+     * neuve, base momentanément injoignable — c'est la lecture qu'on perd,
+     * jamais la preuve de vie.
+     */
+    private static function direOuEnEstLaFile(): void
+    {
+        try {
+            $enAttente = DB::table('jobs')->count();
+            $echouees = DB::table('failed_jobs')->count();
+        } catch (Throwable) {
+            return;   // la file n'est pas lisible : le battement, lui, l'est
+        }
+
+        // Rien en attente et rien en échec : le cas nominal, et il n'a pas
+        // besoin d'une ligne de journal toutes les cinq minutes.
+        if ($enAttente === 0 && $echouees === 0) {
+            return;
+        }
+
+        echo sprintf(
+            'File : %d en attente, %d en échec.'.PHP_EOL,
+            $enAttente,
+            $echouees,
+        );
     }
 
     /**
