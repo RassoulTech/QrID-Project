@@ -66,6 +66,67 @@ Route::match(['get', 'post'], '/automation/schedule', ScheduleRunController::cla
     ->withoutMiddleware([VerifyCsrfToken::class])
     ->name('automation.schedule');
 
+/*
+|------------------------------------------------------------------------------
+| LE RÉVEIL — la route la plus légère du produit
+|------------------------------------------------------------------------------
+|
+| ═══════════════════════════════════════════════════════════════════════════
+| À QUOI ELLE SERT, ET À RIEN D'AUTRE
+| ═══════════════════════════════════════════════════════════════════════════
+| Render arrête un service gratuit après quinze minutes sans requête. Le
+| réveil prend une cinquantaine de secondes — pendant lesquelles le premier
+| visiteur à scanner une carte attend devant un écran blanc, et conclut le
+| plus souvent que le lien est mort.
+|
+| Un service de cron externe appelle cette adresse toutes les dix minutes.
+| Le conteneur ne s'endort jamais, et le réveil à froid disparaît.
+|
+| ═══════════════════════════════════════════════════════════════════════════
+| POURQUOI PAS LA PAGE D'ACCUEIL
+| ═══════════════════════════════════════════════════════════════════════════
+| Elle ferait aussi bien l'affaire pour tenir le conteneur éveillé — mais
+| elle coûte entre 310 et 560 ms, compte les cartes en ligne et charge les
+| tarifs. Payer cela six fois par heure, pour une requête que personne ne
+| lit, revient à faire travailler la base pour rien.
+|
+| Celle-ci ne touche RIEN : pas de base, pas de session, pas de vue. Elle
+| rend deux caractères.
+|
+| ═══════════════════════════════════════════════════════════════════════════
+| POURQUOI PAS /automation/schedule
+| ═══════════════════════════════════════════════════════════════════════════
+| Cette route-là DÉCLENCHE le planificateur, ce qui a un sens quand rien ne
+| le fait tourner. Ce n'est plus le cas : supervisor s'en charge dans le
+| conteneur. L'appeler pour réveiller ferait exécuter des tâches à chaque
+| ping — un travail réel là où on ne veut qu'un signe de vie.
+|
+| ═══════════════════════════════════════════════════════════════════════════
+| SANS JETON, ET C'EST DÉLIBÉRÉ
+| ═══════════════════════════════════════════════════════════════════════════
+| Elle ne lit rien, n'écrit rien et ne révèle rien : il n'y a rien à
+| protéger. Un jeton compliquerait la configuration chez le service de cron
+| sans écarter la moindre attaque — n'importe qui peut de toute façon
+| appeler la page d'accueil pour obtenir le même effet.
+|
+| La limite de cadence est là pour borner l'usage, pas pour interdire :
+| soixante appels par minute laissent toute la marge d'un ping toutes les
+| dix minutes, et refusent qu'on s'en serve comme d'un robinet.
+*/
+Route::get('/reveil', function () {
+    return response('ok', 200, [
+        'Content-Type' => 'text/plain; charset=utf-8',
+
+        // Elle n'a rien à faire dans un moteur de recherche : ce n'est pas
+        // une page, c'est un signe de vie.
+        'X-Robots-Tag' => 'noindex, nofollow',
+
+        // Aucun intermédiaire ne doit répondre à sa place : un ping servi
+        // depuis un cache ne réveillerait rien du tout.
+        'Cache-Control' => 'no-store',
+    ]);
+})->middleware('throttle:60,1')->name('reveil');
+
 // Pages légales — obligatoires avant toute vente.
 Route::get('/conditions-generales', [LegalController::class, 'conditions'])->name('legal.conditions');
 Route::get('/confidentialite', [LegalController::class, 'confidentialite'])->name('legal.confidentialite');
