@@ -13,6 +13,24 @@ $phone-radius-out: 44px;
 $phone-radius-in: 36px;
 $ease: cubic-bezier(.2,.8,.2,1);
 
+/*
+ | LA LARGEUR D'UN TÉLÉPHONE RÉEL.
+ |
+ | La carte publique est rendue À CETTE LARGEUR dans la maquette, puis
+ | réduite d'un seul coup. C'est ce qui garantit que les proportions montrées
+ | à la vitrine sont EXACTEMENT celles que recevra le visiteur.
+ |
+ | La maquette portait auparavant sa propre feuille de styles — 331 lignes de
+ | classes `.phc` recopiées de `.pubc`, avec ses propres tailles « divisées
+ | par deux ». Une copie ne se maintient pas : la page publique a supprimé le
+ | médaillon rond et posé l'identité dans une image pleine largeur, la copie
+ | ne l'a pas suivi, et la vitrine a montré pendant des semaines une
+ | composition que le produit ne rend nulle part.
+ |
+ | Réduire plutôt que redessiner supprime la copie, donc la divergence.
+ */
+$phone-reference: 375;
+
 // -----------------------------------------------------------------------------
 // SCÈNE — dimensionnée pour accueillir le téléphone ET ses cartes flottantes
 // -----------------------------------------------------------------------------
@@ -47,6 +65,12 @@ $ease: cubic-bezier(.2,.8,.2,1);
 .phone{
   position:relative;
   z-index:2;
+
+  // 280 - 2 x 10 de châssis. C'est la seule valeur à changer d'une variante
+  // à l'autre : tout le reste en découle.
+  --phone-ecran: 260;
+  --phone-echelle: calc(var(--phone-ecran) / #{$phone-reference});
+
   width:280px;
   max-width:100%;
   aspect-ratio:9 / 19.5;
@@ -71,13 +95,10 @@ $ease: cubic-bezier(.2,.8,.2,1);
 
     .phone__screen{border-radius:31px}
     .phone__notch{width:76px;height:20px}
-    // La carte se resserre : mêmes proportions, deux points de moins.
-    .phc__couverture{height:104px}
-    .phc__medaillon{width:46px;height:46px}
-    .phc__nom{font-size:11.5px}
-    .phc__role,.phc__entreprise{font-size:8.5px}
-    .phc__tuile-nom{font-size:6px}
-    .phc__action{height:22px;font-size:8px}
+
+    // 240 - 2 x 8 de chassis. Une seule valeur change : les proportions de
+    // la carte ne sont pas reinterpretees, elles sont vues de plus loin.
+    --phone-ecran: 224;
   }
 
   // Mobile : 220px pour les deux variantes
@@ -88,10 +109,8 @@ $ease: cubic-bezier(.2,.8,.2,1);
 
     .phone__screen{border-radius:31px}
     .phone__notch{width:70px;height:19px}
-    .phc__couverture{height:96px}
-    .phc__medaillon{width:42px;height:42px}
-    .phc__nom{font-size:11px}
-    .phc__action{height:21px}
+
+    --phone-ecran: 204;                     // 220 - 2 x 8 de chassis
   }
 }
 
@@ -127,8 +146,74 @@ $ease: cubic-bezier(.2,.8,.2,1);
   background:$blanc;
   border-radius:$phone-radius-in;
   overflow:hidden;
-  display:flex;
-  flex-direction:column;
+}
+
+/*
+ | ═══════════════════════════════════════════════════════════════════════════
+ | LA PAGE PUBLIQUE, RÉDUITE — et elle occupe TOUT l'appareil.
+ | ═══════════════════════════════════════════════════════════════════════════
+ | L'ancienne maquette posait une carte détachée sur une page grise, et
+ | terminait sur un tiers d'écran vide qu'une ligne de texte venait combler.
+ | La page publique, elle, remplit l'écran du haut de la couverture jusqu'en
+ | bas. La maquette fait désormais pareil : `inset:0`, sans marge ni carte
+ | flottante.
+ */
+.phone__vue{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  z-index:1;
+}
+
+.phone__page{
+  width:#{$phone-reference}px;
+
+  /*
+   | LA HAUTEUR DE L'ÉCRAN, EXPRIMÉE AVANT RÉDUCTION.
+   |
+   | Sans elle, `.pubc-page` retomberait sur son `min-height:100dvh`, qui se
+   | mesure sur la FENÊTRE du navigateur : la carte ferait la hauteur de
+   | l'écran du visiteur à l'intérieur d'une maquette de 600px de haut, et
+   | l'appareil n'en montrerait qu'une bande.
+   */
+  height:calc(100% / var(--phone-echelle));
+
+  transform:scale(var(--phone-echelle));
+  transform-origin:top left;
+
+  .pubc-page{min-height:100%}
+
+  /*
+   | ═════════════════════════════════════════════════════════════════════════
+   | LA MAQUETTE REND LA CARTE TÉLÉPHONE, MÊME SUR UN GRAND ÉCRAN.
+   | ═════════════════════════════════════════════════════════════════════════
+   | Une requête média interroge la FENÊTRE, jamais le bloc qui la contient.
+   | Sur un écran de 1280px, la carte de la maquette prenait donc sa mise en
+   | page de bureau — deux colonnes, couverture de 380px, carte détachée sur
+   | fond gris — le tout réduit dans un cadre de téléphone. Un appareil qui
+   | montre la version bureau du produit ne montre pas le produit.
+   |
+   | La parade tient en six règles, qui REMETTENT les valeurs de base. Elles
+   | l'emportent par leur spécificité (0,2,0 contre 0,1,0), quel que soit
+   | l'ordre des fichiers.
+   |
+   | POURQUOI PAS UNE REQUÊTE DE CONTENEUR, qui serait la bonne réponse :
+   | `container-type` applique le confinement de mise en page, ce qui fait de
+   | l'élément le bloc conteneur de ses descendants `position:fixed`. La
+   | feuille de partage de la carte publique en est un — elle couvre l'écran
+   | entier. Le confinement l'enfermerait dans la page, sur la page la plus
+   | visitée du produit, pour le confort d'une maquette.
+   |
+   | CE BLOC EST UNE COPIE, ET UNE COPIE DÉRIVE. C'est pourquoi il est tenu
+   | par un test qui MESURE la maquette au lieu de la relire : voir
+   | MaquetteTelephoneTest. Si la carte publique change ses valeurs de base,
+   | le test devient rouge ici.
+   */
+  .pubc-page{background:var(--surface);padding:0}
+  .pubc{max-width:none;margin:0}
+  .pubc__carte{display:block;border:0;border-radius:0;box-shadow:none}
+  .pubc__couverture{height:280px}
+  .pubc__grille{grid-template-columns:repeat(3, 1fr)}
 }
 
 .phone__notch{
@@ -140,351 +225,34 @@ $ease: cubic-bezier(.2,.8,.2,1);
   z-index:4;
 }
 
-// Barre d'état, sur le fond vert
+/*
+ | LA BARRE D'ÉTAT FLOTTE AU-DESSUS DE LA PAGE.
+ |
+ | Elle était un bloc en tête d'une colonne flex, posé sur un aplat vert : il
+ | fallait donc qu'un bandeau vert existe sous elle. La page publique n'en a
+ | pas — elle commence par la couverture, que le porteur choisit.
+ |
+ | Elle passe donc par-dessus, comme sur un vrai téléphone. Le voile sombre
+ | n'est pas décoratif : la couverture peut être un ciel blanc ou un mur
+ | clair, et l'heure disparaîtrait.
+ */
 .phone__status{
-  background:$vert-fonce;
-  color:rgba($blanc,.9);
-  padding:7px 14px 0;
+  position:absolute;
+  top:0;
+  inset-inline:0;
+  z-index:3;
+  background:linear-gradient(to bottom, rgba(6,37,28,.55), rgba(6,37,28,0));
+  color:rgba($blanc,.95);
+  padding:7px 14px 12px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   font-size:9px;
   font-weight:600;
+  pointer-events:none;
 }
 .phone__icons{display:flex;align-items:center;gap:3px}
 
-// En-tête vert foncé
-// =============================================================================
-// LA CARTE, DANS L'ÉCRAN — reprise de .pubc, à l'échelle
-// =============================================================================
-//
-// LES PROPORTIONS SONT CELLES DE LA PAGE PUBLIQUE, divisées par deux pour
-// tenir dans 280px de large. Chaque bloc a son équivalent exact dans
-// _carte-publique.scss, et ils doivent évoluer ensemble :
-//
-//   .pubc__couverture   →  .phc__couverture
-//   .pubc__medaillon    →  .phc__medaillon
-//   .pubc__infos        →  .phc__infos
-//   .pubc__grille       →  .phc__grille
-//   .pubc__barre        →  .phc__barre
-//
-// POURQUOI PAS LES MÊMES CLASSES. .pubc est dimensionné en pixels pour un
-// écran de téléphone RÉEL — médaillon de 112px, grille de 44px de cible
-// tactile. Posé dans une maquette de 280px, il déborderait de toutes parts.
-// Réécrire les tailles sous .phone les rendrait par ailleurs impossibles à
-// lire : on ne saurait plus laquelle s'applique où.
-//
-// LES COULEURS, ELLES, SONT LES MÊMES JETONS. La maquette est toujours en
-// clair — c'est une illustration de produit, pas une préférence
-// d'affichage — d'où les valeurs figées plutôt que var(--surface).
-// LA PAGE — grise, comme .pubc. C'est elle qui détache la carte.
-//
-// LE CONTENU EST CENTRÉ VERTICALEMENT, et ce n'est pas cosmétique. Il était
-// collé sous l'encoche, et l'écran se terminait sur un tiers de blanc : la
-// maquette donnait l'impression d'une page arrêtée en cours de chargement,
-// alors qu'elle est censée montrer un produit fini.
-.phc{
-  flex:1 1 auto;
-  min-height:0;
-  padding:10px 7px 8px;
-  background:$gris-fond;
-  overflow:hidden;
-
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:9px;
-}
-
-// LA CARTE — blanche, bordée, arrondie, comme .pubc__carte. Sans ce second
-// niveau, la maquette montrait une application plein écran ; la page
-// publique, elle, montre une CARTE posée sur un fond.
-.phc__carte{
-  display:flex;
-  flex-direction:column;
-  background:$blanc;
-  border:1px solid $bordure;
-  border-radius:14px;
-  box-shadow:0 6px 18px rgba(10,31,26,.08);
-  overflow:hidden;
-}
-
-// -----------------------------------------------------------------------------
-// COUVERTURE ET MÉDAILLON
-// -----------------------------------------------------------------------------
-.phc__couverture{
-  position:relative;
-  // 56px et l'identité en dessous, sur fond blanc — ce que la page publique
-  // ne rend nulle part. Sur .pubc la couverture occupe environ le tiers de la
-  // carte et PORTE le nom. 104px tient la même proportion à cette échelle.
-  height:118px;
-  flex:0 0 auto;
-  // Plus de marge : l'identité est dedans, elle ne déborde plus.
-  margin-bottom:0;
-  overflow:hidden;
-
-  // MÉDAILLON ET IDENTITÉ SUR UNE MÊME LIGNE, calés en bas.
-  //
-  // Premier essai : médaillon en absolu en haut à gauche, identité en bas.
-  // À cette échelle ils se recouvraient — le nom disparaissait derrière la
-  // photo. Une couverture de 86px sur mobile ne peut pas empiler 42px de
-  // médaillon et trois lignes de texte.
-  //
-  // En ligne, les deux tiennent à toutes les tailles et se lisent comme un
-  // seul bloc d'identité.
-  display:flex;
-  align-items:flex-end;
-  gap:8px;
-  padding:0 12px 10px;
-}
-
-// LE VOILE — fonctionnel, pas décoratif. C'est lui qui rend le nom lisible
-// par-dessus la couverture, exactement comme sur la page publique.
-.phc__couverture-voile{
-  position:absolute;inset:0;
-  background:$voile-couverture;
-}
-
-// LE MÊME DÉCOR QUE LA PAGE PUBLIQUE, à l'échelle. Les deux doivent
-// évoluer ensemble : voir .pubc__couverture-fond dans _carte-publique.scss.
-//
-// Aucune trame répétée : un motif régulier se voit toujours, quelle que soit
-// son opacité, et donnait à la bande l'aspect d'une moustiquaire.
-.phc__couverture-fond{
-  position:absolute;inset:0;
-  background:
-    linear-gradient(118deg,
-      transparent 0%,
-      rgba(255,255,255,.10) 38%,
-      rgba(255,255,255,.02) 52%,
-      transparent 68%),
-    radial-gradient(78% 120% at 88% -12%, rgba(120, 230, 190, .38) 0%, transparent 62%),
-    radial-gradient(62% 96% at 8% 108%, rgba(4, 32, 24, .55) 0%, transparent 66%),
-    radial-gradient(46% 70% at 62% 88%, rgba(30, 158, 122, .40) 0%, transparent 70%),
-    linear-gradient(142deg, #0B3B2E 0%, #0F5A44 46%, #1E9E7A 100%);
-}
-
-// Le médaillon DÉBORDE sur la couverture, comme sur la page publique : c'est
-// ce chevauchement qui fait lire le portrait et le nom comme un seul bloc.
-.phc__medaillon{
-  // Il débordait sous la couverture (`position:absolute; bottom:-24px`). Il
-  // est maintenant DANS le flux, sur la même ligne que l'identité.
-  position:relative;
-  z-index:1;
-  flex:0 0 auto;
-  width:52px;height:52px;
-  // ROND, comme sur la page publique : c'est la même carte, à l'échelle.
-  border-radius:999px;
-  border:3px solid $blanc;
-  box-shadow:0 2px 8px rgba(10,31,26,.18);
-  overflow:hidden;
-  background:$vert-clair;
-}
-
-.phc__photo{display:block;width:100%;height:100%}
-
-// -----------------------------------------------------------------------------
-// IDENTITÉ
-// -----------------------------------------------------------------------------
-// L'IDENTITÉ EST POSÉE SUR LA COUVERTURE, au-dessus du voile.
-.phc__identite{
-  position:relative;
-  z-index:1;
-  // La gouttière est portée par la couverture, qui les aligne tous les deux.
-  padding:0;
-  display:flex;flex-direction:column;gap:1px;
-  min-width:0;
-}
-
-// Les trois lignes passent en blanc : elles sont désormais sur la couverture,
-// pas sur le fond blanc de la carte. Le voile garantit le contraste.
-.phc__nom{
-  font-size:13px;font-weight:700;
-  letter-spacing:-.02em;line-height:1.15;
-  color:$blanc;
-  overflow-wrap:anywhere;
-}
-
-.phc__role{font-size:9.5px;color:rgba(255,255,255,.88);line-height:1.2}
-.phc__entreprise{font-size:9px;font-weight:600;color:$blanc;line-height:1.2}
-
-// -----------------------------------------------------------------------------
-// COORDONNÉES — un bloc teinté, lu d'un seul regard
-// -----------------------------------------------------------------------------
-/*
- | LE BLOC DE COORDONNEES — transpose de .pubc__infos, a l'echelle.
- |
- | Il portait un CADRE : fond gris, bordure, coins arrondis. La page publique
- | a abandonne ce cadre — ce sont des TRAITS FINS qui structurent la liste, et
- | une pastille ronde pleine qui donne le point d'entree a l'oeil. Une liste
- | encadree ET separee porterait deux fois la meme information.
- |
- | La maquette montrait donc une composition que le produit ne rend plus.
- */
-.phc__infos{
-  margin:8px 10px 0;
-  padding:0;
-  display:flex;flex-direction:column;
-
-  // Le trait appartient a la ligne SUIVANTE : jamais de trait apres la
-  // derniere, quel que soit le nombre de coordonnees renseignees. Meme regle
-  // que `.pubc__infos > li + li`.
-  > * + *{ border-top:1px solid $bordure; }
-}
-
-.phc__info{
-  display:flex;align-items:center;gap:7px;
-  padding:5px 6px;
-  min-width:0;
-}
-
-/*
- | LA PASTILLE ETAIT L'INVERSE DE CELLE DE LA PAGE.
- |
- |   maquette    : 17px, fond vert PALE, icone vert FONCE
- |   page reelle : 36px, fond vert FONCE, icone BLANCHE   (mesure au rendu)
- |
- | 36px sur une carte de 375 valent 9,6 % de sa largeur ; a l'echelle de la
- | maquette, cela fait 18px.
- */
-.phc__info-icone{
-  flex:0 0 auto;
-  width:18px;height:18px;
-  display:grid;place-items:center;
-  border-radius:999px;
-  background:$vert-fonce;
-  color:$blanc;
-}
-
-// La troncature est ACCEPTABLE ICI, et seulement ici : c'est une maquette,
-// pas une fiche qu'on doit pouvoir lire. Sur la vraie page publique,
-// .pubc__info-valeur passe à la ligne plutôt que de couper une adresse.
-// LA VALEUR ET SON ÉTIQUETTE, comme sur .pubc__info-texte.
-//
-// La maquette n'affichait que la valeur. La vraie page en montre DEUX lignes :
-// l'adresse, puis « E-MAIL » en dessous. Mesuré : 64px de haut sur la vraie
-// page contre 50px d'équivalent ici — la maquette annonçait donc une ligne de
-// contact plus pauvre que celle qu'on livre.
-.phc__info-texte{
-  display:flex;flex-direction:column;
-  min-width:0;
-}
-
-.phc__info-valeur{
-  font-size:8.5px;font-weight:600;
-  color:$texte;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-
-.phc__info-etiquette{
-  font-size:6px;font-weight:700;
-  letter-spacing:.1em;text-transform:uppercase;
-  color:$gris-second;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-
-// -----------------------------------------------------------------------------
-// LA GRILLE — trois par rangée, comme sur la page publique
-// -----------------------------------------------------------------------------
-.phc__grille{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  gap:5px;
-  padding:8px 10px 0;
-}
-
-/*
- | LA TUILE — transposee de .pubc__tuile, MEME TECHNIQUE DE TEINTE.
- |
- | Elle portait un fond gris uniforme et une bordure grise. La page publique
- | teinte chaque tuile de la couleur de SA plateforme, a 9 % sur la surface,
- | avec un liseré de la meme couleur a 18 % — mesure au rendu, la tuile
- | WhatsApp y ressort en vert tres pale, la tuile Instagram en rose.
- |
- | La maquette annoncait donc une grille grise la ou le produit rend une
- | grille teintee. `--marque` est pose par la vue sur chaque tuile, comme sur
- | la page publique : la meme declaration produit donc le meme resultat.
- |
- | 16px de rayon sur une carte de 375 valent 4,3 % de sa largeur ; a
- | l'echelle de la maquette, cela fait 8px.
- */
-.phc__tuile{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3.5px;
-  aspect-ratio:1;
-  min-width:0;
-  padding:5px 3px;
-  border-radius:8px;
-
-  background:color-mix(in srgb, var(--marque, #{$vert-fonce}) 9%, #{$blanc});
-  border:1px solid color-mix(in srgb, var(--marque, #{$vert-fonce}) 18%, transparent);
-  box-shadow:0 1px 2px rgba(11,59,46,.05);
-
-  color:$texte;
-
-  // Le logo garde la couleur officielle de sa plateforme, comme sur la page.
-  .social-svg{color:var(--marque, #{$vert-fonce})}
-}
-
-.phc__tuile-nom{
-  // 700 comme .pubc__tuile-nom, pas 600 : sur un fond teinte, une graisse
-  // de moins fait decrocher le libelle.
-  font-size:6.5px;font-weight:700;
-  text-align:center;line-height:1.1;
-  color:$texte;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-width:100%;
-}
-
-// -----------------------------------------------------------------------------
-// BARRE D'ACTIONS
-// -----------------------------------------------------------------------------
-// Une seule action est PLEINE. Deux boutons primaires n'en font aucun : c'est
-// « Enregistrer » qui termine le parcours, « Partager » n'est qu'un service.
-// PAS DE margin-top:auto ICI, et c'est délibéré.
-//
-// Poussée en bas de l'écran, la barre laissait entre la grille et elle une
-// plage blanche d'un tiers de la maquette — un écran qui paraît à moitié
-// chargé. La carte se termine où son contenu se termine, exactement comme
-// la page publique, et le reste de l'écran est simplement du fond.
-.phc__barre{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:6px;
-  padding:9px 10px 0;
-}
-
-.phc__pied{
-  display:block;
-  padding:8px 10px 12px;
-  text-align:center;
-  font-size:7px;
-  color:$gris-second;
-
-  b{color:$vert-fonce;font-weight:700}
-}
-
-// La phrase sous la carte : elle occupe le bas de l'écran plutôt que de le
-// laisser vide, et elle dit ce que la maquette montre.
-.phc__note{
-  margin:0;
-  padding:0 12px;
-  text-align:center;
-  font-size:7.5px;
-  line-height:1.45;
-  color:$gris-second;
-}
-
-.phc__action{
-  display:grid;place-items:center;
-  height:24px;
-  border-radius:999px;
-  font-size:8.5px;font-weight:700;
-  letter-spacing:.02em;
-}
-
-.phc__action--plein{background:$vert-fonce;color:$blanc}
-.phc__action--clair{background:$gris-fond;border:1px solid $bordure-forte;color:$texte}
 // -----------------------------------------------------------------------------
 // ANIMATIONS DU TÉLÉPHONE
 // -----------------------------------------------------------------------------

@@ -57,7 +57,7 @@
 
     {{-- Socle vert plus clair, ombre interne, téléphone débordant vers le haut --}}
     <div class="phone-pedestal">
-      <x-phone :profile="$showcaseProfile" size="sm" />
+      <x-phone :profile="$showcaseProfile" size="sm" :couverture="asset('images/couverture-demo.svg')" />
     </div>
 
   </div>

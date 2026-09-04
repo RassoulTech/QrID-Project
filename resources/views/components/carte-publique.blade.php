@@ -77,8 +77,18 @@
 @endphp
 
 {{-- L'ancre de retour de la feuille de partage. Elle ferme la feuille sans
-     recourir à `href="#"`, qui est un lien mort. --}}
-<div id="carte" class="pubc{{ $apercu ? ' pubc--apercu' : '' }}">
+     recourir à `href="#"`, qui est un lien mort.
+
+     ELLE N'EXISTE QU'EN DEHORS DE L'APERÇU. La maquette et la planche de
+     styles rendent ce composant PLUSIEURS FOIS sur une même page : deux
+     téléphones sur l'accueil, trois sur /design-system. Un identifiant en
+     dur y apparaîtrait autant de fois, et un identifiant en double est
+     invalide — le premier gagne, et « fermer » renverrait vers une carte
+     qui n'est pas celle qu'on regarde.
+
+     Aucune perte : la feuille de partage n'est rendue que par la vraie page
+     publique, qui, elle, n'affiche la carte qu'une fois. --}}
+<div @if (! $apercu) id="carte" @endif class="pubc{{ $apercu ? ' pubc--apercu' : '' }}">
     <article class="pubc__carte">
 
         {{-- ═══════════════ COUVERTURE ═══════════════
@@ -185,14 +195,25 @@
                  chose annonce le mauvais geste.
 
                  « Partager » était écrit en dur ici, en français. --}}
-            <a href="{{ $apercu ? '#carte' : '#partage' }}" class="pubc__action pubc__action--clair">
+            {{-- EN APERÇU, CE N'EST PAS UN LIEN.
+
+                 Il pointait vers `#carte`, une ancre qui n'existe plus hors
+                 de la vraie page — et qui n'a jamais rien fait ici : la
+                 feuille de partage n'est rendue que par la page publique.
+                 C'était donc un lien mort, qui a l'air cliquable et ne mène
+                 nulle part.
+
+                 Une maquette montre des boutons ; elle n'en offre pas. --}}
+            <{{ $apercu ? 'span' : 'a' }}
+                @if (! $apercu) href="#partage" @endif
+                class="pubc__action pubc__action--clair">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
                     <path d="M16 6l-4-4-4 4M12 2v14"/>
                 </svg>
                 {{ __('card.publique.partager') }}
-            </a>
+            </{{ $apercu ? 'span' : 'a' }}>
 
             {{-- LES DONNÉES SONT PORTÉES PAR LE LIEN, en data-*.
                  Le module enregistrer-contact.js les relit pour composer
@@ -204,7 +225,18 @@
                  SANS JAVASCRIPT, ce lien reste la vCard, qui fonctionne
                  partout : sur iOS elle ouvre Contacts d'elle-même grâce à
                  l'en-tête « inline ». --}}
-            <a href="{{ $apercu ? '#' : route('profile.vcard', $profile->slug) }}"
+            {{-- EN APERÇU, CE N'EST PAS UN LIEN NON PLUS.
+
+                 Il valait `href="#"` — le seul lien mort que le produit
+                 s'autorisait, et il est arrivé sur l'écran d'aperçu le jour
+                 où celui-ci a cessé de redessiner la carte pour rendre la
+                 vraie. Un `#` a l'air cliquable et ne mène nulle part.
+
+                 Les attributs `data-*` restent : ils ne coûtent rien, et les
+                 retirer créerait une seconde différence entre les deux
+                 rendus — c'est-à-dire le début d'une nouvelle copie. --}}
+            <{{ $apercu ? 'span' : 'a' }}
+               @if (! $apercu) href="{{ route('profile.vcard', $profile->slug) }}" @endif
                class="pubc__action pubc__action--plein"
                data-enregistrer-contact
                data-nom="{{ $profile->full_name }}"
@@ -220,7 +252,7 @@
                     <circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>
                 </svg>
                 {{ __('card.publique.enregistrer') }}
-            </a>
+            </{{ $apercu ? 'span' : 'a' }}>
         </div>
 
         <p class="pubc__pied">

@@ -5,94 +5,73 @@
   <x-phone :profile="$p" size="sm" />      section sombre (240px)
   <x-phone :profile="$p" :animate="false" />
 
-  ═══════════════════════════════════════════════════════════════════════
-  CE QU'IL MONTRE DOIT ÊTRE CE QU'ON REÇOIT
-  ═══════════════════════════════════════════════════════════════════════
-  Cette maquette reproduisait la PREMIÈRE version de la page publique :
-  en-tête vert plein, avatar rond centré, quatre actions en ligne, pastilles
-  grises pour les réseaux. La page publique a été refaite depuis — bannière
-  en dégradé, médaillon carré qui déborde, bloc de coordonnées teinté,
-  grille de trois par rangée, barre Partager / Enregistrer.
+  ═══════════════════════════════════════════════════════════════════════════
+  IL NE REDESSINE PLUS LA CARTE : IL LA RÉDUIT
+  ═══════════════════════════════════════════════════════════════════════════
+  Ce fichier portait une COPIE À LA MAIN de la page publique — sa propre
+  série de classes `.phc`, ses propres balises, ses propres proportions. Son
+  commentaire affirmait suivre `public/profile.blade.php` « bloc pour bloc ».
 
-  Une landing qui montre un écran que le produit ne rend plus est une
-  promesse fausse. Le visiteur qui s'inscrit obtient autre chose que ce
-  qu'on lui a montré, et c'est exactement à ce moment-là qu'il se demande ce
-  qu'on lui a caché d'autre.
+  Il ne le suivait plus. La page publique a supprimé le médaillon rond et posé
+  l'identité DANS une image unique en pleine largeur ; la maquette montrait
+  encore un portrait rond sur un bandeau vert, avec le nom à côté. Deux
+  compositions opposées, et c'est celle qui ne existe pas que voyait le
+  visiteur avant de s'inscrire.
 
-  La structure ci-dessous suit donc, bloc pour bloc, celle de
-  resources/views/public/profile.blade.php. Les classes sont distinctes
-  (.phc au lieu de .pubc) parce que les tailles sont réduites de moitié pour
-  tenir dans 280px — mais l'ordre, les proportions et les couleurs sont les
-  mêmes, et ils doivent le rester.
+  Une copie ne se maintient pas. Elle diverge à la première correction faite
+  d'un seul côté, sans erreur, sans test rouge — et c'est toujours la vitrine
+  qui reste en arrière, parce qu'on corrige la page qu'on utilise.
 
-  ═══════════════════════════════════════════════════════════════════════
-  LE PORTRAIT EST UN DESSIN
-  ═══════════════════════════════════════════════════════════════════════
-  La photo du profil de démonstration est celle d'une personne réelle — le
-  propriétaire du compte. Une vitrine ne présente pas quelqu'un de réel
-  comme s'il était un client : voir x-avatar-demo.
+  LA MAQUETTE REND DONC `x-carte-publique`, LE COMPOSANT LUI-MÊME.
 
-  Tout en HTML/CSS, icônes en SVG inline. Aucune image, aucune police
-  d'icônes, aucune requête réseau.
+  Le même que sert /p/{slug}. Le même que montre /design-system. Réduit par
+  une transformation d'échelle, ce qui préserve EXACTEMENT les proportions au
+  lieu de les réinterpréter en plus petit. Ce qui change sur la page publique
+  change ici, sans que personne ait à y penser.
+
+  ═══════════════════════════════════════════════════════════════════════════
+  POURQUOI UNE ÉCHELLE ET NON DES TAILLES RÉDUITES
+  ═══════════════════════════════════════════════════════════════════════════
+  Redéfinir les tailles en plus petit, c'est réécrire la mise en page — donc
+  reproduire, en CSS cette fois, la copie qu'on vient de supprimer.
+
+  La carte est rendue à la largeur d'un vrai téléphone (375px), puis réduite.
+  Une seule valeur gouverne le rapport, et rien d'autre n'est réinterprété :
+  la carte de la vitrine EST la carte du produit, vue de plus loin.
+
+  ═══════════════════════════════════════════════════════════════════════════
+  ELLE OCCUPE TOUT L'ÉCRAN
+  ═══════════════════════════════════════════════════════════════════════════
+  L'ancienne maquette posait une carte détachée sur une page grise, avec une
+  ligne de texte sous elle pour combler le tiers d'écran resté vide. La page
+  publique, elle, occupe l'appareil entier. La maquette aussi, désormais.
+
+  Props :
+    profile     le porteur
+    couverture  l'adresse de l'image de couverture, ou null
+    size        lg | sm
+    animate     l'entrée animée
 --}}
 @props([
     'profile',
+    'couverture' => null,
     'size' => 'lg',
     'animate' => true,
 ])
 
 @php
     /*
-     | LES ACTIONS, DANS L'ORDRE DE LA PAGE PUBLIQUE.
+     | LA COUVERTURE PAR DÉFAUT EST CELLE DU PORTEUR.
      |
-     | WhatsApp, téléphone, localisation, puis les réseaux. Six au plus : la
-     | grille en montre deux rangées de trois, et une troisième rangée
-     | dépasserait de l'écran du téléphone.
+     | C'est ce qu'attend l'aperçu client (/profil/apercu), qui montre à
+     | quelqu'un SA carte : elle doit porter SON image, pas une illustration.
      |
-     | Les réseaux ne sont lus que si la relation a été chargée en amont :
-     | aucune requête déclenchée depuis une vue, donc aucun N+1 possible.
+     | Le profil de démonstration de la vitrine, lui, n'existe pas en base et
+     | n'a donc pas de couverture — les sections de la landing lui en passent
+     | une, dessinée. Voir public/images/couverture-demo.svg.
      */
-    $liens = $profile->relationLoaded('socialLinks') ? $profile->socialLinks : collect();
-
-    $actions = [];
-
-    if ($profile->whatsapp_href) {
-        $actions[] = ['whatsapp', __('WhatsApp')];
-    }
-
-    if ($profile->phone) {
-        $actions[] = ['telephone', __('Appeler')];
-    }
-
-    if ($profile->address) {
-        $actions[] = ['localisation', __('Localisation')];
-    }
-
-    foreach ($liens as $lien) {
-        $actions[] = [$lien->platform, $lien->platform_label];
-    }
-
-    /*
-     | LA GRILLE N'EST PLUS COMPLÉTÉE ARTIFICIELLEMENT.
-     |
-     | Elle l'était jusqu'à SIX entrées, avec LinkedIn, Instagram et Facebook
-     | ajoutés à l'affichage « pour que les deux rangées soient pleines ». La
-     | maquette montrait donc trois comptes que le profil illustré ne possède
-     | pas — et une grille toujours pleine, ce qu'une vraie page ne rend que
-     | par hasard.
-     |
-     | Une maquette qui s'arrange est une promesse fausse : le visiteur qui
-     | s'inscrit obtient une grille qui, elle, a des trous.
-     |
-     | Les réseaux de la maquette sont désormais DÉCLARÉS dans
-     | config/landing.php et posés en relation par LandingController. Ce que la
-     | grille affiche est ce que le profil déclare, exactement comme sur
-     | /p/{slug}.
-     |
-     | Le plafond de six demeure : au-delà, une troisième rangée sortirait de
-     | l'écran du téléphone. C'est une contrainte de place, pas un maquillage.
-     */
-    $actions = array_slice($actions, 0, 6);
+    $couvertureUrl = $couverture
+        ?? (filled($profile->cover_path) ? \Illuminate\Support\Facades\Storage::url($profile->cover_path) : null);
 @endphp
 
 <div {{ $attributes->merge([
@@ -128,124 +107,25 @@
             </span>
         </div>
 
-        {{-- ═══════════ LA CARTE, comme sur /p/{slug} ═══════════
-             Deux niveaux, exactement comme la page publique : une PAGE grise
-             qui porte une CARTE blanche détachée. La carte à fond perdu, sans
-             marge ni coin arrondi, ressemblait à une application plein écran
-             et non à une carte de visite. --}}
-        <div class="phc">
-          <div class="phc__carte">
+        {{-- ═══════════════ LA PAGE PUBLIQUE, RÉDUITE ═══════════════
 
-            {{-- COUVERTURE ET MÉDAILLON — le médaillon déborde, c'est ce
-                 chevauchement qui fait lire la photo et le nom comme un seul
-                 bloc. Même composition que .pubc__couverture. --}}
-            {{-- L'IDENTITÉ EST DANS LA COUVERTURE, comme sur la vraie page.
-                 Elle vivait en dessous, sur fond blanc : la maquette montrait
-                 donc une composition que le produit ne rend nulle part. Sur
-                 .pubc, le nom est POSÉ SUR la couverture, sous un voile qui le
-                 rend lisible quelle que soit la photo. Les deux doivent se
-                 ressembler — c'est tout l'intérêt d'une maquette. --}}
-            <div class="phc__couverture">
-                <span class="phc__couverture-fond" aria-hidden="true"></span>
-                <span class="phc__couverture-voile" aria-hidden="true"></span>
+             `inert` retire tout ce bloc du parcours de tabulation et du
+             pointeur. C'est une IMAGE de la carte, pas la carte : sans lui, la
+             page d'accueil offrirait au clavier une douzaine de liens
+             invisibles à l'œil, et un visiteur qui tabule se retrouverait
+             piégé dans une maquette.
 
-                <div class="phc__medaillon">
-                    <x-avatar-demo :taille="52" class="phc__photo" />
-                </div>
-
-                <div class="phc__identite">
-                    <span class="phc__nom">{{ $profile->full_name }}</span>
-                    @if ($profile->job_title)
-                        <span class="phc__role">{{ $profile->job_title }}</span>
-                    @endif
-                    @if ($profile->company)
-                        <span class="phc__entreprise">{{ $profile->company }}</span>
-                    @endif
-                </div>
+             `aria-hidden` va avec : un lecteur d'écran annoncerait sinon un
+             deuxième « Awa Ndiaye, Architecte » sans rien qui explique
+             pourquoi la page contient deux fois la même personne. La landing
+             décrit la maquette dans son propre texte. --}}
+        <div class="phone__vue" inert aria-hidden="true">
+            <div class="phone__page">
+                <x-carte-publique
+                    :profile="$profile"
+                    :couverture-url="$couvertureUrl"
+                    apercu />
             </div>
-
-            {{-- COORDONNÉES — bloc teinté, lu d'un seul regard. --}}
-            <div class="phc__infos">
-                @if ($profile->public_email)
-                    <span class="phc__info">
-                        <span class="phc__info-icone" aria-hidden="true">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>
-                            </svg>
-                        </span>
-                        <span class="phc__info-texte">
-                            <span class="phc__info-valeur">{{ $profile->public_email }}</span>
-                            <span class="phc__info-etiquette">{{ __('card.publique.email') }}</span>
-                        </span>
-                    </span>
-                @endif
-
-                @if ($profile->phone)
-                    <span class="phc__info">
-                        <span class="phc__info-icone" aria-hidden="true">
-                            <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
-                                <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58z"/>
-                            </svg>
-                        </span>
-                        <span class="phc__info-texte">
-                            <span class="phc__info-valeur">{{ $profile->formatted_phone }}</span>
-                            <span class="phc__info-etiquette">{{ __('card.publique.telephone') }}</span>
-                        </span>
-                    </span>
-                @endif
-
-                @if ($profile->address)
-                    <span class="phc__info">
-                        <span class="phc__info-icone" aria-hidden="true">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>
-                            </svg>
-                        </span>
-                        <span class="phc__info-texte">
-                            <span class="phc__info-valeur">{{ $profile->address }}</span>
-                            <span class="phc__info-etiquette">{{ __('card.publique.localisation') }}</span>
-                        </span>
-                    </span>
-                @endif
-            </div>
-
-            {{-- LA GRILLE — trois par rangée, logos officiels. --}}
-            <div class="phc__grille">
-                @foreach ($actions as [$plateforme, $libelle])
-                    <span class="phc__tuile"
-                          style="--marque:{{ \App\Support\CouleursPlateformes::pour($plateforme) }}">
-                        <x-social-icon :plateforme="$plateforme" :taille="14" />
-                        <span class="phc__tuile-nom">{{ $libelle }}</span>
-                    </span>
-                @endforeach
-            </div>
-
-            {{-- BARRE D'ACTIONS — une seule est pleine : c'est
-                 « Enregistrer » qui termine le parcours. --}}
-            <div class="phc__barre">
-                <span class="phc__action phc__action--clair">{{ __('Partager') }}</span>
-                <span class="phc__action phc__action--plein">{{ __('Enregistrer') }}</span>
-            </div>
-
-            {{-- La signature de bas de carte, comme sur la page publique.
-                 Elle n'est pas décorative : c'est elle qui fait de chaque
-                 carte partagée un point d'entrée vers le produit. --}}
-            <span class="phc__pied">
-                {!! __('Carte créée avec <b>:marque</b>', ['marque' => e(config('app.name'))]) !!}
-            </span>
-          </div>
-
-          {{-- SOUS LA CARTE, UNE LIGNE — et non un vide.
-               L'écran laissait en dessous un tiers de blanc sans rien : une
-               page qui paraît avoir fini de charger à moitié. Cette phrase
-               occupe la place, et elle dit ce que la maquette montre — ce
-               qu'un visiteur de la landing est justement en train de se
-               demander. --}}
-          <p class="phc__note">
-            {{ __('Un lien, un QR Code. Vos coordonnées à jour, partout.') }}
-          </p>
         </div>
     </div>
 </div>

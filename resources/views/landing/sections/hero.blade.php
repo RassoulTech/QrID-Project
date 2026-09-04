@@ -41,7 +41,7 @@
         <span class="label">{{ __('landing.hero.qr_genere') }}</span>
       </div>
 
-      <x-phone :profile="$heroProfile" size="lg" />
+      <x-phone :profile="$heroProfile" size="lg" :couverture="asset('images/couverture-demo.svg')" />
 
       <div class="float float--views">
         <div class="n">{{ $heroViews }}</div>
