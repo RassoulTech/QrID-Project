@@ -162,6 +162,8 @@ WORKDIR /var/www
 COPY --from=vendor /app /var/www
 COPY --from=assets /app/public/build /var/www/public/build
 
+
+
 # --- Droits ---------------------------------------------------------------------
 # php-fpm tourne sous `www-data` dans l'image officielle. Il doit pouvoir
 # écrire dans storage/ (journaux, vues compilées) et bootstrap/cache/ (caches
@@ -181,6 +183,33 @@ RUN mkdir -p \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache \
     # nginx écrit les corps de requête volumineux dans des fichiers
+
+# --- Les caches DÉTERMINISTES, construits ici et non au démarrage ---------------
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+# CE QUI PEUT ÊTRE FAIT MAINTENANT NE DOIT PAS ÊTRE FAIT AU RÉVEIL
+# ═══════════════════════════════════════════════════════════════════════════════
+# Le conteneur s'endort après quinze minutes sans visiteur sur le plan gratuit,
+# et tout ce que l'entrypoint exécute se paie au réveil — pendant que quelqu'un
+# attend devant une carte qu'il vient de scanner.
+#
+# `view:cache` est de loin le poste le plus lourd : il compile chaque gabarit
+# Blade du produit, mesuré à trente secondes sur une machine de développement.
+# Or il ne dépend d'AUCUNE variable d'environnement : les mêmes fichiers
+# produisent toujours les mêmes vues compilées. Le faire à chaque réveil, c'est
+# refaire un travail dont le résultat était déjà connu à la construction.
+#
+# `event:cache` suit la même logique : il découvre les écouteurs déclarés dans
+# le code, pas dans l'environnement.
+#
+# CE QUI RESTE AU DÉMARRAGE, ET POURQUOI :
+#   config:cache   il fige les variables d'environnement, que Render ne fournit
+#                  qu'au lancement du conteneur. Le faire ici graverait les
+#                  valeurs de la machine de construction.
+#   route:cache    il est rapide, et le garder au démarrage évite d'avoir à
+#                  garantir qu'aucune route ne lira jamais la configuration.
+#   migrate        elle touche la base, qui n'existe pas à la construction.
+RUN php artisan view:cache     && php artisan event:cache
     # temporaires. Au-delà de client_body_buffer_size, une photo téléversée
     # y passe : sans ces droits, le téléversement échoue en 500 alors que
     # tout le reste fonctionne.

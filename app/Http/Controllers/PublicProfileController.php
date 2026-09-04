@@ -7,9 +7,12 @@ use App\Models\ProfileEvent;
 use App\Services\QrCodeService;
 use App\Services\SharePreviewService;
 use App\Services\VCardService;
+use App\Support\Theme;
 use App\Support\Whatsapp;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -40,7 +43,56 @@ class PublicProfileController extends Controller
 
         $this->enregistrerVisite($request, $profile);
 
-        return view('public.profile', [
+        /*
+         | LE RENDU EST MIS EN CACHE, PAS LA VISITE.
+         |
+         | ═══════════════════════════════════════════════════════════════
+         | POURQUOI CETTE PAGE ET AUCUNE AUTRE
+         | ═══════════════════════════════════════════════════════════════
+         | C'est la page qui prend TOUT le trafic du produit : chaque scan de
+         | QR Code, chaque lien partagé sur WhatsApp aboutit ici. Et son
+         | contenu ne dépend d'AUCUN visiteur — deux personnes qui ouvrent la
+         | même carte voient exactement la même chose.
+         |
+         | Mesuré en local : cinq requêtes SQL et 45 ms de rendu. Le
+         | conteneur de production dispose d'un DIXIÈME de processeur, ce qui
+         | multiplie ce temps d'autant, et sa base est distante — chaque
+         | requête paie sa latence. Le cache supprime les deux.
+         |
+         | ═══════════════════════════════════════════════════════════════
+         | L'ENREGISTREMENT DE LA VISITE RESTE EN DEHORS
+         | ═══════════════════════════════════════════════════════════════
+         | Il est appelé juste au-dessus, hors du cache. Servir un rendu
+         | mémorisé ne doit rien coûter au comptage : un client dont la carte
+         | marche bien verrait ses statistiques s'arrêter net, et conclurait
+         | que le produit a cessé de compter au moment précis où il commençait
+         | à circuler.
+         |
+         | ═══════════════════════════════════════════════════════════════
+         | LA CLÉ PORTE CE QUI CHANGE LE RENDU, ET RIEN D'AUTRE
+         | ═══════════════════════════════════════════════════════════════
+         | La date de modification du profil rend l'invalidation AUTOMATIQUE :
+         | modifier sa carte change la date, donc la clé, donc le rendu — sans
+         | qu'aucune purge n'ait à être écrite ni retenue. Les liens sociaux
+         | remontent leur modification au profil (voir SocialLink::$touches),
+         | ce qui les fait entrer dans la même garantie.
+         |
+         | La langue et le thème y figurent parce qu'ils changent le HTML :
+         | sans eux, un visiteur en anglais recevrait la page d'un visiteur
+         | francophone passé avant lui.
+         |
+         | Dix minutes de durée de vie en filet : elles bornent la portée de
+         | tout ce que la clé ne saurait pas voir.
+         */
+        $cle = sprintf(
+            'carte:%s:%s:%s:%s',
+            $profile->slug,
+            App::getLocale(),
+            Theme::estSombre() ? 'sombre' : 'clair',
+            $profile->updated_at?->getTimestamp() ?? 0,
+        );
+
+        return response(Cache::remember($cle, now()->addMinutes(10), fn () => view('public.profile', [
             'profile' => $profile,
 
             /*
@@ -105,7 +157,7 @@ class PublicProfileController extends Controller
              | initiales prennent le relais — jamais un vide.
              */
             'couvertureUrl' => $this->couvertureUrl($profile),
-        ]);
+        ])->render()));
     }
 
     /**

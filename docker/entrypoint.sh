@@ -233,11 +233,24 @@ php artisan storage:link --force --ansi || true
 # On efface d'abord. Un cache hérité de la construction — ou d'un démarrage
 # précédent avec d'autres variables — servirait des valeurs périmées.
 echo "→ caches"
-php artisan optimize:clear --ansi
+
+# `optimize:clear` EFFAÇAIT LES VUES COMPILÉES À LA CONSTRUCTION.
+#
+# Il vide tout : configuration, routes, vues, événements. C'était cohérent
+# quand tout était reconstruit juste après — mais les vues et les événements
+# viennent désormais de l'image, où ils ont été compilés une fois pour toutes.
+# Les effacer ici obligerait à refaire au réveil un travail déjà fait, et
+# `view:cache` est le poste le plus lourd du démarrage.
+#
+# On efface donc ce qu'on va reconstruire, et RIEN d'autre : la configuration,
+# parce qu'un cache hérité de la construction porterait les variables de la
+# machine de construction, et les routes pour la même raison de prudence.
+php artisan config:clear --ansi
+php artisan route:clear --ansi
+php artisan cache:clear --ansi || true
+
 php artisan config:cache --ansi
 php artisan route:cache --ansi
-php artisan view:cache --ansi
-php artisan event:cache --ansi
 
 # -----------------------------------------------------------------------------
 # 7. DROITS
