@@ -10,6 +10,7 @@ use App\Models\ProfileEvent;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -159,10 +160,21 @@ class ChargeDesEcransTest extends TestCase
 
         $carte = Profile::factory()->create(['user_id' => $client->id, 'is_active' => true]);
 
+        /*
+         | LE CACHE EST VIDÉ AVANT CHAQUE MESURE.
+         |
+         | Sans cela on comparerait un rendu froid à un rendu mémorisé, et le
+         | test dirait que la page est devenue rapide — alors qu'il doit dire
+         | tout autre chose : que son coût ne suit pas son audience. Ce sont
+         | deux questions différentes, et mélanger les deux ferait passer une
+         | régression pour une amélioration.
+         */
         ProfileEvent::factory()->count(5)->view()->create(['profile_id' => $carte->id]);
+        Cache::flush();
         $discrete = $this->requetesPour(fn () => $this->get(route('profile.public', $carte->slug))->assertOk());
 
         ProfileEvent::factory()->count(200)->view()->create(['profile_id' => $carte->id]);
+        Cache::flush();
         $populaire = $this->requetesPour(fn () => $this->get(route('profile.public', $carte->slug))->assertOk());
 
         $this->assertSame($discrete, $populaire,

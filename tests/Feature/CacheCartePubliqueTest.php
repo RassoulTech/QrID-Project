@@ -209,14 +209,59 @@ class CacheCartePubliqueTest extends TestCase
             ->assertStatus(404);
     }
 
-    /** Idem quand c'est l'abonnement qui s'arrête. */
-    public function test_an_expired_subscription_takes_the_card_offline_despite_the_cache(): void
+    /**
+     * L'EXPIRATION D'UN ABONNEMENT MET AU PLUS DEUX MINUTES À PRENDRE EFFET.
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * C'EST UN COMPROMIS ASSUMÉ, PAS UN OUBLI
+     * ═══════════════════════════════════════════════════════════════════
+     * Le cache porte la décision de visibilité — c'est ce qui fait passer la
+     * page de sept allers-retours vers la base à deux, et donc ce qui la
+     * rend rapide sur un dixième de processeur.
+     *
+     * Toute MODIFICATION du profil purge cette entrée : une dépublication ou
+     * une désactivation par l'administration prend effet immédiatement, et
+     * c'est la seule chose non négociable — une décision de modération ne
+     * peut pas attendre.
+     *
+     * L'expiration d'un abonnement, elle, survient sans que personne ne
+     * touche au profil : aucun événement ne la signale. Elle attend donc
+     * l'expiration du cache. Deux minutes de carte encore visible après
+     * l'échéance ne lèsent personne — le client a payé jusqu'à cette date,
+     * pas jusqu'à cette seconde.
+     *
+     * Ce test FIGE ce délai : le porter à une heure changerait la nature du
+     * compromis sans que personne s'en aperçoive.
+     */
+    public function test_an_expired_subscription_takes_the_card_offline_within_two_minutes(): void
     {
         $carte = $this->carteEnLigne();
 
         $this->get(route('profile.public', $carte->slug))->assertOk();
 
         $carte->user->subscriptions()->update(['ends_at' => now()->subDay()]);
+
+        // Le cache tient encore : la carte reste servie, et c'est voulu.
+        $this->get(route('profile.public', $carte->slug))->assertOk();
+
+        $this->travel(3)->minutes();
+
+        $this->get(route('profile.public', $carte->slug))->assertStatus(404);
+    }
+
+    /**
+     * MAIS UNE DÉPUBLICATION, ELLE, EST IMMÉDIATE.
+     *
+     * C'est la contrepartie du compromis ci-dessus : l'observateur purge le
+     * rendu dès qu'un profil change, quelle que soit la colonne touchée.
+     */
+    public function test_unpublishing_takes_effect_at_once(): void
+    {
+        $carte = $this->carteEnLigne();
+
+        $this->get(route('profile.public', $carte->slug))->assertOk();
+
+        $carte->update(['is_active' => false]);
 
         $this->get(route('profile.public', $carte->slug))->assertStatus(404);
     }

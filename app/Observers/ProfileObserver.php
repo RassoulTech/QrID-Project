@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Profile;
 use App\Services\QrCodeService;
 use App\Services\SharePreviewService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -71,12 +72,55 @@ class ProfileObserver
         if ($profile->wasChanged([...self::CHAMPS_APERCU, 'slug'])) {
             $this->sansCasser($profile, fn () => $this->apercu->forget($profile));
         }
+
+        /*
+         | LA CARTE PUBLIQUE EST MÉMORISÉE : TOUTE MODIFICATION LA PURGE.
+         |
+         | Sans condition sur les champs, et c'est délibéré. La page affiche
+         | presque tout le profil ; énumérer les colonnes qui la changent
+         | reviendrait à tenir une liste qui se périme au premier ajout, et
+         | dont l'oubli se traduirait par une correction invisible au
+         | visiteur — le porteur croirait sa modification perdue.
+         |
+         | Le cas le plus grave est la DÉPUBLICATION. Le cache porte aussi la
+         | décision de visibilité : sans cette purge, une carte retirée par
+         | l'administration resterait consultable le temps du cache. Une
+         | décision de modération doit prendre effet immédiatement.
+         */
+        $this->sansCasser($profile, fn () => $this->oublierLaPagePublique($profile));
     }
 
     public function deleted(Profile $profile): void
     {
         $this->sansCasser($profile, fn () => $this->qr->forget($profile));
         $this->sansCasser($profile, fn () => $this->apercu->forget($profile));
+        $this->sansCasser($profile, fn () => $this->oublierLaPagePublique($profile));
+    }
+
+    /**
+     * Purge le rendu mémorisé d'une carte, dans toutes ses variantes.
+     *
+     * La clé porte la langue et le thème parce que les deux changent le HTML.
+     * Purger la seule variante courante — celle de l'administrateur qui vient
+     * de dépublier — laisserait les autres servir la carte retirée.
+     *
+     * Les combinaisons sont peu nombreuses et connues : deux langues, deux
+     * thèmes. Les énumérer coûte quatre suppressions et évite d'avoir à
+     * étiqueter le cache, ce que le pilote `database` ne sait pas faire.
+     */
+    private function oublierLaPagePublique(Profile $profile): void
+    {
+        foreach (config('app.locales', ['fr', 'en']) as $langue) {
+            foreach (['clair', 'sombre'] as $theme) {
+                Cache::forget('carte:'.$profile->slug.':'.$langue.':'.$theme);
+
+                // L'ancien slug, quand il vient de changer : sinon son rendu
+                // survit et continue de répondre à l'ancienne adresse.
+                if ($profile->wasChanged('slug') && $ancien = $profile->getOriginal('slug')) {
+                    Cache::forget('carte:'.$ancien.':'.$langue.':'.$theme);
+                }
+            }
+        }
     }
 
     private function sansCasser(Profile $profile, callable $action): void

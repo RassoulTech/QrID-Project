@@ -29,70 +29,96 @@ class PublicProfileController extends Controller
      */
     public function show(Request $request, string $slug): View|Response
     {
-        // isPubliclyVisible() consulte l'abonnement du propriétaire : sans ces
-        // deux relations chargées d'avance, la page part en N+1 dès le premier
-        // scan. C'est LA page qui prend tout le trafic.
-        $profile = Profile::query()
-            ->with(['socialLinks', 'user.subscriptions'])
-            ->where('slug', $slug)
-            ->firstOrFail();
-
-        if (! $profile->isPubliclyVisible()) {
-            return $this->carteInactive($profile);
-        }
-
-        $this->enregistrerVisite($request, $profile);
-
         /*
-         | LE RENDU EST MIS EN CACHE, PAS LA VISITE.
+         | ═══════════════════════════════════════════════════════════════
+         | SEPT ALLERS-RETOURS VERS LA BASE, POUR UNE PAGE QUI NE CHANGE PAS
+         | ═══════════════════════════════════════════════════════════════
+         | MESURÉ EN PRODUCTION, en comparant deux pages :
+         |
+         |     page légale (aucune requête)   250 à 380 ms
+         |     carte publique                 470 à 530 ms
+         |
+         | L'écart — environ 230 ms — n'est pas du calcul : c'est le temps
+         | passé à attendre une base DISTANTE. Le profil, ses liens, son
+         | propriétaire, l'abonnement de celui-ci, la lecture du cache et
+         | l'écriture de la visite font sept allers-retours, à une trentaine
+         | de millisecondes chacun.
+         |
+         | Mémoriser le HTML seul ne réglait rien : cela retirait du calcul
+         | — qui n'était pas le problème — et AJOUTAIT un aller-retour pour
+         | lire le cache. C'est ce qu'a montré la mesure après le premier
+         | essai : aucun gain visible.
+         |
+         | On mémorise donc TOUT ce qu'il faut pour servir la page, y compris
+         | l'identifiant du profil dont le comptage a besoin. Il reste deux
+         | allers-retours : lire le cache, écrire la visite.
          |
          | ═══════════════════════════════════════════════════════════════
-         | POURQUOI CETTE PAGE ET AUCUNE AUTRE
+         | LA VISIBILITÉ EST MÉMORISÉE AUSSI, ET C'EST LE POINT DÉLICAT
          | ═══════════════════════════════════════════════════════════════
-         | C'est la page qui prend TOUT le trafic du produit : chaque scan de
-         | QR Code, chaque lien partagé sur WhatsApp aboutit ici. Et son
-         | contenu ne dépend d'AUCUN visiteur — deux personnes qui ouvrent la
-         | même carte voient exactement la même chose.
+         | Une carte dépubliée pourrait donc rester visible le temps du
+         | cache. Deux garde-fous rendent ce délai acceptable :
          |
-         | Mesuré en local : cinq requêtes SQL et 45 ms de rendu. Le
-         | conteneur de production dispose d'un DIXIÈME de processeur, ce qui
-         | multiplie ce temps d'autant, et sa base est distante — chaque
-         | requête paie sa latence. Le cache supprime les deux.
-         |
-         | ═══════════════════════════════════════════════════════════════
-         | L'ENREGISTREMENT DE LA VISITE RESTE EN DEHORS
-         | ═══════════════════════════════════════════════════════════════
-         | Il est appelé juste au-dessus, hors du cache. Servir un rendu
-         | mémorisé ne doit rien coûter au comptage : un client dont la carte
-         | marche bien verrait ses statistiques s'arrêter net, et conclurait
-         | que le produit a cessé de compter au moment précis où il commençait
-         | à circuler.
-         |
-         | ═══════════════════════════════════════════════════════════════
-         | LA CLÉ PORTE CE QUI CHANGE LE RENDU, ET RIEN D'AUTRE
-         | ═══════════════════════════════════════════════════════════════
-         | La date de modification du profil rend l'invalidation AUTOMATIQUE :
-         | modifier sa carte change la date, donc la clé, donc le rendu — sans
-         | qu'aucune purge n'ait à être écrite ni retenue. Les liens sociaux
-         | remontent leur modification au profil (voir SocialLink::$touches),
-         | ce qui les fait entrer dans la même garantie.
-         |
-         | La langue et le thème y figurent parce qu'ils changent le HTML :
-         | sans eux, un visiteur en anglais recevrait la page d'un visiteur
-         | francophone passé avant lui.
-         |
-         | Dix minutes de durée de vie en filet : elles bornent la portée de
-         | tout ce que la clé ne saurait pas voir.
+         |   · l'observateur PURGE cette entrée dès qu'un profil est modifié,
+         |     dépublié ou désactivé — une décision de modération prend effet
+         |     immédiatement, ce qui est la seule chose non négociable ;
+         |   · la durée de vie est courte. Seule l'expiration d'un abonnement
+         |     survient sans qu'on touche au profil, et deux minutes de carte
+         |     encore visible après l'échéance ne lèsent personne.
          */
-        $cle = sprintf(
-            'carte:%s:%s:%s:%s',
-            $profile->slug,
-            App::getLocale(),
-            Theme::estSombre() ? 'sombre' : 'clair',
-            $profile->updated_at?->getTimestamp() ?? 0,
+        $cache = Cache::remember(
+            'carte:'.$slug.':'.App::getLocale().':'.(Theme::estSombre() ? 'sombre' : 'clair'),
+            now()->addMinutes(2),
+            function () use ($slug) {
+                $profile = Profile::query()
+                    ->with(['socialLinks', 'user.subscriptions'])
+                    ->where('slug', $slug)
+                    ->first();
+
+                if ($profile === null) {
+                    return ['etat' => 'introuvable'];
+                }
+
+                if (! $profile->isPubliclyVisible()) {
+                    // La page « carte indisponible » est mémorisée elle aussi :
+                    // une carte hors ligne peut recevoir autant de scans qu'une
+                    // carte en ligne — les QR Codes déjà imprimés continuent
+                    // d'exister.
+                    return [
+                        'etat' => 'hors-ligne',
+                        'id' => $profile->id,
+                        'html' => $this->carteInactive($profile)->getContent(),
+                    ];
+                }
+
+                return [
+                    'etat' => 'en-ligne',
+                    'id' => $profile->id,
+                    'html' => $this->rendu($profile),
+                ];
+            },
         );
 
-        return response(Cache::remember($cle, now()->addMinutes(10), fn () => view('public.profile', [
+        if ($cache['etat'] === 'introuvable') {
+            abort(404);
+        }
+
+        // LE COMPTAGE RESTE EN DEHORS DU CACHE. Servir un rendu mémorisé sans
+        // compter la visite ferait s'arrêter net les statistiques d'un client
+        // dont la carte marche bien — au moment précis où elle commence à
+        // circuler. L'identifiant vient du cache : aucune requête de plus.
+        $this->enregistrerVisite($request, $cache['id']);
+
+        return response(
+            $cache['html'],
+            $cache['etat'] === 'hors-ligne' ? 404 : 200,
+        );
+    }
+
+    /** Le HTML de la carte publique — appelé seulement quand le cache est froid. */
+    private function rendu(Profile $profile): string
+    {
+        return view('public.profile', [
             'profile' => $profile,
 
             /*
@@ -157,7 +183,7 @@ class PublicProfileController extends Controller
              | initiales prennent le relais — jamais un vide.
              */
             'couvertureUrl' => $this->couvertureUrl($profile),
-        ])->render()));
+        ])->render();
     }
 
     /**
@@ -180,11 +206,11 @@ class PublicProfileController extends Controller
      * d'empêcher une carte de s'afficher : c'est la page qui prend tout le
      * trafic du produit, et un compteur ne vaut pas une visite perdue.
      */
-    private function enregistrerVisite(Request $request, Profile $profile, ?string $type = null, ?string $canal = null): void
+    private function enregistrerVisite(Request $request, int $profileId, ?string $type = null, ?string $canal = null): void
     {
         try {
             ProfileEvent::create([
-                'profile_id' => $profile->id,
+                'profile_id' => $profileId,
                 'type' => $type ?? ($request->query('src') === 'qr'
                     ? ProfileEvent::TYPE_SCAN
                     : ProfileEvent::TYPE_VIEW),
@@ -203,7 +229,7 @@ class PublicProfileController extends Controller
             ]);
         } catch (\Throwable $e) {
             Log::warning('Visite non enregistrée.', [
-                'slug' => $profile->slug,
+                'profil' => $profileId,
                 'error' => $e->getMessage(),
             ]);
         }
@@ -244,7 +270,7 @@ class PublicProfileController extends Controller
         $profile = Profile::query()->where('slug', $slug)->first();
 
         if ($profile && $profile->isPubliclyVisible()) {
-            $this->enregistrerVisite($request, $profile, ProfileEvent::TYPE_SHARE, $valide['canal']);
+            $this->enregistrerVisite($request, $profile->id, ProfileEvent::TYPE_SHARE, $valide['canal']);
         }
 
         return response()->noContent();
@@ -487,7 +513,7 @@ class PublicProfileController extends Controller
          | Comme la vue, l'echec est avale : une statistique n'a pas le droit
          | d'empecher un contact de s'enregistrer.
          */
-        $this->enregistrerVisite($request, $profile, ProfileEvent::TYPE_SAVE);
+        $this->enregistrerVisite($request, $profile->id, ProfileEvent::TYPE_SAVE);
 
         /*
          | ═══════════════════════════════════════════════════════════════
