@@ -183,6 +183,10 @@ RUN mkdir -p \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache \
     # nginx écrit les corps de requête volumineux dans des fichiers
+    # temporaires. Au-delà de client_body_buffer_size, une photo téléversée
+    # y passe : sans ces droits, le téléversement échoue en 500 alors que
+    # tout le reste fonctionne.
+    && chown -R www-data:www-data /var/lib/nginx
 
 # --- Les caches DÉTERMINISTES, construits ici et non au démarrage ---------------
 #
@@ -209,11 +213,8 @@ RUN mkdir -p \
 #   route:cache    il est rapide, et le garder au démarrage évite d'avoir à
 #                  garantir qu'aucune route ne lira jamais la configuration.
 #   migrate        elle touche la base, qui n'existe pas à la construction.
-RUN php artisan view:cache     && php artisan event:cache
-    # temporaires. Au-delà de client_body_buffer_size, une photo téléversée
-    # y passe : sans ces droits, le téléversement échoue en 500 alors que
-    # tout le reste fonctionne.
-    && chown -R www-data:www-data /var/lib/nginx
+RUN php artisan view:cache \
+    && php artisan event:cache
 
 # Documentaire : Render impose sa propre valeur via la variable PORT, que
 # l'entrypoint injecte dans la configuration nginx.
