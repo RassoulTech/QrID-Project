@@ -1246,11 +1246,52 @@ textarea.f__control{resize:vertical;min-height:96px;line-height:1.55}
    | s'il y a vraiment 150px pour chacune, une seule sinon. Aucune largeur
    | d'écran ne peut plus produire une colonne trop étroite.
    */
-  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+  /*
+   | 170px ET NON 150 — LA VALEUR EST MESURÉE, PLUS ESTIMÉE.
+   |
+   | 150px laissait 118px de texte une fois les 32px de rembourrage retirés.
+   | Mesuré au rendu, à 393px de fenêtre (iPhone 15) :
+   |
+   |     « QR en PNG »            66px    tient
+   |     « Carte imprimable »    103px    tient, 21px de marge
+   |     « Modifier ma carte »   106px    tient, 18px de marge
+   |     « Partager sur WhatsApp » 137px  DÉBORDE de 13px
+   |
+   | Le libellé sortait de la pilule par la droite et par la gauche — il est
+   | centré, donc il déborde des deux côtés, ce qui le fait aussi paraître
+   | décentré. Les deux autres passaient à 18px près : la première traduction
+   | un peu plus longue les faisait tomber à leur tour.
+   |
+   | 137 + 32 = 169. À 170px, un téléphone n'a plus la place de deux colonnes
+   | (2 x 170 + 8 > 320) : les cinq boutons prennent toute la largeur, une
+   | ligne chacun, centrés. Deux colonnes ne reviennent que là où elles
+   | tiennent vraiment.
+   */
+  grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
 
-  > *{
+  /*
+   | ET LE LIBELLÉ SE REPLIE PLUTÔT QUE DE SORTIR.
+   |
+   | La largeur ci-dessus est juste pour les libellés d'AUJOURD'HUI, en
+   | français. Elle ne l'est pas pour une traduction plus longue, ni pour une
+   | police au rendu plus large, ni pour un futur « Partager sur WhatsApp
+   | Business ». Une mesure protège du cas connu ; seul le repli protège des
+   | autres.
+   |
+   | `%bouton` pose `white-space:nowrap` et `.btn-pill` une hauteur FIXE de
+   | 46px : sans les deux règles ci-dessous, un libellé replié sortirait par
+   | le bas au lieu de sortir par le côté. Le sélecteur nomme les éléments
+   | (0,1,1) pour l'emporter sur le socle, chargé en dernier.
+   */
+  > a,
+  > button{
     width:100%;
     min-width:0;
+
+    white-space:normal;
+    height:auto;
+    min-height:$tactile-min;
+    padding-block:esp(2);
   }
 }
 

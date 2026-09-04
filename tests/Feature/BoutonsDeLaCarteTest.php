@@ -227,6 +227,116 @@ class BoutonsDeLaCarteTest extends TestCase
             'la carte affiche son recto et son verso superposés.');
     }
 
+    /**
+     * 4. LES DEUX FACES NE PEUVENT PAS AVOIR DES HAUTEURS DIFFÉRENTES.
+     *
+     * Le défaut se voyait à l'œil, deux captures à la main : au recto le
+     * bouton tombait juste, au verso la carte descendait plus bas et le
+     * bouton chevauchait son bord. Ce n'était donc pas le bouton qui bougeait
+     * — c'était la carte qui grandissait en se retournant.
+     *
+     * Le verso porte plus de contenu que le recto : un logo, une accroche, un
+     * QR Code, un appel à l'action, un pied. Tant que sa hauteur pouvait
+     * dépendre de ce contenu, elle pouvait dépasser celle du recto, qui fixe
+     * la scène.
+     *
+     * `inset:0` le lui interdit : sa hauteur vient des décalages, donc de la
+     * scène, donc du recto. Les deux faces sont la même boîte.
+     */
+    public function test_the_back_face_cannot_be_taller_than_the_front(): void
+    {
+        $css = $this->cssCompile();
+
+        preg_match('/\.card-duo\.is-flippable\s+\.card-duo__face--verso\s*\{([^}]*)\}/', $css, $verso);
+
+        $regle = str_replace(' ', '', $verso[1] ?? '');
+
+        $this->assertNotEmpty($regle, 'La règle du verso a disparu du CSS compilé.');
+
+        $this->assertStringContainsString('position:absolute', $regle,
+            'Le verso est revenu dans le flux. Il porte plus de contenu que le '.
+            'recto — logo, accroche, QR, pied — et la carte grandira donc en se '.
+            'retournant, jusqu\'à passer sous le bouton.');
+
+        $this->assertMatchesRegularExpression('/inset:0|top:0/', $regle,
+            'Le verso ne se cale plus sur la scène : sa hauteur peut redevenir '.
+            'celle de son contenu, et différer de celle du recto.');
+    }
+
+    // =======================================================================
+    // LES LIBELLÉS NE SORTENT PAS DE LEUR PILULE
+    // =======================================================================
+
+    /**
+     * « PARTAGER SUR WHATSAPP » DÉBORDAIT, ET DEUX AUTRES PASSAIENT DE PEU.
+     *
+     * Mesuré au rendu, à 393px de fenêtre — un iPhone 15 — quand la grille
+     * offrait deux colonnes de 156px, soit 124px de texte :
+     *
+     *     « QR en PNG »              66px   tient
+     *     « Carte imprimable »      103px   tient, 21px de marge
+     *     « Modifier ma carte »     106px   tient, 18px de marge
+     *     « Partager sur WhatsApp » 137px   DÉBORDE de 13px
+     *
+     * Le libellé est centré : il sortait donc des DEUX côtés de la pilule, ce
+     * qui le faisait aussi paraître décentré.
+     *
+     * ═══════════════════════════════════════════════════════════════════════
+     * ÉLARGIR LA COLONNE NE SUFFIT PAS, ET CE TEST GARDE L'AUTRE MOITIÉ
+     * ═══════════════════════════════════════════════════════════════════════
+     * La colonne est passée à 170px, ce qui règle le cas mesuré. Mais une
+     * largeur calibrée sur les libellés d'aujourd'hui, en français, ne
+     * protège ni d'une traduction plus longue, ni d'une police au rendu plus
+     * large, ni d'un libellé qu'on rallongera.
+     *
+     * Le REPLI, lui, protège de tous les cas : le libellé passe à la ligne et
+     * la pilule grandit. Vérifié au rendu — un libellé de 69 caractères tient
+     * sur deux lignes dans une pilule passée de 44 à 49px, sans un pixel de
+     * débordement.
+     *
+     * C'est cette moitié-là que le test garde, parce que c'est celle qu'on
+     * retire par mégarde en croyant que la largeur suffit.
+     */
+    public function test_a_long_label_wraps_instead_of_leaving_its_pill(): void
+    {
+        $css = $this->cssCompile();
+
+        // Le sélecteur nomme les éléments pour l'emporter sur le socle, qui
+        // pose `white-space:nowrap` et est chargé en dernier.
+        preg_match('/\.board-downloads>a,\s*\.board-downloads>button\s*\{([^}]*)\}/',
+            str_replace(' >', '>', str_replace('> ', '>', $css)), $trouvee);
+
+        $regle = str_replace(' ', '', $trouvee[1] ?? '');
+
+        $this->assertNotEmpty($regle,
+            'La règle qui autorise le repli des libellés a disparu. Un libellé '.
+            'trop long ressortira de sa pilule, des deux côtés.');
+
+        $this->assertStringContainsString('white-space:normal', $regle,
+            'Les libellés ne se replient plus : `%bouton` impose `nowrap`, et un '.
+            'libellé trop long sortira de la pilule au lieu de passer à la ligne.');
+
+        $this->assertStringContainsString('height:auto', $regle,
+            "La pilule a de nouveau une hauteur fixe : `.btn-pill` en impose 46. ".
+            'Un libellé replié sortirait par le bas au lieu de sortir par le côté '.
+            "— on aurait déplacé le débordement, pas supprimé.");
+    }
+
+    /** Et la pilule reste une cible atteignable au doigt. */
+    public function test_the_action_buttons_keep_a_reachable_touch_target(): void
+    {
+        $css = $this->cssCompile();
+
+        preg_match('/\.board-downloads>a,\s*\.board-downloads>button\s*\{([^}]*)\}/',
+            str_replace(' >', '>', str_replace('> ', '>', $css)), $trouvee);
+
+        preg_match('/min-height:\s*(\d+)px/', $trouvee[1] ?? '', $hauteur);
+
+        $this->assertGreaterThanOrEqual(44, (int) ($hauteur[1] ?? 0),
+            'En rendant la hauteur libre, on a perdu le plancher tactile de 44px : '.
+            'au doigt, on manque le bouton une fois sur trois.');
+    }
+
     // =======================================================================
     // LES CIBLES RESTENT ATTEIGNABLES
     // =======================================================================
