@@ -132,6 +132,102 @@ class BoutonsDeLaCarteTest extends TestCase
     }
 
     // =======================================================================
+    // TROIS DÉPENDANCES RETIRÉES — chacune pouvait, seule, produire le
+    // recouvrement observé sur iPhone
+    // =======================================================================
+
+    /**
+     * 1. LA HAUTEUR DE LA SCÈNE EST MESURÉE, PLUS CALCULÉE.
+     *
+     * Les DEUX faces étaient absolues : la scène n'avait aucun contenu dans
+     * le flux, et toute sa hauteur venait de `aspect-ratio`. Deux nombres
+     * devaient alors tomber d'accord — la hauteur réservée et celle que la
+     * carte peint. Ils tombaient d'accord sur Chromium, pas sur l'iPhone.
+     *
+     * Le recto reste désormais dans le flux : c'est lui qui donne sa hauteur
+     * à la scène, et cette hauteur est celle que le navigateur a réellement
+     * mesurée. Les deux nombres ne peuvent plus diverger — il n'y en a qu'un.
+     */
+    public function test_the_scene_height_comes_from_a_card_in_the_flow(): void
+    {
+        $css = $this->cssCompile();
+
+        preg_match('/\.card-duo\.is-flippable\s+\.card-duo__face--recto\s*\{([^}]*)\}/', $css, $recto);
+
+        $this->assertNotEmpty($recto[1] ?? '',
+            'La règle du recto a disparu du CSS compilé.');
+
+        $this->assertStringNotContainsString('position:absolute', str_replace(' ', '', $recto[1]),
+            'Le recto est de nouveau retiré du flux. La scène retombe alors sur '.
+            "`aspect-ratio` seul pour sa hauteur, et cette hauteur calculée peut ".
+            'de nouveau diverger de celle que la carte peint réellement — c\'est '.
+            'ce qui faisait chevaucher « Voir le verso » sur iPhone.');
+
+        preg_match('/\.card-duo\.is-flippable\s+\.card-duo__scene\s*\{([^}]*)\}/', $css, $scene);
+
+        $this->assertStringNotContainsString('aspect-ratio', $scene[1] ?? '',
+            'La scène impose de nouveau son propre rapport de forme, en plus de '.
+            'celui de la carte qu\'elle contient. Deux nombres qui doivent tomber '.
+            "d'accord finissent toujours par ne plus le faire.");
+    }
+
+    /**
+     * 2. L'ÉCART SOUS LA CARTE NE DÉPEND PLUS DE `gap`.
+     *
+     * `gap` n'existe en flex que depuis Safari 14.5, et là où il n'est pas
+     * connu il ne dégrade pas : il ne fait rien. L'écart devenait nul et le
+     * bouton venait toucher le bas de la carte, ombre comprise.
+     *
+     * Une marge est comprise partout, depuis toujours.
+     */
+    public function test_the_gap_below_the_card_survives_without_flex_gap(): void
+    {
+        $css = $this->cssCompile();
+
+        preg_match('/\.card-duo__commande\s*\{([^}]*)\}/', $css, $commande);
+
+        $this->assertMatchesRegularExpression('/margin-top\s*:\s*[1-9]/', $commande[1] ?? '',
+            "L'écart entre la carte et son bouton ne repose plus que sur le `gap` ".
+            'du conteneur flex. Là où `gap` n\'est pas connu — Safari avant 14.5 — '.
+            'il ne vaut rien, et le bouton vient toucher la carte.');
+    }
+
+    /**
+     * 3. LES FACES NE PORTENT PLUS `transform-style: preserve-3d`.
+     *
+     * Cette propriété sert à faire vivre les ENFANTS d'un élément dans son
+     * espace 3D. Une face de carte n'a pas d'enfant en 3D — ce qui pivote,
+     * c'est elle.
+     *
+     * Elle n'était pas seulement inutile. `.card` porte `overflow:hidden`, et
+     * la spécification dit qu'un débordement masqué ramène `transform-style`
+     * à `flat`. Un moteur qui ne tranche pas cette contradiction cesse de
+     * découper le contenu de la carte au bord de la carte — et ce contenu
+     * déborde alors sur ce qui suit, c'est-à-dire sur le bouton.
+     */
+    public function test_the_faces_do_not_contradict_the_cards_clipping(): void
+    {
+        $css = $this->cssCompile();
+
+        preg_match('/\.card-duo\.is-flippable\s+\.card-duo__face\s*\{([^}]*)\}/', $css, $face);
+
+        $this->assertNotEmpty($face[1] ?? '',
+            'La règle commune aux deux faces a disparu du CSS compilé.');
+
+        $this->assertStringNotContainsString('preserve-3d', $face[1],
+            'Les faces portent de nouveau `preserve-3d`, qui contredit le '.
+            '`overflow:hidden` de la carte. Un moteur qui suit `preserve-3d` '.
+            'plutôt que la spécification cesse de découper la carte à son bord, '.
+            'et son contenu déborde sur le bouton placé dessous.');
+
+        // La permutation, elle, doit rester : c'est `backface-visibility` seul
+        // qui cache la face tournée de dos.
+        $this->assertStringContainsString('backface-visibility:hidden', str_replace(' ', '', $face[1]),
+            'Sans `backface-visibility`, les deux faces se voient en même temps : '.
+            'la carte affiche son recto et son verso superposés.');
+    }
+
+    // =======================================================================
     // LES CIBLES RESTENT ATTEIGNABLES
     // =======================================================================
 

@@ -359,7 +359,11 @@
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:esp(4);
+
+  /* PAS DE `gap` : l'écart sous la carte est porté par la marge de
+     `.card-duo__commande`, qui est comprise même là où `gap` ne l'est pas.
+     Voir le commentaire qui l'accompagne. Deux sources d'espacement en
+     donneraient le double là où les deux fonctionnent. */
 
   /*
    | IL NE DÉPASSE JAMAIS CE QU'ON LUI DONNE.
@@ -429,6 +433,22 @@
 .card-duo__commande{
   position:relative;
   z-index:1;
+
+  /*
+   | L'ÉCART EST UNE MARGE, PLUS UN `gap`.
+   |
+   | `.card-duo` est un conteneur flex, et son `gap` portait seul tout
+   | l'espace entre la carte et ce bouton. Or `gap` n'existe en flex que
+   | depuis Safari 14.5 : là où il n'est pas connu, il ne dégrade pas, il
+   | ne fait RIEN — l'écart devient nul et le bouton vient toucher le bas
+   | de la carte, ombre comprise.
+   |
+   | Une marge est comprise partout, depuis toujours. Elle s'ajoute au
+   | `gap` là où il fonctionne, ce qui donnerait un écart double : le `gap`
+   | du conteneur est donc retiré au profit de celle-ci, et l'espacement
+   | n'a plus qu'une seule source.
+   */
+  margin-top:esp(4);
 }
 
 .card-duo__bouton{
@@ -451,36 +471,81 @@
 // AVEC JAVASCRIPT — les faces se superposent et pivotent
 // -----------------------------------------------------------------------------
 .card-duo.is-flippable{
+  /*
+   | ══════════════════════════════════════════════════════════════════════
+   | LA HAUTEUR DE LA SCÈNE EST MESURÉE, PLUS CALCULÉE.
+   | ══════════════════════════════════════════════════════════════════════
+   | La scène portait `aspect-ratio:1.586` et ses DEUX faces étaient
+   | absolues. Elle n'avait donc aucun contenu dans le flux : toute sa
+   | hauteur venait de ce rapport.
+   |
+   | Deux nombres devaient alors tomber d'accord — la hauteur que ce rapport
+   | réserve, et celle que la carte peint réellement. Sur Chromium ils
+   | tombaient d'accord : mesuré à 320 comme à 375px, 16px d'écart entre le
+   | bas de la carte et le bouton, aucun chevauchement. Sur l'iPhone, non —
+   | et l'écart était exactement le recouvrement observé, « Voir le verso »
+   | à cheval sur le bas de la carte.
+   |
+   | Deux nombres qui doivent tomber d'accord finissent toujours par ne plus
+   | le faire, sur une machine qu'on n'a pas. Le second est donc supprimé :
+   |
+   |   · le RECTO reste dans le flux. C'est lui qui donne sa hauteur à la
+   |     scène, et cette hauteur est celle que le navigateur a réellement
+   |     mesurée sur la carte — pas celle qu'on espérait ;
+   |   · le VERSO seul se superpose, contre une scène qui a désormais une
+   |     hauteur propre.
+   |
+   | Retourner la carte ne change rien à la mise en page : une rotation ne
+   | déplace pas le flux, et le recto continue d'occuper sa place même quand
+   | `backface-visibility` le rend invisible. La scène garde donc la même
+   | hauteur sur les deux faces.
+   |
+   | Cela retire aussi la dépendance à `aspect-ratio` POUR LA MISE EN PAGE :
+   | là où il n'est pas connu, la scène a toujours la hauteur de son recto,
+   | et le bouton reste en dessous.
+   */
   .card-duo__scene{
     position:relative;
     display:block;
-    // La scène prend la place d'UNE carte : les faces se superposent.
-    //
     // MÊME CORRECTION QUE SUR `.card` : `92vw` se mesurait sur la FENÊTRE,
     // pas sur la colonne. À 1440px, la scène restait à 420px dans un
     // conteneur de 270 — un enfant plus large que son parent, qui sortait
     // de la page de 30px.
-    //
-    // C'était la vraie cause : `.card` avait déjà été bornée, mais la
-    // scène portait sa propre largeur et la lui réimposait.
     width:min(420px, 100%);
-    aspect-ratio:1.586;
     perspective:1400px;
   }
 
   .card-duo__face{
-    position:absolute;
-    inset:0;
     width:100%;
     // 600ms, sur l'axe vertical.
     transition:transform $d-carte cubic-bezier(.22,.68,.28,1);
-    transform-style:preserve-3d;
+
+    /*
+     | PAS DE `transform-style:preserve-3d` ICI.
+     |
+     | Il y était, et il n'avait rien à y faire : cette propriété sert à
+     | faire vivre les ENFANTS d'un élément dans son espace 3D. Une face de
+     | carte n'a pas d'enfant en 3D — ce qui pivote, c'est elle.
+     |
+     | Elle n'était pas seulement inutile. `.card` porte `overflow:hidden`,
+     | et la spécification dit qu'un débordement masqué ramène
+     | `transform-style` à `flat`. Les moteurs n'appliquent pas tous cette
+     | contradiction de la même façon, et celui qui ne la tranche pas cesse
+     | de découper le contenu de la carte au bord de la carte.
+     |
+     | La permutation ne s'appuie que sur `backface-visibility`, qui suffit
+     | : la face tournée de dos ne se voit pas.
+     */
     backface-visibility:hidden;
     cursor:pointer;
   }
 
-  .card-duo__face--recto{transform:rotateY(0deg)}
-  .card-duo__face--verso{transform:rotateY(180deg)}
+  // Le recto tient la hauteur : il est positionné pour rester au-dessus du
+  // fond de la scène, mais JAMAIS retiré du flux.
+  .card-duo__face--recto{position:relative;transform:rotateY(0deg)}
+
+  // Le verso se superpose au recto, exactement à sa place.
+  .card-duo__face--verso{position:absolute;inset:0;transform:rotateY(180deg)}
 
   &.is-flipped .card-duo__face--recto{transform:rotateY(-180deg)}
   &.is-flipped .card-duo__face--verso{transform:rotateY(0deg)}
