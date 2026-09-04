@@ -29,6 +29,12 @@
         'aide' => '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.2 2.4c-.5.2-.7.6-.7 1.1v.5"/><path d="M12 17h.01"/>',
 
         'sortie' => '<path d="M15 17l5-5-5-5M20 12H9M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5"/>',
+
+        // « Mon compte ». Sur ordinateur, cette destination n'existait que
+        // dans le menu déroulant de l'avatar ; sur téléphone, ce menu tient
+        // dans le coin le plus haut de l'écran, à l'opposé du pouce. Elle a
+        // donc désormais sa place dans le panneau, où le pouce l'atteint.
+        'engrenage' => '<circle cx="12" cy="12" r="3"/><path d="M12 2.5l1.4 2.2 2.6-.5.5 2.6 2.2 1.4-1.3 2.3 1.3 2.3-2.2 1.4-.5 2.6-2.6-.5L12 21.5l-1.4-2.2-2.6.5-.5-2.6-2.2-1.4L6.6 12 5.3 9.7l2.2-1.4.5-2.6 2.6.5z"/>',
     ];
 
     // Un nom inconnu rend un point : une icône absente décalerait

@@ -398,6 +398,39 @@
   width:100%;
 }
 
+/*
+ | ══════════════════════════════════════════════════════════════════════════
+ | LA COMMANDE EST POSITIONNÉE, ET C'EST CE QUI LA REND VISIBLE SUR IPHONE.
+ | ══════════════════════════════════════════════════════════════════════════
+ | Le défaut ne se voyait QUE sur un téléphone réel : sur un simulateur de
+ | bureau, à 320 comme à 375px, la mesure est irréprochable — 16px entre le
+ | bas de la carte et le bouton, 44px de haut, aucun chevauchement. Sur
+ | l'iPhone, « Voir le verso » venait chevaucher le bas de la carte, son
+ | libellé à moitié coupé.
+ |
+ | LA CAUSE N'EST PAS UNE MARGE, C'EST L'ORDRE DE PEINTURE.
+ |
+ | La scène porte `perspective`, ses faces `preserve-3d` et
+ | `backface-visibility`. Safari promeut cet ensemble en couche GPU. Le
+ | bouton, lui, n'est ni positionné ni transformé : il n'a aucune couche
+ | propre, et le compositeur reste libre de peindre la couche 3D par-dessus
+ | lui. Les moteurs de bureau tranchent en faveur de l'ordre du document ;
+ | Safari mobile, non.
+ |
+ | Un `margin-top` n'y aurait rien changé : le bouton n'est pas mal placé,
+ | il est correctement placé et recouvert. Le déplacer aurait éloigné la
+ | commande de la carte sans corriger quoi que ce soit — et l'aurait
+ | éloignée AUSSI sur les écrans où rien n'allait mal.
+ |
+ | `position:relative` suffit : un élément positionné est peint après les
+ | descendants non positionnés de son parent. `z-index` le dit en toutes
+ | lettres plutôt que de le laisser dépendre de l'ordre du document.
+ */
+.card-duo__commande{
+  position:relative;
+  z-index:1;
+}
+
 .card-duo__bouton{
   display:inline-flex;align-items:center;gap:esp(2);
   min-height:44px;

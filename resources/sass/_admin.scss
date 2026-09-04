@@ -141,6 +141,45 @@ body:has(> .adm){
   &:first-child { margin-top:0; }
 }
 
+/*
+ | ══════════════════════════════════════════════════════════════════════════
+ | CE QUE LE DOCK PORTE DÉJÀ NE SE RÉPÈTE PAS DANS « PLUS ».
+ | ══════════════════════════════════════════════════════════════════════════
+ | Le défaut corrigé ici était visible à l'œil nu : le dock du bas proposait
+ | quatre destinations, et le panneau « Plus » qu'il ouvre rouvrait
+ | exactement les quatre mêmes. Le pouce avait deux chemins vers la même
+ | page, dont l'un demandait un geste de plus. Un menu « Plus » ne peut
+ | contenir que ce qui ne tient PAS ailleurs.
+ |
+ | LA RUPTURE EST CELLE DU DOCK, ET C'EST LA SEULE QUI SOIT JUSTE.
+ | `.dock` disparaît à `lg` (_dock.scss). En deçà, le dock existe et ces
+ | entrées y sont : le panneau les retire. À partir de `lg`, il n'y a plus
+ | de dock du tout, la colonne redevient la navigation entière, et rien
+ | n'est masqué. Une rupture différente laisserait, sur une bande de
+ | largeurs, soit un doublon soit une destination inatteignable.
+ |
+ | `display: none` ET NON `visibility` NI UN DÉCALAGE HORS ÉCRAN : le lien
+ | doit sortir de l'arbre d'accessibilité, pas seulement de la vue. Un
+ | lecteur d'écran qui annoncerait « Tableau de bord » deux fois décrirait
+ | une interface qui n'existe pas. La destination n'est pas perdue pour
+ | autant — elle est dans le dock, que la synthèse vocale lit aussi.
+ |
+ | Le titre de section suit le même sort quand TOUTES ses entrées sont dans
+ | le dock : sans cela, « Pilotage » et « Ma carte » resteraient posés
+ | au-dessus du vide, ce qui se lit comme une page cassée.
+ */
+.adm-nav__item--dans-le-dock {
+  display: none;
+
+  @include ecran(lg) { display: list-item; }
+}
+
+.adm-nav__titre--dans-le-dock {
+  display: none;
+
+  @include ecran(lg) { display: block; }
+}
+
 .adm-nav__liste {
   list-style: none;
   margin:0;

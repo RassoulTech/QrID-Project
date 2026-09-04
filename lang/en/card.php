@@ -123,6 +123,7 @@ return [
     ],
 
     'voir_verso' => 'View the back',
+    'voir_recto' => 'View the front',
     'protocole' => 'Digital identity protocol',
 
     'actions' => [

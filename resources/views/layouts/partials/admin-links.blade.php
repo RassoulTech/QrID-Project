@@ -11,6 +11,8 @@
   d'elle-même à la livraison de l'écran, sans rien à modifier ici.
 --}}
 @php
+    use App\Support\Navigation;
+
     /*
      | [identifiant, route, motif d'activation, vue attendue]
      |
@@ -22,6 +24,10 @@
      | Le libellé vient maintenant de navigation.admin.*, l'icône de
      | l'identifiant. Les deux peuvent diverger sans se casser.
      */
+    /* Ce que le dock du bas porte deja : ces entrees sont retirees du
+       panneau SUR TELEPHONE UNIQUEMENT, pour qu'il ne les repete pas. */
+    $routesDuDock = Navigation::routesDuDockAdmin();
+
     $sections = [
         'pilotage' => [
             ['vue-ensemble',  'admin.overview',        'admin.overview',      'admin.overview'],
@@ -48,11 +54,22 @@
        passent pas dans une clé de tableau PHP imbriquée : on les convertit
        une fois ici plutôt qu'à chaque ligne. */
     $cle = fn (string $id) => 'navigation.admin.'.str_replace('-', '_', $id);
+
+    /* Un titre pose au-dessus du vide se lit comme une page cassee. */
+    $sectionEntiereDansLeDock = [];
+
+    foreach ($sections as $nom => $entrees) {
+        $hors = array_filter($entrees, fn ($e) => ! Navigation::estDansLeDock($e[1], $routesDuDock));
+        $sectionEntiereDansLeDock[$nom] = $hors === [];
+    }
 @endphp
 
 <nav class="adm-nav" aria-label="{{ __('navigation.administration') }}">
     @foreach ($sections as $section => $entrees)
-        <p class="adm-nav__titre">{{ __('navigation.sections.'.$section) }}</p>
+        <p @class([
+            'adm-nav__titre',
+            'adm-nav__titre--dans-le-dock' => $sectionEntiereDansLeDock[$section],
+        ])>{{ __('navigation.sections.'.$section) }}</p>
 
         <ul class="adm-nav__liste">
             @foreach ($entrees as [$id, $route, $motif, $vue])
@@ -62,7 +79,7 @@
                     $actif = $existe && request()->routeIs($motif);
                 @endphp
 
-                <li>
+                <li @class(['adm-nav__item--dans-le-dock' => Navigation::estDansLeDock($route, $routesDuDock)])>
                     @if ($existe)
                         <a href="{{ route($route) }}"
                            @class(['adm-nav__lien', 'is-active' => $actif])

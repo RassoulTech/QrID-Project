@@ -151,6 +151,10 @@ return [
     ],
 
     'voir_verso' => 'Voir le verso',
+    // L'etiquette du meme bouton une fois la carte retournee. Elle etait
+    // ecrite en dur dans le module JavaScript : un client anglophone qui
+    // retournait sa carte voyait le bouton repasser en francais.
+    'voir_recto' => 'Voir le recto',
     'protocole' => 'Protocole d\'identité numérique',
 
     'actions' => [

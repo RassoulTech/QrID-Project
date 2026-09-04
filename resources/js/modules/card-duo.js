@@ -48,8 +48,28 @@ export default function cardDuo() {
 
             bouton.setAttribute('aria-pressed', versoVisible ? 'true' : 'false');
 
+            /*
+             | LES DEUX LIBELLÉS VIENNENT DU HTML, PLUS DE CE FICHIER.
+             |
+             | Ils y étaient écrits en dur, en français. Le bouton partait
+             | donc de « View the back » pour un client anglophone — rendu
+             | par Blade, correctement traduit — et repassait en français
+             | dès la première pression. Un module JavaScript ne peut pas
+             | lire les fichiers de langue : le HTML est le seul endroit où
+             | les deux se rejoignent.
+             |
+             | Le repli garde le texte en place plutôt que de le vider : un
+             | bouton dont le libellé disparaît est pire qu'un libellé qui
+             | ne change pas.
+             */
             if (etiquette) {
-                etiquette.textContent = versoVisible ? 'Voir le recto' : 'Voir le verso';
+                const suivant = versoVisible
+                    ? bouton.dataset.libelleRecto
+                    : bouton.dataset.libelleVerso;
+
+                if (suivant) {
+                    etiquette.textContent = suivant;
+                }
             }
         });
 

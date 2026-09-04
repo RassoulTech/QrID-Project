@@ -25,7 +25,15 @@
     </div>
 
     <div class="card-duo__commande" data-card-duo-commande hidden>
-        <button type="button" class="card-duo__bouton" data-card-duo-toggle aria-pressed="false">
+        {{-- LES DEUX ÉTIQUETTES VOYAGENT AVEC LE BOUTON.
+             Elles étaient écrites en dur dans le module JavaScript : un
+             client anglophone qui retournait sa carte voyait le bouton
+             repasser en français. Un fichier de traduction n'est pas
+             lisible depuis un module JS — le HTML est le seul endroit où
+             les deux langues se rejoignent. --}}
+        <button type="button" class="card-duo__bouton" data-card-duo-toggle aria-pressed="false"
+                data-libelle-verso="{{ __('card.voir_verso') }}"
+                data-libelle-recto="{{ __('card.voir_recto') }}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/>

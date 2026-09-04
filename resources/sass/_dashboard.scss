@@ -236,6 +236,23 @@
   display:flex;
   flex-direction:column;
   gap:esp(4);
+
+  /*
+   | MÊME RAISON QUE `.card-duo__commande` — voir le commentaire long dans
+   | _card.scss.
+   |
+   | Ce bloc porte les boutons de téléchargement du QR, « Carte
+   | imprimable », « Modifier ma carte » et « Partager sur WhatsApp ». Sur
+   | téléphone il est rendu SOUS la carte, laquelle est une couche 3D
+   | promue par Safari. Sans couche propre, ces boutons peuvent être
+   | recouverts par la carte — et un bouton recouvert ne reçoit pas le
+   | toucher : il ne paraît pas cassé, il ne répond simplement pas.
+   |
+   | C'est la panne la plus coûteuse à diagnostiquer, parce qu'elle est
+   | invisible partout où on la cherche.
+   */
+  position:relative;
+  z-index:1;
 }
 
 // -----------------------------------------------------------------------------
