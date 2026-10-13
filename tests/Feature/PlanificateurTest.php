@@ -25,7 +25,7 @@ use Tests\TestCase;
  *
  *   JAMAIS   la condition ne devient jamais vraie, et la tâche ne part plus.
  *   TROP     la condition reste vraie après l'exécution, et la tâche repart
- *            toutes les cinq minutes — 288 récapitulatifs dans la journée.
+ *            à chaque passage — des dizaines de récapitulatifs par jour.
  */
 class PlanificateurTest extends TestCase
 {
@@ -80,10 +80,10 @@ class PlanificateurTest extends TestCase
 
         $this->assertFalse(Planificateur::estDueAujourdhui(self::TACHE, '02:30'));
 
-        // Cinq minutes plus tard, le planificateur repasse : toujours non.
+        // Le planificateur repasse peu après : toujours non.
         Carbon::setTestNow(Carbon::parse('2026-09-02 02:36', Planificateur::FUSEAU));
         $this->assertFalse(Planificateur::estDueAujourdhui(self::TACHE, '02:30'),
-            'La tâche repart toutes les cinq minutes : le marqueur n\'est pas lu.');
+            'La tâche repart à chaque passage : le marqueur n\'est pas lu.');
 
         // Et le soir non plus.
         Carbon::setTestNow(Carbon::parse('2026-09-02 23:50', Planificateur::FUSEAU));
@@ -303,7 +303,7 @@ class PlanificateurTest extends TestCase
         $this->assertNotEmpty($quotidiennes);
 
         foreach ($quotidiennes as $expression) {
-            $this->assertSame('*/5 * * * *', $expression,
+            $this->assertSame(Planificateur::EXPRESSION, $expression,
                 "Une tâche est déclarée « {$expression} » : elle ne partira que si ".
                 'le planificateur est interrogé à cette minute précise, ce qu\'un '.
                 'conteneur endormi ne garantit pas.');

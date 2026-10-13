@@ -60,6 +60,7 @@ class SystemHealthController extends Controller
              | battre », et la vue doit pouvoir les distinguer.
              */
             'planificateurMinutes' => Planificateur::minutesDepuisLeDernierBattement(),
+            'planificateurSeuil' => Planificateur::SILENCE_ANORMAL_MINUTES,
 
             'mailQueue' => $enFile,
             'totalJobs' => DB::table('jobs')->count(),

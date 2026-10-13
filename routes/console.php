@@ -23,9 +23,15 @@ Planificateur::quotidienne('registrations:purge', '03:00');
  | Mais elle doit dire ce qu'elle trouve. Sans `appendOutputTo`, elle était
  | la SEULE tâche du produit à écrire encore vers /dev/null — et le jour où
  | la file s'engorge, son alerte serait partie au néant.
+ |
+ | ELLE NE TOURNE QUE SI LA FILE EXISTE. Tant que QUEUE_CONNECTION vaut
+ | `sync`, rien n'entre jamais dans la table `jobs` : la mesurer chaque
+ | minute ne mesurait rien, et réveillait la base soixante fois par heure.
+ | Sur Neon, ce réveil se paie en heures de calcul.
  */
 Schedule::command('queue:monitor database:mail --max=50')
     ->everyMinute()
+    ->when(fn () => config('queue.default') !== 'sync')
     ->appendOutputTo('/dev/stdout');
 
 /*
@@ -128,8 +134,11 @@ Planificateur::quotidienne('report:daily', config('notifications.discord.heure',
 |
 | Elle ne porte PAS de rattrapage : un battement en retard n'a aucun sens à
 | rattraper, c'est justement le retard qu'on cherche à mesurer.
+|
+| Même rythme que les tâches — voir Planificateur::CADENCE_MINUTES. Battre
+| plus souvent tiendrait la base éveillée à lui seul.
 */
 Schedule::call(fn () => Planificateur::battre())
-    ->everyFiveMinutes()
+    ->cron(Planificateur::EXPRESSION)
     ->name('battement-planificateur')
     ->withoutOverlapping();

@@ -28,11 +28,11 @@
          inscriptions, les relances et le récapitulatif. S'il s'arrête, rien
          ne casse visiblement : les chiffres cessent simplement d'avancer.
 
-         Quinze minutes est le seuil parce qu'il bat toutes les cinq : trois
-         battements manqués ne sont plus un hasard. En dessous, on affiche
-         sans alerter — un conteneur qui vient de se réveiller n'a pas encore
-         eu le temps de battre. --}}
-    @if ($planificateurMinutes === null || $planificateurMinutes > 15)
+         Le seuil vaut deux battements manqués plus une marge
+         (Planificateur::SILENCE_ANORMAL_MINUTES) : au-delà, ce n'est plus un
+         hasard. En dessous, on affiche sans alerter — un conteneur qui vient
+         de se réveiller n'a pas encore eu le temps de battre. --}}
+    @if ($planificateurMinutes === null || $planificateurMinutes > $planificateurSeuil)
         <x-alert type="warning" :dismissible="false">
             {{ __('admin.sante.planificateur_muet', ['minutes' => $planificateurMinutes ?? '—']) }}
         </x-alert>
@@ -42,7 +42,7 @@
         <div class="col-6 col-lg-3">
             <x-card>
                 <div class="text-secondary small">{{ __('admin.sante.planificateur') }}</div>
-                <div class="h3 fw-bold mb-0 {{ ($planificateurMinutes === null || $planificateurMinutes > 15) ? 'text-danger' : '' }}">
+                <div class="h3 fw-bold mb-0 {{ ($planificateurMinutes === null || $planificateurMinutes > $planificateurSeuil) ? 'text-danger' : '' }}">
                     {{ $planificateurMinutes === null ? '—' : $planificateurMinutes }}
                 </div>
                 <div class="text-secondary small">

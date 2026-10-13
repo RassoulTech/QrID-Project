@@ -260,7 +260,7 @@ return [
         'planificateur' => 'Planificateur',
         'planificateur_battement' => 'dernier passage il y a :minutes min',
         'planificateur_jamais' => 'aucun passage enregistré',
-        'planificateur_muet' => 'Le planificateur est resté muet pendant :minutes minutes. Sur le plan gratuit, cela reste normal juste après un réveil du conteneur : il bat toutes les cinq minutes. Au-delà de quinze, vérifiez les journaux du service.',
+        'planificateur_muet' => 'Le planificateur est resté muet pendant :minutes minutes. Cela reste normal juste après un réveil du conteneur : il bat toutes les trente minutes. Au-delà d\'une heure, vérifiez les journaux du service.',
         'jobs_echec' => ':compte job(s) en échec. Inspectez-les puis relancez avec :commande.',
         'file_engorgee' => 'File « mail » engorgée (:compte en attente). Vérifiez que le worker tourne.',
         'file_mail' => 'File « mail »',

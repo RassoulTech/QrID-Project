@@ -34,21 +34,31 @@ use Throwable;
  * la saute plus jamais.
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * POURQUOI TOUTES LES CINQ MINUTES ET NON CHAQUE MINUTE
+ * POURQUOI TOUTES LES TRENTE MINUTES
  * ═══════════════════════════════════════════════════════════════════════════
- * La question « ai-je déjà tourné ? » coûte une lecture en base. La poser
- * chaque minute pour huit tâches ferait 11 520 lectures par jour ; toutes les
- * cinq minutes, 2 304. Pour des tâches QUOTIDIENNES, cinq minutes de retard
- * ne veulent rien dire — et l'instance tourne sur un dixième de processeur.
+ * La question « ai-je déjà tourné ? » coûte une lecture en base. On la
+ * posait toutes les cinq minutes ; c'était raisonnable sur MySQL, et c'est
+ * devenu un coût sur Neon.
+ *
+ * Neon endort la base après cinq minutes SANS AUCUNE requête, et ne facture
+ * — ou ne décompte de l'offre gratuite — que le temps où elle est éveillée.
+ * Une question toutes les cinq minutes la tenait éveillée en permanence dès
+ * que le conteneur l'était : ~186 heures de calcul par mois pour 100
+ * offertes, sans un seul visiteur.
+ *
+ * Toutes les trente minutes, la base dort vingt-cinq minutes sur trente
+ * quand personne n'utilise le produit. Le prix : une tâche quotidienne part
+ * au plus une demi-heure après son heure — le récapitulatif de 21 h arrive
+ * avant 21 h 30. Pour des tâches QUOTIDIENNES, c'est sans conséquence.
  *
  * ═══════════════════════════════════════════════════════════════════════════
  * LE MARQUEUR EST POSÉ APRÈS LA TENTATIVE, PAS APRÈS LE SUCCÈS
  * ═══════════════════════════════════════════════════════════════════════════
  * `after()` et non `onSuccess()`, et c'est un arbitrage assumé.
  *
- * Avec `onSuccess()`, une tâche qui échoue repartirait toutes les cinq
- * minutes jusqu'à minuit — 288 tentatives, 288 e-mails d'erreur, ou 288
- * appels à un service tiers en panne. Une panne se transformerait en salve.
+ * Avec `onSuccess()`, une tâche qui échoue repartirait à chaque passage
+ * jusqu'à minuit — des dizaines de tentatives, autant d'e-mails d'erreur, ou
+ * d'appels à un service tiers en panne. Une panne se transformerait en salve.
  *
  * Avec `after()`, une tâche en échec attend le lendemain. La contrepartie est
  * réelle : un incident passager fait perdre la journée. On l'accepte parce
@@ -64,6 +74,20 @@ final class Planificateur
 
     /** Clé du battement de cœur — « le planificateur tourne-t-il encore ? ». */
     public const BATTEMENT = '@battement';
+
+    /**
+     * Le rythme auquel le planificateur interroge la base : tâches et
+     * battement. Voir « POURQUOI TOUTES LES TRENTE MINUTES » plus haut.
+     */
+    public const CADENCE_MINUTES = 30;
+
+    public const EXPRESSION = '*/'.self::CADENCE_MINUTES.' * * * *';
+
+    /**
+     * Au-delà de ce silence, le planificateur est tenu pour arrêté : deux
+     * battements manqués, plus une marge pour le réveil d'un conteneur.
+     */
+    public const SILENCE_ANORMAL_MINUTES = 2 * self::CADENCE_MINUTES + 5;
 
     /**
      * Une tâche à exécuter une fois par jour, à partir de `$heure`.
@@ -179,7 +203,7 @@ final class Planificateur
     private static function visible(Event $tache): Event
     {
         return $tache
-            ->everyFiveMinutes()
+            ->cron(self::EXPRESSION)
             ->timezone(self::FUSEAU)
             ->appendOutputTo('/dev/stdout');
     }
@@ -214,8 +238,8 @@ final class Planificateur
      *
      * Le marquage a donc lieu AVANT l'exécution, et non après. C'est la
      * même décision qu'auparavant, poussée à sa conclusion : une tâche qui
-     * échoue attend le lendemain plutôt que de repartir toutes les cinq
-     * minutes. Réclamer d'abord, c'est aussi ce qui rend la réclamation
+     * échoue attend le lendemain plutôt que de repartir à chaque
+     * passage. Réclamer d'abord, c'est aussi ce qui rend la réclamation
      * atomique — on ne peut pas verrouiller ce qu'on n'a pas encore écrit.
      */
     public static function reclamerAujourdhui(string $cle, string $heure): bool
@@ -331,7 +355,7 @@ final class Planificateur
      * ne peut créer de compte », sans la moindre erreur nulle part. C'est
      * la panne que ce produit a déjà vécue.
      *
-     * Deux entiers toutes les cinq minutes suffisent à la rendre visible :
+     * Deux entiers à chaque battement suffisent à la rendre visible :
      * si `en_attente` monte sans jamais redescendre, le worker ne consomme
      * pas. S'il reste à zéro pendant que des e-mails partent, il consomme.
      *
@@ -353,7 +377,7 @@ final class Planificateur
         }
 
         // Rien en attente et rien en échec : le cas nominal, et il n'a pas
-        // besoin d'une ligne de journal toutes les cinq minutes.
+        // besoin d'une ligne de journal à chaque battement.
         if ($enAttente === 0 && $echouees === 0) {
             return;
         }

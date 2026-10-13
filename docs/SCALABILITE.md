@@ -1,8 +1,71 @@
 # Montée en charge
 
-Tous les chiffres de ce document ont été **mesurés**, sur MySQL local, avec
-1 000 profils synthétiques. Ils donnent des ordres de grandeur, pas des garanties :
-Aiven aura d'autres I/O.
+Tous les chiffres de ce document ont été **mesurés**. Ils donnent des ordres de
+grandeur, pas des garanties : la production a d'autres I/O.
+
+---
+
+## PostgreSQL — mesuré le 12 octobre 2026
+
+PostgreSQL 17 local (Docker), **10 000 clients actifs**, **3,6 millions
+d'événements** répartis sur un an — l'hypothèse ci-dessous : 30 par carte et
+par mois. Cache vide à chaque requête : c'est le cas le plus défavorable.
+
+### Temps de page
+
+| Page | Médiane | Pire | Requêtes |
+|---|---|---|---|
+| carte publique (scan) | 279 ms | 324 ms | 5 |
+| tableau de bord client | 212 ms | 236 ms | 20 |
+| statistiques client | 115 ms | 125 ms | 12 |
+| admin — vue d'ensemble | 182 ms | 305 ms | 26 |
+| admin — clients | 126 ms | 154 ms | 7 |
+| admin — recherche (sans casse ni accents) | 133 ms | 190 ms | 7 |
+| admin — statistiques | 346 ms | 440 ms | 12 |
+
+Agrégation nocturne : **3 s par journée** (un an rattrapé en 18 min 44 s).
+
+Ces temps viennent d'un poste de développement. Le plan gratuit de Render a un
+dixième de processeur : ajouter son plancher, environ 270 ms par page (mesuré
+en production le 4 septembre sur une page qui ne touche pas la base).
+
+### Volume — le vrai sujet sur PostgreSQL
+
+| Table | Lignes | Poids |
+|---|---|---|
+| `profile_events` (un an, rétention par défaut) | 3,6 M | **1 265 Mo** — 662 de données, 603 d'index |
+| `profile_stats_daily` (un an d'agrégats) | 2,3 M | 345 Mo, **cumulatif** |
+| `users`, `profiles`, `subscriptions` | 10 000 chacune | 8 Mo |
+
+**350 octets par événement sur PostgreSQL, contre 169 sur MySQL** : l'en-tête
+de ligne et les cinq index pèsent deux fois plus. Les vraies lignes sont encore
+un peu plus lourdes — l'empreinte IP réelle est un SHA-256 de 64 caractères.
+
+Par client actif et par an, environ **300 Ko** : 145 d'événements bruts, 35
+d'agrégats, ~100 de couverture (400 au plus), ~20 d'avatar.
+
+| Offre Neon | Ce qu'elle tient en stockage |
+|---|---|
+| gratuite (1 Go) | **≈ 3 000 clients actifs** |
+| gratuite, rétention des bruts à 3 mois (`STATS_RETENTION_MOIS=3`) | ≈ 5 000 |
+| gratuite, rétention à 3 mois et images sur R2 | ≈ 14 000 |
+| payante (Launch) | sans plafond, 0,35 $ par Go et par mois |
+
+La rétention ne coûte rien en fonctionnalité : au-delà de la journée en cours,
+les bruts ne servent qu'à afficher les 6 à 15 dernières visites. L'historique
+des chiffres vit dans les agrégats, qui ne sont jamais purgés.
+
+### Ce qui saturait avant le stockage : les heures de calcul de Neon
+
+L'application interrogeait la base toutes les dix secondes (worker de file à
+vide), chaque minute (surveillance de la file) et toutes les cinq minutes
+(planificateur). Neon ne s'endort qu'après cinq minutes de silence : il
+restait éveillé tant que Render l'était — ~186 heures de calcul par mois pour
+un conteneur toujours actif, pour 100 offertes.
+
+Corrigé le 12 octobre : planificateur toutes les trente minutes, worker
+endormi tant que la file est en `sync`. Au repos, la base dort vingt-cinq
+minutes sur trente, soit ~30 heures par mois. Voir `NEON.md`.
 
 ---
 
