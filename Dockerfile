@@ -96,11 +96,18 @@ FROM php:8.3-fpm-alpine
 #              code 1 opaque. Aucun planificateur ne tournant, personne ne
 #              l'avait jamais vue echouer : la panne est apparue le jour
 #              meme de la mise en service du planificateur.
+# postgresql18-client : fournit pg_dump, le pendant de mysqldump quand la
+#              base est chez Neon. Version 18 : pg_dump refuse de sauvegarder
+#              un serveur PLUS RÉCENT que lui, et accepte tous les plus
+#              anciens — 18 couvre donc une base Neon en 17 comme en 18.
+# libpq      : la bibliothèque cliente dont pdo_pgsql a besoin pour tourner.
 RUN apk add --no-cache \
         nginx \
         supervisor \
         gettext \
         mariadb-client \
+        postgresql18-client \
+        libpq \
         libpng \
         libjpeg-turbo \
         freetype \
@@ -119,7 +126,10 @@ RUN apk add --no-cache \
 # redimensionnement des photos se dégradait en silence. Elle est ici.
 #
 #   gd        : redimensionnement des photos de profil, QR Codes en PNG
-#   pdo_mysql : la base de données
+#   pdo_mysql : la base de données, quand elle est MySQL
+#   pdo_pgsql : la base de données, quand elle est PostgreSQL (Neon). Les
+#               deux pilotes sont présents : changer de base est une
+#               variable d'environnement, pas une reconstruction d'image.
 #   bcmath    : calculs sur les montants
 #   exif      : orientation des photos prises au téléphone
 #   zip       : archives (dompdf, Composer)
@@ -130,10 +140,12 @@ RUN apk add --no-cache --virtual .build-deps \
         libjpeg-turbo-dev \
         freetype-dev \
         libzip-dev \
+        libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         gd \
         pdo_mysql \
+        pdo_pgsql \
         bcmath \
         exif \
         zip \

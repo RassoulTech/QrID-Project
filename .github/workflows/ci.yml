@@ -67,12 +67,75 @@ jobs:
         run: php artisan test
 
   # ---------------------------------------------------------------------------
+  # 1 bis. LES MÊMES TESTS, SUR POSTGRESQL — le moteur de Neon
+  # ---------------------------------------------------------------------------
+  # SQLite accepte ce que PostgreSQL refuse : SUM(type = ?), un texte binaire
+  # dans une colonne bytea, un identifiant « abc » comparé à un entier. Il
+  # trouve aussi ce que PostgreSQL ne trouve plus — « seck » pour « Seck ».
+  # Une suite qui ne tourne que sur SQLite passerait au vert sur un code qui
+  # casse en production. Celle-ci tourne sur la version que Neon sert.
+  tests-postgresql:
+    name: Tests sur PostgreSQL
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: qrid_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: qrid_test
+      DB_USERNAME: postgres
+      DB_PASSWORD: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, pdo_pgsql, bcmath, exif, zip, mbstring
+          coverage: none
+
+      - name: Cache des dépendances Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - name: Installer les dépendances
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Préparer l'environnement de test
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # Les variables DB_* du job l'emportent sur celles de phpunit.xml :
+      # PHPUnit ne remplace pas une variable déjà définie.
+      - name: Suite de tests
+        run: php artisan test
+
+  # ---------------------------------------------------------------------------
   # 2. L'IMAGE — seulement si les tests passent
   # ---------------------------------------------------------------------------
   image:
     name: Construction de l'image Docker
     runs-on: ubuntu-latest
-    needs: tests
+    needs: [tests, tests-postgresql]
 
     steps:
       - uses: actions/checkout@v4

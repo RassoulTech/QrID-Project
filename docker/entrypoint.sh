@@ -40,8 +40,11 @@ if [ -z "${APP_KEY:-}" ]; then
     exit 1
 fi
 
-if [ -z "${DB_HOST:-}" ]; then
-    echo "ERREUR — DB_HOST est absente. La base de données n'est pas configurée."
+# Deux manières de désigner la base, et l'une suffit : DB_HOST et ses
+# voisines (MySQL chez Aiven), ou DB_URL, l'adresse complète que fournit Neon
+# (postgresql://utilisateur:motdepasse@hôte/base?sslmode=require).
+if [ -z "${DB_HOST:-}" ] && [ -z "${DB_URL:-}" ]; then
+    echo "ERREUR — ni DB_URL ni DB_HOST. La base de données n'est pas configurée."
     exit 1
 fi
 
@@ -58,7 +61,7 @@ fi
 #
 # Une variable dont la valeur ressemble à une consigne n'est pas configurée.
 # On le dit en une ligne, à l'endroit où c'est réparable.
-for _cle in APP_KEY APP_URL DB_HOST DB_PORT DB_PASSWORD DB_USERNAME \
+for _cle in APP_KEY APP_URL DB_URL DB_HOST DB_PORT DB_PASSWORD DB_USERNAME \
             MAIL_PASSWORD ADMIN_PASSWORD; do
     eval "_valeur=\${$_cle:-}"
 
