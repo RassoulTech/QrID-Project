@@ -135,10 +135,12 @@ Planificateur::quotidienne('report:daily', config('notifications.discord.heure',
 | Elle ne porte PAS de rattrapage : un battement en retard n'a aucun sens à
 | rattraper, c'est justement le retard qu'on cherche à mesurer.
 |
-| Même rythme que les tâches — voir Planificateur::CADENCE_MINUTES. Battre
-| plus souvent tiendrait la base éveillée à lui seul.
+| Même rythme que les tâches — au réveil du conteneur, puis toutes les
+| Planificateur::CADENCE_MINUTES. Battre plus souvent tiendrait la base
+| éveillée à lui seul.
 */
 Schedule::call(fn () => Planificateur::battre())
     ->cron(Planificateur::EXPRESSION)
+    ->when(fn () => Planificateur::passageOuvert())
     ->name('battement-planificateur')
     ->withoutOverlapping();

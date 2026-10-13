@@ -289,24 +289,92 @@ class PlanificateurTest extends TestCase
     }
 
     /**
-     * Toutes les tâches quotidiennes sont bien déclarées au planificateur,
-     * et aucune n'est restée sur l'ancien contrat `dailyAt`.
+     * Aucune tâche ne dépend d'être interrogée à une minute précise.
+     *
+     * L'ancien contrat `dailyAt('02:30')` sautait la tâche si personne ne
+     * regardait à 02:30. Le contrat `*\/30` sautait de même toute minute
+     * :00 ou :30 tombée pendant le sommeil du conteneur — c'est arrivé le
+     * 13 octobre. Chaque tâche est désormais interrogée chaque minute, et
+     * c'est passageOuvert() qui choisit.
      */
     public function test_no_task_still_depends_on_being_asked_at_an_exact_minute(): void
     {
-        $quotidiennes = collect(Schedule::events())
-            ->map(fn ($e) => $e->expression)
-            // Le moniteur de file est le seul à devoir passer chaque minute :
-            // il ne fait que lire une profondeur, il n'a rien à rattraper.
-            ->reject(fn ($expression) => $expression === '* * * * *');
+        $expressions = collect(Schedule::events())->map(fn ($e) => $e->expression);
 
-        $this->assertNotEmpty($quotidiennes);
+        $this->assertNotEmpty($expressions);
 
-        foreach ($quotidiennes as $expression) {
+        foreach ($expressions as $expression) {
             $this->assertSame(Planificateur::EXPRESSION, $expression,
                 "Une tâche est déclarée « {$expression} » : elle ne partira que si ".
                 'le planificateur est interrogé à cette minute précise, ce qu\'un '.
                 'conteneur endormi ne garantit pas.');
+        }
+    }
+
+    /**
+     * LE RÉVEIL OUVRE UN PASSAGE, PUIS LA CADENCE REPREND.
+     *
+     * Le témoin vit sur le disque local du conteneur : absent au réveil, il
+     * ouvre le passage aussitôt. Ensuite, rien pendant trente minutes, quelle
+     * que soit l'heure de l'horloge.
+     */
+    public function test_a_pass_opens_on_wake_then_every_thirty_minutes(): void
+    {
+        Planificateur::$temoin = tempnam(sys_get_temp_dir(), 'qrid-passage');
+        @unlink(Planificateur::$temoin);
+
+        try {
+            Carbon::setTestNow(Carbon::parse('2026-10-13 12:33:10', 'UTC'));
+            $this->assertTrue(Planificateur::passageOuvert(),
+                'Au réveil, sans témoin, le planificateur doit passer tout de suite.');
+
+            // Toutes les tâches d'une même minute reçoivent la même réponse.
+            $this->assertTrue(Planificateur::passageOuvert(),
+                'La seconde tâche de la minute s\'est vu refuser le passage ouvert par la première.');
+
+            Carbon::setTestNow(Carbon::parse('2026-10-13 12:34:00', 'UTC'));
+            $this->assertFalse(Planificateur::passageOuvert());
+
+            // 13:00 passe sans rien ouvrir : la cadence suit le dernier
+            // passage, pas l'horloge.
+            Carbon::setTestNow(Carbon::parse('2026-10-13 13:00:00', 'UTC'));
+            $this->assertFalse(Planificateur::passageOuvert());
+
+            Carbon::setTestNow(Carbon::parse('2026-10-13 13:03:00', 'UTC'));
+            $this->assertTrue(Planificateur::passageOuvert());
+        } finally {
+            @unlink(Planificateur::$temoin);
+            Planificateur::$temoin = null;
+        }
+    }
+
+    /**
+     * HORS PASSAGE, AUCUNE REQUÊTE — sinon Neon ne dort jamais.
+     *
+     * On fait tourner le vrai `schedule:run` à une minute fermée et l'on
+     * compte les requêtes : une seule suffirait à réveiller la base chaque
+     * minute où le conteneur est éveillé.
+     */
+    public function test_a_closed_minute_never_touches_the_database(): void
+    {
+        Planificateur::$temoin = tempnam(sys_get_temp_dir(), 'qrid-passage');
+
+        try {
+            Carbon::setTestNow(Carbon::parse('2026-10-13 12:40:00', 'UTC'));
+            file_put_contents(Planificateur::$temoin, (string) Carbon::parse('2026-10-13 12:33:00', 'UTC')->getTimestamp());
+
+            $requetes = 0;
+            \DB::listen(function () use (&$requetes) {
+                $requetes++;
+            });
+
+            $this->artisan('schedule:run')->assertSuccessful();
+
+            $this->assertSame(0, $requetes,
+                'Une minute hors passage a interrogé la base : Neon ne pourra plus s\'endormir.');
+        } finally {
+            @unlink(Planificateur::$temoin);
+            Planificateur::$temoin = null;
         }
     }
 }

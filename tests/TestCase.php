@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Support\Planificateur;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -41,5 +42,26 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         $this->withHeader('Accept-Language', 'fr-FR,fr;q=0.9');
+
+        /*
+         | LE TÉMOIN DU PLANIFICATEUR, PROPRE À CHAQUE TEST.
+         |
+         | Tout test qui fait tourner `schedule:run` écrirait sinon dans
+         | storage/framework — le même fichier que le planificateur local du
+         | développeur — et le test suivant trouverait le passage déjà fermé.
+         | Absent au départ, il se comporte comme un conteneur qui s'éveille.
+         */
+        Planificateur::$temoin = sys_get_temp_dir().DIRECTORY_SEPARATOR.'qrid-passage-'.getmypid().'-'.spl_object_id($this);
+        @unlink(Planificateur::$temoin);
+    }
+
+    protected function tearDown(): void
+    {
+        if (Planificateur::$temoin !== null) {
+            @unlink(Planificateur::$temoin);
+            Planificateur::$temoin = null;
+        }
+
+        parent::tearDown();
     }
 }
