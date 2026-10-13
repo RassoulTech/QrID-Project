@@ -79,9 +79,9 @@ class SubscriptionController extends Controller
     {
         $ligne = Subscription::query()
             ->selectRaw('COUNT(*) as tous')
-            ->selectRaw('SUM(status = ?) as actifs', [Subscription::STATUS_ACTIVE])
-            ->selectRaw('SUM(status = ?) as expires', [Subscription::STATUS_EXPIRED])
-            ->selectRaw('SUM(status = ?) as annules', [Subscription::STATUS_CANCELLED])
+            ->selectRaw('COUNT(CASE WHEN status = ? THEN 1 END) as actifs', [Subscription::STATUS_ACTIVE])
+            ->selectRaw('COUNT(CASE WHEN status = ? THEN 1 END) as expires', [Subscription::STATUS_EXPIRED])
+            ->selectRaw('COUNT(CASE WHEN status = ? THEN 1 END) as annules', [Subscription::STATUS_CANCELLED])
             ->first();
 
         return [

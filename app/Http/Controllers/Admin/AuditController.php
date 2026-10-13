@@ -105,9 +105,9 @@ class AuditController extends Controller
         return AdminAction::query()
             ->with('admin:id,name')
             ->when($request->query('q'), fn (Builder $q, string $terme) => $q->where(
-                fn (Builder $c) => $c->where('reason', 'like', "%{$terme}%")
-                    ->orWhere('action', 'like', "%{$terme}%")
-                    ->orWhereHas('admin', fn (Builder $a) => $a->where('name', 'like', "%{$terme}%"))
+                fn (Builder $c) => $c->whereLikeSouple('reason', "%{$terme}%")
+                    ->orWhereLikeSouple('action', "%{$terme}%")
+                    ->orWhereHas('admin', fn (Builder $a) => $a->whereLikeSouple('name', "%{$terme}%"))
             ))
             ->when($request->query('admin'), fn (Builder $q, string $id) => $q->where('admin_id', $id))
             ->when($request->query('type'), fn (Builder $q, string $type) => $q->where('action', $type))

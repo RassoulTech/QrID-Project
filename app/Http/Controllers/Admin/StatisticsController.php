@@ -105,8 +105,8 @@ class StatisticsController extends Controller
     {
         $ligne = Profile::query()
             ->selectRaw('COUNT(*) as tous')
-            ->selectRaw('SUM(is_active = 1) as publies')
-            ->selectRaw('SUM(deactivated_at IS NOT NULL) as desactives')
+            ->selectRaw('COUNT(CASE WHEN is_active THEN 1 END) as publies')
+            ->selectRaw('COUNT(deactivated_at) as desactives')
             ->first();
 
         $tous = (int) ($ligne->tous ?? 0);

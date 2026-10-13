@@ -22,7 +22,7 @@ class MailHistory extends Command
         }
 
         if ($email = $this->option('email')) {
-            $query->where('recipient', 'like', '%'.$email.'%');
+            $query->whereLikeSouple('recipient', '%'.$email.'%');
         }
 
         $logs = $query->limit((int) $this->option('limit'))->get();

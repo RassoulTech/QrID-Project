@@ -19,6 +19,20 @@ class LoginRequest extends FormRequest
         return true;
     }
 
+    /**
+     * L'ADRESSE EST COMPARÉE EN MINUSCULES, COMME ELLE A ÉTÉ ENREGISTRÉE.
+     *
+     * L'inscription et Google écrivent toujours l'adresse en minuscules.
+     * MySQL comparait sans tenir compte de la casse : « Awa@Gmail.com »
+     * trouvait le compte. PostgreSQL compare à l'octet près, et la même
+     * saisie répondrait « identifiants incorrects » à quelqu'un dont le
+     * mot de passe est juste.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge(['email' => mb_strtolower(trim((string) $this->input('email')))]);
+    }
+
     /** @return array<string, ValidationRule|array<mixed>|string> */
     public function rules(): array
     {

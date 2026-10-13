@@ -149,9 +149,9 @@ class ClientController extends Controller
             // colonne « abonnement » lisent ces relations sur chaque ligne.
             ->with(['profile:id,user_id,is_active,deactivated_at', 'subscriptions.plan:id,name'])
             ->when($request->query('q'), fn (Builder $q, string $terme) => $q->where(
-                fn (Builder $c) => $c->where('name', 'like', "%{$terme}%")
-                    ->orWhere('email', 'like', "%{$terme}%")
-                    ->orWhere('phone', 'like', "%{$terme}%")
+                fn (Builder $c) => $c->whereLikeSouple('name', "%{$terme}%")
+                    ->orWhereLikeSouple('email', "%{$terme}%")
+                    ->orWhereLikeSouple('phone', "%{$terme}%")
             ))
             ->tap(fn (Builder $q) => FiltrePeriode::appliquer(
                 $q, $request->query('periode'), 'users.created_at'

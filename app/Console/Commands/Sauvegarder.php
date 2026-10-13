@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Process;
@@ -43,10 +44,25 @@ class Sauvegarder extends Command
 
     public function handle(): int
     {
-        $config = config('database.connections.'.config('database.default'));
+        /*
+         | LA CONFIGURATION RÉSOLUE, PAS CELLE DU FICHIER.
+         |
+         | Neon fournit une adresse unique (DB_URL). Laravel la découpe en
+         | hôte, port, base et utilisateur au moment d'ouvrir la connexion ;
+         | config('database.connections…') ne contient, lui, que l'adresse
+         | brute et des valeurs par défaut — 127.0.0.1, port 5432. Le dump
+         | serait parti vers une base qui n'existe pas.
+         */
+        $config = DB::connection()->getConfig();
 
-        if (($config['driver'] ?? null) !== 'mysql') {
-            $this->error('Seul MySQL est pris en charge par cette commande.');
+        $processus = match ($config['driver'] ?? null) {
+            'mysql' => $this->mysqldump($config),
+            'pgsql' => $this->pgDump($config),
+            default => null,
+        };
+
+        if ($processus === null) {
+            $this->error('Seuls MySQL et PostgreSQL sont pris en charge par cette commande.');
 
             return self::FAILURE;
         }
@@ -55,28 +71,10 @@ class Sauvegarder extends Command
 
         $this->info('Sauvegarde en cours…');
 
-        /*
-         | LE MOT DE PASSE PASSE PAR L'ENVIRONNEMENT, jamais par la ligne de
-         | commande. Un `--password=…` en argument est visible de tout le
-         | système par `ps`, et se retrouve dans l'historique du shell.
-         |
-         | MYSQL_PWD est la variable que le client mysqldump lit de lui-même.
-         */
-        $processus = new Process([
-            'mysqldump',
-            '--host='.$config['host'],
-            '--port='.$config['port'],
-            '--user='.$config['username'],
-            '--single-transaction',   // pas de verrou sur les tables
-            '--quick',                // ligne à ligne : pas de table entière en mémoire
-            '--default-character-set=utf8mb4',
-            $config['database'],
-        ], null, ['MYSQL_PWD' => (string) $config['password']], null, 600);
-
         $processus->run();
 
         if (! $processus->isSuccessful()) {
-            $this->error('mysqldump a échoué : '.trim($processus->getErrorOutput()));
+            $this->error('Le dump a échoué : '.trim($processus->getErrorOutput()));
 
             return self::FAILURE;
         }
@@ -166,5 +164,59 @@ class Sauvegarder extends Command
             Storage::disk('local')->delete($fichier);
             $this->line("  retirée : {$fichier}");
         }
+    }
+
+    /**
+     * LE MOT DE PASSE PASSE PAR L'ENVIRONNEMENT, jamais par la ligne de
+     * commande. Un `--password=…` en argument est visible de tout le
+     * système par `ps`, et se retrouve dans l'historique du shell.
+     *
+     * MYSQL_PWD est la variable que le client mysqldump lit de lui-même.
+     *
+     * @param  array<string, mixed>  $config
+     */
+    private function mysqldump(array $config): Process
+    {
+        return new Process([
+            'mysqldump',
+            '--host='.$config['host'],
+            '--port='.$config['port'],
+            '--user='.$config['username'],
+            '--single-transaction',   // pas de verrou sur les tables
+            '--quick',                // ligne à ligne : pas de table entière en mémoire
+            '--default-character-set=utf8mb4',
+            $config['database'],
+        ], null, ['MYSQL_PWD' => (string) $config['password']], null, 600);
+    }
+
+    /**
+     * Même principe pour PostgreSQL : PGPASSWORD par l'environnement.
+     *
+     * PGSSLMODE reprend le réglage de la connexion. Neon refuse toute
+     * connexion non chiffrée : sans lui, le dump échouerait là où
+     * l'application, elle, se connecte.
+     *
+     * --no-owner et --no-privileges : le rôle propriétaire chez Neon
+     * (« neondb_owner ») n'existe pas ailleurs. Un dump qui le nomme ne se
+     * restaurerait pas tel quel sur une autre base — c'est-à-dire le jour
+     * précis où l'on en a besoin.
+     *
+     * @param  array<string, mixed>  $config
+     */
+    private function pgDump(array $config): Process
+    {
+        return new Process([
+            'pg_dump',
+            '--host='.$config['host'],
+            '--port='.$config['port'],
+            '--username='.$config['username'],
+            '--no-owner',
+            '--no-privileges',
+            '--encoding=UTF8',
+            $config['database'],
+        ], null, [
+            'PGPASSWORD' => (string) $config['password'],
+            'PGSSLMODE' => (string) ($config['sslmode'] ?? 'prefer'),
+        ], null, 600);
     }
 }

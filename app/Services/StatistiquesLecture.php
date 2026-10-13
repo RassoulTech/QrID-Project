@@ -139,13 +139,13 @@ class StatistiquesLecture
         $source = ProfileEvent::query()
             ->when($profileId, fn ($q) => $q->where('profile_id', $profileId))
             ->when($debutSource, fn ($q) => $q->where('created_at', '>=', $debutSource->startOfDay()))
-            ->selectRaw('SUM(type IN (?, ?, ?)) t', [
+            ->selectRaw('COUNT(CASE WHEN type IN (?, ?, ?) THEN 1 END) t', [
                 ProfileEvent::TYPE_VIEW, ProfileEvent::TYPE_SCAN, ProfileEvent::TYPE_SAVE,
             ])
-            ->selectRaw('SUM(type = ?) v', [ProfileEvent::TYPE_VIEW])
-            ->selectRaw('SUM(type = ?) s', [ProfileEvent::TYPE_SCAN])
-            ->selectRaw('SUM(type = ?) e', [ProfileEvent::TYPE_SAVE])
-            ->selectRaw('SUM(type = ?) p', [ProfileEvent::TYPE_SHARE])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) v', [ProfileEvent::TYPE_VIEW])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) s', [ProfileEvent::TYPE_SCAN])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) e', [ProfileEvent::TYPE_SAVE])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) p', [ProfileEvent::TYPE_SHARE])
             ->first();
 
         return [
@@ -210,13 +210,13 @@ class StatistiquesLecture
             // `t` compte les trois types historiques, jamais les partages :
             // voir la note dans AgregerStatistiques. Un total qui change de
             // définition est un total auquel on ne peut plus se fier.
-            ->selectRaw('SUM(type IN (?, ?, ?)) t', [
+            ->selectRaw('COUNT(CASE WHEN type IN (?, ?, ?) THEN 1 END) t', [
                 ProfileEvent::TYPE_VIEW, ProfileEvent::TYPE_SCAN, ProfileEvent::TYPE_SAVE,
             ])
-            ->selectRaw('SUM(type = ?) v', [ProfileEvent::TYPE_VIEW])
-            ->selectRaw('SUM(type = ?) s', [ProfileEvent::TYPE_SCAN])
-            ->selectRaw('SUM(type = ?) e', [ProfileEvent::TYPE_SAVE])
-            ->selectRaw('SUM(type = ?) p', [ProfileEvent::TYPE_SHARE])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) v', [ProfileEvent::TYPE_VIEW])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) s', [ProfileEvent::TYPE_SCAN])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) e', [ProfileEvent::TYPE_SAVE])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) p', [ProfileEvent::TYPE_SHARE])
             ->groupBy('jour')
             ->get()
             ->mapWithKeys(fn ($ligne) => [

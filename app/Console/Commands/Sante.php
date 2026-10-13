@@ -122,9 +122,7 @@ class Sante extends Command
     private function connexions(): int
     {
         try {
-            $max = (int) DB::selectOne('SHOW VARIABLES LIKE "max_connections"')->Value;
-            $actuelles = (int) DB::selectOne('SHOW STATUS LIKE "Threads_connected"')->Value;
-            $pic = (int) DB::selectOne('SHOW STATUS LIKE "Max_used_connections"')->Value;
+            [$max, $actuelles, $pic] = $this->lireLesConnexions();
         } catch (\Throwable) {
             $this->ligne('Connexions', 'illisibles sur ce serveur', false);
 
@@ -141,6 +139,33 @@ class Sante extends Command
         );
 
         return $sain ? 0 : 1;
+    }
+
+    /**
+     * Plafond, connexions ouvertes, pic — dans le dialecte du moteur.
+     *
+     * PostgreSQL ne retient pas de pic depuis le démarrage : on prend les
+     * connexions ouvertes à l'instant, ce qui reste la bonne question —
+     * « reste-t-il de la marge ? ».
+     *
+     * @return array{0:int, 1:int, 2:int}
+     */
+    private function lireLesConnexions(): array
+    {
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            $max = (int) DB::selectOne('SHOW max_connections')->max_connections;
+            $actuelles = (int) DB::selectOne(
+                'SELECT count(*) AS n FROM pg_stat_activity WHERE datname = current_database()'
+            )->n;
+
+            return [$max, $actuelles, $actuelles];
+        }
+
+        return [
+            (int) DB::selectOne('SHOW VARIABLES LIKE "max_connections"')->Value,
+            (int) DB::selectOne('SHOW STATUS LIKE "Threads_connected"')->Value,
+            (int) DB::selectOne('SHOW STATUS LIKE "Max_used_connections"')->Value,
+        ];
     }
 
     private function tables(): int

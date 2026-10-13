@@ -86,8 +86,8 @@ class TemplateController extends Controller
     {
         $ligne = Template::query()
             ->selectRaw('COUNT(*) as tous')
-            ->selectRaw('SUM(is_active = 1) as actifs')
-            ->selectRaw('SUM(is_premium = 1) as premium')
+            ->selectRaw('COUNT(CASE WHEN is_active THEN 1 END) as actifs')
+            ->selectRaw('COUNT(CASE WHEN is_premium THEN 1 END) as premium')
             ->first();
 
         return [

@@ -88,7 +88,21 @@ return [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
+
+            /*
+             | LE PORT NE DOIT PAS VENIR DE L'ANCIENNE BASE.
+             |
+             | L'adresse que fournit Neon n'a pas de port. Laravel complète
+             | alors ce qui manque à DB_URL avec les clés ci-dessous — et
+             | DB_PORT, sur Render, vaut encore le port d'Aiven (MySQL). Le
+             | conteneur aurait cherché PostgreSQL sur ce port-là, échoué aux
+             | migrations et refusé de démarrer. Constaté le 12 octobre 2026,
+             | avant la bascule : l'essai depuis un poste local visait 3306.
+             |
+             | Avec DB_URL, le port par défaut est donc celui de PostgreSQL ;
+             | une adresse qui en précise un garde le sien.
+             */
+            'port' => env('DB_URL') ? '5432' : env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'laravel'),
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', ''),

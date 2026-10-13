@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\Octets;
 use App\Concerns\FormatsSenegalPhone;
 use App\Enums\VarianteCarte;
 use App\Observers\ProfileObserver;
@@ -59,6 +60,7 @@ class Profile extends Model
             'slug_changed_at' => 'datetime',
             'deactivated_at' => 'datetime',
             'reminder_sent_at' => 'datetime',
+            'cover_data' => Octets::class,
         ];
     }
 

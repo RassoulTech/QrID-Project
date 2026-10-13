@@ -8,6 +8,7 @@ use App\Models\ProfileEvent;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Émission des notifications — uniquement sur des faits vérifiés en base.
@@ -82,11 +83,20 @@ class NotificationService
      * On tente l'insertion et on absorbe le conflit, plutôt que de vérifier
      * puis d'insérer : entre les deux, une seconde requête peut passer. C'est
      * la contrainte de base qui tranche, pas une lecture optimiste.
+     *
+     * L'INSERTION PASSE PAR SA PROPRE TRANSACTION. Sous PostgreSQL, une
+     * instruction en échec ANNULE toute la transaction qui l'entoure : le
+     * conflit absorbé ici rendrait inutilisables toutes les requêtes
+     * suivantes — « current transaction is aborted » — et ferait échouer,
+     * par exemple, la validation d'un paiement qui aurait posé une
+     * notification en double. DB::transaction ouvre un point de sauvegarde
+     * quand une transaction est déjà en cours, et n'annule que lui.
+     * MySQL n'en a pas besoin ; il n'en souffre pas non plus.
      */
     private function poser(User $user, array $attributs): void
     {
         try {
-            Notification::create($attributs + ['user_id' => $user->id]);
+            DB::transaction(fn () => Notification::create($attributs + ['user_id' => $user->id]));
         } catch (QueryException $e) {
             // 23000 = violation de contrainte d'unicité : la notification
             // existe déjà, il n'y a rien à faire et rien à signaler.

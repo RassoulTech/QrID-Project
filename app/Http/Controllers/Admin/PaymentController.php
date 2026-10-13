@@ -80,9 +80,9 @@ class PaymentController extends Controller
     {
         $ligne = Payment::query()
             ->selectRaw('COUNT(*) as tous')
-            ->selectRaw('SUM(status = ?) as reussis', [Payment::STATUS_SUCCESS])
-            ->selectRaw('SUM(status = ?) as attente', [Payment::STATUS_PENDING])
-            ->selectRaw('SUM(status = ?) as echoues', [Payment::STATUS_FAILED])
+            ->selectRaw('COUNT(CASE WHEN status = ? THEN 1 END) as reussis', [Payment::STATUS_SUCCESS])
+            ->selectRaw('COUNT(CASE WHEN status = ? THEN 1 END) as attente', [Payment::STATUS_PENDING])
+            ->selectRaw('COUNT(CASE WHEN status = ? THEN 1 END) as echoues', [Payment::STATUS_FAILED])
             ->first();
 
         return [

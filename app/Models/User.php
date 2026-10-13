@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\Octets;
 use App\Concerns\FormatsSenegalPhone;
 use App\Mail\ResetPasswordMail;
 use App\Support\Courrier;
@@ -68,6 +69,7 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'password' => 'hashed',
             'is_blocked' => 'boolean',
             'blocked_at' => 'datetime',
+            'avatar_data' => Octets::class,
         ];
     }
 

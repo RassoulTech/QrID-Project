@@ -325,12 +325,13 @@ class AdminStatsService
     /**
      * Regroupement par jour ou par mois, dans le dialecte du moteur courant.
      *
-     * SQLite ne connaît pas DATE_FORMAT et MySQL ne connaît pas strftime. Les
-     * tests tournent sur SQLite en mémoire, la production sur MySQL : écrire
-     * l'une des deux syntaxes en dur donnerait soit un écran qui plante en
-     * production, soit une agrégation jamais couverte par les tests.
+     * Chaque moteur a sa fonction : DATE_FORMAT pour MySQL, strftime pour
+     * SQLite, to_char pour PostgreSQL. Les tests tournent sur SQLite et sur
+     * PostgreSQL, la production sur l'un ou l'autre selon l'hébergeur : écrire
+     * une syntaxe en dur donnerait soit un écran qui plante en production,
+     * soit une agrégation jamais couverte par les tests.
      *
-     * DATE() existe des deux côtés, d'où le cas simple traité à part.
+     * DATE() existe partout, d'où le cas simple traité à part.
      */
     private function expressionPeriode(bool $parMois): string
     {
@@ -338,8 +339,10 @@ class AdminStatsService
             return 'DATE(created_at)';
         }
 
-        return DB::connection()->getDriverName() === 'sqlite'
-            ? "strftime('%Y-%m', created_at)"
-            : "DATE_FORMAT(created_at, '%Y-%m')";
+        return match (DB::connection()->getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', created_at)",
+            'pgsql' => "to_char(created_at, 'YYYY-MM')",
+            default => "DATE_FORMAT(created_at, '%Y-%m')",
+        };
     }
 }

@@ -78,10 +78,19 @@ class AgregerStatistiques extends Command
             ->whereBetween('created_at', [$debut, $fin])
             ->groupBy('profile_id')
             ->selectRaw('profile_id')
-            ->selectRaw('SUM(type = ?) as vues', [ProfileEvent::TYPE_VIEW])
-            ->selectRaw('SUM(type = ?) as scans', [ProfileEvent::TYPE_SCAN])
-            ->selectRaw('SUM(type = ?) as saves', [ProfileEvent::TYPE_SAVE])
-            ->selectRaw('SUM(type = ?) as partages', [ProfileEvent::TYPE_SHARE])
+
+            /*
+             | COUNT(CASE WHEN …) ET NON SUM(type = ?).
+             |
+             | SUM(condition) additionne des booléens : MySQL et SQLite les
+             | tiennent pour des entiers, PostgreSQL refuse — « function
+             | sum(boolean) does not exist ». La forme CASE WHEN est du SQL
+             | standard et donne le même nombre sur les trois moteurs.
+             */
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) as vues', [ProfileEvent::TYPE_VIEW])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) as scans', [ProfileEvent::TYPE_SCAN])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) as saves', [ProfileEvent::TYPE_SAVE])
+            ->selectRaw('COUNT(CASE WHEN type = ? THEN 1 END) as partages', [ProfileEvent::TYPE_SHARE])
 
             /*
              | `total` RESTE LA SOMME DES TROIS PREMIERS, et ce n'est pas un
@@ -97,7 +106,7 @@ class AgregerStatistiques extends Command
              | depuis des mois est pire que de ne pas l'enrichir. Les partages
              | ont leur propre colonne.
              */
-            ->selectRaw('SUM(type IN (?, ?, ?)) as total', [
+            ->selectRaw('COUNT(CASE WHEN type IN (?, ?, ?) THEN 1 END) as total', [
                 ProfileEvent::TYPE_VIEW, ProfileEvent::TYPE_SCAN, ProfileEvent::TYPE_SAVE,
             ])
             ->get();

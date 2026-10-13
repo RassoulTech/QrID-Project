@@ -40,11 +40,11 @@ class SearchController extends Controller
         // La carte : une seule, on vérifie simplement si elle correspond.
         $profil = $user->profile()
             ->where(fn ($q) => $q
-                ->where('first_name', 'like', $motif)
-                ->orWhere('last_name', 'like', $motif)
-                ->orWhere('job_title', 'like', $motif)
-                ->orWhere('company', 'like', $motif)
-                ->orWhere('slug', 'like', $motif))
+                ->whereLikeSouple('first_name', $motif)
+                ->orWhereLikeSouple('last_name', $motif)
+                ->orWhereLikeSouple('job_title', $motif)
+                ->orWhereLikeSouple('company', $motif)
+                ->orWhereLikeSouple('slug', $motif))
             ->first();
 
         return view('search.results', [
@@ -53,11 +53,11 @@ class SearchController extends Controller
             'profil' => $profil,
 
             'paiements' => Payment::where('user_id', $user->id)
-                ->where(fn ($q) => $q->where('provider_ref', 'like', $motif)->orWhere('method', 'like', $motif))
+                ->where(fn ($q) => $q->whereLikeSouple('provider_ref', $motif)->orWhereLikeSouple('method', $motif))
                 ->latest()->limit(10)->get(),
 
             'notifications' => Notification::where('user_id', $user->id)
-                ->where(fn ($q) => $q->where('title', 'like', $motif)->orWhere('body', 'like', $motif))
+                ->where(fn ($q) => $q->whereLikeSouple('title', $motif)->orWhereLikeSouple('body', $motif))
                 ->latest()->limit(10)->get(),
         ]);
     }

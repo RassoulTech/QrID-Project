@@ -27,6 +27,9 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // En minuscules, comme à l'inscription : voir LoginRequest.
+        $request->merge(['email' => mb_strtolower(trim((string) $request->input('email')))]);
+
         $request->validate([
             'email' => ['required', 'email'],
         ]);

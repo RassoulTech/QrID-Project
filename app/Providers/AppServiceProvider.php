@@ -2,12 +2,16 @@
 
 namespace App\Providers;
 
+use App\Database\ConnexionPostgres;
 use App\Services\Payment\FakeGateway;
 use App\Services\Payment\PaymentGateway;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -30,11 +34,17 @@ class AppServiceProvider extends ServiceProvider
                 default => new FakeGateway,
             };
         });
+
+        // Les octets des images partent en binaire vers PostgreSQL, et non
+        // en texte. Voir App\Database\ConnexionPostgres.
+        Connection::resolverFor('pgsql', fn ($pdo, $base, $prefixe, $config) => new ConnexionPostgres($pdo, $base, $prefixe, $config));
     }
 
     public function boot(): void
     {
         $this->surveillerLesRequetesLentes();
+        $this->rechercherSansCasseNiAccent();
+        $this->refuserLesIdentifiantsMalFormes();
 
         /*
          * PAGINATION — gabarit propre au produit.
@@ -106,5 +116,61 @@ class AppServiceProvider extends ServiceProvider
                 'route' => request()->path(),
             ]);
         });
+    }
+
+    /**
+     * UNE RECHERCHE TROUVE « Ndèye » QU'ON TAPE « ndeye » OU « NDEYE ».
+     *
+     * ═══════════════════════════════════════════════════════════════════
+     * CE QUE MYSQL FAISAIT SANS LE DIRE
+     * ═══════════════════════════════════════════════════════════════════
+     * La collation utf8mb4_unicode_ci rend LIKE insensible à la casse ET aux
+     * accents. Personne ne l'a jamais écrit : c'était gratuit.
+     *
+     * Sous PostgreSQL, LIKE compare octet à octet. « seck » ne trouve plus
+     * « Seck », « elodie » ne trouve plus « Élodie » — et aucune erreur ne
+     * le signale, la recherche répond simplement « aucun résultat ».
+     *
+     * whereLikeSouple rétablit le comportement d'origine : ILIKE pour la
+     * casse, unaccent() des deux côtés pour les accents (extension créée par
+     * la migration create_unaccent_extension). Sur MySQL et SQLite, c'est le
+     * LIKE d'avant, à l'identique.
+     */
+    private function rechercherSansCasseNiAccent(): void
+    {
+        QueryBuilder::macro('whereLikeSouple', function (string $colonne, string $motif, string $boolean = 'and') {
+            /** @var QueryBuilder $this */
+            if ($this->getConnection()->getDriverName() !== 'pgsql') {
+                return $this->where($colonne, 'like', $motif, $boolean);
+            }
+
+            $colonne = $this->getGrammar()->wrap($colonne);
+
+            return $this->whereRaw("unaccent({$colonne}) ilike unaccent(?)", [$motif], $boolean);
+        });
+
+        QueryBuilder::macro('orWhereLikeSouple', function (string $colonne, string $motif) {
+            /** @var QueryBuilder $this */
+            return $this->whereLikeSouple($colonne, $motif, 'or');
+        });
+    }
+
+    /**
+     * UNE ADRESSE MAL FORMÉE DONNE 404, PAS 500.
+     *
+     * MySQL compare « /admin/clients/abc » à un identifiant numérique, ne
+     * trouve rien, et Laravel répond 404. PostgreSQL refuse la comparaison
+     * elle-même — « invalid input syntax for type bigint » — et la page
+     * tombe en erreur serveur, avec une alerte à la clé.
+     *
+     * On filtre donc au routage, avant toute requête : ces trois paramètres
+     * sont des identifiants numériques. Les profils, modèles et formules se
+     * résolvent par leur slug, une chaîne : ils ne sont pas concernés.
+     */
+    private function refuserLesIdentifiantsMalFormes(): void
+    {
+        Route::pattern('user', '[0-9]+');
+        Route::pattern('payment', '[0-9]+');
+        Route::pattern('notification', '[0-9]+');
     }
 }

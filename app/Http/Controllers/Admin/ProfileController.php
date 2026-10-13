@@ -75,9 +75,9 @@ class ProfileController extends Controller
             // Sous-requête, pas une requête par ligne.
             ->withCount(['events as vues_count' => fn (Builder $q) => $q->where('type', ProfileEvent::TYPE_VIEW)])
             ->when($request->query('q'), fn (Builder $q, string $terme) => $q->where(
-                fn (Builder $c) => $c->where('first_name', 'like', "%{$terme}%")
-                    ->orWhere('last_name', 'like', "%{$terme}%")
-                    ->orWhere('slug', 'like', "%{$terme}%")
+                fn (Builder $c) => $c->whereLikeSouple('first_name', "%{$terme}%")
+                    ->orWhereLikeSouple('last_name', "%{$terme}%")
+                    ->orWhereLikeSouple('slug', "%{$terme}%")
             ))
             ->inState($request->query('etat'))
             ->when($request->query('modele'), fn (Builder $q, string $slug) => $q->whereHas(
