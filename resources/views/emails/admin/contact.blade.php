@@ -1,15 +1,10 @@
 @component('emails.layout', ['title' => __('emails.contact.titre', ['nom' => $contact->name])])
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-           style="margin:0 0 20px;background:#F1F5F9;border-radius:8px;">
-        <tr>
-            <td style="padding:12px 14px;">
-                <span style="font-size:12px;font-weight:bold;letter-spacing:.04em;color:#64748B;">
-                    {{ __('emails.contact.bandeau') }}
-                </span><br>
-                <span style="font-size:18px;font-weight:bold;color:#1E293B;">{{ $motif }}</span>
-            </td>
-        </tr>
-    </table>
+    @component('emails.partials.panneau', [
+        'ton' => 'neutre',
+        'surtitre' => __('emails.contact.bandeau'),
+        'titre' => $motif,
+    ])
+    @endcomponent
 
     @include('emails.partials.details', ['lignes' => array_filter([
         __('emails.contact.lignes.nom') => $contact->name,
@@ -21,12 +16,13 @@
 
     {{-- LE MESSAGE, tel qu'il a été écrit.
          nl2br sur une valeur ÉCHAPPÉE : les retours à la ligne sont conservés
-         sans qu'aucun HTML saisi par un tiers ne puisse être interprété. --}}
-    <div style="margin:0 0 24px;padding:14px 16px;border-left:3px solid #0B3B2E;background:#F8FAFC;font-size:15px;line-height:1.6;color:#1E293B;">
+         sans qu'aucun HTML saisi par un tiers ne puisse être interprété.
+         Le filet baobab à gauche dit « citation » sans un mot de plus. --}}
+    @component('emails.partials.panneau', ['ton' => 'neutre', 'filet' => true])
         {!! nl2br(e($contact->message)) !!}
-    </div>
+    @endcomponent
 
-    <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
+    <p class="q-texte2 q-trait" style="margin:24px 0 0;padding-top:16px;border-top:1px solid #E0D5C1;font-size:14px;line-height:22px;color:#56605A;">
         {!! __('emails.contact_suite.reponse', ['adresse' => e($contact->email)]) !!}
     </p>
 @endcomponent

@@ -1,5 +1,5 @@
 @component('emails.layout', ['title' => __('emails.bienvenue.titre')])
-    <h1 style="margin:0 0 12px;font-size:20px;">{{ __('emails.commun.bonjour', ['nom' => $name]) }}</h1>
+    <h1 class="q-texte" style="margin:0 0 16px;font-size:24px;line-height:30px;font-weight:800;letter-spacing:-0.3px;color:#15211C;">{{ __('emails.commun.bonjour', ['nom' => $name]) }}</h1>
 
     {{--
         La directive est sur sa propre ligne, et ce n'est pas du confort de
@@ -8,14 +8,14 @@
         compile. Le gabarit produit alors un fichier PHP invalide, et
         l'erreur ne se manifeste qu'à l'envoi réel.
     --}}
-    <p style="margin:0 0 16px;line-height:1.5;">
+    <p class="q-texte" style="margin:0 0 16px;font-size:16px;line-height:26px;color:#15211C;">
         {{ __('emails.bienvenue.essai', ['jours' => $trialDays]) }}
         @if ($trialEndsAt)
             {{ __('emails.bienvenue.essai_fin', ['date' => $trialEndsAt]) }}
         @endif
     </p>
 
-    <p style="margin:0 0 16px;line-height:1.5;">
+    <p class="q-texte" style="margin:0 0 16px;font-size:16px;line-height:26px;color:#15211C;">
         {{ __('emails.bienvenue.etape') }}
     </p>
 
@@ -28,19 +28,14 @@
              faire : créer sa carte. Lui proposer d'abord de rejoindre un
              groupe le détournerait de l'étape qui donne au produit sa
              valeur. --}}
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-               style="margin:8px 0 20px;background:#F1F5F9;border-radius:8px;">
-            <tr>
-                <td style="padding:14px 16px;font-size:14px;line-height:1.5;color:#1E293B;">
-                    <strong>{{ __('emails.bienvenue.groupe_titre') }}</strong><br>
-                    {{ __('emails.bienvenue.groupe_texte') }}
-                    <a href="{{ $groupeUrl }}" style="color:#0B3B2E;font-weight:bold;">{{ __('emails.bienvenue.groupe_lien') }}</a>.
-                </td>
-            </tr>
-        </table>
+        @component('emails.partials.panneau', ['ton' => 'neutre'])
+            <strong>{{ __('emails.bienvenue.groupe_titre') }}</strong><br>
+            {{ __('emails.bienvenue.groupe_texte') }}
+            <a href="{{ $groupeUrl }}" class="q-lien" style="color:#146A50;font-weight:700;text-decoration:underline;">{{ __('emails.bienvenue.groupe_lien') }}</a>.
+        @endcomponent
     @endif
 
-    <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
+    <p class="q-texte2 q-trait" style="margin:24px 0 0;padding-top:16px;border-top:1px solid #E0D5C1;font-size:14px;line-height:22px;color:#56605A;">
         {{ __('emails.bienvenue.sans_paiement') }}
     </p>
 @endcomponent

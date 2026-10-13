@@ -1,47 +1,105 @@
 {{--
   CARTE PRÊTE POUR L'IMPRIMEUR — deux pages, recto puis verso.
+  Direction A « Teranga institutionnel » : recto au nom du porteur, verso
+  baobab au claustra, lisière tissée sur la tranche basse des deux faces.
 
   Page : 91,6 × 60 mm = 85,6 × 54 mm (ISO/IEC 7810 ID-1) + 3 mm de fonds
   perdus sur chaque bord. Le trait de coupe passe à 3 mm des bords ; le fond
   court jusqu'au bord de page, sinon une dérive de massicot d'un demi-
   millimètre laisse un liseré blanc.
 
-  ZONE DE SÉCURITÉ : aucun texte à moins de 6 mm du bord (3 mm de fonds perdus
-  + 3 mm de marge).
+  ZONE DE SÉCURITÉ : aucun texte à moins de $marge (6 mm) du bord de page,
+  soit 3 mm du trait de coupe. La composition prend 5 mm depuis le trait —
+  les proportions de la maquette (1,5 em de carte) — au-dessus de ce plancher.
 
-  CONTRAINTE DOMPDF : ni flexbox, ni grid, ni aspect-ratio, ni dégradé radial.
-  Tout est en positionnement absolu et en millimètres — le seul CSS que ce
-  moteur rend fidèlement. Le fond organique du verso est donc une IMAGE,
-  produite par CardTextureService : voir l'en-tête de ce fichier-là.
+  CONTRAINTE DOMPDF : ni flexbox, ni grid, ni aspect-ratio, ni motif SVG
+  répété, ni dégradé radial. Tout est en positionnement absolu et en
+  millimètres, plus un tableau pour la ligne du haut — le seul CSS que ce
+  moteur rend fidèlement (vérifié en rendu réel, page rastérisée). Le
+  claustra et la lisière sont donc DÉJÀ PEINTS dans l'image de fond, produite
+  par CardTextureService : voir l'en-tête de ce fichier-là.
 
-  QR : images PNG haute définition. Le SVG serait plus élégant mais le support
-  vectoriel de DomPDF est partiel, et une carte partie à l'impression avec un
-  code approximatif ne se corrige pas par un déploiement.
+  POLICE : DejaVu Sans, embarquée par DomPDF. Schibsted Grotesk n'existe dans
+  le projet qu'en woff2 variable, sous-ensemble latin : DomPDF ne lit pas ce
+  format, et le sous-ensemble ne couvre pas tous les noms (le ŋ wolof, par
+  exemple). DejaVu les couvre tous ; une carte imprimée avec un nom troué ne
+  se corrige pas.
 
-  AUCUN COIN ARRONDI, et c'est volontaire. Sur une carte physique, le rayon
-  vient de la DÉCOUPE, jamais de l'impression : le fond doit courir jusqu'au
-  bord de page, fonds perdus compris. Un arrondi dessiné dans le PDF laisserait
-  quatre coins blancs à l'intérieur du trait de coupe — exactement le défaut
-  que les fonds perdus servent à éviter.
+  QR CODES — TOUJOURS SOMBRES SUR UN PANNEAU CLAIR (ISO/IEC 18004), sur les
+  deux faces et dans les deux variantes. Les PNG portent leur zone de silence
+  de 4 modules, sur fond blanc ; le panneau blanc les prolonge. Un code
+  inversé (clair sur vert) est lu par les lecteurs récents, ignoré par
+  d'autres, et leur échec est silencieux : sur un objet qu'on ne peut plus
+  corriger, ce risque ne se prend pas.
+
+  AUCUN COIN ARRONDI À LA PAGE, et c'est volontaire. Sur une carte physique,
+  le rayon vient de la DÉCOUPE, jamais de l'impression : le fond doit courir
+  jusqu'au bord de page, fonds perdus compris. Seuls les PANNEAUX intérieurs
+  ont un rayon.
 
   DEUX QR CODES, DEUX DESTINATIONS :
-    recto — la carte du porteur, aux couleurs de la variante ;
-    verso — la PLATEFORME, en orientation standard dans un cadre blanc.
-  Ce n'est pas une erreur : la seconde permet à qui reçoit la carte de
+    recto — la carte du porteur ;
+    verso — la PLATEFORME, en orientation standard, dans son panneau.
+  Ce n'est pas une erreur : le second permet à qui reçoit la carte de
   découvrir le produit.
 
-  Reçoit : $profile, $variante, $nom, $marge, $utile, $tailleNom, $surUneLigne,
-  $qrRecto, $qrVerso, $fondVerso.
-
-  LA TAILLE DU NOM EST CALCULÉE, non écrite ici : App\Support\NomSurCarte la
-  déduit de la longueur, avec le même coefficient qu'à l'écran. Une valeur
-  fixe faisait passer « MOUHAMED DIONE » à la ligne.
+  Reçoit : $profile, $variante, $marge, $qrRecto, $qrVerso, $fondRecto,
+  $fondVerso.
 --}}
+@php
+    $fp = 3.0;                       // fonds perdus
+    $bord = max($marge, $fp + 5.0);  // composition : 5 mm du trait de coupe, jamais sous le plancher
+    $lisiere = 1.4;                  // hauteur visible de la lisière
+    $basUtile = $fp + 54 - $lisiere; // bas de la zone utile, au-dessus de la lisière
+    $largeurUtile = 85.6 - 2 * 5.0;  // 75,6 mm
+
+    $verte = $variante === \App\Enums\VarianteCarte::Verte;
+
+    // Les encres du recto, selon la variante — palette de la direction A.
+    $encre = [
+        'nom' => $verte ? '#FFFCF6' : '#0D3B2E',
+        'fonction' => $verte ? '#6FD1A8' : '#146A50',
+        'entreprise' => $verte ? '#EE9B72' : '#A9481F',
+        'panneau' => $verte ? '#FFFFFF' : '#E0D5C1',
+    ];
+
+    // QR du recto : 25 mm de code (≥ 22 mm exigés), panneau de 26,8 mm calé
+    // dans le coin bas-droit. Le claustra de la face ivoire occupe le coin
+    // opposé (voir CardTextureService::claustraEnCoin).
+    $qrR = 25.0;
+    $panR = $qrR + 1.8;
+    $panRx = $fp + 85.6 - 5.0 - $panR;
+    $panRy = $basUtile - 4.2 - $panR;
+
+    // QR du verso : 31 mm de code, panneau de 33 mm, à gauche, à 5 mm du
+    // trait de coupe en haut comme à gauche — une marge régulière.
+    $qrV = 31.0;
+    $panV = $qrV + 2.0;
+    $panVy = $bord;
+    $colV = $bord + $panV + 4.5;     // colonne de droite du verso
+    $largeurColV = $fp + 85.6 - 5.0 - $colV;
+
+    /*
+     | LE MONOGRAMME de la direction A : le carré de repérage du QR devenu un
+     | Q à queue dorée. En SVG dans une balise <img> — DomPDF le rend net
+     | (php-svg-lib : rectangles arrondis, trait, bout rond), ce que la même
+     | forme bâtie en blocs CSS ne garantissait pas.
+     */
+    $monogramme = 'data:image/svg+xml;base64,'.base64_encode(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">'
+        .'<rect x="3.5" y="3.5" width="29" height="29" rx="8" fill="none" stroke="#FFFCF6" stroke-width="5"/>'
+        .'<rect x="12.5" y="12.5" width="11" height="11" rx="2.5" fill="#FFFCF6"/>'
+        .'<path d="M27.5 27.5 36 36" fill="none" stroke="#E2B85A" stroke-width="5.5" stroke-linecap="round"/>'
+        .'</svg>'
+    );
+
+    $entreprise = trim((string) $profile->company);
+@endphp
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <title>Carte {{ $profile->slug }}</title>
+    <title>{{ config('app.name') }} — {{ $profile->full_name }}</title>
     <style>
         @page { margin: 0; }
 
@@ -57,183 +115,152 @@
 
         .page:last-child { page-break-after: auto; }
 
-        /* Le fond couvre TOUTE la page, fonds perdus compris. */
-        .fond {
-            position: absolute;
-            top: 0; left: 0;
-            width: 91.6mm;
-            height: 60mm;
-            background-color: {{ $variante->fond() }};
-        }
+        /* Le fond couvre TOUTE la page, fonds perdus compris. Il porte déjà
+           la couleur de la face, le claustra et la lisière : aucune
+           superposition, donc aucun écart de teinte au bord de l'image. */
+        .fond { position: absolute; top: 0; left: 0; width: 91.6mm; height: 60mm; }
 
-        /* MARGE RÉGULIÈRE SUR LES QUATRE CÔTÉS — 6,4 mm depuis le bord de
-           page, soit 3,4 mm depuis le trait de coupe. Au-delà des 3 mm de zone
-           de sécurité exigés par l'impression, et exactement les 4 % de largeur
-           employés à l'écran. Trois valeurs différentes donnaient une bordure
-           irrégulière que l'œil perçoit sans savoir la nommer. */
-        .zone {
+        .fond img { width: 91.6mm; height: 60mm; }
+
+        /* LE PANNEAU DU QR : blanc, comme la zone de silence cuite dans le
+           PNG — aucune marche de teinte autour du code. Rayon de 1,8 mm
+           (0,55 em de carte), comme la maquette. */
+        .panneau {
             position: absolute;
-            top: {{ $marge }}mm; left: {{ $marge }}mm;
-            width: {{ $utile }}mm;
-            height: {{ 60 - 2 * $marge }}mm;
+            background-color: #FFFFFF;
+            border-radius: 1.8mm;
         }
 
         /* ============================ RECTO ============================
-           DENSITÉ — les valeurs suivent celles de l'écran, converties dans le
-           repère du papier. Une carte dense à l'écran et aérée à l'impression
-           serait le pire des deux : l'aperçu ne dirait plus la vérité sur ce
-           que le client va tenir.
+           Ligne du haut : le nom et la fonction à gauche, l'entreprise à
+           droite en capitales latérite — la composition de la maquette.
+           Un TABLEAU et non deux blocs absolus : la largeur du nom dépend
+           de celle de l'entreprise, et seul le tableau sait la partager. */
+        .haut {
+            position: absolute;
+            top: {{ $fp + 4.6 }}mm; left: {{ $bord }}mm;
+            width: {{ $largeurUtile }}mm;
+            border-collapse: collapse;
+        }
 
-           Le nom, le QR et la fonction se répartissent sur toute la hauteur
-           utile, sans zone morte. */
+        .haut td { padding: 0; vertical-align: top; }
+
         .nom {
-            position: absolute;
-            top: 0; left: 0;
-            width: {{ $utile }}mm;
-            text-align: center;
-            /* Taille CALCULÉE d'après la longueur du nom, par le même code
-               qu'à l'écran — voir App\Support\NomSurCarte. */
-            font-size: {{ $tailleNom }}pt;
+            /* 1,42 em de carte, graisse 800 dans la maquette — gras ici. */
+            font-size: 13.2pt;
             font-weight: bold;
-            letter-spacing: -0.7pt;
-            color: {{ $variante->encre() }};
-            line-height: 0.94;
-            @if ($surUneLigne) white-space: nowrap; @endif
+            letter-spacing: -0.3pt;
+            line-height: 1.08;
+            color: {{ $encre['nom'] }};
         }
-
-        /* QR à 27,4 mm sur 54 mm de carte, soit ≈50 % de la hauteur — la même
-           proportion que les 32cqw de l'écran. */
-        .qr {
-            position: absolute;
-            left: {{ round(($utile - 27.4) / 2, 2) }}mm; top: 10.6mm;
-            width: 27.4mm;
-            height: 27.4mm;
-        }
-
-        .qr img { width: 27.4mm; height: 27.4mm; }
 
         .fonction {
-            position: absolute;
-            left: 0; bottom: 0;
-            width: {{ $utile }}mm;
-            text-align: center;
-            font-size: 7.5pt;
+            margin-top: 1.4mm;
+            font-size: 7pt;
             font-weight: bold;
-            letter-spacing: 2pt;
-            color: {{ $variante->encre() }};
+            line-height: 1.25;
+            color: {{ $encre['fonction'] }};
         }
+
+        .entreprise {
+            padding-left: 3.3mm;
+            padding-top: 0.6mm;
+            text-align: right;
+            font-size: 6.2pt;
+            font-weight: bold;
+            letter-spacing: 0.9pt;
+            line-height: 1.3;
+            color: {{ $encre['entreprise'] }};
+        }
+
+        .entreprise-courte { white-space: nowrap; }
+
+        .entreprise-longue { width: 30mm; }
+
+        .panneau-recto {
+            left: {{ $panRx }}mm; top: {{ $panRy }}mm;
+            width: {{ $panR }}mm; height: {{ $panR }}mm;
+            @unless ($verte) border: 0.25mm solid {{ $encre['panneau'] }}; @endunless
+        }
+
+        .qr-recto { position: absolute; left: 0.9mm; top: 0.9mm; width: {{ $qrR }}mm; height: {{ $qrR }}mm; }
 
         /* ============================ VERSO ============================
-           Le fond organique est une image posée à plat sur toute la page,
-           fonds perdus compris. Elle contient DÉJÀ la couleur de la variante :
-           aucune superposition, donc aucun risque d'écart de teinte entre le
-           bord de l'image et le fond de la page. */
-        .verso-fond {
-            position: absolute;
-            top: 0; left: 0;
-            width: 91.6mm;
-            height: 60mm;
+           La face de la PLATEFORME, identique sur toutes les cartes : baobab,
+           claustra, panneau du QR à gauche, colonne de droite — appel,
+           accroche, adresse, signature — comme la maquette. */
+        .panneau-verso {
+            left: {{ $bord }}mm; top: {{ $panVy }}mm;
+            width: {{ $panV }}mm; height: {{ $panV }}mm;
         }
 
-        .verso-fond img { width: 91.6mm; height: 60mm; }
+        .qr-verso { position: absolute; left: 1mm; top: 1mm; width: {{ $qrV }}mm; height: {{ $qrV }}mm; }
 
-        /* --- Colonne gauche : logo, nom de la marque, accroche ---
+        .v-colonne { position: absolute; left: {{ $colV }}mm; width: {{ $largeurColV }}mm; }
 
-           LE LOGO EST CELUI DE L'APPLICATION — le carré du monogramme, dessiné
-           ici en CSS plutôt qu'en image. DomPDF rend fidèlement un bloc à fond
-           plein avec du texte centré, et cette voie évite d'embarquer un
-           fichier de plus dans un document déjà lourd de trois images.
+        /* L'appel et l'accroche forment UN bloc qui s'écoule : l'accroche
+           vient de la configuration, sa longueur varie, et deux positions
+           fixes l'auraient fait buter sur la ligne suivante. */
+        .v-texte { top: {{ $panVy + 0.6 }}mm; }
 
-           Le carré est AU-DESSUS du nom, jamais à côté : le nom est écrit en
-           grand juste en dessous. */
-        .v-logo {
-            position: absolute;
-            left: {{ $marge }}mm; top: {{ $marge }}mm;
-            width: 11mm;
-            height: 11mm;
-            background-color: {{ $variante === \App\Enums\VarianteCarte::Verte ? '#1E9E7A' : '#0B3B2E' }};
-            border-radius: 2.6mm;
-            text-align: center;
-            /* DomPDF ne centre pas verticalement : la hauteur de ligne le fait
-               à sa place, réglée sur la hauteur du carré. */
-            line-height: 11mm;
-            font-size: 13pt;
+        .v-appel {
+            font-size: 6pt;
             font-weight: bold;
-            color: #FFFFFF;
-            letter-spacing: 0.3pt;
-        }
-
-        /* LE NOM EST SUR LA MÊME LIGNE QUE LE CARRÉ, à sa droite. Empilés, les
-           deux formaient deux blocs distincts au lieu d'une signature, et le
-           regard devait redescendre pour lire la marque. */
-        .v-nom {
-            position: absolute;
-            left: {{ $marge + 13.4 }}mm; top: {{ $marge }}mm;
-            /* Même hauteur de ligne que le carré : les deux s'alignent sur
-               leur milieu sans calcul de position supplémentaire. */
-            line-height: 11mm;
-            font-size: 25pt;
-            font-weight: bold;
-            letter-spacing: -0.8pt;
-            color: {{ $variante->encre() }};
+            letter-spacing: 1.1pt;
+            color: #E2B85A;
         }
 
         .v-accroche {
-            position: absolute;
-            left: {{ $marge }}mm; top: {{ $marge + 14 }}mm;
-            width: 41mm;
-            font-size: 8pt;
+            margin-top: 1.6mm;
+            font-size: 10pt;
             font-weight: bold;
-            line-height: 1.42;
-            color: {{ $variante->encre() }};
+            letter-spacing: -0.15pt;
+            line-height: 1.16;
+            color: #FFFCF6;
         }
 
-        /* --- QR de la plateforme, à droite ---
-           ALIGNÉ SUR LE HAUT du bloc de texte, et non centré : deux blocs qui
-           partent de la même ligne se lisent comme une composition.
 
-           Cadre blanc réduit à une marge fine et régulière : c'est la zone de
-           silence du code, pas une décoration. Blanc en dur, jamais dérivé de
-           la variante — ce code doit rester sombre sur clair. */
-        .v-qr {
+
+        /* La signature : monogramme et nom, alignés sur le BAS du panneau —
+           deux blocs qui partent et s'arrêtent sur les mêmes lignes se lisent
+           comme une composition. */
+        .v-marque { top: {{ $panVy + $panV - 6.2 }}mm; height: 6.2mm; }
+
+        .v-marque img { position: absolute; left: 0; top: 0.2mm; width: 5.8mm; height: 5.8mm; }
+
+        .v-marque span {
             position: absolute;
-            right: {{ $marge }}mm; top: {{ $marge }}mm;
-            width: 26mm;
-            background-color: #FFFFFF;
-            padding: 1.2mm;
-        }
-
-        .v-qr img { width: 26mm; height: 26mm; }
-
-        .v-qr-mention {
-            position: absolute;
-            right: {{ $marge }}mm; top: {{ $marge + 30 }}mm;
-            width: 28.4mm;
-            text-align: center;
-            font-size: 6.5pt;
+            left: 7.3mm; top: 0;
+            line-height: 6.2mm;
+            font-size: 14pt;
             font-weight: bold;
-            letter-spacing: 0.3pt;
-            color: {{ $variante->encre() }};
+            letter-spacing: -0.5pt;
+            color: #FFFCF6;
         }
 
-        /* --- Pied : nature à gauche, adresse à droite ---
-           Même marge que partout ailleurs : c'est la régularité de la bordure
-           qui fait qu'une carte paraît soignée. */
+        /* Pied, juste au-dessus de la lisière : la nature du service à
+           gauche, l'adresse du site à droite, en or — la voix qui engage. */
+        .v-pied {
+            position: absolute;
+            left: {{ $bord }}mm; top: {{ $basUtile - 4.8 }}mm;
+            width: {{ $largeurUtile }}mm;
+            border-collapse: collapse;
+        }
+
+        .v-pied td { padding: 0; vertical-align: bottom; }
+
         .v-nature {
-            position: absolute;
-            left: {{ $marge }}mm; bottom: {{ $marge }}mm;
-            font-size: 6pt;
-            letter-spacing: 0.9pt;
-            color: {{ $variante->encre() }};
+            font-size: 5.6pt;
+            letter-spacing: 1pt;
+            color: #ABB3AB;
         }
 
         .v-site {
-            position: absolute;
-            right: {{ $marge }}mm; bottom: {{ $marge }}mm;
-            font-size: 6pt;
+            text-align: right;
+            font-size: 7pt;
             font-weight: bold;
-            letter-spacing: 0.9pt;
-            color: {{ $variante->encre() }};
+            letter-spacing: 0.4pt;
+            color: #E2B85A;
         }
     </style>
 </head>
@@ -241,32 +268,56 @@
 
 {{-- ============================== RECTO ============================== --}}
 <div class="page">
-    <div class="fond"></div>
+    <div class="fond"><img src="{{ $fondRecto }}" alt=""></div>
 
-    <div class="zone">
-        <div class="nom">{{ $nom }}</div>
+    <table class="haut">
+        <tr>
+            <td>
+                <div class="nom">{{ $profile->full_name }}</div>
+                @if ($profile->job_title)
+                    <div class="fonction">{{ $profile->job_title }}</div>
+                @endif
+            </td>
+            @if ($entreprise !== '')
+                <td class="entreprise {{ mb_strlen($entreprise) <= 18 ? 'entreprise-courte' : 'entreprise-longue' }}">{{ mb_strtoupper($entreprise) }}</td>
+            @endif
+        </tr>
+    </table>
 
-        <div class="qr"><img src="{{ $qrRecto }}" alt=""></div>
-
-        <div class="fonction">{{ mb_strtoupper($profile->job_title ?? '') }}</div>
+    <div class="panneau panneau-recto">
+        <img class="qr-recto" src="{{ $qrRecto }}" alt="{{ __('card.publique.qr_aria') }}">
     </div>
 </div>
 
 {{-- ============================== VERSO ==============================
      La face de la PLATEFORME. Aucune donnée du porteur : ce verso est
-     rigoureusement identique sur toutes les cartes de tous les clients. --}}
+     rigoureusement identique sur toutes les cartes de tous les clients, et
+     toujours en baobab, quelle que soit la variante du recto. --}}
 <div class="page">
-    <div class="verso-fond"><img src="{{ $fondVerso }}" alt=""></div>
+    <div class="fond"><img src="{{ $fondVerso }}" alt=""></div>
 
-    <div class="v-logo">{{ \App\Support\Marque::monogramme() }}</div>
-    <div class="v-nom">{{ config('app.name') }}</div>
-    <div class="v-accroche">{{ config('landing.brand.tagline') }}</div>
+    <div class="panneau panneau-verso">
+        <img class="qr-verso" src="{{ $qrVerso }}" alt="{{ __('card.publique.qr_aria') }}">
+    </div>
 
-    <div class="v-qr"><img src="{{ $qrVerso }}" alt=""></div>
-    <div class="v-qr-mention">{{ mb_strtoupper(config('landing.brand.card_cta')) }}</div>
+    <div class="v-colonne v-texte">
+        <div class="v-appel">{{ mb_strtoupper(config('landing.brand.card_cta')) }}</div>
+        <div class="v-accroche">{{ config('landing.brand.tagline') }}</div>
+    </div>
+    <div class="v-colonne v-marque">
+        <img src="{{ $monogramme }}" alt="">
+        <span>{{ config('app.name') }}</span>
+    </div>
 
-    <div class="v-nature">{{ mb_strtoupper(__('card.protocole')) }}</div>
-    <div class="v-site">{{ mb_strtoupper(config('landing.brand.website')) }}</div>
+    <table class="v-pied">
+        <tr>
+            <td class="v-nature">{{ mb_strtoupper(__('card.protocole')) }}</td>
+            {{-- L'adresse vient de la configuration : en développement, la
+                 dériver d'APP_URL ferait imprimer « 127.0.0.1 », et cela ne se
+                 voit qu'une fois les cartes sorties. --}}
+            <td class="v-site">{{ config('landing.brand.website') }}</td>
+        </tr>
+    </table>
 </div>
 
 </body>

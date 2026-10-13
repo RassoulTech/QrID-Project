@@ -1,15 +1,13 @@
 @component('emails.layout', ['title' => $motif->titre()])
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-           style="margin:0 0 20px;background:{{ $motif->estUrgent() ? '#FEF2F2' : '#F1F5F9' }};border-radius:8px;">
-        <tr>
-            <td style="padding:12px 14px;">
-                <span style="font-size:12px;font-weight:bold;letter-spacing:.04em;color:{{ $motif->estUrgent() ? '#B91C1C' : '#64748B' }};">
-                    {{ $motif->estUrgent() ? __('emails.alerte.action_requise') : __('emails.alerte.pour_information') }}
-                </span><br>
-                <span style="font-size:18px;font-weight:bold;color:#1E293B;">{{ $motif->titre() }}</span>
-            </td>
-        </tr>
-    </table>
+    {{-- Urgente : le panneau prend la teinte « échoué » de la direction A.
+         Informative : le sable neutre. Le SURTITRE dit lequel des deux —
+         la couleur ne fait que le confirmer. --}}
+    @component('emails.partials.panneau', [
+        'ton' => $motif->estUrgent() ? 'echec' : 'neutre',
+        'surtitre' => $motif->estUrgent() ? __('emails.alerte.action_requise') : __('emails.alerte.pour_information'),
+        'titre' => $motif->titre(),
+    ])
+    @endcomponent
 
     @include('emails.partials.details', ['lignes' => $lignes])
 
@@ -21,7 +19,7 @@
         ])
     @endif
 
-    <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
+    <p class="q-texte2 q-trait" style="margin:24px 0 0;padding-top:16px;border-top:1px solid #E0D5C1;font-size:14px;line-height:22px;color:#56605A;">
         {{ __('emails.alerte.automatique') }}
     </p>
 @endcomponent

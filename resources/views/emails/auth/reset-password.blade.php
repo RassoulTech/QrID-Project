@@ -1,27 +1,19 @@
 @component('emails.layout', ['title' => __('emails.reinitialisation.titre')])
-    <h1 style="margin:0 0 12px;font-size:20px;">{{ __('emails.reinitialisation.titre') }}</h1>
+    <h1 class="q-texte" style="margin:0 0 16px;font-size:24px;line-height:30px;font-weight:800;letter-spacing:-0.3px;color:#15211C;">{{ __('emails.reinitialisation.titre') }}</h1>
 
-    <p style="margin:0 0 16px;line-height:1.5;">
+    <p class="q-texte" style="margin:0 0 16px;font-size:16px;line-height:26px;color:#15211C;">
         {{ __('emails.reinitialisation.intro', ['marque' => config('app.name')]) }}
     </p>
 
-    <p style="margin:0 0 24px;" align="center">
-        <a href="{{ $resetUrl }}"
-           style="display:inline-block;background:#0B3B2E;color:#ffffff;text-decoration:none;padding:14px 26px;border-radius:8px;font-weight:bold;font-size:16px;">
-            {{ __('emails.reinitialisation.bouton') }}
-        </a>
-    </p>
+    @include('emails.partials.bouton', ['url' => $resetUrl, 'libelle' => __('emails.reinitialisation.bouton')])
 
-    <p style="margin:0 0 8px;font-size:13px;color:#64748b;line-height:1.5;">
+    <p class="q-texte2" style="margin:0 0 12px;font-size:14px;line-height:22px;color:#56605A;">
         {{ __('emails.reinitialisation.validite', ['minutes' => $ttlMinutes]) }}
     </p>
 
-    <p style="margin:0 0 16px;font-size:13px;color:#64748b;word-break:break-all;">
-        {{ __('emails.commun.lien_brut') }}<br>
-        <a href="{{ $resetUrl }}" style="color:#0B3B2E;">{{ $resetUrl }}</a>
-    </p>
+    @include('emails.partials.lien-brut', ['url' => $resetUrl])
 
-    <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
+    <p class="q-texte2 q-trait" style="margin:24px 0 0;padding-top:16px;border-top:1px solid #E0D5C1;font-size:14px;line-height:22px;color:#56605A;">
         {{ __('emails.reinitialisation.ignorer') }}
     </p>
 @endcomponent

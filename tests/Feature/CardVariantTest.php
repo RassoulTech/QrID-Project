@@ -330,7 +330,15 @@ class CardVariantTest extends TestCase
     // LES QUATRE FACES SE FABRIQUENT
     // =======================================================================
 
-    /** Le fond organique existe pour chaque variante, et c'est bien un PNG. */
+    /**
+     * Le fond imprimé (claustra, lisière) existe pour chaque variante, c'est
+     * bien un PNG à la taille de la page, et il est écrit sur le disque pour
+     * n'être peint qu'une fois.
+     *
+     * Le nom du fichier porte la version du motif (« fond-Verte-teranga-1 ») :
+     * un changement de motif ne doit pas laisser servir l'ancien fichier. Le
+     * test cherche donc le fichier par son préfixe, pas par un nom figé.
+     */
     public function test_the_organic_background_is_produced_for_both_variants(): void
     {
         $texture = app(CardTextureService::class);
@@ -339,8 +347,42 @@ class CardVariantTest extends TestCase
             $png = $texture->png($variante);
 
             $this->assertStringStartsWith("\x89PNG", $png, 'Le fond de la variante '.$variante->name.' n\'est pas un PNG.');
-            Storage::disk('public')->assertExists("cartes/fond-{$variante->name}.png");
+
+            // 1832 × 1200 px : 91,6 × 60 mm, fonds perdus compris, à 20 px/mm.
+            [$largeur, $hauteur] = getimagesizefromstring($png);
+            $this->assertSame([1832, 1200], [$largeur, $hauteur], 'Le fond ne couvre pas la page entière.');
+
+            $ecrits = preg_grep('#^cartes/fond-'.$variante->name.'-.+\.png$#', Storage::disk('public')->files('cartes'));
+            $this->assertNotEmpty($ecrits, 'Le fond de la variante '.$variante->name.' n\'est pas mis en cache sur le disque.');
         }
+    }
+
+    /**
+     * LE VERSO EST LE MÊME SUR TOUTES LES CARTES, ET LE QR Y RESTE SOMBRE.
+     *
+     * Le verso est la face de la plateforme : baobab, claustra, lisière, pour
+     * les deux variantes. Et le QR du recto est le fichier STANDARD (modules
+     * sombres sur blanc), jamais la version inversée de la carte verte :
+     * ISO/IEC 18004, que certains lecteurs appliquent sans tolérance.
+     */
+    public function test_the_printable_card_keeps_qr_codes_dark_on_light(): void
+    {
+        // La carte VERTE : c'est elle qui produisait le code inversé.
+        $this->profile->forceFill(['primary_color' => VarianteCarte::Verte->value])->save();
+
+        $this->partialMock(QrCodeService::class, function ($qr) {
+            $qr->shouldReceive('cartePng')->never();
+            $qr->shouldReceive('png')->once()->passthru();
+        });
+
+        $this->partialMock(CardTextureService::class, function ($texture) {
+            // Le verso prend le fond baobab, quelle que soit la variante.
+            $texture->shouldReceive('dataUri')->with(VarianteCarte::Verte)->twice()->passthru();
+        });
+
+        $pdf = app(PrintableCardService::class)->render($this->profile->refresh());
+
+        $this->assertStringStartsWith('%PDF', $pdf);
     }
 
     /**

@@ -1,15 +1,18 @@
 @component('emails.layout', ['title' => __('emails.abonnement_expire.titre')])
-    <h1 style="margin:0 0 12px;font-size:20px;">{{ __('emails.commun.bonjour', ['nom' => $name]) }}</h1>
+    @include('emails.partials.cachet', ['ton' => 'echec', 'libelle' => __('emails.abonnement_expire.titre')])
 
-    <p style="margin:0 0 16px;line-height:1.5;">
+    <h1 class="q-texte" style="margin:0 0 16px;font-size:24px;line-height:30px;font-weight:800;letter-spacing:-0.3px;color:#15211C;">{{ __('emails.commun.bonjour', ['nom' => $name]) }}</h1>
+
+    <p class="q-texte" style="margin:0 0 16px;font-size:16px;line-height:26px;color:#15211C;">
         {{ __('emails.abonnement_expire.intro', ['date' => $echeance]) }}
     </p>
 
-    <p style="margin:0 0 20px;padding:12px 14px;background:#F1F5F9;border-radius:8px;line-height:1.5;">
+    {{-- La nouvelle rassurante, détachée en vert « réussi » : rien n'est perdu. --}}
+    @component('emails.partials.panneau', ['ton' => 'ok'])
         {!! __('emails.abonnement_expire.intactes') !!}
-    </p>
+    @endcomponent
 
-    <p style="margin:0 0 16px;line-height:1.5;">
+    <p class="q-texte" style="margin:0 0 16px;font-size:16px;line-height:26px;color:#15211C;">
         {{ __('emails.abonnement_expire.renouveler') }}
     </p>
 
@@ -17,7 +20,7 @@
     @include('emails.partials.lien-brut', ['url' => $renewUrl])
 
     @if ($publicUrl)
-        <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;word-break:break-all;">
+        <p class="q-texte2 q-trait" style="margin:24px 0 0;padding-top:16px;border-top:1px solid #E0D5C1;font-size:14px;line-height:22px;color:#56605A;word-break:break-word;overflow-wrap:anywhere;">
             {{ __('emails.abonnement_expire.adresse_conservee', ['url' => $publicUrl]) }}
         </p>
     @endif

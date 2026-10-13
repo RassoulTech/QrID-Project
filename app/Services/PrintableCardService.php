@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\VarianteCarte;
 use App\Models\Profile;
-use App\Support\NomSurCarte;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Cache;
 
@@ -48,18 +48,17 @@ class PrintableCardService
      */
     private const MARGE_MM = 6.0;
 
-    /** Largeur de page, fonds perdus compris. */
-    private const PAGE_L = 91.6;
-
     /**
-     * Largeur de la carte APRÈS COUPE — ISO/IEC 7810 ID-1.
+     * LA VERSION DU GABARIT, inscrite dans la clé de cache.
      *
-     * C'est elle, et non la page, qui donne l'échelle des bornes de taille du
-     * nom : l'écran montre la carte coupée, et les deux doivent aboutir à la
-     * même proportion. Passer la largeur de page ici rendait le plafond et le
-     * plancher 7 % trop généreux.
+     * Le PDF est gardé trente jours, sous une clé qui ne dépendait que des
+     * champs imprimés. Sans cette version, une refonte de la carte resterait
+     * invisible un mois durant pour tous les profils déjà téléchargés — et
+     * l'e-mail de paiement joindrait l'ANCIEN fichier, celui qui part chez
+     * l'imprimeur. À incrémenter à chaque changement de la vue
+     * profile.printable ou des fonds de CardTextureService.
      */
-    private const CARTE_L = 85.6;
+    private const GABARIT = 'teranga-1';
 
     /**
      * LE PDF EST MIS EN CACHE, ET LA CLÉ PORTE L'EMPREINTE DU PROFIL.
@@ -101,6 +100,7 @@ class PrintableCardService
     private function cleDeCache(Profile $profile): string
     {
         $empreinte = md5(implode('|', [
+            self::GABARIT,
             $profile->first_name,
             $profile->last_name,
             $profile->job_title,
@@ -116,39 +116,45 @@ class PrintableCardService
     {
         $variante = $profile->variante();
 
-        $nom = mb_strtoupper($profile->full_name);
-
         /*
-         | LA TAILLE DU NOM VIENT DU MÊME CALCUL QU'À L'ÉCRAN.
+         | LE NOM N'EST PLUS MESURÉ ICI.
          |
-         | NomSurCarte est sans unité : on lui passe des millimètres, il rend
-         | des millimètres. La conversion en points PostScript se fait ensuite,
-         | une seule fois. Reproduire ici le coefficient d'avance aurait garanti
-         | une divergence entre l'aperçu et le tirage.
+         | La direction A l'écrit à taille FIXE (1,42 em de carte, comme la
+         | maquette), en haut à gauche, et le laisse passer à la ligne dans sa
+         | colonne : c'est DomPDF, qui connaît les vraies métriques de la
+         | police, qui coupe. L'ancien calcul (NomSurCarte) servait à faire
+         | tenir un nom en capitales sur toute la largeur — une composition
+         | abandonnée.
          */
-        $utile = self::PAGE_L - 2 * self::MARGE_MM;
-        $tailleMm = NomSurCarte::taille($nom, $utile, self::CARTE_L);
-
         return Pdf::loadView('profile.printable', [
             'profile' => $profile,
             'variante' => $variante,
-            'nom' => $nom,
             'marge' => self::MARGE_MM,
-            'utile' => $utile,
-            'tailleNom' => round($tailleMm * 2.8346, 1),   // mm → points
-            'surUneLigne' => NomSurCarte::surUneLigne($tailleMm, self::CARTE_L),
 
-            // RECTO — le QR du porteur, aux couleurs de la variante. Le fond
-            // est CUIT dans l'image plutôt que laissé transparent, la
-            // transparence PNG étant une faiblesse connue de DomPDF.
-            'qrRecto' => $this->enBase64($this->qr->cartePng($profile)),
+            /*
+             | RECTO — le QR du porteur, TOUJOURS SOMBRE SUR CLAIR.
+             |
+             | png() et non plus cartePng(). cartePng() teintait les modules
+             | selon la variante : sur la carte VERTE, il les rendait BLANCS sur
+             | vert — un code inversé, hors de la norme ISO/IEC 18004, que
+             | certains lecteurs ignorent sans rien dire. png() encode la MÊME
+             | adresse (urlEncodee), en encre de marque sur fond blanc, et la
+             | vue le pose dans un panneau blanc sur les deux variantes —
+             | exactement ce que montre l'écran, qui utilise svg().
+             */
+            'qrRecto' => $this->enBase64($this->qr->png($profile)),
 
             // VERSO — le QR de la PLATEFORME, en orientation standard. Il est
             // identique sur toutes les cartes : le cache est global.
             'qrVerso' => $this->enBase64($this->qr->plateformePng()),
 
-            // Le fond organique, que DomPDF ne saurait pas peindre lui-même.
-            'fondVerso' => $this->texture->dataUri($variante),
+            /*
+             | Les fonds, que DomPDF ne saurait pas peindre lui-même : claustra
+             | et lisière. Le recto prend celui de sa variante ; le verso, face
+             | de la plateforme, est TOUJOURS baobab — le fond de la verte.
+             */
+            'fondRecto' => $this->texture->dataUri($variante),
+            'fondVerso' => $this->texture->dataUri(VarianteCarte::Verte),
         ])
             ->setPaper([0, 0, $this->mm(91.6), $this->mm(60)])
             ->output();
