@@ -1,21 +1,17 @@
 {{--
-  x-modal — fenêtre modale Bootstrap native (attributs data-bs-*, aucun JS écrit).
+  x-modal — la boîte de dialogue (Bootstrap natif, habillée par le socle).
 
-  Déclencheur :
-    <x-button type="button" data-bs-toggle="modal" data-bs-target="#suppression">Supprimer</x-button>
+      <x-modal id="suppression" title="Confirmer la suppression">
+          …
+          <x-slot name="footer">…</x-slot>
+      </x-modal>
 
-  Modale :
-    <x-modal id="suppression" title="Confirmer la suppression" :show="$errors->userDeletion->isNotEmpty()">
-        <p>Cette action est irréversible.</p>
-        <x-slot name="footer">
-            <x-button type="button" variant="secondary" data-bs-dismiss="modal">Annuler</x-button>
-            <x-button variant="danger">Supprimer</x-button>
-        </x-slot>
-    </x-modal>
+  Rayon 24, ombre de niveau 4, titre H3. Une action qui ne doit jamais
+  dépendre du script passe plutôt par un <dialog> ou une page de
+  confirmation : sans JavaScript, une modale Bootstrap ne s'ouvre pas.
 
-  Props : id, title, size (sm | lg | xl), centered, show (ouverture serveur
-          après une erreur de validation — sans JavaScript, via la classe .show)
-  Slots : default, footer
+  `show` l'affiche ouverte d'emblée (rendu serveur après une erreur) : le
+  voile est alors posé par la classe `modal--ouverte`, pas en ligne.
 --}}
 @props([
     'id',
@@ -26,26 +22,23 @@
 ])
 
 <div
-    class="modal fade {{ $show ? 'show d-block' : '' }}"
+    @class(['modal', 'fade', 'show d-block modal--ouverte' => $show])
     id="{{ $id }}"
     tabindex="-1"
     aria-labelledby="{{ $id }}-title"
     aria-hidden="{{ $show ? 'false' : 'true' }}"
-    @if ($show) style="background-color: rgba(15,23,42,.5);" @endif
 >
     <div class="modal-dialog {{ $centered ? 'modal-dialog-centered' : '' }} {{ $size ? 'modal-'.$size : '' }}">
         <div class="modal-content">
             @if ($title)
                 <div class="modal-header">
-                    <h2 class="modal-title h6 fw-bold" id="{{ $id }}-title">{{ $title }}</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    <h2 class="modal-title" id="{{ $id }}-title">{{ $title }}</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('common.actions.fermer') }}"></button>
                 </div>
             @endif
-
             <div class="modal-body">
                 {{ $slot }}
             </div>
-
             @isset($footer)
                 <div class="modal-footer">
                     {{ $footer }}

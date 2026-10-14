@@ -1,250 +1,283 @@
-{{-- Référence visuelle. Accessible uniquement en environnement local.
-     Props : $profile (profil de démonstration) --}}
+{{--
+  /design-system — LA PLANCHE DE LA DIRECTION A « Teranga institutionnel ».
+
+  Page locale (le contrôleur rend 404 ailleurs). Elle sert de RÉFÉRENCE aux
+  lots qui composent les écrans : chaque composant y est rendu par son vrai
+  gabarit, dans les deux thèmes. Ce qu'on juge ici est ce que le produit sert.
+
+  Aucune valeur n'est écrite dans cette page : les pastilles de couleur
+  lisent les jetons (x-nuancier), les styles viennent du socle.
+  Props : $profile (profil de démonstration)
+--}}
 <x-public-layout title="Système de design">
-    <section class="section">
-        <div class="wrap">
-            <h1 class="section-title">Système de design</h1>
-            <p class="section-sub">Page locale. Voir <code>docs/DESIGN.md</code> pour les règles.</p>
+<div class="ds">
 
-            {{-- ================= LE LOGO =================
+    {{-- ===================== EN-TÊTE ===================== --}}
+    <header class="wrap ds-tete">
+        <p class="t-surtitre">Direction A · Teranga institutionnel</p>
+        <h1 class="t-display">Le système de design</h1>
+        <p class="t-lead">
+            La rigueur d'une institution, l'hospitalité d'un salon dakarois. Vert
+            baobab sur sable, claustra en filigrane, lisière tissée pour signer
+            ce qui compte, l'or réservé à ce qui engage. Règles et mode d'emploi :
+            <code>docs/DESIGN.md</code>.
+        </p>
+    </header>
 
-                 UN SEUL COMPOSANT POUR TOUT LE PRODUIT : navbar, menu latéral,
-                 pages d'erreur, pied public, cartes PVC et PDF d'impression.
-                 Un second dessin quelque part serait un second logo, qui
-                 divergerait au premier ajustement.
+    <div class="wrap ds-grille">
 
-                 Le monogramme est CALCULÉ à partir de APP_NAME, jamais écrit
-                 en dur : « QrID » → « QI ». Changer le nom du produit met le
-                 logo à jour partout, sans toucher un fichier. --}}
-            <h2 class="section-title" style="margin-top:72px">Logo</h2>
-            <p class="section-sub">
-                Monogramme <code>{{ \App\Support\Marque::monogramme() }}</code>, calculé
-                depuis <code>APP_NAME</code>. Le nom du ton désigne le <em>texte</em>,
-                pas le fond : <code>dark</code> se pose sur un fond clair,
-                <code>light</code> sur un fond sombre.
-            </p>
-            <p class="section-sub">
-                Dans les deux tons, <strong>les lettres du monogramme restent
-                blanches</strong> : seul le carré change de teinte. Un monogramme
-                tantôt blanc sur vert, tantôt vert sur blanc, donnerait deux logos.
-            </p>
-
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:32px">
-                <div style="padding:28px;border:1px solid rgba(10,31,26,.10);border-radius:20px;background:#FFFFFF">
-                    <p class="section-sub" style="margin:0 0 20px"><code>tone="dark"</code> — sur fond clair</p>
-                    <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
-                        <x-brand size="lg" :link="false" />
-                        <x-brand size="md" :link="false" />
-                        <x-brand size="sm" :link="false" />
-                        <x-brand :words="false" :link="false" size="lg" />
-                    </div>
-                </div>
-
-                <div style="padding:28px;border-radius:20px;background:#0B3B2E">
-                    <p class="section-sub" style="margin:0 0 20px;color:rgba(255,255,255,.7)"><code>tone="light"</code> — sur fond sombre</p>
-                    <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
-                        <x-brand size="lg" tone="light" :link="false" />
-                        <x-brand size="md" tone="light" :link="false" />
-                        <x-brand size="sm" tone="light" :link="false" />
-                        <x-brand :words="false" :link="false" tone="light" size="lg" />
-                    </div>
-                </div>
+        {{-- ===================== CONCEPT ===================== --}}
+        <section class="tuile tuile--couverture tuile--panneau ds-col-5 ds-concept avec-lisiere" aria-labelledby="ds-concept">
+            <x-brand size="xl" tone="light" :words="false" :link="false" />
+            <div>
+                <h2 id="ds-concept" class="ds-concept__titre">Teranga institutionnel</h2>
+                <p class="ds-concept__texte">
+                    Une institution moderne qui accueille : la structure d'une banque,
+                    la chaleur d'une maison. Le vert signe, le sable accueille, la
+                    latérite alerte, l'or distingue.
+                </p>
             </div>
-
-            {{-- ---------------------------------------------------------- --}}
-            <h2 class="section-title" style="margin-top:72px">Carte PVC</h2>
-            <p class="section-sub">
-                Ratio 1,586 (85,6 × 54 mm, ISO/IEC 7810 ID-1) · rayon de coin 3,18 mm,
-                la valeur normative CR80 ·
-                typographie en unités de conteneur · deux variantes, verte et blanche.
-            </p>
-            <p class="section-sub">
-                <strong>Recto</strong> — le porteur : nom, code, fonction. Son QR mène
-                à sa carte.
-                <strong>Verso</strong> — la plateforme, identique sur toutes les
-                cartes, sans aucune donnée de profil. Son QR mène à la plateforme.
-            </p>
-            <p class="section-sub">
-                <strong>Densité</strong> — marges à 6 % de la largeur, QR à ≈47 % de
-                la hauteur, aucune zone morte de plus d'un quart de la hauteur.
-            </p>
-
-            <div style="margin-top:56px">
-                <p class="section-sub" style="margin-bottom:24px">
-                    Présentation « duo » — les deux faces en perspective, comme la référence.
-                </p>
-                <div style="display:flex;justify-content:center">
-                    <x-card-duo :profile="$profile" />
-                </div>
+            <div class="ds-rangee">
+                <span class="puce-op">Claustra</span>
+                <span class="puce-op">Lisière tissée</span>
+                <span class="puce-op">Schibsted Grotesk</span>
             </div>
+        </section>
 
-            {{-- ================= LES QUATRE FACES =================
+        {{-- ===================== PALETTES ===================== --}}
+        <section class="tuile ds-col-7" aria-labelledby="ds-clair">
+            <div class="tuile__tete">
+                <h2 id="ds-clair" class="tuile__titre">Palette — thème clair</h2>
+                <span class="t-over">Rôle · hex</span>
+            </div>
+            <x-nuancier theme="clair" />
+        </section>
 
-                 Deux variantes × deux faces. C'est la planche de référence :
-                 tout ce qui peut partir à l'impression est ici, et rien
-                 d'autre n'existe.
+        <section class="tuile ds-col-7 ds-col-debut-6 theme-dark ds-sombre" aria-labelledby="ds-sombre">
+            <div class="tuile__tete">
+                <h2 id="ds-sombre" class="tuile__titre">Palette — thème sombre</h2>
+                <span class="t-over">Rôle · hex</span>
+            </div>
+            <x-nuancier theme="sombre" />
+        </section>
 
-                 On les montre à la MÊME ÉCHELLE et côte à côte, car c'est le
-                 seul moyen de juger ce qui compte réellement — le contraste
-                 du QR Code sur chaque fond, et l'équilibre entre un recto
-                 centré et un verso asymétrique.
+        {{-- ===================== TYPOGRAPHIE ===================== --}}
+        <section class="tuile ds-col-7" aria-labelledby="ds-type">
+            <div class="tuile__tete">
+                <h2 id="ds-type" class="tuile__titre">Échelle typographique — Schibsted Grotesk</h2>
+                <span class="t-over">Variable 400 → 900 · woff2 latin 46,8 Ko</span>
+            </div>
+            <dl class="ds-type">
+                <dt>Display · 72/850</dt><dd class="t-display">La carte qui reste.</dd>
+                <dt>H1 · 44/820</dt><dd class="t-h1">Bonjour Mouhamed</dd>
+                <dt>H2 · 36/800</dt><dd class="t-h2">Un prix clair</dd>
+                <dt>H3 · 22/760</dt><dd class="t-h3">Comment ça marche</dd>
+                <dt>Chapô · 20/400</dt><dd class="t-lead">On scanne, et vos coordonnées sont enregistrées.</dd>
+                <dt>Corps · 16/400</dt><dd>Texte courant, jamais sous 16 px sur mobile. Chiffres tabulaires pour les montants.</dd>
+                <dt>Surtitre · 13/650</dt><dd class="t-over">Abonnement · Standard</dd>
+                <dt>Surtitre de section</dt><dd><span class="t-surtitre">Comment ça marche</span></dd>
+                <dt>Chiffre · 44/820</dt><dd><span class="indic__valeur">1 248<small>FCFA</small></span></dd>
+            </dl>
+        </section>
 
-                 La carte de gauche est celle du profil réel, avec son QR ;
-                 celle de droite force l'autre variante sur le même profil. --}}
-            <div style="margin-top:64px">
-                <p class="section-sub" style="margin-bottom:8px">
-                    Les quatre faces — deux variantes, recto et verso.
-                </p>
-                <p class="section-sub" style="margin-bottom:24px;max-width:60ch">
-                    La variante <strong>blanche</strong> est conforme à ISO/IEC 18004
-                    (code sombre sur fond clair). La <strong>verte</strong> l'inverse :
-                    les lecteurs modernes la gèrent, d'autres non, et leur échec est
-                    silencieux. À qualité d'impression égale, la blanche scanne plus sûrement.
-                </p>
-
-                @foreach (\App\Enums\VarianteCarte::toutes() as $variante)
-                    @php
-                        // On clone le profil pour lui imposer la variante sans
-                        // toucher à la base : cette page ne doit rien écrire.
-                        $exemplaire = clone $profile;
-                        $exemplaire->primary_color = $variante->value;
-                    @endphp
-
-                    <p class="section-sub" style="margin:32px 0 16px">
-                        <strong>Variante {{ $variante->libelle() }}</strong> — {{ $variante->description() }}
-                    </p>
-
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;align-items:start">
-                        <div>
-                            <x-card face="recto" :profile="$exemplaire" :variant="$variante->carte()" />
-                            <p class="section-sub" style="margin-top:16px">
-                                <strong>Recto</strong> — centré, symétrique. Son QR mène
-                                à la carte du porteur.
-                            </p>
-                        </div>
-
-                        <div>
-                            <x-card face="verso" :profile="$exemplaire" :variant="$variante->carte()" />
-                            <p class="section-sub" style="margin-top:16px">
-                                <strong>Verso</strong> — asymétrique, identique sur toutes
-                                les cartes. Son QR mène à la <em>plateforme</em>.
-                            </p>
-                        </div>
-                    </div>
+        {{-- ===================== RAYONS, OMBRES, ESPACES ===================== --}}
+        <section class="tuile ds-col-5" aria-labelledby="ds-formes">
+            <div class="tuile__tete"><h2 id="ds-formes" class="tuile__titre">Rayons et ombres</h2></div>
+            <div class="ds-rayons">
+                @foreach (['xs' => '6 · badge', 'sm' => '10 · bouton', 'md' => '16 · carte', 'lg' => '24 · tuile', 'xl' => '32 · panneau'] as $rayon => $legende)
+                    <figure class="ds-rayon">
+                        <span class="ds-rayon__forme ds-rayon--{{ $rayon }}" aria-hidden="true"></span>
+                        <figcaption>{{ $legende }}</figcaption>
+                    </figure>
                 @endforeach
             </div>
-
-            <div style="margin-top:64px">
-                <p class="section-sub" style="margin-bottom:24px">
-                    Trois tailles, avec permutation.
-                </p>
-                <div style="display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start">
-                    <x-card face="recto" :profile="$profile" />
-                    <x-card face="verso" :profile="$profile" />
-                </div>
+            <div class="ds-ombres">
+                <span class="ds-ombre ds-ombre--1">Niveau 1<br>tuiles</span>
+                <span class="ds-ombre ds-ombre--2">Niveau 2<br>flottants</span>
+                <span class="ds-ombre ds-ombre--4">Objet<br>carte PVC</span>
             </div>
-
-            {{-- ---------------------------------------------------------- --}}
-            <h2 class="section-title" style="margin-top:72px">Composant téléphone</h2>
-            <p class="section-sub">Ratio 9/19.5 · 280px, 240px, 220px selon le contexte.</p>
-
-            <div style="display:flex;flex-wrap:wrap;gap:64px;justify-content:center;align-items:flex-start;margin-top:56px">
-                <div style="text-align:center">
-                    <x-phone :profile="$profile" size="lg" :animate="false" />
-                    <p class="section-sub" style="margin-top:20px">Grande — 280px (hero)</p>
-                </div>
-
-                <div style="text-align:center">
-                    <x-phone :profile="$profile" size="sm" :animate="false" />
-                    <p class="section-sub" style="margin-top:20px">Réduite — 240px (section sombre)</p>
-                </div>
-            </div>
-
-            <div style="margin-top:64px">
-                <p class="section-sub">Sur socle, comme dans la section sombre :</p>
-                <div class="showcase" style="border-radius:32px;margin-top:24px">
-                    <div class="wrap" style="display:flex;justify-content:center">
-                        <div class="phone-pedestal">
-                            <x-phone :profile="$profile" size="sm" :animate="false" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- ---------------------------------------------------------- --}}
-            {{-- BOUTONS — chaque variante dans ses CINQ états, côte à côte.
-                 Un texte invisible au repos se voit immédiatement ici.
-                 Les états simulés utilisent les classes Bootstrap :hover/:focus
-                 forcées par la classe utilitaire `.state-*` définie plus bas. --}}
-            <h2 class="section-title" style="margin-top:96px">Boutons — cinq états</h2>
-            <p class="section-sub">
-                Aucun libellé ne doit dépendre du survol pour être lisible.
+            <p class="t-caption ds-note">
+                Espacements, base 4 : 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64 · 80 · 96 · 128.
+                Le trait fait le travail, l'ombre reste discrète. Sur la carte publique :
+                niveau 1 seulement, aucun flou d'arrière-plan.
             </p>
+        </section>
 
-            <div style="overflow-x:auto;margin-top:40px">
-                <table style="width:100%;min-width:720px;border-collapse:collapse;text-align:center">
-                    <thead>
-                        <tr>
-                            <th style="text-align:left;padding:12px" class="figure-card__l">Variante</th>
-                            <th style="padding:12px" class="figure-card__l">Repos</th>
-                            <th style="padding:12px" class="figure-card__l">Survol</th>
-                            <th style="padding:12px" class="figure-card__l">Focus</th>
-                            <th style="padding:12px" class="figure-card__l">Actif</th>
-                            <th style="padding:12px" class="figure-card__l">Désactivé</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ([
-                            'dark' => 'Principal — blanc sur #0B3B2E',
-                            'outline' => 'Secondaire — #0A1F1A sur blanc',
-                        ] as $variant => $label)
-                            <tr>
-                                <td style="text-align:left;padding:16px 12px" class="t-label">{{ $label }}</td>
-                                <td style="padding:16px 12px"><span class="btn-pill btn-{{ $variant }}">Action</span></td>
-                                <td style="padding:16px 12px"><span class="btn-pill btn-{{ $variant }} state-hover">Action</span></td>
-                                <td style="padding:16px 12px"><span class="btn-pill btn-{{ $variant }} state-focus">Action</span></td>
-                                <td style="padding:16px 12px"><span class="btn-pill btn-{{ $variant }} state-active">Action</span></td>
-                                <td style="padding:16px 12px"><span class="btn-pill btn-{{ $variant }}" style="opacity:.5">Action</span></td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+        {{-- ===================== COMPOSANTS, CLAIR ET SOMBRE ===================== --}}
+        @foreach (['clair' => '', 'sombre' => 'theme-dark'] as $nomTheme => $classeTheme)
+            <section @class(['tuile', 'tuile--gres', 'ds-col-6', 'ds-composants', $classeTheme]) aria-label="Composants — {{ $nomTheme }}">
+                <p class="t-over">Composants · {{ $nomTheme }}</p>
 
-            {{-- Variante posée sur fond sombre --}}
-            <div class="showcase" style="border-radius:24px;margin-top:32px;padding:40px 0">
-                <div class="wrap" style="text-align:center">
-                    <p class="figure-card__l" style="color:rgba(255,255,255,.7)">
-                        Sur fond sombre — #0B3B2E sur blanc
-                    </p>
-                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px">
-                        <span class="btn-pill btn-light">Repos</span>
-                        <span class="btn-pill btn-light state-hover">Survol</span>
-                        <span class="btn-pill btn-light state-focus">Focus</span>
-                        <span class="btn-pill btn-light state-active">Actif</span>
-                    </div>
+                <div class="ds-rangee">
+                    <x-button icon="user-plus" type="button">Enregistrer le contact</x-button>
+                    <x-button variant="secondary" icon="share-2" type="button">Partager</x-button>
+                    <x-button variant="quiet" type="button">Voir un exemple</x-button>
                 </div>
-            </div>
 
-            @include('design-system.cartes-publiques', ['profile' => $profile])
+                <div class="ds-rangee">
+                    <span class="btn-pill btn-outline state-focus">Focus clavier</span>
+                    <x-button variant="secondary" size="sm" icon="download" type="button">QR en PNG</x-button>
+                    <x-button variant="danger" size="sm" type="button">Supprimer</x-button>
+                    <button type="button" class="btn-icone" aria-label="Aide"><x-icone name="help-circle" /></button>
+                </div>
 
-            {{-- ---------------------------------------------------------- --}}
-            <h2 class="section-title" style="margin-top:96px">Palette</h2>
-            <div class="figures__grid" style="margin-top:32px">
-                @foreach ([
-                    'Vert foncé #0B3B2E' => '#0B3B2E',
-                    'Vert accent #1E9E7A' => '#1E9E7A',
-                    'Vert clair #E4F2EC' => '#E4F2EC',
-                    'Gris fond #F2F3F1' => '#F2F3F1',
-                    'Texte #0A1F1A' => '#0A1F1A',
-                    'Gris second. #5C6B66' => '#5C6B66',
-                ] as $label => $hex)
-                    <div class="figure-card">
-                        <div style="height:56px;border-radius:12px;background:{{ $hex }}"></div>
-                        <div class="figure-card__l" style="margin-top:12px">{{ $label }}</div>
-                    </div>
-                @endforeach
+                <div class="f">
+                    <label class="f__label" for="ds-courriel-{{ $nomTheme }}">Adresse e-mail</label>
+                    <input class="f__control is-invalid" type="email" id="ds-courriel-{{ $nomTheme }}"
+                           value="mouhameddione@exemple" aria-invalid="true" aria-describedby="ds-erreur-{{ $nomTheme }}">
+                    <span class="f__error ds-erreur" id="ds-erreur-{{ $nomTheme }}">
+                        <x-icone name="alert-circle" class="icone--sm" />
+                        Il manque la fin de l'adresse, par exemple nom@exemple.sn
+                    </span>
+                </div>
+
+                <div class="f">
+                    <label class="f__label" for="ds-formule-{{ $nomTheme }}">Formule <span class="f__opt">facultatif</span></label>
+                    <select class="f__select" id="ds-formule-{{ $nomTheme }}">
+                        <option>Standard — 3 mois</option>
+                        <option>Standard — 12 mois</option>
+                    </select>
+                    <span class="f__hint">L'aide sous le champ : 15 px, 16 sur téléphone.</span>
+                </div>
+
+                <div class="ds-rangee">
+                    <label class="form-check">
+                        <input class="form-check-input" type="checkbox" checked>
+                        <span class="form-check-label">Se souvenir de moi</span>
+                    </label>
+                </div>
+
+                <div class="ds-rangee">
+                    <x-badge variant="success">Réussi</x-badge>
+                    <x-badge variant="warning">En attente</x-badge>
+                    <x-badge variant="danger">Échoué</x-badge>
+                    <x-badge variant="neutral">Brouillon</x-badge>
+                    <x-badge variant="gold">Formule complète</x-badge>
+                </div>
+
+                <div class="ds-rangee">
+                    <x-puce-operateur methode="wave" />
+                    <x-puce-operateur methode="orange_money" />
+                    <x-puce-operateur methode="free_money" />
+                </div>
+            </section>
+        @endforeach
+
+        {{-- ===================== MOTIFS ===================== --}}
+        <section class="tuile ds-col-4" aria-labelledby="ds-claustra">
+            <div class="tuile__tete"><h2 id="ds-claustra" class="tuile__titre">Claustra</h2><span class="t-over">SVG 0,4 Ko</span></div>
+            <div class="claustra ds-motif" aria-hidden="true"></div>
+            <p class="t-caption ds-note">Le bloc ajouré des façades modernistes de Dakar. Filigrane à 14 % sur le vert : couverture de carte, tuile d'abonnement, tarifs, verso PVC. Classe <code>.claustra</code>.</p>
+        </section>
+
+        <section class="tuile ds-col-4" aria-labelledby="ds-lisiere">
+            <div class="tuile__tete"><h2 id="ds-lisiere" class="tuile__titre">Lisière tissée</h2><span class="t-over">SVG 0,3 Ko</span></div>
+            <div class="ds-motif ds-motif--gres" aria-hidden="true">
+                <span class="lisiere"></span>
+                <span class="lisiere lisiere--fine"></span>
             </div>
+            <p class="t-caption ds-note">Frise des pagnes manjak : losanges latérite et or. Elle ferme ce qui compte — bas de couverture, onglet actif, offre Standard, tranche de la carte. Classes <code>.lisiere</code>, <code>.avec-lisiere</code>.</p>
+        </section>
+
+        <section class="tuile ds-col-4" aria-labelledby="ds-mono">
+            <div class="tuile__tete"><h2 id="ds-mono" class="tuile__titre">Monogramme</h2><span class="t-over">Repère QR + queue</span></div>
+            <div class="ds-monos">
+                <span class="ds-mono ds-mono--gres"><x-brand :words="false" :link="false" size="lg" /></span>
+                <span class="ds-mono claustra"><x-brand :words="false" :link="false" size="lg" tone="light" /></span>
+                <span class="ds-mono theme-dark"><x-brand :words="false" :link="false" size="lg" /></span>
+            </div>
+            <p class="t-caption ds-note">Le carré de repérage du QR Code devient un Q ; la queue en or le signe. Lisible à 16 px. Composant <code>&lt;x-brand&gt;</code>.</p>
+        </section>
+
+        {{-- ===================== PIÈCES D'ÉCRAN ===================== --}}
+        <section class="tuile ds-col-8" aria-labelledby="ds-indic">
+            <div class="tuile__tete">
+                <h2 id="ds-indic" class="tuile__titre">Indicateurs chiffrés</h2>
+                <a class="lien-fleche" href="#ds-alertes">Alertes <x-icone name="arrow-right" /></a>
+            </div>
+            <div class="ds-indics">
+                <x-stat label="Vues" value="1 248" icon="eye" trend="up" trend-value="+293 en 7 jours" />
+                <x-stat label="Scans du QR" value="312" icon="scan-line" trend="up" trend-value="+77 en 7 jours" />
+                <x-stat label="Encaissé" value="266 000" unit="FCFA" icon="credit-card" hint="76 paiements réussis" />
+            </div>
+        </section>
+
+        <section class="tuile tuile--couverture ds-col-4 avec-lisiere" aria-labelledby="ds-abo">
+            <p class="t-over ds-or">Abonnement</p>
+            <h2 id="ds-abo" class="tuile__titre ds-abo__titre">Standard</h2>
+            <div class="ds-rangee">
+                <span class="badge badge--couverture"><x-icone name="check" />Actif</span>
+            </div>
+            <div class="ds-rangee">
+                <x-button variant="ivory" size="sm" type="button">Prolonger de 3 mois</x-button>
+                <x-button variant="outline-ivory" size="sm" type="button">Historique</x-button>
+            </div>
+        </section>
+
+        <section class="tuile ds-col-6" aria-labelledby="ds-alertes">
+            <div class="tuile__tete"><h2 id="ds-alertes" class="tuile__titre">Alertes</h2></div>
+            <div class="ds-pile">
+                <x-alert type="warning" title="3 paiements à vérifier" :dismissible="false">Le plus ancien attend depuis 2 jours.</x-alert>
+                <x-alert type="success" :dismissible="false">Profil publié.</x-alert>
+                <x-alert type="danger" title="Paiement refusé" :dismissible="false">Vérifiez votre solde, puis recommencez.</x-alert>
+                <x-alert type="info" :dismissible="false">Votre lien peut être modifié une seule fois.</x-alert>
+            </div>
+        </section>
+
+        <section class="tuile ds-col-6" aria-labelledby="ds-nav">
+            <div class="tuile__tete"><h2 id="ds-nav" class="tuile__titre">Navigation et repères</h2></div>
+            <div class="ds-pile">
+                <x-breadcrumb :items="[['label' => 'Gestion', 'url' => route('design.system')], ['label' => 'Paiements']]" />
+                <x-wizard-progress :step="2" :labels="['Identité', 'Coordonnées', 'Apparence']" />
+                <div class="ds-rangee">
+                    <x-language-toggle />
+                    <x-theme-toggle />
+                    <x-whatsapp-fab variante="barre" message="Bonjour, je regarde le système de design." />
+                </div>
+                <x-google-button />
+            </div>
+        </section>
+
+        <section class="tuile ds-col-12" aria-labelledby="ds-vide">
+            <div class="tuile__tete"><h2 id="ds-vide" class="tuile__titre">État vide</h2></div>
+            <x-empty-state icon="payment" title="Aucun paiement pour l'instant"
+                           message="Les paiements apparaîtront ici dès le premier abonnement réglé.">
+                <x-slot name="action"><x-button variant="secondary" size="sm" type="button">Voir les formules</x-button></x-slot>
+            </x-empty-state>
+        </section>
+    </div>
+
+    {{-- ===================== LES OBJETS DU PRODUIT =====================
+         Composants des autres lots, rendus tels quels : la carte PVC (deux
+         variantes, recto et verso), le téléphone, la carte publique. --}}
+    <section class="wrap ds-objets" aria-labelledby="ds-objets">
+        <p class="t-surtitre">Les objets</p>
+        <h2 id="ds-objets" class="t-h2">Carte PVC, téléphone, carte publique</h2>
+        <p class="t-lead">CR80 : 85,6 × 54 mm, coins à 3,7 % de la largeur. QR toujours sombre sur un panneau clair (ISO/IEC 18004).</p>
+
+        <div class="ds-rangee ds-objets__rangee">
+            <x-card-duo :profile="$profile" />
         </div>
+
+        @foreach (\App\Enums\VarianteCarte::toutes() as $variante)
+            @php
+                // On clone le profil pour imposer la variante sans rien écrire.
+                $exemplaire = clone $profile;
+                $exemplaire->primary_color = $variante->value;
+            @endphp
+            <p class="t-over ds-objets__legende">Variante {{ $variante->libelle() }} — {{ $variante->description() }}</p>
+            <div class="ds-faces">
+                <x-card face="recto" :profile="$exemplaire" :variant="$variante->carte()" />
+                <x-card face="verso" :profile="$exemplaire" :variant="$variante->carte()" />
+            </div>
+        @endforeach
+
+        <div class="ds-rangee ds-objets__rangee">
+            <x-phone :profile="$profile" size="lg" :animate="false" />
+            <x-phone :profile="$profile" size="sm" :animate="false" />
+        </div>
+
+        @include('design-system.cartes-publiques', ['profile' => $profile])
     </section>
+</div>
 </x-public-layout>

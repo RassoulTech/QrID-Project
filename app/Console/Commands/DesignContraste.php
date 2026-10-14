@@ -230,6 +230,39 @@ class DesignContraste extends Command
         }
 
         /*
+         | LES ALIAS, SUIVIS JUSQU'À LEUR COULEUR.
+         |
+         | La refonte « Teranga » déclare les rôles par référence à la
+         | palette : `$c-page: $sable-100;`. La première lecture ne
+         | connaissait que les hex en clair — elle ignorait donc ces rôles
+         | SANS LE DIRE, et la commande est passée de 20 couples mesurés à
+         | 6, toujours « verte ». Un garde-fou qui s'éteint en silence est
+         | pire que pas de garde-fou : il rassure.
+         |
+         | On résout les chaînes d'alias (une palette peut pointer vers une
+         | autre) jusqu'à stabilité, avec une borne pour ne jamais boucler.
+         */
+        preg_match_all(
+            '/^\s*\$([\w-]+)\s*:\s*\$([\w-]+)\s*;/m',
+            $contenu, $alias, PREG_SET_ORDER
+        );
+
+        for ($tour = 0; $tour < 5; $tour++) {
+            $resolus = 0;
+
+            foreach ($alias as [, $nom, $cible]) {
+                if (! isset($tokens[$nom]) && isset($tokens[$cible]) && is_string($tokens[$cible])) {
+                    $tokens[$nom] = $tokens[$cible];
+                    $resolus++;
+                }
+            }
+
+            if ($resolus === 0) {
+                break;
+            }
+        }
+
+        /*
          | LES FONDS SEMI-TRANSPARENTS, LUS TELS QU'ILS SONT DÉCLARÉS.
          |
          | Supposer que tout fond doux du thème sombre est « la teinte à

@@ -1,11 +1,19 @@
-{{-- layouts/public — structure de la landing QrID. --}}
+{{--
+  layouts/public — la vitrine (accueil, pages légales, design-system).
+
+      <x-public-layout title="…" description="…">…sections…</x-public-layout>
+
+  La barre (x-nav-public) et le pied (x-footer-public) sont posés ici ; une
+  page n'a qu'à composer ses sections dans le slot. L'aide WhatsApp est dans
+  le pied de page — plus aucune bulle flottante ne recouvre le contenu.
+--}}
 <!DOCTYPE html>
 @include('layouts.partials.html-open')
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#0B3B2E">
+    @include('layouts.partials.couleur-theme')
 
     @include('layouts.partials.icons')
 
@@ -17,13 +25,14 @@
     <meta property="og:title" content="{{ $title ?? config('app.name') }}">
     <meta property="og:description" content="{{ $description ?? '' }}">
     <meta property="og:url" content="{{ url()->current() }}">
-    {{-- og:locale était figé sur « fr_SN ». Une page partagée en anglais
-         s'annonçait donc en français aux robots des messageries. --}}
+    {{-- La langue de la page, pas une valeur figée : une page partagée en
+         anglais s'annonce en anglais aux robots des messageries. --}}
     <meta property="og:locale" content="{{ App\Support\Langue::etiquetteOuverte() }}">
     <link rel="canonical" href="{{ url()->current() }}">
 
-    {{-- Polices servies en local (voir @font-face dans _base.scss).
-         Aucun CDN de police. --}}
+    {{-- La police est auto-hébergée et préchargée. Aucun CDN. --}}
+    @include('layouts.partials.police')
+
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
 <body>
@@ -36,12 +45,5 @@
     </main>
 
     <x-footer-public />
-
-    {{-- Hors du <main> : c'est une aide permanente, pas un élément du
-         contenu. Un lecteur d'écran qui parcourt la page ne doit pas la
-         rencontrer au milieu d'un paragraphe.
-
-         Aucun message n'est passé : le composant le déduit de la page. --}}
-    <x-whatsapp-fab />
 </body>
 </html>

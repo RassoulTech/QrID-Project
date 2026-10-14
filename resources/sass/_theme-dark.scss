@@ -1,504 +1,228 @@
 // =============================================================================
-// THÈME SOMBRE — application effective à TOUTES les surfaces.
+// THÈME SOMBRE — le rattrapage des feuilles écrites en variables Sass
+// =============================================================================
 //
-// POURQUOI CE FICHIER EXISTE.
+// POURQUOI CE FICHIER EXISTE ENCORE.
 //
-// La bascule ne fonctionnait pas : seuls les blocs écrits récemment lisaient
-// les jetons --surface / --texte. Tout le reste du projet — coque de l'espace
-// client, landing, écrans d'authentification, parcours de création — est écrit
-// avec les variables SASS ($blanc, $gris-fond, $texte). Or Sass compile ses
-// variables en valeurs littérales : elles ne peuvent PAS changer à l'exécution.
-// Le bouton basculait, la page restait claire.
+// Une variable Sass ($blanc, $gris-fond, $texte) est compilée en valeur
+// littérale : elle ne bascule PAS avec le thème. Les feuilles de pages
+// écrites ainsi avant la refonte restent claires en sombre, sauf si l'on
+// redéclare leurs surfaces ici, sous `.theme-dark`.
 //
-// On ne peut pas non plus remplacer $blanc par var(--surface) dans
-// _variables.scss : les fonctions Sass (rgba(), darken(), color-mix côté Sass)
-// refusent une valeur var() et la compilation échouerait.
+// CE QUI EN EST SORTI À LA DIRECTION A : boutons, menus, panneaux, alertes,
+// badges, barre publique, marque — tout cela est désormais écrit en jetons
+// (`_socle.scss`, `_components.scss`, `_brand.scss`) et bascule seul. Il
+// n'en reste ici que les écrans des autres lots encore écrits en Sass ; au
+// fil de leur refonte, leurs règles quittent ce fichier.
 //
-// D'où ce fichier : les surfaces sont redéclarées explicitement sous
-// .theme-dark. C'est plus long qu'un simple échange de variables, mais c'est
-// la seule approche qui compile ET qui couvre l'existant.
+// AUCUNE COULEUR LITTÉRALE : chaque valeur est un jeton du thème sombre,
+// mesuré dans `_tokens.scss`.
 //
-// CONTRASTES VÉRIFIÉS — voir le tableau livré avec ce travail. Aucun couple
-// texte/fond ne descend sous 4,5:1 dans l'un ou l'autre mode.
+// IMPORTÉ APRÈS les feuilles de pages, AVANT le socle : il gagne sur les
+// premières par l'ordre, sans !important.
 // =============================================================================
 
 .theme-dark{
 
   // ---------------------------------------------------------------------------
-  // Fond général et typographie
+  // Fond général
   // ---------------------------------------------------------------------------
-  body{background:var(--surface-2);color:var(--texte)}
-
+  body{background:var(--page);color:var(--texte)}
   h1,h2,h3,h4,h5,h6{color:var(--texte)}
-  .text-secondary{color:var(--texte-2) !important}
-  .text-body{color:var(--texte) !important}
-  hr{border-color:var(--bord)}
-
-  /*
-   |---------------------------------------------------------------------------
-   | COQUE CONNECTÉE — client et administration
-   |---------------------------------------------------------------------------
-   | Onze règles vivaient ici pour les classes .app-side, .app-top, .app-avatar
-   | et .app-content. Elles ont disparu avec ces classes : les deux espaces
-   | emploient désormais la coque .adm-, décrite une seule fois.
-   |
-   | ET IL N'Y A RIEN À REDÉCLARER POUR ELLE. La colonne latérale est en vert
-   | très foncé dans les DEUX thèmes — c'est ce qui distingue une application
-   | connectée d'un site public — et la barre supérieure comme la zone de
-   | contenu sont déjà écrites en jetons (var(--surface), var(--bord)). Elles
-   | basculent donc d'elles-mêmes.
-   |
-   | C'est le bénéfice concret de la fusion : une surface décrite en jetons
-   | n'a pas besoin d'un second bloc pour le thème sombre.
-   */
 
   .app-trial{
-    background:var(--accent-doux);
+    background:var(--alerte-fond);
     color:var(--texte);
-    border-color:var(--bord);
-    a{color:var(--accent)}
+    border-color:var(--alerte-trait);
+    a{color:var(--lien)}
   }
 
   // ---------------------------------------------------------------------------
-  // Cartes et blocs
+  // Surfaces des écrans du parcours (lot 5)
   // ---------------------------------------------------------------------------
-  /*
-   | ═══════════════════════════════════════════════════════════════════
-   | LA CARTE DE VISITE NE SUIT PAS LE THÈME, ET C'EST UNE RÈGLE MÉTIER
-   | ═══════════════════════════════════════════════════════════════════
-   | `.card` désigne DEUX objets dans ce projet : une surface d'interface,
-   | et la carte de visite PVC de `_card.scss`. La règle ci-dessous visait
-   | la première et attrapait la seconde.
-   |
-   | LE DÉFAUT QUE CELA PRODUISAIT, mesuré en thème sombre :
-   | la carte BLANCHE recevait `background: var(--surface)` — un fond
-   | sombre — pendant que `.card.light .who .name` gardait son vert foncé,
-   | avec une spécificité de (0,3,0) qui bat le (0,2,0) d'ici. Résultat :
-   | vert foncé sur fond sombre, le nom du porteur illisible.
-   |
-   | MAIS LA VRAIE RAISON N'EST PAS TECHNIQUE. La couleur de la carte est
-   | CHOISIE PAR LE CLIENT à la dernière étape de la création de son
-   | profil — blanche ou verte. C'est une décision de produit, imprimée
-   | sur du PVC. Le thème d'affichage du visiteur n'a rien à y voir : une
-   | carte blanche reste blanche, qu'on la regarde en clair ou en sombre,
-   | exactement comme l'objet qu'on recevra par la poste.
-   |
-   | Les deux variantes portent toujours `.light` ou `.dark` : c'est ce
-   | qui permet de les exclure ici, comme `_socle.scss` le fait déjà pour
-   | le rayon et la bordure.
-   */
-  .card:not(.light):not(.dark),
   .board-card,
   .step-card,
   .board-empty__card{
-    background:var(--surface);
-    border-color:var(--bord);
+    background:var(--carte);
+    border-color:var(--bordure);
     color:var(--texte);
   }
 
-  .step-card__foot{border-top-color:var(--bord)}
+  .step-card__foot{border-top-color:var(--bordure)}
+
   .step-card__kicker,
   .step-card__sub,
   .board-card__meta{color:var(--texte-2)}
+
   .step-card__title,
   .board-card__title,
   .board-card__name{color:var(--texte)}
-  .step-bar__seg{background:var(--surface-3);&.is-done{background:var(--accent)}}
+
+  .step-bar__seg{background:var(--surelev);&.is-done{background:var(--marque)}}
+
   .step-back{color:var(--texte-2);&:hover{color:var(--texte)}}
 
-  // ---------------------------------------------------------------------------
-  // Champs de saisie — tous les systèmes du projet
-  // ---------------------------------------------------------------------------
-  .f__control,
-  .form-control,
-  /*
-   | LE CHEVRON DU <select> EST UNE IMAGE, ET SA COULEUR EST ÉCRITE DEDANS.
-   |
-   | Bootstrap encode la flèche en SVG dans --bs-form-select-bg-img, en gris
-   | ardoise (#343a40). Sur un champ sombre elle devient invisible : le
-   | sélecteur de motif du formulaire de contact ressemblait à un champ de
-   | texte, et rien ne disait qu'il ouvrait une liste.
-   |
-   | La variable est redéclarée avec la même flèche en clair. C'est la seule
-   | façon de la retourner sans réécrire le composant.
-   */
-  .form-select{
-    --bs-form-select-bg-img:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239BB0A8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-  }
-
-  .form-select,
   .board-link__input{
-    background:var(--surface-3);
-    border-color:var(--bord-fort);
+    background:var(--champ-fond);
+    border-color:var(--champ-bord);
     color:var(--texte);
-
-    &::placeholder{color:var(--texte-2);opacity:1}
-    &:focus{
-      background:var(--surface-3);
-      border-color:var(--accent);
-      color:var(--texte);
-      box-shadow:0 0 0 3px rgba(47,191,146,.22);
-    }
   }
 
   .f__label,.form-label{color:var(--texte)}
   .f__hint,.form-text,.f__opt{color:var(--texte-2)}
+  .f__error,.invalid-feedback,.f__alert{color:var(--danger)}
 
-  // Le rouge d'erreur s'éclaircit : #B42318 sur fond sombre tombe à 2,6:1.
-  .f__error,.invalid-feedback{color:#FF9A8F}
-  .f__control.is-invalid,.form-control.is-invalid{border-color:#FF9A8F}
-  .f__alert{color:#FF9A8F}
-
-  .form-check-input{
-    background-color:var(--surface-3);
-    border-color:var(--bord-fort);
-    &:checked{background-color:var(--accent);border-color:var(--accent)}
-  }
   .form-check-label{color:var(--texte)}
 
   .board-link__label{color:var(--texte-2)}
   .board-link__copy{
-    background:var(--accent-doux);
-    color:var(--accent);
-    border-color:var(--bord);
+    background:var(--surelev);
+    color:var(--texte);
+    border-color:var(--champ-bord);
   }
 
   // ---------------------------------------------------------------------------
-  // Boutons
-  // ---------------------------------------------------------------------------
-  // Le vert foncé du bouton principal reste lisible : blanc sur #0B3B2E =
-  // 12,6:1. On l'éclaircit néanmoins pour qu'il se détache du fond sombre.
-  .btn-dark{
-    &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
-      background:var(--accent);
-      color:#08110E;
-      border-color:var(--accent);
-    }
-    &:hover{background:var(--accent-vif);border-color:var(--accent-vif)}
-  }
-
-  .btn-outline{
-    &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
-      background:transparent;
-      color:var(--texte);
-      border-color:var(--bord-fort);
-    }
-    &:hover{background:var(--surface-3)}
-  }
-
-  .btn-light{
-    &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
-      background:var(--surface-3);color:var(--texte);border-color:var(--bord-fort);
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Badges de statut — fonds ramenés à des teintes profondes
+  // Badges de statut hérités (avant x-badge)
   // ---------------------------------------------------------------------------
   .badge-statut{
-    &--published,&--active{background:rgba(47,191,146,.18);color:#5FE0B4}
-    &--draft{background:rgba(232,237,235,.10);color:var(--texte-2)}
-    &--trial{background:rgba(96,150,220,.18);color:#8FBEF5}
-    &--expired,&--blocked{background:rgba(255,138,128,.16);color:#FF9A8F}
+    &--published,&--active{background:var(--succes-fond);color:var(--succes)}
+    &--draft{background:var(--neutre-fond);color:var(--neutre)}
+    &--trial{background:var(--info-fond);color:var(--info)}
+    &--expired,&--blocked{background:var(--danger-fond);color:var(--danger)}
   }
 
   // ---------------------------------------------------------------------------
-  // Alertes Bootstrap
+  // Héritage de l'accueil (lot 2) — écrit en Sass
   // ---------------------------------------------------------------------------
-  .alert{border-color:var(--bord)}
-  .alert-success{background:rgba(47,191,146,.14);color:#7FE8C4}
-  .alert-info{background:rgba(96,150,220,.14);color:#A6CBF8}
-  .alert-warning{background:rgba(214,150,80,.16);color:#F0C284}
-  .alert-danger{background:rgba(255,138,128,.14);color:#FF9A8F}
-  .btn-close{filter:invert(1) grayscale(1) brightness(2)}
-
-  // ---------------------------------------------------------------------------
-  // Menus déroulants
-  // ---------------------------------------------------------------------------
-  .dropdown-menu{
-    background:var(--surface-3);
-    border-color:var(--bord);
-    color:var(--texte);
-  }
-  .dropdown-item{
-    color:var(--texte);
-    &:hover,&:focus{background:var(--surface-2);color:var(--texte)}
-  }
-  .dropdown-divider{border-color:var(--bord)}
-  .dropdown-item-text{color:var(--texte-2)}
-
-  // ---------------------------------------------------------------------------
-  // Landing et pages publiques
-  // ---------------------------------------------------------------------------
-  .site-nav{
-    background:var(--surface);
-    border-bottom-color:var(--bord);
-    &.is-scrolled{background:rgba(22,33,29,.94)}
-  }
-  .site-nav__link,.site-nav__signin{color:var(--texte-2);&:hover{color:var(--texte)}}
-  .site-nav__burger{color:var(--texte-2);&:hover{color:var(--texte)}}
-
-  // Le menu de langue est posé SUR la page : sans surface propre et sans
-  // bordure franche, il se confondrait avec le fond sombre et paraîtrait
-  // flotter sans contour.
-  .langue__menu{background:var(--surface-3);border-color:var(--bord-fort)}
-  .langue__option{color:var(--texte)}
-  .langue__option[aria-current]{color:var(--accent)}
-
-  // Menu mobile : c'est un panneau Bootstrap, il reste blanc sans cette règle.
-  .offcanvas{background:var(--surface);color:var(--texte)}
-  .offcanvas-header{border-bottom-color:var(--bord)}
-  .offcanvas-title{color:var(--texte)}
-
-  // La croix de Bootstrap est une image NOIRE encodée en dur : sur un panneau
-  // sombre elle disparaît. L'inversion est le seul moyen de la retourner sans
-  // réécrire l'image.
-  .offcanvas .btn-close{filter:invert(1) grayscale(1) brightness(2)}
-  .btn-close{filter:invert(1) grayscale(1) brightness(2)}
-
   .hero__lead{color:var(--texte-2)}
-
-  .section--tint,.figures,.trades{background:var(--surface-2)}
-  .figure-card,.plan{background:var(--surface);border-color:var(--bord)}
+  .section--tint,.figures,.trades{background:var(--surelev)}
+  .figure-card,.plan{background:var(--carte);border-color:var(--bordure)}
   .figure-card__n,.figure-card__w,.plan__price,.section-title{color:var(--texte)}
   .figure-card__l,.plan__period,.plan__name,.section-sub,.step__text{color:var(--texte-2)}
   .step__title{color:var(--texte)}
-
-  // Le bandeau des métiers gardait ses gris du thème clair : les mots
-  // atténués tombaient à 2,3:1 et les mots mis en avant, en texte quasi noir,
-  // disparaissaient purement et simplement sur le fond sombre.
   .trades__item{color:var(--texte-2)}
   .trades__item--strong{color:var(--texte)}
-
-  // Cercle numéroté : bordure et chiffre venaient de la palette claire.
-  .step__num{border-color:var(--bord-fort);color:var(--texte-2)}
-
+  .step__num{border-color:var(--bordure-f);color:var(--texte-2)}
   .plan__list li{color:var(--texte-2)}
-  // ---------------------------------------------------------------------------
-  // Compteur de résultats — voir x-liste-resultats
-  // ---------------------------------------------------------------------------
-  // Le NOMBRE était posé en $texte, l'encre du thème clair : noir sur fond
-  // noir. On lisait « paiements » sans jamais voir combien. Un compteur
-  // invisible est pire qu'un compteur absent — il occupe la place de
-  // l'information qu'il devait donner.
   .liste-compteur{color:var(--texte-2)}
   .liste-compteur strong{color:var(--texte)}
-  .liste-compteur__reset{color:var(--accent)}
-
+  .liste-compteur__reset{color:var(--lien)}
   .pay-note{color:var(--texte-2)}
-
-  // Pastille « recommandé » : le vert foncé sur une carte sombre ne se
-  // détachait plus. L'accent clair prend le relais, texte très sombre dessus.
-  .plan__badge{background:var(--accent);color:var(--sur-accent)}
-
-  // Ombres de la palette claire, invisibles ici et surtout inversées : une
-  // carte qui s'élève sur fond sombre s'éclaircit, elle ne s'assombrit pas.
-  .figure-card{box-shadow:var(--ombre-1)}
-  .plan:hover{box-shadow:var(--ombre-2)}
-
-  /*
-   | APPEL À L'ACTION FINAL
-   |
-   | Le fond passait bien au voile vert translucide, mais le titre et le
-   | texte restaient en couleurs du thème clair — un titre quasi noir posé
-   | sur un fond sombre. La section entière était illisible.
-   */
-  .final{background:var(--accent-doux)}
+  .plan__badge{background:var(--marque);color:var(--texte-inv-marque)}
+  .final{background:var(--surelev)}
   .final__title{color:var(--texte)}
   .final__text{color:var(--texte-2)}
 
   // ---------------------------------------------------------------------------
-  // Écrans d'authentification
+  // Écrans d'accès (lot 4) — écrits en Sass
   // ---------------------------------------------------------------------------
-  .auth{background:var(--surface-2)}
-  .auth__shell{background:var(--surface);box-shadow:var(--ombre-2)}
+  .auth{background:var(--page)}
+  .auth__shell{background:var(--carte);box-shadow:var(--ombre-2)}
   .auth__title{color:var(--texte)}
   .auth__lead,.auth__legal,.auth__legal a{color:var(--texte-2)}
-  .auth__brand,.brand--dark{
-    &,&:link,&:visited,&:hover,&:focus{color:var(--texte)}
-  }
-  .brand--dark .brand__mark{background:var(--accent);color:var(--sur-accent)}
 
-  /*
-   |---------------------------------------------------------------------------
-   | BOUTON GOOGLE — il DISPARAISSAIT en thème sombre
-   |---------------------------------------------------------------------------
-   | Deux défauts se cumulaient, et chacun suffisait à le rendre invisible :
-   |
-   |   · son fond valait var(--surface), c'est-à-dire EXACTEMENT le fond de la
-   |     carte d'authentification (#16211D) ;
-   |   · sa bordure retombait sur $bordure-forte, un rgba tiré du texte
-   |     presque noir — invisible sur une surface sombre. Le repli s'appliquait
-   |     toujours, --bordure-forte n'existant pas comme jeton CSS.
-   |
-   | Il ne restait qu'un logo et un mot flottant au milieu du vide.
-   |
-   | LES VALEURS CI-DESSOUS SONT CELLES DE GOOGLE, pas les nôtres. Leur charte
-   | publie deux boutons — un clair et un sombre — et impose leurs couleurs.
-   | Le bouton sombre officiel est #131314 sur bordure #8E918F, texte #E3E3E3.
-   |
-   | Les reprendre telles quelles sert deux fins d'un coup : la charte est
-   | respectée, et le bouton reste reconnaissable d'un site à l'autre — ce qui
-   | est précisément ce qui le rend rassurant. Un bouton Google repeint aux
-   | couleurs de la marque hôte perd cette reconnaissance.
-   |
-   | CONTRASTES : texte 15,3:1 sur le fond du bouton, bordure 5,6:1 — très
-   | au-delà des 3:1 exigés pour un élément d'interface.
-   */
-  .oauth__btn{
-    background:#131314;
-    border-color:#8E918F;
-
-    &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
-      color:#E3E3E3;
-    }
-
-    // Au survol, la bordure s'éclaircit — c'est le seul retour possible sur un
-    // bouton dont le fond ne doit pas changer.
-    &:hover{
-      border-color:#E3E3E3;
-      box-shadow:none;
-    }
-
-    &:focus-visible{box-shadow:0 0 0 3px rgba(255,255,255,.35)}
-  }
-
-  /*
-   | Le séparateur « ou » souffrait du même repli : son filet valait
-   | $bordure — rgba(10,31,26,.08) — donc rien du tout sur fond sombre.
-   | Le mot, lui, pose le fond de la carte pour interrompre le trait ; ce
-   | jeton-là est bien redéfini et fonctionnait déjà.
-   */
   .oauth__ou{
-    &::before{background:rgba(255,255,255,.14)}
-    span{background:var(--surface);color:var(--texte-2)}
+    &::before{background:var(--bordure)}
+    span{background:var(--carte);color:var(--texte-2)}
   }
 
-  .auth-tabs{background:var(--surface-3)}
+  .auth-tabs{background:var(--surelev)}
   .auth-tabs__item{
     &,&:link,&:visited,&:hover,&:focus,&:focus-visible{color:var(--texte-2)}
-    &:hover{background:rgba(255,255,255,.05);color:var(--texte)}
+    &:hover{background:var(--carte);color:var(--texte)}
     &.is-active{
       &,&:link,&:visited,&:hover,&:focus,&:focus-visible{
-        background:var(--surface);color:var(--texte);
+        background:var(--carte);color:var(--texte);
       }
     }
   }
 
-  .mail-spam{background:var(--surface-3);border-color:var(--bord);color:var(--texte-2)}
+  .mail-spam{background:var(--surelev);border-color:var(--bordure);color:var(--texte-2)}
   .mail-steps li{color:var(--texte-2)}
-  .mail-steps li::before{background:var(--accent-doux);color:var(--accent)}
-  .mail-icon{background:var(--accent-doux);color:var(--accent)}
+  .mail-steps li::before{background:var(--teinte-vert);color:var(--lien)}
+  .mail-icon{background:var(--teinte-vert);color:var(--lien)}
   .mail-address{color:var(--texte)}
   .resend-note{color:var(--texte-2)}
-  .pw-meter__seg{background:var(--surface-3)}
+  .pw-meter__seg{background:var(--surelev)}
   .pw-meter__label{color:var(--texte-2)}
-  .f__eye{color:var(--texte-2);&:hover{color:var(--texte);background:var(--surface-3)}}
+  .f__eye{color:var(--texte-2);&:hover{color:var(--texte);background:var(--surelev)}}
 
-  // Colonne droite claire des écrans d'authentification : sur fond sombre,
-  // elle deviendrait un rectangle éblouissant.
   .auth__aside--light{
-    background:linear-gradient(165deg, var(--surface-3) 0%, var(--surface) 100%);
-    border-left-color:var(--bord);
+    background:var(--surelev);
+    border-left-color:var(--bordure);
     .auth-aside__title{color:var(--texte)}
     .auth-aside__text{color:var(--texte-2)}
-    .auth-aside__dot{background:rgba(232,237,235,.20)}
-    .auth-aside__dot.is-on{background:var(--accent)}
+    .auth-aside__dot{background:var(--bordure-f)}
+    .auth-aside__dot.is-on{background:var(--marque)}
   }
 
   .av-card,.av-portrait,.av-stat,.av-chip{
-    background:var(--surface);
+    background:var(--carte);
     color:var(--texte);
   }
-  .av-card__line{background:var(--surface-3)}
+  .av-card__line{background:var(--surelev)}
   .av-stat__label,.av-portrait__role{color:var(--texte-2)}
 
   // ---------------------------------------------------------------------------
-  // Parcours de création
+  // Parcours de création et paiement (lot 5) — écrits en Sass
   // ---------------------------------------------------------------------------
-  .tpl__box{background:var(--surface-3);border-color:var(--bord-fort)}
+  .tpl__box{background:var(--surelev);border-color:var(--bordure-f)}
   .tpl__name{color:var(--texte)}
-  .drop{background:var(--surface-3);border-color:var(--bord-fort)}
+
+  .drop{background:var(--surelev);border-color:var(--champ-bord)}
   .drop__text{color:var(--texte)}
   .drop__hint{color:var(--texte-2)}
-  .social-row{background:var(--surface-3);border-color:var(--bord)}
 
-  // ---------------------------------------------------------------------------
-  // Paiement
-  // ---------------------------------------------------------------------------
-  // -------------------------------------------------------------------------
-  // Paiement — formules et moyens
-  // -------------------------------------------------------------------------
+  .social-row{background:var(--surelev);border-color:var(--bordure)}
+
   .checkout__title{color:var(--texte)}
   .checkout__sub{color:var(--texte-2)}
-  .checkout__kicker{color:var(--accent)}
+  .checkout__kicker{color:var(--terre)}
   .checkout__legend{color:var(--texte)}
-  .checkout__step{background:var(--accent);color:var(--sur-accent)}
+  .checkout__step{background:var(--marque);color:var(--texte-inv-marque)}
 
   .plan-card__box,
-  .pay-method__box{background:var(--surface-2);border-color:var(--bord-fort)}
+  .pay-method__box{background:var(--carte);border-color:var(--bordure-f)}
+
   .plan-card:hover .plan-card__box,
-  .pay-method:hover .pay-method__box{border-color:var(--accent)}
+  .pay-method:hover .pay-method__box{border-color:var(--marque)}
 
   .plan-card__input:checked + .plan-card__box,
   .pay-method__input:checked + .pay-method__box{
-    border-color:var(--accent);
-    background:var(--accent-doux);
+    border-color:var(--marque);
+    background:var(--teinte-vert);
   }
 
   .plan-card__name,.pay-method__name{color:var(--texte)}
-  .plan-card__price{color:var(--accent)}
+  .plan-card__price{color:var(--lien)}
   .plan-card__meta,.plan-card__feature{color:var(--texte-2)}
-  .plan-card__features{border-top-color:var(--bord)}
-  .plan-card__badge{background:var(--accent);color:var(--sur-accent)}
+  .plan-card__features{border-top-color:var(--bordure)}
+  .plan-card__badge{background:var(--marque);color:var(--texte-inv-marque)}
 
   .plan-card__tick,.pay-method__tick{
-    background:var(--surface-3);border-color:var(--bord-fort);
-  }
-  .plan-card__input:checked + .plan-card__box .plan-card__tick,
-  .pay-method__input:checked + .pay-method__box .pay-method__tick{
-    background:var(--accent);border-color:var(--accent);color:var(--sur-accent);
+    background:var(--surelev);border-color:var(--bordure-f);
   }
 
-  .checkout__panel{background:var(--surface-2);border-color:var(--bord)}
+  .plan-card__input:checked + .plan-card__box .plan-card__tick,
+  .pay-method__input:checked + .pay-method__box .pay-method__tick{
+    background:var(--marque);border-color:var(--marque);color:var(--texte-inv-marque);
+  }
+
+  .checkout__panel{background:var(--surelev);border-color:var(--bordure)}
   .checkout__panel-title{color:var(--texte)}
   .trust__item{color:var(--texte-2);strong{color:var(--texte)}}
-  .trust__icon{background:var(--accent-doux);color:var(--accent)}
+  .trust__icon{background:var(--teinte-vert);color:var(--lien)}
   .checkout__later{color:var(--texte-2)}
 
   // ---------------------------------------------------------------------------
-  // Compteur de résultats — voir x-liste-resultats
+  // Pages publiques héritées
   // ---------------------------------------------------------------------------
-  // Le NOMBRE était posé en $texte, l'encre du thème clair : noir sur fond
-  // noir. On lisait « paiements » sans jamais voir combien. Un compteur
-  // invisible est pire qu'un compteur absent — il occupe la place de
-  // l'information qu'il devait donner.
-  .liste-compteur{color:var(--texte-2)}
-  .liste-compteur strong{color:var(--texte)}
-  .liste-compteur__reset{color:var(--accent)}
-
-  .pay-note{color:var(--texte-2)}
-
-  // ---------------------------------------------------------------------------
-  // Pages d'erreur
-  // ---------------------------------------------------------------------------
-  .auth-wrapper{background:var(--surface-2)}
-
-  // ---------------------------------------------------------------------------
-  // Profil public — page ouverte après un scan
-  // ---------------------------------------------------------------------------
-  // Le visiteur arrive avec SA préférence : elle habille la page, jamais la
-  // carte elle-même. Le cadre du téléphone garde ses couleurs d'origine, sinon
-  // deux personnes verraient deux cartes différentes du même professionnel.
-  .public-profile{background:var(--surface-2)}
-  .public-profile > .container > p{color:var(--texte-2) !important}
-  .pub__social{background:var(--accent-doux);color:var(--accent)}
-  .pub__foot{color:var(--texte-2);a{color:var(--accent)}}
-
-  // Carte non active. Le texte secondaire doit rester lisible : c'est lui qui
-  // porte le « rien n'est cassé », la seule information qui compte ici.
-  .carte-off__marque{background:var(--accent-doux);color:var(--accent)}
+  .auth-wrapper{background:var(--page)}
+  .public-profile{background:var(--page)}
+  .pub__social{background:var(--teinte-vert);color:var(--lien)}
+  .pub__foot{color:var(--texte-2);a{color:var(--lien)}}
+  .carte-off__marque{background:var(--teinte-vert);color:var(--lien)}
   .carte-off__titre{color:var(--texte)}
   .carte-off__texte{color:var(--texte-2);strong{color:var(--texte)}}
-  .carte-off__pied a{color:var(--accent)}
+  .carte-off__pied a{color:var(--lien)}
 }

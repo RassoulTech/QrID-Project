@@ -1,44 +1,38 @@
 // =============================================================================
-// MARQUE — pastille monogramme + nom.
+// LA MARQUE — monogramme, nom, et les deux motifs signatures
+// =============================================================================
 //
-// La pastille porte l'identité, le mot porte le nom. C'est le contraste entre
-// les deux qui donne du poids à la marque, PAS la mise en capitales du nom :
-// « QRID » tout en majuscules se lit mal et alourdit chaque écran où il
-// apparaît. La casse vient de APP_NAME et n'est jamais forcée en CSS.
-//
-// Trois tailles, deux tons. Le ton clair sert sur les fonds verts (pied de
-// page public, en-tête d'administration).
+// Voir `components/brand.blade.php`. Le monogramme est un SVG en ligne :
+// l'anneau et l'œil prennent `currentColor` (la couleur de la marque sur la
+// surface), la queue prend `--marque-queue` (l'or). Aucune couleur n'est
+// écrite ici : tout vient des jetons, et tout bascule avec le thème.
 // =============================================================================
 
 .brand{
+  // L'or de la queue : or-500 sur clair, or-300 sur sombre et sur vert.
+  --marque-queue: var(--or);
+
   display:inline-flex;
   align-items:center;
-  gap:esp(3);
-  line-height:1.15;
+  gap:esp(2);
+  min-height:$tactile-min;
+  line-height:1;
+  color:var(--texte);
 
-  // La couleur est déclarée pour TOUS les états : aucune marque ne doit
-  // attendre un survol pour être lisible.
   &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
     text-decoration:none;
   }
 }
 
-// -----------------------------------------------------------------------------
-// La pastille
-// -----------------------------------------------------------------------------
 .brand__mark{
   flex:0 0 auto;
-  display:grid;
-  place-items:center;
-  border-radius:rayon(md);
-  font-weight:800;
-  letter-spacing:.02em;
-  // Le monogramme est une abréviation : les capitales y sont légitimes,
-  // contrairement au nom complet.
-  text-transform:uppercase;
-  background:$vert-fonce;
-  color:$blanc;
+  display:block;
+  // Le carré de repérage porte la couleur de la marque : baobab en clair,
+  // menthe claire en sombre.
+  color:var(--marque);
 }
+
+.brand__queue{ stroke:var(--marque-queue); }
 
 .brand__words{
   display:flex;
@@ -48,92 +42,110 @@
 
 .brand__name{
   font-weight:800;
-  letter-spacing:-.02em;
+  letter-spacing:-.03em;
   white-space:nowrap;
+  color:var(--texte);
 }
 
 .brand__tagline{
+  margin-top:esp(1);
+  font-size:typo(overline);
   font-weight:400;
-  color:$gris-second;
-  margin-top:1px;
+  color:var(--texte-2);
 }
 
-// -----------------------------------------------------------------------------
-// Tailles
-// -----------------------------------------------------------------------------
+// ── Tailles ────────────────────────────────────────────────────────────────
 .brand--sm{
-  gap:esp(2);
-  .brand__mark{width:26px;height:26px;font-size:typo(overline);border-radius:rayon(sm)}
-  .brand__name{font-size:typo(body-sm)}
-  .brand__tagline{font-size:typo(overline)}
+  .brand__mark{width:30px;height:30px}
+  .brand__name{font-size:typo(h3)}
 }
 
 .brand--md{
-  .brand__mark{width:32px;height:32px;font-size:typo(caption)}
-  .brand__name{font-size:typo(body-lg)}
-  .brand__tagline{font-size:typo(overline)}
+  .brand__mark{width:34px;height:34px}
+  .brand__name{font-size:typo(h3, bureau)}
 }
 
 .brand--lg{
   gap:esp(3);
-  .brand__mark{width:42px;height:42px;font-size:typo(body-lg);border-radius:rayon(md)}
+  .brand__mark{width:44px;height:44px}
   .brand__name{font-size:typo(h1)}
-  .brand__tagline{font-size:typo(caption)}
 }
 
-// -----------------------------------------------------------------------------
-// LES DEUX TONS
-//
-// Le nom du ton désigne le TEXTE, pas le fond : « dark » se pose sur un fond
-// clair, « light » sur un fond sombre. C'est la convention du projet, et elle
-// se lit à l'envers la première fois — d'où ce rappel.
-//
-// DANS LES DEUX CAS, LES LETTRES DU MONOGRAMME SONT BLANCHES. C'est ce qui
-// rend la marque reconnaissable d'un support à l'autre : seul le carré change
-// de teinte, jamais les lettres. Un monogramme tantôt blanc sur vert, tantôt
-// vert sur blanc, donne deux logos au lieu d'un.
-// -----------------------------------------------------------------------------
-
-// Sur fond CLAIR — page, navbar, carte blanche.
-.brand--dark{
-  // Le nom prend le vert de la marque, non le noir du texte courant. Il ne
-  // s'agit pas d'un titre : c'est une identité, elle doit se distinguer du
-  // paragraphe qui l'entoure.
-  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{color:$vert-fonce}
-  .brand__mark{background:$vert-fonce;color:$blanc}
+// Le monogramme seul, en grand (planche, états vides de marque).
+.brand--xl{
+  .brand__mark{width:88px;height:88px}
 }
 
-// Sur fond SOMBRE — pied de page public, en-tête d'administration, carte verte.
-//
-// Le carré prend le VERT ACCENT et non le blanc. Un carré blanc sur fond vert
-// foncé est un trou de lumière : il attire l'œil avant le nom et casse le
-// bloc. En vert accent, il reste lisible tout en appartenant à la surface.
-// LA VARIANTE POSÉE SUR FOND SOMBRE.
-//
-// ═══════════════════════════════════════════════════════════════════════
-// MESURÉ À 3,37:1, ET CONSERVÉ TEL QUEL
-// ═══════════════════════════════════════════════════════════════════════
-// Le monogramme est blanc sur $vert-accent. L'audit de contraste le relève,
-// et il a raison de le relever : c'est bien sous les 4,5:1.
-//
-// Il n'est pourtant pas corrigé, pour deux raisons qui vont ensemble.
-//
-// D'abord, WCAG 1.4.3 exempte explicitement les logotypes : « un texte qui
-// fait partie d'un logo ou d'un nom de marque n'a pas d'exigence de
-// contraste minimal ». Cette pastille EST le logo.
-//
-// Ensuite, les corrections possibles coûtent plus qu'elles ne rapportent.
-// Assombrir le carré jusqu'à porter du blanc (#157A5E donne 5,28:1) le fait
-// tomber à 2,37:1 contre la section sombre où il est posé : le carré cesse
-// de se détacher, et on a déplacé le problème. L'inverser — carré pâle,
-// lettre verte — donne 10,84:1 mais crée un SECOND logo : blanc sur vert
-// ici, vert sur blanc là. Une marque qui se dessine de deux façons n'est
-// plus une marque, et un test le vérifie explicitement.
-//
-// C'est donc une exception assumée, écrite ici pour qu'elle ne soit pas
-// « redécouverte » et corrigée par erreur au prochain audit.
+// ── Tons ───────────────────────────────────────────────────────────────────
+// `dark` : la marque sur une surface du thème (par défaut).
+// `light` : la marque posée sur une COUVERTURE verte — anneau ivoire,
+// queue or clair, nom ivoire. Ne dépend pas du thème : le vert non plus.
 .brand--light{
-  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{color:$blanc}
-  .brand__mark{background:$vert-accent;color:$blanc}
-  .brand__tagline{color:rgba($blanc,.7)}
+  --marque-queue: var(--sur-couverture-accent);
+
+  .brand__mark,
+  .brand__name{color:var(--sur-couverture)}
+  .brand__tagline{color:var(--sur-couverture-2)}
+}
+
+
+// =============================================================================
+// LES MOTIFS — utilitaires
+// =============================================================================
+
+// CLAUSTRA — le filigrane des surfaces vertes. `.claustra` pose la
+// couverture ET sa trame : c'est la seule façon d'avoir un vert de marque.
+// `.claustra--clair` pose la trame baobab sur une surface claire (grès).
+.claustra{
+  background-color:var(--couverture);
+  background-image:var(--motif-claustra);
+  background-size:$claustra-pas $claustra-pas;
+  color:var(--sur-couverture);
+}
+
+.claustra--lg{ background-size:$claustra-pas-lg $claustra-pas-lg; }
+
+.claustra--clair{
+  background-color:transparent;
+  background-image:var(--motif-claustra-clair);
+  color:inherit;
+}
+
+// LISIÈRE — la frise tissée. Hauteur 8 (ou 6 en version fine) : un
+// multiple du pas du losange, sans quoi le motif moire sur écran.
+.lisiere{
+  display:block;
+  height:$lisiere-h;
+  background:var(--motif-lisiere) repeat-x 0 0 / #{$lisiere-l} #{$lisiere-h};
+}
+
+.lisiere--fine{
+  height:$lisiere-h-fine;
+  background-size:$lisiere-l-fine $lisiere-h-fine;
+}
+
+// La lisière en bord BAS d'une surface positionnée (couverture, tuile).
+.avec-lisiere{
+  position:relative;
+  // La frise suit les coins arrondis de la surface qu'elle ferme.
+  overflow:hidden;
+
+  &::after{
+    content:"";
+    position:absolute;
+    left:0;right:0;bottom:0;
+    height:$lisiere-h;
+    background:var(--motif-lisiere) repeat-x 0 0 / #{$lisiere-l} #{$lisiere-h};
+    pointer-events:none;
+  }
+}
+
+// La lisière en bord HAUT (offre Standard).
+.avec-lisiere--haut::after{ top:0; bottom:auto; }
+
+// La surface verte recalcule son focus : le contour or reste visible sur
+// le baobab, là où la latérite s'y perdrait.
+.claustra,
+.sur-couverture{
+  --focus: var(--sur-couverture-accent);
 }

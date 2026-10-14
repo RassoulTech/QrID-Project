@@ -119,10 +119,19 @@ class CiblesTactilesTest extends TestCase
         $css = $this->feuilleCompilee();
 
         foreach ($this->ciblesGaranties() as $selecteur => $quoi) {
-            $motif = '/[^{}]*'.preg_quote($selecteur, '/').'(?=[,{\s:])[^{}]*\{[^}]*min-height:\s*44px[^}]*\}/';
+            /*
+             | 44px AU MOINS, et non 44px exactement. Depuis la direction A, un
+             | bouton standard mesure 48px (le petit, 44) : exiger la valeur
+             | exacte du minimum ferait échouer le test sur une cible PLUS
+             | confortable que la loi ne le demande.
+             */
+            $motif = '/[^{}]*'.preg_quote($selecteur, '/').'(?=[,{\s:])[^{}]*\{[^}]*min-height:\s*(\d+)px[^}]*\}/';
 
-            $this->assertMatchesRegularExpression($motif, $css,
-                "Plus aucune règle ne donne 44px aux {$quoi} : la hauteur ".
+            preg_match_all($motif, $css, $blocs);
+            $accordees = array_filter($blocs[1] ?? [], fn ($h) => (int) $h >= 44);
+
+            $this->assertNotEmpty($accordees,
+                "Plus aucune règle ne donne au moins 44px aux {$quoi} : la hauteur ".
                 'tactile a disparu de la cascade.');
         }
     }

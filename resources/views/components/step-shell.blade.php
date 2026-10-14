@@ -29,8 +29,7 @@
     {{-- La touche Entrée déclenche le PREMIER bouton submit du formulaire.
          Sans ce leurre, ce serait « Ajouter un réseau » à l'étape 2.
          Ici, Entrée vaut toujours « Continuer ». --}}
-    <button type="submit" tabindex="-1" aria-hidden="true"
-            style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);border:0"></button>
+    <button type="submit" tabindex="-1" aria-hidden="true" class="visually-hidden"></button>
 
     <div class="step-card">
         @php
@@ -42,15 +41,13 @@
             $rang = __('profile.wizard.etape_sur', ['n' => $step, 'total' => 3]);
         @endphp
 
-        <p class="step-card__kicker">{{ $rang }}</p>
-
-        <div class="step-bar" role="progressbar" aria-valuenow="{{ $step }}"
-             aria-valuemin="1" aria-valuemax="3"
-             aria-label="{{ $rang }}">
-            @for ($i = 1; $i <= 3; $i++)
-                <span @class(['step-bar__seg', 'is-done' => $i <= $step])></span>
-            @endfor
-        </div>
+        {{-- LES ÉTAPES : la frise A (coche, anneau, numéro) et le rang en
+             toutes lettres. Voir x-wizard-progress. --}}
+        <x-wizard-progress :step="$step" :total="3" class="step-card__etapes" :labels="[
+            __('profile.wizard.entete_1'),
+            __('profile.wizard.entete_2'),
+            __('profile.wizard.entete_3'),
+        ]" />
 
         <h1 class="step-card__title">{{ $title }}</h1>
         <p class="step-card__sub">{{ $subtitle }}</p>

@@ -41,6 +41,11 @@ return [
         'comment_ca_marche' => 'Comment ça marche',
         'metiers' => 'Métiers concernés',
         'contact' => 'Contact',
+        'fonctionnement' => 'Fonctionnement',
+        'carte_pvc' => 'Carte PVC',
+        'exemple' => 'Exemple',
+        'aide' => 'Aide',
+        'se_connecter' => 'Se connecter',
     ],
 
     // -----------------------------------------------------------------
@@ -59,6 +64,18 @@ return [
         'deconnexion' => 'Déconnexion',
         'retour_espace_client' => 'Retour à mon espace client',
         'aide' => 'Aide',
+
+        // La coque A (lot 1) — barre du haut, menus sans JavaScript.
+        'menu_compte' => 'Menu du compte',
+        'connecte' => 'Connecté',
+        'role_client' => 'Espace client',
+        'role_admin' => 'Administrateur',
+        'preferences' => 'Affichage',
+        'aide_whatsapp' => 'Une question ? Nous écrire sur WhatsApp',
+        'aide_court' => 'Une question ?',
+        'lancer_recherche' => 'Lancer la recherche',
+        'fermer_menu' => 'Fermer le menu',
+        'fil_ariane' => "Fil d'Ariane",
     ],
 
     // -----------------------------------------------------------------
@@ -79,6 +96,19 @@ return [
         'mon_profil' => 'Mon profil',
         'mon_qr' => 'Mon QR Code',
         'mon_abonnement' => 'Mon abonnement',
+        /*
+         | LES ONGLETS DU HAUT (ordinateur) — six destinations, libellés
+         | complets. La liste et leur ordre vivent dans App\Support\Navigation.
+         */
+        'onglet' => [
+            'tableau_de_bord' => 'Tableau de bord',
+            'statistiques' => 'Statistiques',
+            'mon_profil' => 'Mon profil',
+            'mon_qr' => 'Mon QR Code',
+            'abonnement' => 'Abonnement',
+            'compte' => 'Compte',
+        ],
+
 
         /*
          | LIBELLÉS COURTS DU DOCK — un jeu séparé, et c'est nécessaire.
@@ -102,6 +132,7 @@ return [
             'mon_qr' => 'Carte',
             'statistiques' => 'Stats',
             'mon_abonnement' => 'Offre',
+            'compte' => 'Compte',
         ],
     ],
 
@@ -119,6 +150,8 @@ return [
         'etat_systeme' => 'État système',
         'retour' => 'Retour',
         'en_construction' => 'Écran en cours de construction',
+        'tag' => 'Admin',
+        'a_verifier' => ':compte paiement à vérifier|:compte paiements à vérifier',
 
         /* Libellés courts du dock — huit caractères maximum, voir le
            commentaire du bloc client. */
@@ -174,11 +207,20 @@ return [
         'confidentialite' => 'Confidentialité',
         'mentions' => 'Mentions légales',
         'conditions' => 'Conditions générales',
+
+        // Le pied de page A (lot 1).
+        'description' => 'La carte de visite numérique des professionnels au Sénégal : une carte PVC, un QR Code, une page à votre nom.',
+        'produit' => 'Produit',
+        'aide' => 'Aide',
+        'exemple_carte' => 'Exemple de carte',
+        'nous_ecrire' => 'Nous écrire',
+        'paiement' => 'Paiement : Wave · Orange Money · Free Money · en FCFA',
     ],
 
     'dock' => [
         'aria' => 'Navigation principale',
         'en_attente' => ':compte élément en attente|:compte éléments en attente',
         'plus' => 'Plus',
+        'fermer' => 'Fermer',
     ],
 ];

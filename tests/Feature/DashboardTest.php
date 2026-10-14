@@ -306,7 +306,7 @@ class DashboardTest extends TestCase
     {
         app(NotificationService::class)->premiereVue($this->user, $this->profile);
 
-        $this->assertStringContainsString('app-bell__pastille', $this->html());
+        $this->assertStringContainsString('cloche__pastille', $this->html());
 
         $this->actingAs($this->user)->get(route('notifications.index'))
             ->assertOk()

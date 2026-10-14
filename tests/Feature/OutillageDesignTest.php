@@ -86,6 +86,22 @@ class OutillageDesignTest extends TestCase
         $this->artisan('design:contraste')->assertSuccessful();
     }
 
+    /**
+     * LA COMMANDE MESURE TOUT CE QU'ELLE DOIT, OU ELLE ÉCHOUE BRUYAMMENT.
+     *
+     * Le 14 octobre, la refonte « Teranga » a déclaré les rôles par alias
+     * (`$c-page: $sable-100;`). La commande ne lisait que les hex en clair :
+     * elle est passée de 20 couples à 6 en restant verte. Ce test fixe le
+     * plancher — dix couples par thème — pour qu'un garde-fou ne puisse plus
+     * s'éteindre sans que personne le remarque.
+     */
+    public function test_design_contraste_mesure_les_vingt_couples(): void
+    {
+        $this->artisan('design:contraste')
+            ->expectsOutputToContain('20 couple(s) de tokens mesuré(s).')
+            ->assertSuccessful();
+    }
+
     public function test_design_check_respecte_ses_plafonds(): void
     {
         $this->artisan('design:check')->assertSuccessful();

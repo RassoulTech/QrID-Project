@@ -272,20 +272,30 @@ class AuthScreensTest extends TestCase
      */
     public function test_the_google_button_stays_visible_in_dark_theme(): void
     {
-        $css = (string) file_get_contents(resource_path('sass/_theme-dark.scss'));
+        /*
+         | LA RÈGLE A DÉMÉNAGÉ AVEC LA REFONTE « TERANGA », PAS SA GARANTIE.
+         |
+         | Le bouton sombre est désormais déclaré dans le socle, et ses trois
+         | valeurs vivent dans _tokens.scss — la seule feuille autorisée à
+         | porter des valeurs. On vérifie donc les deux bouts : la règle
+         | sombre existe et emploie les jetons Google, et les jetons valent
+         | les couleurs officielles du bouton sombre de Google.
+         */
+        $socle = (string) file_get_contents(resource_path('sass/_socle.scss'));
+        $tokens = (string) file_get_contents(resource_path('sass/_tokens.scss'));
 
-        $this->assertStringContainsString(
-            '.oauth__btn{',
-            $css,
+        $this->assertMatchesRegularExpression(
+            '/\.theme-dark \.oauth__btn\s*\{[^}]*background:\s*\$google-sombre-fond;[^}]*border-color:\s*\$google-sombre-trait;/s',
+            $socle,
             'Le thème sombre ne redéclare plus le bouton Google : il reprendra le fond de la carte et disparaîtra.'
         );
 
         // Les couleurs officielles du bouton sombre de Google.
-        $this->assertStringContainsString('background:#131314', $css);
-        $this->assertStringContainsString('border-color:#8E918F', $css);
+        $this->assertMatchesRegularExpression('/\$google-sombre-fond:\s*#131314;/', $tokens);
+        $this->assertMatchesRegularExpression('/\$google-sombre-trait:\s*#8E918F;/', $tokens);
 
         // Et le filet du séparateur, qui souffrait du même repli.
-        $this->assertStringContainsString('.oauth__ou{', $css);
+        $this->assertStringContainsString('.oauth__ou{', (string) file_get_contents(resource_path('sass/_theme-dark.scss')));
     }
 
     /**

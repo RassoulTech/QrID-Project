@@ -1,67 +1,56 @@
 {{--
-  x-whatsapp-fab — le bouton d'aide flottant.
+  x-whatsapp-fab — le bouton d'aide WhatsApp, contextuel.
 
-      <x-whatsapp-fab />
-      <x-whatsapp-fab message="Bonjour, question particulière." />
+      <x-whatsapp-fab />                         lien discret, centré en bas d'écran
+      <x-whatsapp-fab variante="barre" />        bouton-icône « ? » d'une barre
+      <x-whatsapp-fab variante="lien" />         lien en ligne (pied de page)
+      <x-whatsapp-fab message="Bonjour, …" />    message imposé (hors route)
 
-  UN SEUL COMPOSANT, PARTOUT. Le message pré-rempli est déduit de la PAGE :
-  App\Support\AideContextuelle tient la correspondance, écran par écran.
+  IL NE FLOTTE PLUS. La pastille verte « Une question ? » était fixée en bas
+  à droite et recouvrait du contenu — le dernier bouton d'un formulaire, la
+  colonne d'aperçu d'une carte. Elle vit désormais DANS la page : dans la
+  barre des espaces connectés (icône « ? »), dans le pied de page de la
+  vitrine, sous le formulaire des écrans d'accès. Rien n'est recouvert, et
+  la fonction est intacte.
 
-  Pourquoi pas un message unique : « j'ai une question » oblige à tout écrire
-  au moment précis où l'on est bloqué, souvent sur un téléphone. La moitié
-  renonce, et l'autre produit un message que l'équipe devra faire préciser.
-  « Je suis à l'étape 2 de la création de ma carte » se traite immédiatement.
+  LE MESSAGE PRÉ-REMPLI EST DÉDUIT DE LA PAGE (App\Support\AideContextuelle) :
+  « je suis à l'étape 2 de la création de ma carte » se traite tout de suite.
 
-  Le paramètre `message` reste possible, mais ne sert qu'aux cas hors route —
-  un aperçu, une page de démonstration. La règle est de laisser le composant
-  décider.
+  IL N'APPARAÎT PAS SI LE NUMÉRO N'EST PAS CONFIGURÉ : une aide qui mène à
+  une conversation vide est pire que pas d'aide.
 
-  IL N'APPARAÎT PAS SI LE NUMÉRO N'EST PAS CONFIGURÉ. Un bouton d'aide qui
-  mène à une conversation vide avec un numéro inexistant est pire que pas de
-  bouton : quelqu'un qui a un problème en rencontre un second.
-
-  target="_blank" avec rel="noopener" : WhatsApp s'ouvre à côté, sans faire
-  perdre la page en cours — un client au milieu de la création de sa carte ne
-  doit pas la quitter pour poser une question. Le `noopener` empêche la page
-  ouverte d'accéder à la nôtre.
-
-  LE LIBELLÉ EST MASQUÉ SUR PETIT ÉCRAN, jamais supprimé : il reste lisible
-  par un lecteur d'écran, et le bouton garde un nom accessible.
+  target="_blank" + rel="noopener" : WhatsApp s'ouvre à côté, la page en
+  cours n'est pas perdue.
 --}}
 @props([
     'message' => null,
+    'variante' => 'bloc',
 ])
 
 @php
-    /*
-     | LE LIEN VIENT DU SERVICE, PLUS DU GABARIT.
-     |
-     | Ce bloc nettoyait le numéro et encodait le texte lui-même. C'était la
-     | quatrième copie de la même logique dans le produit — et la seule à
-     | corriger le jour où l'une des trois autres se trompe.
-     |
-     | `assistance()` rend null quand aucun numéro n'est configuré : un bouton
-     | d'aide qui mène à une conversation avec un numéro inexistant est pire
-     | que pas de bouton — quelqu'un qui a un problème en rencontre un second.
-     */
     $lien = $message !== null
         ? \App\Support\Whatsapp::lien(config('landing.support.whatsapp'), $message)
         : \App\Support\Whatsapp::assistance();
 @endphp
 
 @if ($lien !== null)
-
-    <a href="{{ $lien }}"
-       class="wa-fab"
-       target="_blank"
-       rel="noopener noreferrer"
-       aria-label="{{ __('Nous écrire sur WhatsApp') }}">
-
-        <svg class="wa-fab__icone" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.65.07a8.1 8.1 0 0 1-2.39-1.47 9 9 0 0 1-1.65-2.06c-.17-.3-.02-.46.13-.61s.3-.35.45-.52.2-.3.3-.5.05-.37-.02-.52-.67-1.61-.92-2.21c-.24-.58-.49-.5-.67-.51h-.57a1.1 1.1 0 0 0-.8.37 3.35 3.35 0 0 0-1.04 2.48 5.8 5.8 0 0 0 1.22 3.09 13.3 13.3 0 0 0 5.09 4.5c.71.3 1.27.49 1.7.63a4.1 4.1 0 0 0 1.88.12 3.07 3.07 0 0 0 2.01-1.42 2.5 2.5 0 0 0 .17-1.42c-.07-.12-.27-.2-.57-.35z"/>
-            <path d="M12.04 2a9.9 9.9 0 0 0-8.5 15.02L2 22.5l5.62-1.47A9.9 9.9 0 1 0 12.04 2m0 1.67a8.23 8.23 0 1 1-4.19 15.31l-.3-.18-3.34.87.89-3.25-.2-.31A8.23 8.23 0 0 1 12.04 3.67"/>
-        </svg>
-
-        <span class="wa-fab__texte">{!! __('Une question&nbsp;?') !!}</span>
-    </a>
+    @if ($variante === 'barre')
+        <a href="{{ $lien }}" target="_blank" rel="noopener noreferrer"
+           {{ $attributes->merge(['class' => 'aide-wa aide-wa--barre']) }}
+           aria-label="{{ __('navigation.coque.aide_whatsapp') }}"
+           title="{{ __('navigation.coque.aide_court') }}">
+            <x-icone name="help-circle" class="aide-wa__icone" />
+        </a>
+    @else
+        @if ($variante === 'bloc')<p class="aide-wa-bloc">@endif
+        <a href="{{ $lien }}" target="_blank" rel="noopener noreferrer"
+           {{ $attributes->merge(['class' => 'aide-wa']) }}>
+            <svg class="aide-wa__icone" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.65.07a8.1 8.1 0 0 1-2.39-1.47 9 9 0 0 1-1.65-2.06c-.17-.3-.02-.46.13-.61s.3-.35.45-.52.2-.3.3-.5.05-.37-.02-.52-.67-1.61-.92-2.21c-.24-.58-.49-.5-.67-.51h-.57a1.1 1.1 0 0 0-.8.37 3.35 3.35 0 0 0-1.04 2.48 5.8 5.8 0 0 0 1.22 3.09 13.3 13.3 0 0 0 5.09 4.5c.71.3 1.27.49 1.7.63a4.1 4.1 0 0 0 1.88.12 3.07 3.07 0 0 0 2.01-1.42 2.5 2.5 0 0 0 .17-1.42c-.07-.12-.27-.2-.57-.35z"/>
+                <path d="M12.04 2a9.9 9.9 0 0 0-8.5 15.02L2 22.5l5.62-1.47A9.9 9.9 0 1 0 12.04 2m0 1.67a8.23 8.23 0 1 1-4.19 15.31l-.3-.18-3.34.87.89-3.25-.2-.31A8.23 8.23 0 0 1 12.04 3.67"/>
+            </svg>
+            <span>{{ __('navigation.coque.aide_whatsapp') }}</span>
+        </a>
+        @if ($variante === 'bloc')</p>@endif
+    @endif
 @endif

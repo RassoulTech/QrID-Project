@@ -1,12 +1,39 @@
 // =============================================================================
-// BASE — police locale, reset, typographie, liens, focus, conteneurs.
+// BASE — police auto-hébergée, reset, typographie, liens, conteneurs.
 // =============================================================================
 
 // -----------------------------------------------------------------------------
-// POLICE LOCALE — jamais de CDN.
-// Déposer les .woff2 dans public/fonts/ puis décommenter.
-// Tant qu'ils sont absents, la pile système sert de repli.
+// LA POLICE — Schibsted Grotesk, variable 400 → 900, AUTO-HÉBERGÉE.
 // -----------------------------------------------------------------------------
+// Un seul fichier (46,8 Ko, sous-ensemble latin), servi depuis /fonts/ et
+// préchargé par `layouts/partials/head.blade.php`. JAMAIS un CDN.
+//
+// `font-display: swap` : le texte s'affiche tout de suite dans la police de
+// repli, puis bascule. Pour que la bascule ne fasse pas sauter la page, la
+// police de repli est RECALÉE sur les métriques de Schibsted : Arial (ou
+// Roboto sur Android) agrandie de 3 % et ses jambages réglés. Les valeurs
+// sont mesurées, voir `_tokens.scss` § 8.
+//
+// La plage unicode est celle du sous-ensemble latin : un caractère hors
+// plage (wolof étendu, emoji) tombe proprement sur la pile système au lieu
+// d'un carré vide.
+@font-face{
+  font-family:'Schibsted Grotesk';
+  src:url('/fonts/schibsted-grotesk-latin.woff2') format('woff2');
+  font-weight:400 900;
+  font-style:normal;
+  font-display:swap;
+  unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face{
+  font-family:'Schibsted Grotesk Repli';
+  src:local('Arial'), local('ArialMT'), local('Roboto'), local('Roboto-Regular');
+  size-adjust:$font-repli-taille;
+  ascent-override:$font-repli-ascendant;
+  descent-override:$font-repli-descendant;
+  line-gap-override:0%;
+}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -72,11 +99,6 @@ p,li,dd,dt,td,th,figcaption{overflow-wrap:break-word}
   > table{margin-bottom:0}
 }
 
-// Zone tactile : 40px de côté au minimum sur les commandes isolées.
-// En dessous, un doigt vise deux commandes à la fois.
-@media (hover:none) and (pointer:coarse){
-  .theme-toggle,.app-bell,.adm-top__burger{min-width:40px;min-height:40px}
-}
 
 // Les titres suivent l'échelle typographique du socle, qui porte aussi
 // leur graisse, leur interligne et leur interlettrage par palier.
@@ -93,7 +115,7 @@ a,a:link,a:visited,a:hover,a:active,a:focus,a:focus-visible{text-decoration:none
 
 // Couleur héritée par défaut, avec une spécificité minimale (0,0,1) que
 // toute classe de composant peut surcharger.
-a{color:inherit;transition:color .18s ease,opacity .18s ease}
+a{color:inherit;transition:color $d-rapide $courbe,opacity $d-rapide $courbe}
 .btn-link,.nav-link,.dropdown-item,.navbar-brand,.page-link{text-decoration:none !important}
 
 // LE CONTOUR DE FOCUS EST POSÉ PAR LE SOCLE, pour tous les éléments
@@ -181,8 +203,8 @@ a{color:inherit;transition:color .18s ease,opacity .18s ease}
   // blanc illisible sur sa moitié basse. Le jeton donne le même vert pâle en
   // clair, et un voile vert translucide en sombre.
   background:var(--accent-doux);
-  border-radius:4px;
-  z-index:-1;
+  border-radius:rayon(xs);
+  z-index:plan(fond);
   transform-origin:left center;
   transform:scaleX(0);
   // Démarrait à 500ms pour 600ms de tracé : le trait finissait de se dessiner
@@ -221,9 +243,9 @@ a{color:inherit;transition:color .18s ease,opacity .18s ease}
 // FINITIONS — éléments interactifs
 // -----------------------------------------------------------------------------
 a,button,.btn-pill,.plan,.figure-card,.step{
-  transition:transform 200ms ease, box-shadow 200ms ease,
-             background-color 200ms ease, color 200ms ease,
-             border-color 200ms ease, opacity 200ms ease;
+  transition:transform $d-rapide $courbe, box-shadow $d-rapide $courbe,
+             background-color $d-rapide $courbe, color $d-rapide $courbe,
+             border-color $d-rapide $courbe, opacity $d-rapide $courbe;
 }
 
 button:active,.btn-pill:active{transform:translateY(1px)}

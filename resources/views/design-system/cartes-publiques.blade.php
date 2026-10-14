@@ -15,15 +15,15 @@
 --}}
 @props(['profile'])
 
-<h2 class="section-title" style="margin-top:96px">Carte publique</h2>
+<h3 class="t-h3 ds-objets__titre">Carte publique</h3>
 
-<p class="section-sub" style="max-width:680px;margin-inline:auto">
+<p class="t-caption ds-note">
     Le composant tel qu'il est servi après un scan, à 375px. Le profil est
     rendu sans photo ni bannière : ce sont les replis qu'il faut pouvoir
     juger, puisque ce sont eux que verra tout client qui n'a rien téléversé.
 </p>
 
-<div class="ds-carte__paire" style="justify-content:center;margin-top:40px">
+<div class="ds-carte__paire ds-objets__rangee">
     @foreach (['clair' => '', 'sombre' => 'theme-dark'] as $nomTheme => $classeTheme)
         <figure class="ds-carte__vue {{ $classeTheme }}">
             <figcaption class="ds-carte__legende">{{ ucfirst($nomTheme) }} · 375px</figcaption>

@@ -1,18 +1,24 @@
 {{--
-  x-badge — statut court (abonnement, paiement, profil).
+  x-badge — le CACHET : fond teinté + bordure 1px + rayon 6 + icône + libellé.
 
-  <x-badge status="active" />                      libellé automatique
-  <x-badge status="pending">En attente</x-badge>   libellé personnalisé
-  <x-badge variant="success">Payé</x-badge>        variante directe
+      <x-badge status="active" />                  Actif ✓ (succès)
+      <x-badge status="pending" />                 En attente ◷ (alerte)
+      <x-badge status="failed" />                  Échoué ✕ (danger)
+      <x-badge variant="success">Réussi</x-badge>  libellé libre
+      <x-badge variant="neutral" :icon="false">Brouillon</x-badge>
 
-  Statuts reconnus : active, trial, expired, pending, failed, refunded,
-                     published, draft, suspended
-  Props : status (mappé sur une variante + un libellé), variant (surcharge),
-          soft (fond pâle, défaut : true)
+  LA COULEUR NE PORTE JAMAIS SEULE L'INFORMATION (signature 4) : l'icône et
+  le libellé disent la même chose que la teinte, pour qui ne la distingue
+  pas. Chaque texte est mesuré sur SON fond teinté, dans les deux thèmes
+  (voir _tokens.scss § 4).
+
+  Variantes : success · warning · danger · info · neutral (alias Bootstrap
+  `secondary`) · gold (premium).
 --}}
 @props([
     'status' => null,
     'variant' => null,
+    'icon' => true,
     'soft' => true,
 ])
 
@@ -23,20 +29,29 @@
         'expired'   => ['danger',  __('common.etats.expire')],
         'pending'   => ['warning', __('common.etats.en_attente')],
         'failed'    => ['danger',  __('common.etats.echoue')],
-        'refunded'  => ['secondary', __('common.etats.rembourse')],
+        'refunded'  => ['neutral', __('common.etats.rembourse')],
         'published' => ['success', __('common.etats.publie')],
-        'draft'     => ['secondary', __('common.etats.brouillon')],
+        'draft'     => ['neutral', __('common.etats.brouillon')],
         'suspended' => ['danger',  __('common.etats.suspendu')],
     ];
 
-    [$mappedVariant, $mappedLabel] = $map[$status] ?? ['secondary', $status];
+    [$varianteStatut, $libelleStatut] = $map[$status] ?? ['neutral', $status];
+    $variante = $variant ?? $varianteStatut;
 
-    $finalVariant = $variant ?? $mappedVariant;
-    $classes = $soft
-        ? "badge text-bg-light text-{$finalVariant} border border-{$finalVariant}-subtle"
-        : "badge text-bg-{$finalVariant}";
+    // Les noms de Bootstrap restent acceptés.
+    $nom = [
+        'success' => 'succes', 'warning' => 'alerte', 'danger' => 'danger',
+        'info' => 'info', 'neutral' => 'neutre', 'secondary' => 'neutre',
+        'light' => 'neutre', 'primary' => 'succes', 'gold' => 'or',
+    ][$variante] ?? 'neutre';
+
+    $icone = [
+        'succes' => 'check', 'alerte' => 'clock', 'danger' => 'x',
+        'info' => 'info', 'neutre' => null, 'or' => 'shield-check',
+    ][$nom];
 @endphp
 
-<span {{ $attributes->merge(['class' => $classes]) }}>
-    {{ trim($slot) !== '' ? $slot : $mappedLabel }}
+<span {{ $attributes->merge(['class' => 'badge badge--'.$nom]) }}>
+    @if ($icon && $icone)<x-icone :name="$icone" />@endif
+    {{ trim($slot) !== '' ? $slot : $libelleStatut }}
 </span>

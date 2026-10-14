@@ -167,12 +167,24 @@ class CardPresentationTest extends TestCase
      */
     public function test_the_dark_theme_never_repaints_the_business_card(): void
     {
-        $this->assertStringContainsString(
-            '.card:not(.light):not(.dark)',
-            file_get_contents(resource_path('sass/_theme-dark.scss')),
-            'Le thème sombre a recommencé à repeindre la carte de visite : '
-            .'sa couleur est choisie par le client, elle ne suit pas le thème.'
-        );
+        /*
+         | Depuis la direction A, `_theme-dark.scss` ne vise plus du tout les
+         | surfaces `.card` : le socle les écrit en jetons, et elles basculent
+         | seules. La garantie reste la même : si la règle revient, elle doit
+         | exclure la carte de visite (`.light` / `.dark`).
+         */
+        $source = (string) file_get_contents(resource_path('sass/_theme-dark.scss'));
+        $source = (string) preg_replace('#^\s*//.*$#m', '', $source);
+
+        preg_match_all('/\.card(?![\w-])(:not\(\.light\):not\(\.dark\))?/', $source, $visees);
+
+        foreach ($visees[1] as $exclusion) {
+            $this->assertNotSame('', $exclusion,
+                'Le thème sombre a recommencé à repeindre la carte de visite : '
+                .'sa couleur est choisie par le client, elle ne suit pas le thème.');
+        }
+
+        $this->addToAssertionCount(1);
     }
 
     /**

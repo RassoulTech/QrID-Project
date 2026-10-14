@@ -1,5 +1,5 @@
 // =============================================================================
-// QrID — TOKENS
+// QrID — TOKENS — direction A « Teranga institutionnel »
 // =============================================================================
 //
 // LE SEUL FICHIER QUI CONTIENT DES VALEURS. Partout ailleurs, on référence.
@@ -7,343 +7,405 @@
 // écrits en dur dans un autre fichier sont une régression, et la commande
 // `php artisan design:check` les signale.
 //
-// ─────────────────────────────────────────────────────────────────────────
-// POURQUOI DES PROPRIÉTÉS CSS ET PAS SEULEMENT DES VARIABLES SCSS
-// ─────────────────────────────────────────────────────────────────────────
-// Une variable SCSS est résolue à la compilation : elle ne peut pas changer
-// selon le thème. Or le thème bascule à l'exécution, par une classe posée
-// sur <html>.
+// LE CONCEPT, EN UNE LIGNE : la rigueur d'une institution, l'hospitalité
+// d'un salon dakarois. Vert baobab profond sur sable, la trame du claustra
+// en filigrane sur les surfaces vertes, une lisière tissée pour signer ce
+// qui compte, l'or réservé à ce qui engage, la latérite comme seconde voix.
 //
-// D'où deux couches, et la distinction compte :
-//
+// ─────────────────────────────────────────────────────────────────────────
+// DEUX COUCHES — et la distinction compte
+// ─────────────────────────────────────────────────────────────────────────
 //   · LES VARIABLES SCSS ($...) portent la palette BRUTE. C'est la source
 //     de vérité, celle qu'on modifie.
 //   · LES PROPRIÉTÉS CSS (--...) portent la valeur ACTIVE, déclinée pour
-//     chaque thème. C'est ce que les composants consomment.
+//     chaque thème (`:root` clair, `.theme-dark` sombre, posée par le
+//     serveur sur <html>). C'est ce que les composants consomment.
 //
-// Un composant écrit donc `color: var(--texte)` et n'a rien à savoir du
-// thème courant. Ajouter un troisième thème ne demandera pas de rouvrir
-// un seul composant.
+// LES NOMS N'ONT PAS CHANGÉ À LA REFONTE. `--page`, `--carte`, `--texte`,
+// `--marque`, `--succes`, l'échelle `--vert-*`… sont consommés par toutes
+// les feuilles : ils ont reçu les valeurs A, et le produit entier a basculé
+// d'un coup. Ce qui manquait (or, latérite, couverture, motifs, graphique,
+// teintes, lien, focus) est AJOUTÉ, jamais substitué.
 //
 // Les échelles qui NE dépendent pas du thème — espacement, rayons,
-// typographie, durées, points de rupture — restent en SCSS pur : elles
-// sont utilisées dans des `@media` et des calculs, où une propriété CSS
-// ne fonctionnerait pas.
+// typographie, durées, ruptures — restent en SCSS pur : elles servent dans
+// des `@media` et des calculs, où une propriété CSS ne fonctionne pas.
 //
 // ─────────────────────────────────────────────────────────────────────────
-// TOUTES LES COULEURS SONT MESURÉES
+// TOUTES LES COULEURS DE TEXTE SONT MESURÉES
 // ─────────────────────────────────────────────────────────────────────────
-// Chaque couleur de texte a été vérifiée contre les trois surfaces sur
-// lesquelles elle peut atterrir (page, carte, surélevé), dans les deux
-// thèmes. Le ratio le plus faible est noté en commentaire. Aucune valeur
-// n'est en dessous de 4,5:1.
+// Chaque couleur de texte est mesurée contre les TROIS surfaces où elle peut
+// atterrir — page (sable / nuit), carte (ivoire / surface), surélevé (grès /
+// surface 2) — dans les deux thèmes. Le ratio le plus faible est noté en
+// commentaire. Aucun texte n'est sous 4,5:1. `php artisan design:contraste`
+// refait le calcul sur ce fichier à chaque passage.
 //
-// Ce n'est pas une précaution théorique : l'audit a mesuré « En attente »
-// à 1,46:1 — un texte illisible, présent 23 fois sur trois écrans, parce
-// que le badge reprenait le jaune de Bootstrap sur un fond gris clair.
-//
+//   Surfaces claires  : sable #F5EFE4 · ivoire #FFFCF6 · grès #EDE4D3
+//   Surfaces sombres  : nuit  #0C1713 · surface #13211C · surface 2 #1B2D26
 // =============================================================================
 
 
 // =============================================================================
-// 1. LA MARQUE — imposée, jamais recalculée
+// 1. LA PALETTE BRUTE — noms de matière, pas de rôle
 // =============================================================================
 
-$vert-fonce:  #0B3B2E;   // sections sombres, boutons principaux, médaillon
-$vert-accent: #1E9E7A;   // accents, traits, icônes — JAMAIS un fond de texte
-$vert-clair:  #E4F2EC;   // fonds doux, badges, appel à l'action final
+// ── Les verts : baobab, feuille, menthe ────────────────────────────────────
+$baobab-950:  #06201A;
+$baobab-900:  #08281F;   // pied de page, couverture profonde
+$baobab-800:  #0D3B2E;   // LA MARQUE — vert baobab
+$baobab-700:  #124A3A;
+$feuille-600: #146A50;   // liens et accent de texte (thème clair)
+$menthe-500:  #1E9E7A;   // remplissage SEULEMENT — jamais de texte sur clair
+$menthe-400:  #46B88F;
+$menthe-300:  #6FD1A8;   // accent et primaire du thème sombre
+$menthe-200:  #A8E3C8;
+$menthe-100:  #CFEFDF;
+$menthe-50:   #E3F1E8;
 
-// La MÊME teinte, remontée pour le thème sombre. Ce n'est pas une seconde
-// couleur de marque : c'est la même, rendue lisible sur fond sombre.
-$vert-accent-sombre: #1FBC8A;
+// ── Le sable et ses pierres ────────────────────────────────────────────────
+$sable-50:  #FFFCF6;     // ivoire — surfaces
+$sable-100: #F5EFE4;     // sable — fond de page
+$sable-200: #EDE4D3;     // grès — surface 2, bandes
+$sable-300: #E0D5C1;     // trait
+$sable-400: #CDBFA6;     // trait marqué
+$sable-500: #8F826C;     // contour de champ (3,29:1 sur sable, 3,68:1 sur ivoire)
 
-// LES TEINTES DE SURVOL. Elles ne sont pas « la même en plus clair » au
-// jugé : le texte posé dessus doit rester lisible, sinon le survol
-// devient le seul état non conforme de l'interface — celui qu'aucun
-// audit automatique ne visite.
-$vert-fonce-survol:  #0E4C3B;   // blanc dessus : 9,93:1
-$vert-accent-survol: #23D29A;   // #0A1F1A dessus : 8,79:1
+// ── La terre de Thiès et l'or ──────────────────────────────────────────────
+$laterite-600: #A9481F;  // texte, focus, numéros d'étape, surtitres
+$laterite-500: #C2613A;  // décor (losanges de la lisière, pastilles)
+$laterite-300: #EE9B72;  // la même voix, thème sombre
+$or-700: #7E5D12;        // or — texte sur clair
+$or-500: #B88A2A;        // or — décor, premium
+$or-300: #E2B85A;        // or — sur vert et en sombre
 
-// Le vert accent porte mal le texte : #FFFFFF dessus ne donne que 3,37:1.
-// C'est ce qui rendait le médaillon « QI » non conforme sur 18 pages. Il
-// reste une couleur de TRAIT et d'ICÔNE ; pour un fond de texte, on prend
-// le vert foncé — #FFFFFF dessus donne 12,51:1.
+// ── Les encres ─────────────────────────────────────────────────────────────
+$encre-900: #15211C;     // texte
+$encre-700: #4A544F;     // texte d'état neutre
+$encre-600: #56605A;     // texte secondaire
+$encre-500: #5B645E;     // texte tertiaire
+
+// ── La nuit verte (thème sombre) ───────────────────────────────────────────
+$nuit-950: #0C1713;
+$nuit-900: #13211C;
+$nuit-800: #1B2D26;
+$nuit-700: #2A3D35;
+$nuit-600: #3C5249;
+$nuit-500: #6B7F75;
+$brume-100: #F2ECE0;
+$brume-300: #ABB3AB;
+$brume-400: #9AA39B;
+$encre-profonde: #0B1A15;   // encre posée sur la menthe claire
 
 
 // =============================================================================
-// 1 BIS. L'ÉCHELLE DE VERTS — neuf degrés, une seule teinte
+// 2. LA MARQUE — imposée, jamais recalculée
 // =============================================================================
 //
-// POURQUOI UNE ÉCHELLE, ALORS QU'IL Y AVAIT DÉJÀ TROIS VERTS.
+// Les trois noms historiques restent : ils sont lus par la surcharge
+// Bootstrap et par les feuilles de pages. Ils pointent sur la palette A.
+
+$vert-fonce:  $baobab-800;   // boutons principaux, couvertures, médaillon
+$vert-accent: $menthe-500;   // traits, icônes, remplissages — JAMAIS un fond de texte
+$vert-clair:  $menthe-50;    // fonds doux, teinte verte
+
+// La même marque, remontée pour le thème sombre : la menthe claire.
+$vert-accent-sombre: $menthe-300;
+
+// LES TEINTES DE SURVOL — le texte posé dessus reste lisible.
+$vert-fonce-survol:  $baobab-900;   // ivoire dessus : 15,38:1
+$vert-accent-survol: #8ADDB9;       // #0B1A15 dessus : 11,19:1
+
+// La menthe porte mal le texte clair : ivoire dessus ne donne que 3,29:1.
+// Elle reste une couleur de TRAIT et de REMPLISSAGE ; pour un fond de
+// texte, on prend le baobab — ivoire dessus : 12,19:1.
+
+
+// =============================================================================
+// 2 BIS. L'ÉCHELLE DE VERTS — neuf degrés, une seule famille
+// =============================================================================
 //
-// Trois valeurs — foncé, accent, clair — suffisent à colorer, pas à
-// COMPOSER. Dès qu'un écran demande deux surfaces vertes voisines qui se
-// distinguent (un panneau sur un aplat, une pastille sur un bandeau), il
-// n'y a rien entre `#0B3B2E` et `#1E9E7A` : l'écart est de sept degrés de
-// luminosité d'un coup. On se retrouve à inventer un `rgba()` local, et
-// c'est ainsi que la charte se dilue.
-//
-// Neuf degrés d'UNE SEULE teinte, et pas une seconde couleur d'accent :
-// c'est ce qui distingue une palette d'un assortiment. La référence
-// fournie fait exactement cela — un vert profond, un vert moyen pour les
-// panneaux, un vert pâle pour les fonds.
-//
-// LES DEUX VALEURS HISTORIQUES GARDENT LEUR PLACE EXACTE dans l'échelle :
-// $vert-fonce est le 800, $vert-accent le 500, $vert-clair le 50. Aucune
-// couleur existante ne bouge, on ne fait qu'ajouter les degrés manquants.
+// Elle NE CHANGE PAS avec le thème : ce sont les degrés d'une teinte de
+// marque. Un composant qui veut « un vert un peu plus clair » prend le degré
+// voisin au lieu d'inventer un rgba() local.
 //
 // USAGE, ET C'EST LA RÈGLE :
 //   900–700  fonds sombres qui portent du texte clair
-//   600      la plus claire qui porte encore du blanc à 4,5:1
-//   500–300  PANNEAUX, TRAITS, ICÔNES — jamais un fond de texte
-//   200–50   fonds doux qui portent du texte foncé
+//   600      le plus clair qui porte encore de l'ivoire à 4,5:1
+//   500–300  PANNEAUX, TRAITS, ICÔNES, REMPLISSAGES — jamais un fond de texte clair
+//   200–50   fonds doux qui portent de l'encre
 
-$vert-900: #06251C;   // #FFFFFF dessus : 16,84:1
-$vert-800: #0B3B2E;   // = $vert-fonce      · #FFFFFF : 12,51:1
-$vert-700: #0F5040;   // #FFFFFF dessus :  9,04:1
-$vert-600: #157A5F;   // #FFFFFF dessus :  5,17:1 — LE DERNIER QUI PORTE DU BLANC
-$vert-500: #1E9E7A;   // = $vert-accent     · surface, jamais fond de texte
-$vert-400: #3DBE99;   // panneaux, traits
-$vert-300: #6FD3B7;   // panneaux clairs
-$vert-200: #A8E6D3;   // fonds doux · #0A1F1A dessus : 12,02:1
-$vert-100: #CFF0E4;   // fonds doux · #0A1F1A dessus : 14,29:1
-$vert-50:  #E4F2EC;   // = $vert-clair      · #0A1F1A dessus : 15,42:1
+$vert-900: $baobab-900;    // ivoire dessus : 15,38:1
+$vert-800: $baobab-800;    // ivoire dessus : 12,19:1
+$vert-700: $baobab-700;    // ivoire dessus :  9,92:1
+$vert-600: $feuille-600;   // ivoire dessus :  6,39:1 — LE DERNIER QUI PORTE DU CLAIR
+$vert-500: $menthe-500;    // encre dessus :  4,92:1 · remplissage
+$vert-400: $menthe-400;    // encre dessus :  6,72:1 · panneaux, traits
+$vert-300: $menthe-300;    // encre dessus :  8,97:1
+$vert-200: $menthe-200;    // encre dessus : 11,44:1
+$vert-100: $menthe-100;    // encre dessus : 13,48:1
+$vert-50:  $menthe-50;     // encre dessus : 14,23:1
 
-// ── TEINTES DE CATÉGORIE ────────────────────────────────────────────────────
-// Décoratives : elles n'accueillent jamais de texte long, seulement un
-// chiffre et son libellé court, tous deux en encre du thème.
-//
-// La cinquième porte les PARTAGES. Teinte propre, et non une reprise de la
-// marque : un partage n'est pas une consultation de plus, et la couleur doit
-// le dire avant que le libellé ne soit lu.
-$pastel-violet: #F1EAF7;   // consultations cumulées
-$pastel-ambre:  #FDF0E3;   // partages lancés
+// ── LES TEINTES — fonds d'icône et de catégorie ────────────────────────────
+// Décoratives : elles portent un pictogramme ou un chiffre court, jamais un
+// paragraphe. Chacune est mesurée sous SA couleur de texte.
+$teinte-vert:  $menthe-50;   // feuille dessus  : 5,62:1
+$teinte-terre: #F7E6DC;      // latérite dessus : 4,76:1
+$teinte-or:    #F6ECD3;      // or-700 dessus   : 5,16:1
 
-// Leurs équivalents en thème sombre. Un aplat clair y brûlerait l'écran :
-// on garde la teinte, on la pose en voile sur le fond.
-$pastel-violet-sombre: rgba(160, 120, 214, .14);
-$pastel-ambre-sombre:  rgba(214, 150, 80, .14);
+$s-teinte-vert:  #173A2C;    // menthe dessus   : 6,77:1
+$s-teinte-terre: #3A2219;    // latérite claire : 6,72:1
+$s-teinte-or:    #352B14;    // or clair dessus : 7,46:1
 
 
 // =============================================================================
-// 1 TER. LE PANNEAU SOMBRE — la colonne de l'administration et du client
+// 2 TER. LE PANNEAU VERT — surface de marque qui ne suit pas le thème
 // =============================================================================
 //
-// C'EST UNE SURFACE INVERSÉE, ET ELLE NE SUIT PAS LE THÈME. Le menu latéral
-// reste vert profond en thème clair comme en sombre : c'est ce qui dit à
-// l'exploitant qu'il change d'espace. Il lui faut donc ses propres jetons de
-// texte, mesurés contre SON fond — pas contre `--carte`.
+// Les tuiles « vedette » (abonnement, chiffre-clé de l'administration) sont
+// vert baobab dans les DEUX thèmes. Elles ont donc leurs propres jetons de
+// texte, mesurés contre LEUR fond — pas contre `--carte`.
 //
-// ─────────────────────────────────────────────────────────────────────────
-// POURQUOI DES TEINTES PLEINES ET PLUS DES OPACITÉS
-// ─────────────────────────────────────────────────────────────────────────
-// Le panneau écrivait son texte en `rgba($blanc, …)`, avec SIX valeurs
-// différentes relevées dans le fichier : .52, .58, .60, .62, .68, .74, .88.
-// Personne n'a choisi .58 contre .60 ; c'est le résultat d'ajustements
-// successifs jamais repris — exactement la dérive que l'échelle supprime.
-//
-// Surtout : une opacité sur du TEXTE fait chuter le contraste sans qu'aucun
-// outil ne le signale, parce que la valeur déclarée reste `#FFFFFF`. Trois
-// teintes pleines, mesurées, remplacent les sept.
-//
-// L'opacité reste légitime pour un FOND ou une BORDURE : elle n'y porte
-// aucune information, et un survol translucide s'adapte au fond qu'il
-// recouvre. Seul le texte exige une valeur pleine.
+// LA COLONNE DE L'ADMINISTRATION N'EN FAIT PLUS PARTIE : depuis la direction
+// A, elle est claire (ivoire, filets, grès à l'entrée active) et prend les
+// jetons de surface ordinaires.
 
-$panneau:         $vert-900;   // #06251C
-$panneau-texte:   #E1E5E4;     // 12,82:1  — entrées actives, titres
-$panneau-texte-2: #A9B4B1;     //  7,64:1  — entrées au repos
-// LE NIVEAU 3 EST MESURÉ SUR LES DEUX VERTS SOMBRES, pas seulement sur le
-// plus profond. La tuile vedette du tableau de bord pose ce texte sur
-// $vert-800, plus clair que le panneau : #8B9692 y tombait à 4,09:1 — sous
-// le seuil, et invisible dans un audit qui n'aurait regardé que la colonne.
-$panneau-texte-3: #9CA7A3;     //  6,57:1 sur $vert-900 · 5,04:1 sur $vert-800
+$panneau:         $baobab-800;   // #0D3B2E
+$panneau-texte:   $sable-50;     // 12,19:1
+$panneau-texte-2: #C9D8CF;       //  8,45:1
+// Mesuré sur les deux verts où il atterrit : 7,06:1 sur 800, 5,74:1 sur 700.
+$panneau-texte-3: #B5C7BD;
 
-// Les deux seules opacités conservées : ni l'une ni l'autre ne porte de texte.
-$panneau-bord:    rgba(#FFFFFF, .10);
-$panneau-survol:  rgba(#FFFFFF, .09);
+// Opacités tolérées : ni l'une ni l'autre ne porte de texte.
+$panneau-bord:    rgba($sable-50, .16);
+$panneau-survol:  rgba($sable-50, .08);
 
-// Les tendances, sur ce fond-là. Elles ne peuvent pas venir de --succes /
-// --danger : ceux-ci sont calibrés pour les surfaces du thème, pas pour un
-// vert profond qui ne bascule jamais.
-$panneau-hausse:  #7BE3BE;     // 10,53:1
-$panneau-baisse:  #FFB4AC;     //  9,60:1
+$panneau-hausse:  #8FE0B9;       // 8,04:1
+$panneau-baisse:  #FFB4A0;       // 7,31:1
 
-
-// L'ENCRE POSÉE SUR LE VERT ACCENT — et c'est un piège documenté.
-//
-// `--sur-accent` existe, mais il pointe vers `--texte-inv-marque`, qui vaut
-// #FFFFFF en thème clair : sur $vert-500, cela ne donne que 3,37:1. C'est
-// précisément le défaut qui rendait le médaillon « QI » non conforme sur
-// dix-huit pages.
-//
-// $vert-500 ne bascule jamais avec le thème — c'est une couleur de marque.
-// L'encre qu'il porte n'a donc pas à basculer non plus, et elle mérite son
-// propre jeton plutôt qu'un #06231B recopié à la main à chaque emploi.
-$sur-vert-500: #06231B;        // 8,40:1 sur $vert-500
+// L'encre posée sur la menthe — elle ne bascule pas, la menthe non plus.
+$sur-vert-500: $baobab-950;      // 5,07:1 sur #1E9E7A
 
 
 // =============================================================================
-// 2. SURFACES ET TEXTES — deux thèmes
+// 3. SURFACES ET TEXTES — deux thèmes
 // =============================================================================
 
-// ── Thème clair ──────────────────────────────────────────────────────────
-$c-page:      #F7F8F7;
-$c-carte:     #FFFFFF;
-$c-surelev:   #F2F3F1;
+// ── Thème clair : sable, ivoire, grès ──────────────────────────────────────
+$c-page:      $sable-100;   // #F5EFE4
+$c-carte:     $sable-50;    // #FFFCF6
+$c-surelev:   $sable-200;   // #EDE4D3
 
-$c-texte:     #0A1F1A;   // min 15,42:1
-$c-texte-2:   #42524C;   // min  7,42:1
-$c-texte-3:   #5C6B66;   // min  5,03:1
-$c-texte-inv: #FFFFFF;
+$c-texte:     $encre-900;   // min 13,14:1 (grès) · 14,49 sable · 16,20 ivoire
+$c-texte-2:   $encre-600;   // min  5,17:1 (grès) ·  5,70 sable ·  6,38 ivoire
+$c-texte-3:   $encre-500;   // min  4,85:1 (grès) ·  5,35 sable ·  5,98 ivoire
+$c-texte-inv: $sable-50;
 
-$c-bordure:   rgba(#0A1F1A, .10);
-$c-bordure-f: rgba(#0A1F1A, .18);
+$c-bordure:   $sable-300;   // trait — décoratif
+$c-bordure-f: $sable-400;   // trait marqué — décoratif
+$c-champ:     $sable-500;   // contour de champ — 3,29:1 sur sable (WCAG 1.4.11)
 
-// ── Thème sombre ─────────────────────────────────────────────────────────
-$s-page:      #0F1714;
-$s-carte:     #16211D;
-$s-surelev:   #1D2B26;
+// Le lien et l'accent de texte : la feuille.
+$c-lien:      $feuille-600; // min 5,19:1 (grès) · 5,72 sable · 6,39 ivoire
 
-$s-texte:     #EAF1EE;   // min 12,85:1
-$s-texte-2:   #B8C7C1;   // min  8,40:1
-$s-texte-3:   #93A59E;   // min  5,69:1
-$s-texte-inv: #0A1F1A;
+// ── Thème sombre : nuit verte et sable lumineux ────────────────────────────
+$s-page:      $nuit-950;    // #0C1713
+$s-carte:     $nuit-900;    // #13211C
+$s-surelev:   $nuit-800;    // #1B2D26
 
-$s-bordure:   rgba(#EAF1EE, .12);
-$s-bordure-f: rgba(#EAF1EE, .22);
+$s-texte:     $brume-100;   // min 12,31:1 (surface 2) · 15,55 nuit · 14,14 surface
+$s-texte-2:   $brume-300;   // min  6,74:1 · 8,51 · 7,74
+$s-texte-3:   $brume-400;   // min  5,58:1 · 7,05 · 6,41
+$s-texte-inv: $encre-profonde;
+
+$s-bordure:   $nuit-700;
+$s-bordure-f: $nuit-600;
+$s-champ:     $nuit-500;    // 4,29:1 sur nuit, 3,90:1 sur surface
+
+$s-lien:      $menthe-300;  // min 7,84:1 · 9,90 · 9,00
 
 
 // =============================================================================
-// 3. ÉTATS — version PLEINE (fond coloré) et version DOUCE (texte sur fond pâle)
+// 4. ÉTATS — le cachet : fond teinté + bordure 1px + texte
 // =============================================================================
 //
-// La version douce est celle des badges. C'est elle qui échouait : un badge
-// « En attente » écrivait le jaune vif de Bootstrap sur du gris clair.
-// Chaque teinte douce a donc été assombrie jusqu'à passer 4,5:1 sur la
-// surface la plus claire des trois.
+// La version douce est celle des badges et des alertes. Chaque texte
+// d'état est mesuré sur son PROPRE fond teinté et sur les trois surfaces
+// nues — le fond teinté est le cas qu'on oublie.
 
 // ── Clair ────────────────────────────────────────────────────────────────
-$c-succes:        #177A5F;   // 4,57:1 — pire cas : sur son propre fond doux
-$c-succes-fond:   #E4F2EC;
-$c-alerte:        #8A6700;   // 4,66:1
-$c-alerte-fond:   #FBF1DC;
-$c-danger:        #B42318;   // 5,62:1
-$c-danger-fond:   #FCE9E7;
-$c-info:          #1D6DB4;   // 4,59:1
-$c-info-fond:     #E4EEF8;
-$c-neutre:        #587067;   // 4,62:1
-$c-neutre-fond:   #ECEFED;
+$c-succes:        #145C3F;   // 6,84:1 sur son fond · min 6,32 nu
+$c-succes-fond:   $menthe-50;
+$c-succes-trait:  #B7D9C4;
+$c-alerte:        #7A5300;   // 5,79:1 sur son fond · min 5,43 nu
+$c-alerte-fond:   #F8EBCB;
+$c-alerte-trait:  #E6CF95;
+$c-danger:        #9B2F1A;   // 5,94:1 sur son fond · min 5,91 nu
+$c-danger-fond:   #F7E1D9;
+$c-danger-trait:  #E7B7A6;
+$c-info:          $feuille-600; // 5,54:1 sur son fond · min 5,19 nu
+$c-info-fond:     #E6EEEA;
+$c-info-trait:    #C3D6CC;
+$c-neutre:        $encre-700;   // 6,23:1 sur son fond (grès) · min 6,23 nu
+$c-neutre-fond:   $sable-200;
+$c-neutre-trait:  $sable-400;
 
 // ── Sombre ───────────────────────────────────────────────────────────────
-$s-succes:        #1FBC8A;   // 4,57:1 sur son fond teinté | 6,04:1 sur surface nue
-$s-succes-fond:   rgba(#1FBC8A, .16);
-$s-alerte:        #F68F00;   // 4,58:1 teinté | 6,21:1 nu
-$s-alerte-fond:   rgba(#F68F00, .18);
-$s-danger:        #E78E83;   // 4,58:1 teinté | 6,03:1 nu
-$s-danger-fond:   rgba(#E78E83, .16);
-$s-info:          #70ADE0;   // 4,56:1 teinté | 6,13:1 nu
-$s-info-fond:     rgba(#70ADE0, .16);
-$s-neutre:        #93A59E;   // 4,97:1 teinté | 5,69:1 nu
-$s-neutre-fond:   rgba(#EAF1EE, .08);
+$s-succes:        #8FE0B9;   // 8,06:1 sur son fond · min 9,33 nu
+$s-succes-fond:   #173A2C;
+$s-succes-trait:  #275740;
+$s-alerte:        #F2CC74;   // 8,29:1 · min 9,42
+$s-alerte-fond:   #3D3115;
+$s-alerte-trait:  #5E4C1F;
+$s-danger:        #F6A68E;   // 7,30:1 · min 7,42
+$s-danger-fond:   #45201A;
+$s-danger-trait:  #6B3427;
+$s-info:          $menthe-300;  // 7,84:1 · min 7,84
+$s-info-fond:     $nuit-800;
+$s-info-trait:    $nuit-600;
+$s-neutre:        $brume-300;   // 6,74:1 · min 6,74
+$s-neutre-fond:   $nuit-800;
+$s-neutre-trait:  $nuit-600;
 
 
 // =============================================================================
-// 4. OVERLAYS ET VOILES
+// 5. LES VOIX SECONDES — latérite, or, couverture
 // =============================================================================
-//
-// Le voile de la couverture publique n'est pas décoratif : c'est lui qui
-// rend le nom lisible sur une photo dont on ne sait rien. Il est donc un
-// token, pas une valeur locale.
 
-$c-overlay:       rgba(#0A1F1A, .48);
+// La latérite : surtitres, numéros d'étape, focus. Seconde voix, jamais la
+// première — un écran ne porte qu'un ou deux éléments latérite.
+$c-terre:   $laterite-600;   // min 4,58:1 (grès) · 5,05 sable · 5,64 ivoire
+$s-terre:   $laterite-300;   // min 6,60:1
+
+// L'or : décor (lisière, offre Standard, pastilles), et texte en or-700.
+$c-or:       $or-500;
+$c-or-texte: $or-700;        // min 4,81:1 (grès) · 5,30 sable · 5,92 ivoire
+$s-or:       $or-300;
+$s-or-texte: $or-300;        // min 7,75:1
+
+// LE FOCUS — 3px plein, latérite sur clair, or sur sombre et sur vert.
+// Il n'est jamais le vert de la marque : un contour vert sur un bouton
+// vert ne se voit pas.
+$c-focus: $laterite-600;     // 5,05:1 sur sable (exigé : 3:1)
+$s-focus: $or-300;           // 9,79:1 sur nuit
+
+// LA COUVERTURE — les surfaces vertes (en-tête de carte, tuile abonnement,
+// section tarifs, pied de page). Le claustra y vit en filigrane.
+$c-couverture:          $baobab-800;
+$c-couverture-profonde: $baobab-900;
+$s-couverture:          #0B3328;
+$s-couverture-profonde: #072219;
+$sur-couverture:        $sable-50;  // 12,19:1 sur baobab · 11,76:1 sur #0B3328
+$c-sur-couverture-2:    #C9D8CF;    //  8,45:1
+$s-sur-couverture-2:    #BCD0C5;    //  8,54:1
+$sur-couverture-accent: $or-300;    //  6,68:1 sur baobab · 7,40:1 sur #0B3328
+
+// ── LE GRAPHIQUE — validé pour la vision des couleurs (protan ΔE 11,9) ─────
+$c-graphique-1: #007A5E;   // vues
+$c-graphique-2: #B9862A;   // scans
+$c-graphique-grille: #E6DCCA;
+$s-graphique-1: #2BA57A;
+$s-graphique-2: #B88B34;
+$s-graphique-grille: #24372F;
+
+
+// =============================================================================
+// 6. OVERLAYS ET VOILES
+// =============================================================================
+
+$c-overlay:       rgba($encre-900, .48);
 $s-overlay:       rgba(#000000, .62);
 $voile-couverture: linear-gradient(180deg,
-                     rgba(#04120E, 0) 34%,
-                     rgba(#04120E, .58) 68%,
-                     rgba(#04120E, .86) 100%);
+                     rgba($baobab-950, 0) 34%,
+                     rgba($baobab-950, .58) 68%,
+                     rgba($baobab-950, .86) 100%);
 
 
 // =============================================================================
-// 5. TYPOGRAPHIE — une seule famille, chargée en local
+// 7. LES MOTIFS — SVG en data-URI, aucune image, ~0,4 Ko chacun
 // =============================================================================
 //
-// JAMAIS DE CDN. Un visiteur sénégalais en 3G paie une résolution DNS, un
-// handshake TLS et un aller-retour supplémentaires pour un fichier que
-// l'hébergeur sert déjà. Et si fonts.googleapis.com est lent ou bloqué,
+// CLAUSTRA : le bloc ajouré du modernisme dakarois (arcs en quart de
+// cercle). Filigrane à ~14 % sur TOUTES les surfaces vertes. Décliné en deux
+// encres : ivoire pour le vert, baobab pour une surface claire.
+//
+// LISIÈRE : la frise tissée des pagnes manjak — losanges latérite et or sur
+// baobab. Elle ferme ce qui compte : bas de couverture, onglet actif, offre
+// Standard, tranche de la carte. Sa hauteur est un multiple de 6 ou 8 px,
+// sans quoi le losange tombe entre deux pixels et le motif moire.
+
+$motif-claustra-ivoire: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23FFFCF6' stroke-opacity='.14' stroke-width='1.2'%3E%3Cpath d='M20 0A20 20 0 0 1 0 20M40 20A20 20 0 0 1 20 0M20 40A20 20 0 0 1 40 20M0 20A20 20 0 0 1 20 40'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='1.8' fill='%23FFFCF6' fill-opacity='.18'/%3E%3C/svg%3E");
+$motif-claustra-baobab: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%230D3B2E' stroke-opacity='.13' stroke-width='1.2'%3E%3Cpath d='M20 0A20 20 0 0 1 0 20M40 20A20 20 0 0 1 20 0M20 40A20 20 0 0 1 40 20M0 20A20 20 0 0 1 20 40'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='1.8' fill='%230D3B2E' fill-opacity='.16'/%3E%3C/svg%3E");
+$motif-lisiere: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Crect width='24' height='8' fill='%230D3B2E'/%3E%3Cpath d='M6 0l6 4-6 4-6-4z' fill='%23C2613A'/%3E%3Cpath d='M18 0l6 4-6 4-6-4z' fill='%23E2B85A'/%3E%3Ccircle cx='6' cy='4' r='1' fill='%23F5EFE4'/%3E%3Ccircle cx='18' cy='4' r='1' fill='%230D3B2E'/%3E%3C/svg%3E");
+
+// Le pas du motif : 40px de base, 56px sur les grands aplats.
+$claustra-pas:    40px;
+$claustra-pas-lg: 56px;
+// La lisière : 8px de haut sur 24 de large ; 6 sur 18 en version fine.
+$lisiere-h:       8px;
+$lisiere-l:       24px;
+$lisiere-h-fine:  6px;
+$lisiere-l-fine:  18px;
+
+
+// =============================================================================
+// 8. TYPOGRAPHIE — UNE famille variable, auto-hébergée
+// =============================================================================
+//
+// Schibsted Grotesk, variable 400 → 900, sous-ensemble latin : 46,8 Ko,
+// `public/fonts/schibsted-grotesk-latin.woff2`, licence OFL à côté.
+// JAMAIS de CDN : un visiteur en 3G paierait une résolution DNS, une
+// poignée de main TLS et un aller-retour de plus, et si le CDN est lent
 // c'est la page entière qui attend.
 //
-// Le repli sur la pile système est délibéré : tant que les fichiers ne
-// sont pas déposés, la page s'affiche dans une police correcte plutôt que
-// dans du Times New Roman.
+// `font-display: swap` + une police de REPLI MÉTRIQUE (Arial / Roboto
+// recalés par size-adjust) : le texte s'affiche tout de suite, et le
+// passage à la vraie police ne décale presque rien. Voir `_base.scss`.
+//
+// $font-systeme : la pile sans la famille de marque. Une page qui ne doit
+// RIEN télécharger (la carte publique, si le lot 3 le décide) la pose.
+$font-systeme: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$font: 'Schibsted Grotesk', 'Schibsted Grotesk Repli', $font-systeme;
 
-// LA PILE SYSTÈME, ASSUMÉE — décision du Lot 1.
-//
-// `'QrID'` ouvrait cette pile, cinq `@font-face` l'attendaient en
-// commentaire dans `_base.scss`, et `public/fonts/` n'a jamais existé. Le
-// produit annonçait donc une police qu'il ne servait pas : le repli
-// fonctionnait, mais la première famille de la liste était un mensonge.
-//
-// DEUX ISSUES SEULEMENT, ET ON TRANCHE POUR LA SECONDE :
-//   A — déposer les cinq .woff2 (jamais un CDN) ;
-//   B — assumer la pile système.
-//
-// B, parce que le poids est un critère du produit : le trafic public
-// arrive par scan de QR Code, souvent en 3G, et cinq graisses coûtent
-// 150 à 250 Ko avant le premier mot lisible. La pile système ne coûte
-// rien et rend une police native sur chaque plateforme.
-//
-// LE CARACTÈRE VIENT D'AILLEURS : de l'échelle, des graisses (800 sur
-// `display` et `h1`) et de l'interlettrage (-.03em sur `display`,
-// -.025em sur `h1`). C'est ce qui donne le ton institutionnel, pas le
-// dessin des lettres.
-//
-// Reversible : l'option A reste ouverte en V2, et ne demandera que de
-// remettre une famille en tête de cette pile.
-$font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+// La police de repli métrique — mesurée dans Chromium sur un texte français
+// représentatif, contre Arial : largeur moyenne 1,0313 × Arial, jambage
+// supérieur 0,98 em, inférieur 0,26 em. Roboto a la chasse d'Arial à 1 %
+// près ; une seule face de repli suffit.
+$font-repli-taille:     103.13%;
+$font-repli-ascendant:  95.02%;
+$font-repli-descendant: 25.21%;
 
 // Chaque taille porte : mobile, bureau, graisse, interligne, interlettrage.
-// Aucune valeur de police ailleurs dans le projet.
+// Échelle A : display 72/850, H1 44/820, H2 36/800, H3 22/760, chapô 20,
+// corps 16, surtitre 13/650 en capitales. Sur mobile, lecture ≥ 16 px.
 $type: (
-  display:  (mobile: 34px, bureau: 52px, graisse: 800, interligne: 1.06, espacement: -.03em),
-  h1:       (mobile: 26px, bureau: 36px, graisse: 800, interligne: 1.14, espacement: -.025em),
-  h2:       (mobile: 21px, bureau: 27px, graisse: 700, interligne: 1.22, espacement: -.02em),
-  h3:       (mobile: 17px, bureau: 20px, graisse: 700, interligne: 1.32, espacement: -.01em),
-  body-lg:  (mobile: 17px, bureau: 18px, graisse: 400, interligne: 1.62, espacement: 0),
-  body:     (mobile: 16px, bureau: 16px, graisse: 400, interligne: 1.62, espacement: 0),
-  body-sm:  (mobile: 14px, bureau: 14px, graisse: 400, interligne: 1.55, espacement: 0),
-  caption:  (mobile: 13px, bureau: 13px, graisse: 500, interligne: 1.45, espacement: 0),
-  overline: (mobile: 11px, bureau: 11px, graisse: 700, interligne: 1.3,  espacement: .08em),
+  display:  (mobile: 42px, bureau: 72px, graisse: 850, interligne: .98,  espacement: -.04em),
+  h1:       (mobile: 30px, bureau: 44px, graisse: 820, interligne: 1.06, espacement: -.035em),
+  h2:       (mobile: 26px, bureau: 36px, graisse: 800, interligne: 1.1,  espacement: -.03em),
+  h3:       (mobile: 20px, bureau: 22px, graisse: 760, interligne: 1.2,  espacement: -.02em),
+  body-lg:  (mobile: 18px, bureau: 20px, graisse: 400, interligne: 1.55, espacement: 0),
+  body:     (mobile: 16px, bureau: 16px, graisse: 400, interligne: 1.55, espacement: 0),
+  body-sm:  (mobile: 15px, bureau: 15px, graisse: 400, interligne: 1.5,  espacement: 0),
+  caption:  (mobile: 14px, bureau: 14px, graisse: 500, interligne: 1.45, espacement: 0),
+  overline: (mobile: 13px, bureau: 13px, graisse: 650, interligne: 1.3,  espacement: .09em),
 );
 
-// `body` reste à 16px sur mobile, et ce n'est pas négociable : en dessous,
-// iOS zoome automatiquement à la mise au point d'un champ, et la page part
-// de travers. L'audit a relevé 41 tailles distinctes, dont 12,5px répété
-// 40 fois — c'est cette dérive que l'échelle supprime.
+// Le chiffre-indicateur : gros, tabulaire, très gras (signature 5).
+$chiffre: (mobile: 32px, bureau: 44px, graisse: 820, espacement: -.04em);
 
-// `typo()` et non `type()` : Sass reserve `type` pour la fonction CSS du
-// meme nom. Troisieme collision apres `e()` et `r()` — les noms courts
-// coutent plus qu'ils ne rapportent.
+// `typo()` et non `type()` : Sass réserve `type`.
 @function typo($nom, $clef: mobile) {
   @return map-get(map-get($type, $nom), $clef);
 }
 
 
 // =============================================================================
-// 6. ESPACEMENT — treize valeurs, pas une de plus
+// 9. ESPACEMENT — base 4
 // =============================================================================
-//
-// L'audit a relevé 63 valeurs distinctes pour 781 usages : 14px employé 74
-// fois, 12px 63 fois, 9px 24 fois, 7px 21 fois. Personne n'a choisi 7px
-// contre 8px ; c'est le résultat d'un ajustement local qui n'a jamais été
-// repris. L'échelle rend ce choix impossible.
 
 $espaces: (0: 0, 1: 4px, 2: 8px, 3: 12px, 4: 16px, 5: 20px, 6: 24px,
            7: 32px, 8: 40px, 9: 48px, 10: 64px, 11: 80px, 12: 96px, 13: 128px);
 
-// `esp()` et non `e()` : Sass réserve `e` pour la constante mathématique
-// de CSS. Un nom court qui entre en collision avec le langage coûte plus
-// cher qu'il ne fait gagner.
+// `esp()` et non `e()` : Sass réserve `e`.
 @function esp($n) {
   @if not map-has-key($espaces, $n) {
     @error "Espacement #{$n} hors échelle. Valeurs permises : #{map-keys($espaces)}.";
@@ -353,10 +415,20 @@ $espaces: (0: 0, 1: 4px, 2: 8px, 3: 12px, 4: 16px, 5: 20px, 6: 24px,
 
 
 // =============================================================================
-// 7. RAYONS
+// 10. RAYONS — moins « bulle », plus « institution »
 // =============================================================================
+//
+//   xs  6   badges, cachets
+//   sm  10  boutons, champs
+//   md  16  cartes
+//   lg  24  tuiles
+//   xl  32  grands panneaux
+//   full    pilule (puces, interrupteurs)
+//
+// La carte PVC suit sa norme, pas cette échelle : CR80, coins à 3,7 % de
+// la largeur (voir `_card.scss`).
 
-$rayons: (none: 0, sm: 8px, md: 14px, lg: 22px, xl: 32px, full: 999px);
+$rayons: (none: 0, xs: 6px, sm: 10px, md: 16px, lg: 24px, xl: 32px, full: 999px);
 
 @function rayon($nom) {
   @if not map-has-key($rayons, $nom) {
@@ -365,69 +437,46 @@ $rayons: (none: 0, sm: 8px, md: 14px, lg: 22px, xl: 32px, full: 999px);
   @return map-get($rayons, $nom);
 }
 
-// LA CARTE PVC UTILISE `none`, ET C'EST UNE CONTRAINTE PHYSIQUE, PAS UN GOÛT.
-// La référence figée `carte-qrid.html` porte des angles vifs ; le rendu
-// écran doit correspondre à ce qui sort de l'imprimeur.
-
 
 // =============================================================================
-// 8. OMBRES — quatre niveaux, deux thèmes
+// 11. OMBRES — légères ; le trait fait le travail
 // =============================================================================
 //
-// Sur fond sombre, une ombre noire ne se voit pas : elle salit sans
-// séparer. Le thème sombre sépare donc par la BORDURE et une ombre plus
-// dense, jamais par une ombre seule.
+//   1  tuiles et cartes posées
+//   2  éléments flottants (menus, toasts)
+//   3  survol d'une carte cliquable
+//   4  l'objet carte PVC
+// En sombre, l'ombre ne sépare pas : la bordure le fait. Niveau 1 nul.
 
-$c-ombre-1: 0 1px 2px rgba(#0A1F1A, .05);
-$c-ombre-2: 0 4px 12px rgba(#0A1F1A, .08);
-$c-ombre-3: 0 12px 32px rgba(#0A1F1A, .12);
-$c-ombre-4: 0 28px 64px rgba(#0A1F1A, .18);
+$c-ombre-1: 0 1px 2px rgba($encre-900, .06), 0 1px 1px rgba($encre-900, .04);
+$c-ombre-2: 0 2px 4px rgba($encre-900, .04), 0 12px 28px -12px rgba($encre-900, .18);
+$c-ombre-3: 0 2px 6px rgba($encre-900, .06), 0 18px 36px -16px rgba($encre-900, .24);
+$c-ombre-4: 0 22px 44px -22px rgba($baobab-950, .55), 0 2px 6px rgba($baobab-950, .12);
 
-$s-ombre-1: 0 1px 2px rgba(#000000, .30);
-$s-ombre-2: 0 4px 12px rgba(#000000, .40);
-$s-ombre-3: 0 12px 32px rgba(#000000, .50);
-$s-ombre-4: 0 28px 64px rgba(#000000, .62);
+$s-ombre-1: none;
+$s-ombre-2: 0 12px 28px -14px rgba(#000000, .6);
+$s-ombre-3: 0 18px 36px -16px rgba(#000000, .66);
+$s-ombre-4: 0 22px 44px -20px rgba(#000000, .75);
 
 
 // =============================================================================
-// 9. MOUVEMENT — une seule courbe pour tout le projet
+// 12. MOUVEMENT — une seule courbe, des durées courtes
 // =============================================================================
 
-$d-rapide: 150ms;   // halo de focus, changement de teinte
+$d-rapide: 150ms;   // focus, teinte, fond
 $d-normal: 250ms;   // apparition, survol, ouverture
 $d-lent:   400ms;   // révélation au défilement
 $d-carte:  600ms;   // permutation 3D de la carte PVC
 
-/*
- | LE DÉFILEMENT CONTINU — une échelle de temps qui n'a rien à voir.
- |
- | Le bandeau des métiers employait $d-carte : 600 MILLISECONDES pour
- | parcourir la moitié de la liste. Les mots passaient plus vite qu'on ne
- | les lit, et un bandeau qu'on ne peut pas lire ne dit rien — il agite.
- |
- | 45 secondes donnent une dérive lente, qu'on remarque à peine et qui
- | laisse le temps de lire chaque métier. C'est le seul endroit du produit
- | où une durée se compte en secondes, d'où son propre jeton : le mettre
- | dans la même famille que les micro-interactions inviterait à le
- | confondre avec elles, ce qui vient précisément d'arriver.
- */
+// Le défilement continu du bandeau des métiers : une dérive qu'on lit.
 $d-defile: 45s;
 
 $courbe: cubic-bezier(.2, .8, .2, 1);
 
-// Une courbe unique n'est pas une simplification : deux courbes
-// différentes sur deux éléments voisins se remarquent, et ce qui se
-// remarque dans une animation d'interface est presque toujours un défaut.
-
 
 // =============================================================================
-// 10. POINTS DE RUPTURE
+// 13. POINTS DE RUPTURE — mobile first strict, `min-width` seulement
 // =============================================================================
-//
-// MOBILE FIRST STRICT : on écrit le style de base pour 320px, et chaque
-// `@media` ne fait qu'AJOUTER. Aucune requête `max-width` — elles obligent
-// à défaire ce qu'on vient de faire, et c'est ainsi qu'un style finit par
-// dépendre de l'ordre des déclarations.
 
 $ruptures: (xs: 320px, sm: 375px, ms: 480px, md: 640px,
             lg: 768px, xl: 1024px, xxl: 1280px, max: 1440px);
@@ -439,33 +488,62 @@ $ruptures: (xs: 320px, sm: 375px, ms: 480px, md: 640px,
   @media (min-width: map-get($ruptures, $nom)) { @content; }
 }
 
+// La largeur utile des écrans connectés (maquette : 1376px).
+$largeur-app: 1376px;
+
 
 // =============================================================================
-// 11. ZONES TACTILES
+// 14. ZONES TACTILES ET GABARITS
 // =============================================================================
 
 $tactile-min:   44px;   // le minimum absolu (WCAG 2.5.5)
-$champ-hauteur: 48px;   // hauteur d'un champ sur mobile
+$champ-hauteur: 52px;   // un champ, partout
+$bouton-hauteur: 48px;  // un bouton standard
+$bouton-hauteur-lg: 56px;
 $action-mobile: 52px;   // barre d'actions de la page publique
 $tuile-reseau:  64px;   // grille des réseaux sociaux
 
-// LE DOCK — une dimension de produit, au même titre que la tuile.
-//
-// 56px de haut : au-dessus du minimum tactile, parce qu'une cible qu'on
-// vise EN MARCHANT, une carte à la main, demande plus de marge qu'une
-// cible qu'on vise assis devant un écran.
-$dock-hauteur: 56px;
-$dock-icone:   22px;
+// LA BARRE D'ONGLETS DU BAS (mobile) — ancrée, opaque, sans flou.
+// 76px dont 56 d'entrée : on vise une cible en marchant, une carte à la main.
+$onglets-bas-hauteur: 76px;
+$onglets-bas-entree:  56px;
+$onglets-bas-icone:   22px;
+
+// LA BARRE SUPÉRIEURE des espaces connectés.
+$barre-haut-hauteur:        64px;
+$barre-haut-hauteur-bureau: 76px;
+
+// La colonne de l'administration.
+$colonne-largeur: 272px;
+
+// Compatibilité : l'ancien dock (supprimé) portait ces noms.
+$dock-hauteur: $onglets-bas-hauteur;
+$dock-icone:   $onglets-bas-icone;
 
 
 // =============================================================================
-// 12. LA COUCHE ACTIVE — ce que les composants consomment
+// 15. PLANS (z-index) — une échelle, pas des nombres au hasard
 // =============================================================================
 //
-// Tout ce qui précède est une source. Ce qui suit est l'interface : les
-// composants n'écrivent QUE `var(--quelque-chose)`.
+// Les composants Bootstrap (menus 1000, panneau 1045, modale 1055) restent
+// au-dessus : ils recouvrent volontairement la coque.
+
+$plans: (fond: -1, contenu: 1, collant: 20, barre: 30, menu: 40, alerte: 50);
+
+@function plan($nom) {
+  @if not map-has-key($plans, $nom) {
+    @error "Plan #{$nom} inconnu. Valeurs : #{map-keys($plans)}.";
+  }
+  @return map-get($plans, $nom);
+}
+
+
+// =============================================================================
+// 16. LA COUCHE ACTIVE — ce que les composants consomment
+// =============================================================================
 
 :root {
+  // ── Surfaces et textes ─────────────────────────────────────────────────
   --page:        #{$c-page};
   --carte:       #{$c-carte};
   --surelev:     #{$c-surelev};
@@ -478,17 +556,59 @@ $dock-icone:   22px;
   --bordure:     #{$c-bordure};
   --bordure-f:   #{$c-bordure-f};
 
-  --succes:      #{$c-succes};
-  --succes-fond: #{$c-succes-fond};
-  --alerte:      #{$c-alerte};
-  --alerte-fond: #{$c-alerte-fond};
-  --danger:      #{$c-danger};
-  --danger-fond: #{$c-danger-fond};
-  --info:        #{$c-info};
-  --info-fond:   #{$c-info-fond};
-  --neutre:      #{$c-neutre};
-  --neutre-fond: #{$c-neutre-fond};
+  --lien:        #{$c-lien};
 
+  // ── Champs ─────────────────────────────────────────────────────────────
+  --champ-fond:  #{$c-carte};
+  --champ-bord:  #{$c-champ};
+
+  // ── États (cachet : fond + trait + texte) ──────────────────────────────
+  --succes:       #{$c-succes};
+  --succes-fond:  #{$c-succes-fond};
+  --succes-trait: #{$c-succes-trait};
+  --alerte:       #{$c-alerte};
+  --alerte-fond:  #{$c-alerte-fond};
+  --alerte-trait: #{$c-alerte-trait};
+  --danger:       #{$c-danger};
+  --danger-fond:  #{$c-danger-fond};
+  --danger-trait: #{$c-danger-trait};
+  --info:         #{$c-info};
+  --info-fond:    #{$c-info-fond};
+  --info-trait:   #{$c-info-trait};
+  --neutre:       #{$c-neutre};
+  --neutre-fond:  #{$c-neutre-fond};
+  --neutre-trait: #{$c-neutre-trait};
+
+  // ── Voix secondes ──────────────────────────────────────────────────────
+  --terre:        #{$c-terre};
+  --terre-decor:  #{$laterite-500};
+  --or:           #{$c-or};
+  --or-texte:     #{$c-or-texte};
+  --focus:        #{$c-focus};
+
+  // ── Couverture (surfaces vertes) ───────────────────────────────────────
+  --couverture:            #{$c-couverture};
+  --couverture-profonde:   #{$c-couverture-profonde};
+  --sur-couverture:        #{$sur-couverture};
+  --sur-couverture-2:      #{$c-sur-couverture-2};
+  --sur-couverture-accent: #{$sur-couverture-accent};
+
+  // ── Teintes ────────────────────────────────────────────────────────────
+  --teinte-vert:  #{$teinte-vert};
+  --teinte-terre: #{$teinte-terre};
+  --teinte-or:    #{$teinte-or};
+
+  // ── Graphique ──────────────────────────────────────────────────────────
+  --graphique-1:      #{$c-graphique-1};
+  --graphique-2:      #{$c-graphique-2};
+  --graphique-grille: #{$c-graphique-grille};
+
+  // ── Motifs ─────────────────────────────────────────────────────────────
+  --motif-claustra:        #{$motif-claustra-ivoire};
+  --motif-claustra-clair:  #{$motif-claustra-baobab};
+  --motif-lisiere:         #{$motif-lisiere};
+
+  // ── Voiles et ombres ───────────────────────────────────────────────────
   --overlay:     #{$c-overlay};
 
   --ombre-1:     #{$c-ombre-1};
@@ -496,14 +616,7 @@ $dock-icone:   22px;
   --ombre-3:     #{$c-ombre-3};
   --ombre-4:     #{$c-ombre-4};
 
-  /*
-   | L'ÉCHELLE DE VERTS, DISPONIBLE PARTOUT.
-   |
-   | Elle NE CHANGE PAS avec le thème : ce sont les degrés d'une teinte de
-   | marque, pas des surfaces d'interface. Un composant qui veut « un vert
-   | un peu plus clair que le fond » prend le degré au-dessus, au lieu
-   | d'inventer un rgba() local — c'est ainsi que la charte se dilue.
-   */
+  // ── L'échelle de verts — ne change pas avec le thème ───────────────────
   --vert-900: #{$vert-900};
   --vert-800: #{$vert-800};
   --vert-700: #{$vert-700};
@@ -515,8 +628,7 @@ $dock-icone:   22px;
   --vert-100: #{$vert-100};
   --vert-50:  #{$vert-50};
 
-  // LE PANNEAU SOMBRE — il ne bascule pas avec le thème, donc il vit ici et
-  // n'est pas redéclaré sous .theme-dark.
+  // ── Le panneau vert — ne bascule pas avec le thème ─────────────────────
   --panneau:         #{$panneau};
   --panneau-texte:   #{$panneau-texte};
   --panneau-texte-2: #{$panneau-texte-2};
@@ -527,39 +639,29 @@ $dock-icone:   22px;
   --panneau-baisse:  #{$panneau-baisse};
   --sur-vert-500:    #{$sur-vert-500};
 
-  // La marque ne change pas avec le thème : c'est ce qui la rend
-  // reconnaissable. Seules les surfaces autour d'elle changent.
+  // ── La marque ──────────────────────────────────────────────────────────
+  // Baobab en clair (12,19:1 d'ivoire dessus), menthe claire en sombre
+  // (9,69:1 d'encre profonde dessus). C'est le seul endroit où la charte
+  // s'adapte au thème.
+  //
+  // `--accent-trait` et non `--accent` : dans _theme.scss, `--accent` porte
+  // le vert de FOND de bouton. Deux sens opposés sous un même nom auraient
+  // produit une régression silencieuse sur chaque bouton.
   --marque:        #{$vert-fonce};
   --marque-survol: #{$vert-fonce-survol};
-  // `--accent-trait` et non `--accent` : dans _theme.scss, `--accent`
-  // porte depuis toujours le vert FONCÉ, celui qui sert de fond de
-  // bouton. Deux sens opposés sous un même nom auraient produit une
-  // régression silencieuse sur chaque bouton du produit.
   --accent-trait:  #{$vert-accent};
   --marque-doux:   #{$vert-clair};
 
-  // Le texte posé SUR la marque. Il change avec le thème parce que la
-  // marque change de luminosité : un blanc figé donnerait 1,5:1 sur le
-  // vert remonté du thème sombre.
-  --texte-inv-marque: #FFFFFF;                    // 12,51:1 sur #0B3B2E
+  --texte-inv-marque: #{$sur-couverture};     // 12,19:1 sur #0D3B2E
 
-  // Les halos de focus. Assez opaques pour se voir sur les deux fonds,
-  // assez discrets pour ne pas déborder visuellement du champ.
-  --marque-halo: #{rgba($vert-fonce, .22)};
-  --danger-halo: #{rgba($c-danger, .22)};
+  // Les halos : le focus d'un champ est un anneau latérite de 3px.
+  --marque-halo: #{rgba($c-focus, .24)};
+  --danger-halo: #{rgba($c-danger, .20)};
 
-  /*
-   | LE TEXTE POSÉ SUR --danger, et pourquoi il change avec le thème.
-   |
-   | En clair, --danger vaut #B42318 : du blanc dessus donne 5,62:1.
-   | En sombre, il vaut #E78E83 — un saumon CLAIR, choisi pour se lire
-   | sur une surface sombre. Du blanc dessus n'y donnerait que 1,9:1.
-   |
-   | Une pastille de comptage écrite en blanc en dur serait donc illisible
-   | dans la moitié des cas. C'est exactement le piège de --sur-accent,
-   | déjà documenté, sur une autre couleur.
-   */
-  --sur-danger: #FFFFFF;
+  // Le texte posé sur --danger plein : ivoire 7,28:1 sur #9B2F1A.
+  --sur-danger: #{$sur-couverture};
+
+  color-scheme: light;
 }
 
 .theme-dark {
@@ -575,16 +677,47 @@ $dock-icone:   22px;
   --bordure:     #{$s-bordure};
   --bordure-f:   #{$s-bordure-f};
 
-  --succes:      #{$s-succes};
-  --succes-fond: #{$s-succes-fond};
-  --alerte:      #{$s-alerte};
-  --alerte-fond: #{$s-alerte-fond};
-  --danger:      #{$s-danger};
-  --danger-fond: #{$s-danger-fond};
-  --info:        #{$s-info};
-  --info-fond:   #{$s-info-fond};
-  --neutre:      #{$s-neutre};
-  --neutre-fond: #{$s-neutre-fond};
+  --lien:        #{$s-lien};
+
+  --champ-fond:  #{$s-carte};
+  --champ-bord:  #{$s-champ};
+
+  --succes:       #{$s-succes};
+  --succes-fond:  #{$s-succes-fond};
+  --succes-trait: #{$s-succes-trait};
+  --alerte:       #{$s-alerte};
+  --alerte-fond:  #{$s-alerte-fond};
+  --alerte-trait: #{$s-alerte-trait};
+  --danger:       #{$s-danger};
+  --danger-fond:  #{$s-danger-fond};
+  --danger-trait: #{$s-danger-trait};
+  --info:         #{$s-info};
+  --info-fond:    #{$s-info-fond};
+  --info-trait:   #{$s-info-trait};
+  --neutre:       #{$s-neutre};
+  --neutre-fond:  #{$s-neutre-fond};
+  --neutre-trait: #{$s-neutre-trait};
+
+  --terre:        #{$s-terre};
+  --terre-decor:  #{$laterite-300};
+  --or:           #{$s-or};
+  --or-texte:     #{$s-or-texte};
+  --focus:        #{$s-focus};
+
+  --couverture:            #{$s-couverture};
+  --couverture-profonde:   #{$s-couverture-profonde};
+  --sur-couverture-2:      #{$s-sur-couverture-2};
+
+  --teinte-vert:  #{$s-teinte-vert};
+  --teinte-terre: #{$s-teinte-terre};
+  --teinte-or:    #{$s-teinte-or};
+
+  --graphique-1:      #{$s-graphique-1};
+  --graphique-2:      #{$s-graphique-2};
+  --graphique-grille: #{$s-graphique-grille};
+
+  // Sur une surface sombre, le claustra « clair » passe en ivoire.
+  --motif-claustra-clair: #{$motif-claustra-ivoire};
 
   --overlay:     #{$s-overlay};
 
@@ -593,105 +726,73 @@ $dock-icone:   22px;
   --ombre-3:     #{$s-ombre-3};
   --ombre-4:     #{$s-ombre-4};
 
-  // Sur fond sombre, le vert foncé de la marque devient illisible : il se
-  // confond avec la surface. L'accent prend le relais — c'est le seul
-  // endroit où la charte s'adapte au thème.
-  //
-  // ET IL EST REMONTÉ, PAS REPRIS TEL QUEL. #1E9E7A ne donne que 4,37:1
-  // sur la surface surélevée, et 3,64:1 sur son propre fond teinté. La
-  // même teinte éclaircie passe les deux. C'est le piège qu'on ne voit
-  // pas : un fond teinté à 16 % éclaircit la surface, et le texte perd
-  // du contraste contre son PROPRE fond.
   --marque:        #{$vert-accent-sombre};
   --marque-survol: #{$vert-accent-survol};
-  --marque-doux:   #{rgba($vert-accent-sombre, .16)};
+  --marque-doux:   #{$s-teinte-vert};
 
-  --texte-inv-marque: #{$s-texte-inv};            // 7,04:1 sur #1FBC8A
+  --texte-inv-marque: #{$s-texte-inv};          // 9,69:1 sur #6FD1A8
 
-  --marque-halo: #{rgba($vert-accent-sombre, .30)};
-  --danger-halo: #{rgba($s-danger, .30)};
+  --marque-halo: #{rgba($s-focus, .30)};
+  --danger-halo: #{rgba($s-danger, .26)};
 
-  --sur-danger: #{$s-texte-inv};   // encre sombre sur le saumon clair
+  --sur-danger: #{$s-texte-inv};                // 9,18:1 sur #F6A68E
+
+  color-scheme: dark;
 }
 
 
 // =============================================================================
-// 13. COMPATIBILITÉ — les noms historiques, branchés sur les tokens
+// 17. COMPATIBILITÉ — les noms historiques, branchés sur les tokens
 // =============================================================================
 //
-// Ces dix-huit noms sont employés ~700 fois dans les feuilles historiques.
-// Les remplacer un à un est le travail du Lot 2 ; les redéclarer ici avec
-// leur ancienne valeur serait rouvrir une seconde source.
-//
-// On les garde donc comme ALIAS : le nom survit, la valeur vient du token.
-// Une correction de charte se fait à un seul endroit et se propage, ce qui
-// était tout l'objet du chantier.
-//
-// ─────────────────────────────────────────────────────────────────────────
-// CE QUE CE BRANCHEMENT CHANGE À L'ÉCRAN — et il fallait le mesurer
-// ─────────────────────────────────────────────────────────────────────────
-// Les deux fichiers ne portaient PAS les mêmes valeurs. Brancher les alias
-// sur les tokens modifie donc le rendu, et voici exactement où :
-//
-//   RAYONS — le changement le plus visible, ~120 usages
-//     sm  12px -> 8px      md  20px -> 14px
-//     lg  28px -> 22px     xl  40px -> 32px
-//   Tout le produit s'arrondit moins. C'est l'échelle validée qui gagne :
-//   les anciennes valeurs n'avaient jamais été choisies, elles avaient été
-//   posées avant qu'une échelle existe.
-//
-//   BORDURES — imperceptible, mais mesurable
-//     discrète  8 % -> 10 %      marquée  14 % -> 18 %
-//   Les bordures gagnent en visibilité, ce qui sert la lisibilité des
-//   champs (WCAG 1.4.11 demande 3:1 pour délimiter une saisie).
-//
-//   COULEURS — aucun changement. Les cinq teintes étaient déjà identiques.
-//
-// ─────────────────────────────────────────────────────────────────────────
-// LES OMBRES SONT MAPPÉES PAR ÉQUIVALENCE VISUELLE, PAS PAR NUMÉRO
-// ─────────────────────────────────────────────────────────────────────────
-// L'échelle des tokens compte QUATRE niveaux, l'ancienne en comptait TROIS.
-// Faire correspondre les numéros aurait écrasé l'élévation : l'ancien
-// `shadow-2` (0 12px 32px) vaut le nouveau `ombre-3`, pas `ombre-2`
-// (0 4px 12px), qui est trois fois plus discret.
-//
-// On apparie donc par ce que l'œil voit, pas par ce que le nom suggère.
+// Ces noms sont employés dans les feuilles de pages. Ils survivent comme
+// ALIAS : le nom reste, la valeur vient de la palette A. Ils sont résolus à
+// la compilation — ils ne basculent PAS avec le thème, d'où la règle :
+// une feuille neuve écrit `var(--…)`, jamais `$blanc` ni `$texte`.
 
-$blanc:         $c-carte;        // #FFFFFF — inchangé
-$texte:         $c-texte;        // #0A1F1A — inchangé
-$gris-second:   $c-texte-3;      // #5C6B66 — inchangé
-$gris-fond:     $c-surelev;      // #F2F3F1 — inchangé
-$rouge-erreur:  $c-danger;       // #B42318 — inchangé
+$blanc:         $c-carte;        // ivoire
+$texte:         $c-texte;        // encre
+$gris-second:   $c-texte-3;
+$gris-fond:     $c-surelev;      // grès
+$rouge-erreur:  $c-danger;
 $font-base:     $font;
 
-$bordure:       $c-bordure;      // 8 %  -> 10 %
-$bordure-forte: $c-bordure-f;    // 14 % -> 18 %
+$bordure:       $c-bordure;
+$bordure-forte: $c-bordure-f;
 
-$r-sm:   rayon(sm);              // 12px -> 8px
-$r-md:   rayon(md);              // 20px -> 14px
-$r-lg:   rayon(lg);              // 28px -> 22px
-$r-xl:   rayon(xl);              // 40px -> 32px
-$r-full: rayon(full);            // 999px — inchangé
+$r-sm:   rayon(sm);              // 10px — boutons, champs
+$r-md:   rayon(md);              // 16px — cartes
+$r-lg:   rayon(lg);              // 24px — tuiles
+$r-xl:   rayon(xl);              // 32px — grands panneaux
+$r-full: rayon(full);
 
-$shadow-1: $c-ombre-1;           // identique
+$shadow-1: $c-ombre-1;
 $shadow-2: $c-ombre-3;           // apparié à l'œil, pas au numéro
-$shadow-3: $c-ombre-4;           // idem
+$shadow-3: $c-ombre-4;
+
 
 // =============================================================================
-// 14. LES COULEURS IMPOSÉES PAR DES TIERS
+// 18. LES COULEURS IMPOSÉES PAR DES TIERS
 // =============================================================================
 //
-// Ces teintes ne nous appartiennent pas et ne suivent donc pas la charte.
-// Elles sont pourtant des TOKENS, pour une raison précise : recopiées à la
-// main, elles divergent. `#25D366` était écrit à trois endroits —
-// `_whatsapp.scss`, `_contact.scss` et `_dashboard.scss` — et rien ne
-// garantissait qu'ils restent d'accord.
-//
-// RÈGLE D'EMPLOI : elles servent de FOND ou de TRAIT identifiant une
-// plateforme. Elles ne portent jamais de texte sans qu'on ait mesuré le
-// couple, car aucune n'a été choisie pour son contraste sur nos surfaces.
+// Elles ne suivent pas la charte. Elles servent de FOND ou de TRAIT
+// identifiant une plateforme ; elles ne portent jamais de texte sans qu'on
+// ait mesuré le couple. Le nom de l'opérateur porte toujours l'information
+// à côté de la pastille.
 
 $marque-whatsapp: #25D366;   // WhatsApp
 $marque-wave:     #1DC8FF;   // Wave
 $marque-orange:   #FF7900;   // Orange Money
 $marque-free:     #CD1719;   // Free Money
+
+// L'encre des pastilles d'initiales (« W », « OM », « FM »), mesurée sur
+// chaque couleur d'opérateur.
+$marque-wave-encre:   #0A2540;     // 8,05:1 sur Wave
+$marque-orange-encre: $encre-900;  // 6,34:1 sur Orange
+$marque-free-encre:   $sable-50;   // 5,67:1 sur Free
+
+// Le bouton « Continuer avec Google », thème sombre : les trois valeurs de
+// la charte Google (fond, trait, libellé). En clair, il prend nos surfaces.
+$google-sombre-fond:  #131314;
+$google-sombre-trait: #8E918F;
+$google-sombre-texte: #E3E3E3;   // 14,40:1 sur son fond

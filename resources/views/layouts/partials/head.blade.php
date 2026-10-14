@@ -1,8 +1,8 @@
-{{-- Partie <head> commune à tous les gabarits. Aucune ressource externe. --}}
+{{-- Partie <head> commune aux gabarits de l'application. Aucune ressource externe. --}}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<meta name="theme-color" content="#0B3B2E">
+@include('layouts.partials.couleur-theme')
 
 @include('layouts.partials.icons')
 
@@ -11,5 +11,7 @@
 @isset($description)
     <meta name="description" content="{{ $description }}">
 @endisset
+
+@include('layouts.partials.police')
 
 @vite(['resources/sass/app.scss', 'resources/js/app.js'])

@@ -91,4 +91,7 @@
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
   }
+
+  // La révélation au défilement : le contenu est rendu visible d'emblée.
+  [data-reveal].is-hidden { opacity: 1; transform: none; }
 }

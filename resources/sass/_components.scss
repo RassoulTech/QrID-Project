@@ -1,229 +1,367 @@
 // =============================================================================
-// COMPOSANTS — landing QrID.
-// Toutes les couleurs viennent de _variables.scss.
+// COMPOSANTS — barre publique, pied de page, menus, aide, préférences.
+// Direction A « Teranga institutionnel ». Toutes les valeurs : _tokens.scss.
 // =============================================================================
+//
+// Les BOUTONS, CHAMPS, CACHETS, ALERTES, TUILES vivent dans `_socle.scss`,
+// importé en dernier. Ce fichier porte les composants de COQUE partagés par
+// plusieurs gabarits : la barre publique et son panneau, le pied de page,
+// les menus déroulants sans JavaScript, le bouton d'aide, le sélecteur de
+// langue, le champ téléphone.
 
 // -----------------------------------------------------------------------------
-// 1. NAVBAR — fond blanc, fine bordure inférieure
+// 1. LA BARRE PUBLIQUE — sable, filet bas, marque, sections, actions
 // -----------------------------------------------------------------------------
+// Maquette desk-1 : 84px de haut sur ordinateur, 68 sur téléphone. Opaque :
+// aucun flou sur un élément présent au défilement (loi de performance).
 .site-nav{
-  position:sticky;top:0;z-index:50;
-  background:$blanc;
-  border-bottom:1px solid $bordure;
-  transition:box-shadow $d-normal ease, background-color $d-normal ease;
+  position:sticky;top:0;z-index:plan(collant);
+  background:var(--page);
+  border-bottom:1px solid var(--bordure);
 
-  // Ajouté par le module navbar-scroll après 40px de défilement.
-  // Sans JavaScript, la navbar garde cet état de repos : parfaitement lisible.
-  &.is-scrolled{
-    background:rgba($blanc,.94);
-    backdrop-filter:blur(12px);
-    box-shadow:0 4px 20px rgba(10,31,26,.07);
+  &__in{
+    display:flex;align-items:center;justify-content:space-between;gap:esp(4);
+    min-height:$barre-haut-hauteur + esp(1);
+
+    @include ecran(xl){ min-height:$barre-haut-hauteur-bureau + esp(2); gap:esp(6); }
   }
 
-  &__in{display:flex;align-items:center;justify-content:space-between;height:68px}
+  // Les sections du site : visibles à partir de 1024px, dans le panneau
+  // en dessous.
+  &__menu{display:none;align-items:center;gap:esp(1)}
 
-  &__brand{font-size:typo(body-lg);font-weight:800;letter-spacing:-.03em;color:$vert-fonce}
+  &__link{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:$tactile-min;min-width:$tactile-min;
+    padding:0 esp(3);
+    border-radius:rayon(sm);
+    font-weight:550;
+    color:var(--texte);
+    text-decoration:none;
 
-  &__menu{display:none;align-items:center;gap:esp(7)}
-  &__link{font-size:typo(body-sm);font-weight:500;color:$gris-second}
-  &__link:hover{color:$texte}
+    &:hover{background:var(--surelev);color:var(--texte)}
+  }
 
-  &__right{display:flex;align-items:center;gap:esp(3)}
+  &__right{display:flex;align-items:center;gap:esp(2)}
 
-  // MOBILE FIRST : la barre ne porte que le logo et le menu.
-  //
-  // Elle portait aussi les deux bascules et le bouton d'inscription. À 375px
-  // les quatre se chevauchaient, et le bouton passait sous le menu. Ils sont
-  // repris à l'identique dans le panneau latéral, où ils ont la place d'être
-  // touchés — pas d'écran perdu, un écran gagné.
-  &__actions{display:none;align-items:center;gap:esp(3)}
+  // Les préférences (langue, thème) : à partir de 1024px dans la barre,
+  // dans le panneau en dessous.
+  &__prefs{display:none;align-items:center;gap:esp(2)}
 
-  &__signin{display:none;font-size:typo(body-sm);font-weight:500;color:$gris-second}
-  &__signin:hover{color:$texte}
+  // « Connexion » : un lien de texte en feuille, présent à TOUTES les
+  // largeurs — la maquette mob-01 le garde à côté du menu.
+  &__signin{
+    display:inline-flex;align-items:center;
+    min-height:$tactile-min;
+    padding:0 esp(2);
+    font-weight:600;
+    color:var(--lien);
+    text-decoration:none;
+    &:hover{color:var(--lien)}
+  }
 
-  // 44×44 : la cible tactile minimale. Six pixels de remplissage autour d'une
-  // icône de 22 donnaient 34px — un menu raté une fois sur trois.
+  // L'action principale : masquée sur téléphone, où elle vit en bas du
+  // panneau, pleine largeur, sous le pouce. Sélecteur doublé : le socle,
+  // importé après, pose `display:inline-flex` sur tout bouton.
+  & &__cta{display:none}
+
+  // Le menu : un carré de 44, filet, coins de 10.
   &__burger{
     display:grid;place-items:center;
-    width:44px;height:44px;
-    background:none;border:0;color:$vert-fonce;line-height:0;
-    border-radius:$r-sm;
-    &:hover{background:var(--survol)}
-    &:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    width:$tactile-min;height:$tactile-min;
+    border:1px solid var(--bordure);
+    border-radius:rayon(sm);
+    background:var(--carte);
+    color:var(--texte);
+    line-height:0;
+    text-decoration:none;
+    &:hover{background:var(--surelev);color:var(--texte)}
   }
 
-  @media(min-width:992px){
+  @include ecran(md){
+    & &__cta{display:inline-flex}
+  }
+
+  @include ecran(xl){
     &__menu{display:flex}
-    &__actions{display:flex}
-    &__signin{display:inline}
+    &__prefs{display:flex}
     &__burger{display:none}
-    &__right{gap:esp(5)}
   }
 }
 
 // -----------------------------------------------------------------------------
-// 1 bis. LE PANNEAU MOBILE
+// 1 bis. LE PANNEAU MOBILE DE LA VITRINE
 // -----------------------------------------------------------------------------
-// Il contient TOUT ce que la barre ne porte plus : sections, connexion,
-// langue, thème et inscription. Chaque ligne fait au moins 48px de haut ;
-// une liste de liens de 32px se touche mal et se lit comme une liste de
-// paramètres, pas comme une navigation.
+// L'offcanvas natif de Bootstrap. SANS JAVASCRIPT, il s'ouvre quand même :
+// le déclencheur est un lien vers `#menuMobile`, et `:target` le rend
+// visible ; « Fermer » mène à `#contenu`, qui lui retire la cible.
 .menu-mobile{
-  background:var(--surface);
+  background:var(--page);
   color:var(--texte);
-  // Le panneau ne dépasse jamais la largeur de l'écran, même à 320px.
-  max-width:min(88vw, 340px);
+  max-width:min(88vw, 360px);
 
-  .offcanvas-header{border-bottom:1px solid var(--bord)}
+  .offcanvas-header{
+    border-bottom:1px solid var(--bordure);
+    padding:esp(3) esp(4);
+  }
+}
+
+.offcanvas:target{
+  visibility:visible;
+  transform:none;
 }
 
 .menu-mobile__corps{
   display:flex;
   flex-direction:column;
   gap:esp(6);
-  // Le pied est poussé en bas : le pouce y arrive sans étirement.
   justify-content:space-between;
 }
 
 .menu-mobile__liens{display:flex;flex-direction:column}
 
 .menu-mobile__lien{
-  display:flex;align-items:center;
-  min-height:48px;
+  display:flex;align-items:center;justify-content:space-between;gap:esp(3);
+  min-height:esp(10) - esp(2);
   padding:0 esp(1);
-  font-size:typo(body);font-weight:600;
+  font-size:typo(body-lg);font-weight:650;
   color:var(--texte);
   text-decoration:none;
-  border-bottom:1px solid var(--bord);
+  border-bottom:1px solid var(--bordure);
 
-  &:hover,&:focus-visible{color:var(--accent)}
+  .icone{color:var(--texte-3)}
+  &:hover,&:focus-visible{color:var(--texte);background:var(--surelev)}
 }
 
 .menu-mobile__prefs{display:flex;flex-direction:column;gap:esp(3)}
 
 .menu-mobile__titre{
-  font-size:typo(overline);font-weight:700;
-  letter-spacing:.09em;text-transform:uppercase;
+  font-size:typo(overline);font-weight:typo(overline, graisse);
+  letter-spacing:typo(overline, espacement);text-transform:uppercase;
   color:var(--texte-2);
 }
 
-// Les deux bascules côte à côte : ce sont deux réglages du même ordre, les
-// séparer ferait chercher la seconde ailleurs.
 .menu-mobile__bascules{display:flex;align-items:center;gap:esp(3);flex-wrap:wrap}
 
-.menu-mobile__pied{margin-top:auto;padding-top:esp(3)}
+.menu-mobile__pied{margin-top:auto;padding-top:esp(3);display:grid;gap:esp(3)}
 
 // -----------------------------------------------------------------------------
-// 2. BOUTONS
+// 2. LES PIÈCES DE BOUTON QUI NE RELÈVENT PAS DU SOCLE
 // -----------------------------------------------------------------------------
-.btn-pill{
-  display:inline-flex;align-items:center;justify-content:center;gap:esp(2);
-  height:46px;padding:0 esp(6);
-  border-radius:$r-full;
-  font-size:typo(body-sm);font-weight:600;
-  border:1px solid transparent;
-  cursor:pointer;
-  transition:transform $d-rapide ease,background $d-rapide ease,box-shadow $d-rapide ease;
+// L'apparence des boutons est dans `_socle.scss` (un seul jeu de règles pour
+// toutes les familles). Restent ici les cas d'usage.
 
-  &:active{transform:translateY(1px)}
-}
-
-// RÈGLE : la couleur du texte est identique dans TOUS les états.
-// Au survol, seul le FOND change. Aucun bouton ne dépend d'une interaction
-// pour être lisible. Les états sont listés explicitement pour qu'aucune
-// pseudo-classe extérieure ne puisse les écraser par spécificité.
-
-.btn-dark{
-  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
-    background:$vert-fonce;
-    color:$blanc;          // #FFFFFF dans tous les états
-    border-color:$vert-fonce;
-  }
-  &:hover{background:darken($vert-fonce,4%);border-color:darken($vert-fonce,4%);box-shadow:$shadow-2;transform:translateY(-1px)}
-}
-
-.btn-outline{
-  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
-    background:$blanc;
-    color:$texte;          // #0A1F1A dans tous les états
-    border-color:$bordure-forte;
-  }
-  &:hover{background:$gris-fond;transform:translateY(-1px)}
-}
-
-// Bouton posé sur un fond sombre.
-.btn-light{
-  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
-    background:$blanc;
-    color:$vert-fonce;     // #0B3B2E dans tous les états
-    border-color:$blanc;
-  }
-  &:hover{background:$gris-fond;border-color:$gris-fond;transform:translateY(-1px)}
-}
-
-// Variante fantôme sur fond sombre : contour blanc, fond transparent.
-// Chaque état déclare sa couleur : jamais de texte révélé au survol.
-.btn-ghost-light{
-  &,&:link,&:visited,&:hover,&:focus,&:focus-visible,&:active{
-    background:transparent; color:$blanc; border-color:rgba($blanc,.45);
-  }
-  &:hover{background:rgba($blanc,.12);border-color:rgba($blanc,.7)}
-}
-
-// Taille réduite, pour les actions secondaires d'une carte.
-.btn-pill--sm{padding:esp(2) esp(4);font-size:typo(caption)}
-
-// Action pas encore disponible.
-// .is-disabled : portée par un <span>, jamais par un lien mort.
-// :disabled    : vrai bouton refusé par le serveur (renvoi d'e-mail épuisé).
-//                Sans cette règle, les couleurs déclarées pour tous les états
-//                ci-dessus le laissaient paraître cliquable.
-.btn-pill.is-disabled,
-.btn-pill:disabled{
-  // L'OPACITÉ EST CELLE DU SOCLE, et cette règle ne la redéclare plus.
-  //
-  // Elle portait .45 quand le socle porte .55, à spécificité égale : le
-  // socle étant importé après, sa valeur gagnait déjà. La ligne ne
-  // faisait que décrire un état qui n'existait pas.
-  cursor:not-allowed;
-  box-shadow:none;
-  transform:none;
-}
-
+// Action pas encore disponible, portée par un <span> — jamais un lien mort.
 .btn-pill.is-disabled{pointer-events:none}
 
-/*
- | `min-height` ET NON `height`.
- |
- | Une hauteur FIXE de 40px n'a pas de sortie de secours : dès que le libellé
- | passe à la ligne — colonne étroite, langue plus verbeuse, police plus
- | grande — le texte sort du bouton par le bas. C'est ce qu'on voyait sur
- | « QR en SVG » et « Modifier ma carte » dans la colonne du tableau de bord.
- |
- | Avec `min-height`, le bouton grandit au lieu de laisser fuir son contenu.
- | Il fait toujours 40px dans l'immense majorité des cas ; il fait 56 quand le
- | libellé l'exige, ce qui est toujours préférable à un texte coupé.
- */
-.btn-sm-pill{
-  min-height:40px;
-  padding:esp(2) esp(5);
-  font-size:typo(caption);
-  // La ligne se centre quand elle se replie, au lieu de partir à gauche.
-  text-align:center;
-}
-.btn-block{width:100%}
+// Taille réduite des actions secondaires d'une carte.
+.btn-pill--sm{min-height:$tactile-min;padding:esp(2) esp(4);font-size:typo(body-sm)}
 
-// -----------------------------------------------------------------------------
-// SIMULATION D'ÉTATS — page /design-system uniquement.
-// Permet d'afficher les cinq états côte à côte et de repérer d'un coup d'œil
-// un texte qui ne serait lisible qu'au survol.
-// -----------------------------------------------------------------------------
-.state-hover.btn-dark{background:darken($vert-fonce,4%);border-color:darken($vert-fonce,4%);box-shadow:$shadow-2;transform:translateY(-1px)}
-.state-hover.btn-outline{background:$gris-fond;transform:translateY(-1px)}
-.state-hover.btn-light{background:$gris-fond;border-color:$gris-fond;transform:translateY(-1px)}
-
-.state-focus{outline:3px solid $vert-accent;outline-offset:3px}
+// SIMULATION D'ÉTATS — page /design-system uniquement : les cinq états côte
+// à côte, pour repérer d'un coup d'œil un texte lisible au seul survol.
+.state-hover.btn-dark,
+.state-hover.btn-primary{background:var(--marque-survol);border-color:var(--marque-survol)}
+.state-hover.btn-outline,
+.state-hover.btn-secondary{background:var(--surelev)}
+.state-hover.btn-light{background:var(--surelev)}
+.state-hover.btn-quiet{background:var(--surelev)}
+.state-focus{outline:3px solid var(--focus);outline-offset:2px}
 .state-active{transform:translateY(1px)}
+
+// -----------------------------------------------------------------------------
+// 3. LES MENUS SANS JAVASCRIPT — <details> / <summary>
+// -----------------------------------------------------------------------------
+// Compte, notifications, recherche : chaque menu de la coque est un
+// <details>. Il s'ouvre et se ferme nativement, au doigt comme au clavier.
+// `menus.js` n'ajoute que le confort : fermer au clic extérieur et à Échap.
+.menu-coque{
+  position:relative;
+
+  > summary{list-style:none;cursor:pointer}
+  > summary::-webkit-details-marker{display:none}
+}
+
+.menu-coque__panneau{
+  position:absolute;
+  top:calc(100% + #{esp(2)});
+  right:0;
+  z-index:plan(menu);
+  width:min(320px, calc(100vw - #{esp(6)}));
+  padding:esp(2);
+  background:var(--carte);
+  border:1px solid var(--bordure);
+  border-radius:rayon(md);
+  box-shadow:var(--ombre-2);
+  color:var(--texte);
+}
+
+.menu-coque__tete{
+  display:flex;align-items:center;gap:esp(3);
+  padding:esp(2) esp(3) esp(3);
+  margin-bottom:esp(1);
+  border-bottom:1px solid var(--bordure);
+  min-width:0;
+}
+
+.menu-coque__qui{display:flex;flex-direction:column;min-width:0}
+.menu-coque__nom{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menu-coque__courriel{font-size:typo(caption);color:var(--texte-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.menu-coque__lien{
+  display:flex;align-items:center;gap:esp(3);
+  width:100%;
+  min-height:$tactile-min;
+  padding:0 esp(3);
+  border:0;border-radius:rayon(sm);
+  background:transparent;
+  font:inherit;font-weight:550;
+  color:var(--texte);
+  text-align:start;
+  text-decoration:none;
+  cursor:pointer;
+
+  .icone{color:var(--texte-2)}
+  &:hover{background:var(--surelev);color:var(--texte)}
+
+  &--danger{color:var(--danger);.icone{color:var(--danger)}}
+  &--danger:hover{color:var(--danger)}
+}
+
+.menu-coque__separateur{height:1px;margin:esp(1) esp(2);background:var(--bordure)}
+
+.menu-coque__prefs{
+  display:flex;align-items:center;justify-content:space-between;gap:esp(3);
+  padding:esp(2) esp(3);
+  font-size:typo(caption);font-weight:600;color:var(--texte-2);
+
+  > div{display:flex;align-items:center;gap:esp(2)}
+}
+
+// La recherche dans un menu.
+.menu-coque__recherche{
+  display:flex;gap:esp(2);
+  padding:esp(1);
+
+  input{flex:1 1 auto;min-width:0}
+}
+
+// Le menu de langue ouvert DANS un menu de coque : il s'ouvre vers la gauche.
+.menu-coque .langue__menu{right:auto;left:0}
+
+// -----------------------------------------------------------------------------
+// 4. LE BOUTON D'AIDE — WhatsApp, contextuel, jamais couvrant
+// -----------------------------------------------------------------------------
+// Il flottait en bas à droite et recouvrait du contenu sur les captures. Il
+// vit désormais DANS la page : icône « ? » de la barre des espaces
+// connectés, lien discret ailleurs (pied de page, bas des écrans d'accès).
+// La fonction est intacte : le message pré-rempli reste déduit de l'écran.
+.aide-wa{
+  display:inline-flex;align-items:center;gap:esp(2);
+  min-height:$tactile-min;
+  padding:esp(2) esp(4);
+  border:1px solid var(--bordure-f);
+  border-radius:rayon(sm);
+  background:var(--carte);
+  color:var(--texte);
+  font-weight:600;
+  text-decoration:none;
+
+  .aide-wa__icone{width:20px;height:20px;flex:0 0 auto;color:var(--lien)}
+  &:hover{background:var(--surelev);color:var(--texte)}
+
+  // Dans une barre : un bouton-icône de 44, le libellé reste pour le
+  // lecteur d'écran.
+  &--barre{
+    width:$tactile-min;
+    padding:0;
+    justify-content:center;
+    border-color:var(--bordure);
+    color:var(--texte);
+    .aide-wa__icone{color:var(--texte)}
+  }
+}
+
+// En bas d'un écran, centré, hors de tout recouvrement.
+.aide-wa-bloc{
+  display:flex;justify-content:center;
+  margin:0;
+  padding:esp(5) esp(4) esp(7);
+}
+
+// -----------------------------------------------------------------------------
+// 5. LE PIED DE PAGE PUBLIC — couverture profonde, lisière en tête
+// -----------------------------------------------------------------------------
+.site-footer{
+  position:relative;
+  background:var(--couverture-profonde);
+  color:var(--sur-couverture);
+  padding:esp(10) 0 0;
+  --focus: var(--sur-couverture-accent);
+
+  // La lisière ferme la page (signature 2).
+  &::before{
+    content:"";
+    position:absolute;left:0;right:0;top:0;
+    height:$lisiere-h;
+    background:var(--motif-lisiere) repeat-x 0 0 / #{$lisiere-l} #{$lisiere-h};
+  }
+}
+
+.site-footer__grid{
+  display:grid;gap:esp(8);grid-template-columns:1fr;
+  padding-bottom:esp(9);
+
+  @include ecran(md){grid-template-columns:repeat(2, 1fr)}
+  @include ecran(xl){grid-template-columns:1.4fr repeat(3, 1fr);gap:esp(9)}
+}
+
+.site-footer__about{
+  margin:esp(4) 0 0;
+  max-width:36ch;
+  line-height:typo(body, interligne);
+  color:var(--sur-couverture-2);
+}
+
+.site-footer__title{
+  margin:0 0 esp(3);
+  font-size:typo(overline);font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--sur-couverture-accent);
+}
+
+.site-footer__liens{list-style:none;margin:0;padding:0}
+
+.site-footer a:not(.aide-wa){
+  display:inline-flex;align-items:center;
+  min-height:$tactile-min;
+  color:var(--sur-couverture);
+  text-decoration:none;
+  &:hover{color:var(--sur-couverture-accent)}
+}
+
+.site-footer .aide-wa{
+  margin-top:esp(2);
+  background:transparent;
+  border-color:rgba($sur-couverture, .5);
+  color:var(--sur-couverture);
+  .aide-wa__icone{color:var(--sur-couverture-accent)}
+  &:hover{background:rgba($sur-couverture, .08)}
+}
+
+.site-footer__base{
+  display:flex;flex-wrap:wrap;justify-content:space-between;gap:esp(3) esp(6);
+  padding:esp(5) 0 esp(7);
+  border-top:1px solid rgba($sur-couverture, .14);
+  font-size:typo(body-sm);
+  color:var(--sur-couverture-2);
+}
+
+// =============================================================================
+// HÉRITAGE DE L'ACCUEIL — sections de la landing d'avant la direction A
+// =============================================================================
+// Conservées tant que le lot 2 recompose l'accueil dans `_p-accueil.scss` :
+// elles consomment les jetons, et ont donc déjà basculé dans la palette A.
+// À SUPPRIMER par le lot 2 au fil de ses remplacements.
 
 // -----------------------------------------------------------------------------
 // 3. HERO — texte à gauche, visuel à droite
@@ -607,30 +745,6 @@
 }
 .final .btn-pill{margin-top:esp(7)}
 
-// -----------------------------------------------------------------------------
-// 11. PIED DE PAGE — fond très sombre
-// -----------------------------------------------------------------------------
-.site-footer{
-  background:$texte;
-  color:rgba($blanc,.6);
-  padding:esp(10) 0 esp(8);
-  font-size:typo(overline);
-}
-
-.site-footer__grid{
-  display:grid;gap:esp(8);grid-template-columns:1fr;
-  @media(min-width:768px){grid-template-columns:1.6fr repeat(3,1fr);gap:esp(7)}
-}
-
-.site-footer__brand{font-size:typo(body-sm);font-weight:800;color:$blanc;letter-spacing:-.02em}
-.site-footer__about{margin-top:esp(4);line-height:1.8;max-width:34ch}
-
-.site-footer__title{
-  font-size:typo(overline);font-weight:700;letter-spacing:.14em;text-transform:uppercase;
-  color:$blanc;margin-bottom:esp(4);
-}
-.site-footer a{display:block;padding:esp(2) 0;color:rgba($blanc,.6)}
-.site-footer a:hover{color:$blanc}
 
 // -----------------------------------------------------------------------------
 // CHAMPS OBLIGATOIRES — l'astérisque et sa légende
@@ -643,16 +757,16 @@
 // aria-hidden sur la marque : le lecteur d'écran annonce déjà « obligatoire »
 // grâce à aria-required. L'entendre deux fois par champ est fatigant.
 .f__requis{
-  color:var(--danger, #{$rouge-erreur});
+  color:var(--danger);
   font-weight:700;
-  margin-left:2px;
+  margin-left:esp(1);
 }
 
 .f__legende{
   display:flex;align-items:baseline;gap:esp(2);
   margin:0 0 esp(5);
   font-size:typo(caption);
-  color:var(--texte-2, #{$gris-second});
+  color:var(--texte-2);
 }
 
 // -----------------------------------------------------------------------------
@@ -692,7 +806,7 @@
 
 .tel__drapeau{
   position:absolute;
-  left:12px;top:50%;transform:translateY(-50%);
+  left:esp(3);top:50%;transform:translateY(-50%);
   display:block;
   // Le pointeur traverse : c'est le select qui reçoit le clic, pas l'image.
   pointer-events:none;
@@ -703,8 +817,8 @@
 // d'Ivoire, Nigeria) se fondent dans le champ et paraissent tronqués.
 .drapeau{
   display:block;
-  border-radius:2px;
-  box-shadow:0 0 0 1px rgba(0,0,0,.16);
+  border-radius:rayon(none);
+  box-shadow:0 0 0 1px var(--bordure-f);
 }
 
 // La planche de <symbol> ne s'affiche pas : elle sert de réserve de tracés.
@@ -735,7 +849,7 @@
 // la version sombre a passé des semaines à ne pas être mise à jour.
 .tel__chevron{
   position:absolute;
-  right:12px;top:50%;transform:translateY(-50%);
+  right:esp(3);top:50%;transform:translateY(-50%);
   display:block;
   color:var(--texte-2);
   pointer-events:none;
@@ -752,7 +866,7 @@
 
 // À partir de 640px — tablette et au-delà — la place existe pour une ligne.
 // Le pays ne prend alors que ce dont il a besoin ; le numéro garde le reste.
-@media (min-width:640px){
+@include ecran(md){
   .tel{flex-direction:row}
   .tel__pays-boite{flex:0 0 auto;max-width:46%}
 }
@@ -777,30 +891,20 @@
 }
 
 .langue__declencheur{
-  display:inline-flex;align-items:center;gap:esp(2);
+  display:inline-flex;align-items:center;justify-content:center;gap:esp(2);
   // 44px PARTOUT — le minimum tactile de WCAG 2.5.5.
-  //
-  // Il valait 34px de base et 40px sous 640px : deux valeurs sous le
-  // seuil, et dans le mauvais sens — le mobile first veut la valeur
-  // confortable en base, pas en exception. Le relevé navigateur le
-  // mesurait à 54×40 sur trois pages.
-  height:$tactile-min;padding:0 esp(3);
-  border:1px solid var(--bord-fort, #{$bordure-forte});
-  border-radius:$r-full;
-  background:transparent;
-  color:var(--texte-2, #{$gris-second});
-  font-size:typo(overline);font-weight:700;
+  min-height:$tactile-min;min-width:$tactile-min;padding:0 esp(3);
+  border:1px solid var(--bordure);
+  border-radius:rayon(sm);
+  background:var(--carte);
+  color:var(--texte);
+  font-size:typo(caption);font-weight:700;
   letter-spacing:.04em;
   cursor:pointer;
   user-select:none;
-  transition:color $d-rapide ease, border-color $d-rapide ease, background $d-rapide ease;
+  transition:background-color $d-rapide $courbe, border-color $d-rapide $courbe;
 
-  &:hover{
-    color:var(--accent, #{$vert-fonce});
-    border-color:var(--accent, #{$vert-fonce});
-  }
-
-  &:focus-visible{outline:2px solid var(--accent-vif, #{$vert-accent});outline-offset:2px}
+  &:hover{background:var(--surelev)}
 }
 
 .langue__code{line-height:1}
@@ -812,8 +916,8 @@
 .langue[open] .langue__chevron{transform:rotate(180deg)}
 
 .langue[open] .langue__declencheur{
-  color:var(--accent, #{$vert-fonce});
-  border-color:var(--accent, #{$vert-fonce});
+  background:var(--surelev);
+  border-color:var(--bordure-f);
 }
 
 // LE MENU EST ANCRÉ À DROITE.
@@ -823,39 +927,39 @@
 // vers l'intérieur de la page, jamais vers le bord.
 .langue__menu{
   position:absolute;
-  top:calc(100% + 6px);
+  top:calc(100% + #{esp(2)});
   right:0;
-  z-index:60;
-  min-width:150px;
+  z-index:plan(menu);
+  min-width:170px;
   padding:esp(2);
-  display:flex;flex-direction:column;gap:2px;
-  background:var(--surface-3, #{$blanc});
-  border:1px solid var(--bord, #{$bordure});
-  border-radius:$r-sm;
-  box-shadow:var(--ombre-2, #{$shadow-2});
+  display:flex;flex-direction:column;gap:esp(1);
+  background:var(--carte);
+  border:1px solid var(--bordure);
+  border-radius:rayon(md);
+  box-shadow:var(--ombre-2);
 }
 
 .langue__option{
   display:flex;align-items:center;justify-content:space-between;gap:esp(3);
   width:100%;
   // 40px : une ligne de menu se touche, elle ne se vise pas.
-  min-height:40px;
+  min-height:$tactile-min;
   padding:0 esp(3);
   border:0;
-  border-radius:rayon(sm);   // un cran sous $r-sm : une ligne de menu, pas une carte
+  border-radius:rayon(sm);
   background:transparent;
-  color:var(--texte, #{$texte});
+  color:var(--texte);
   font-family:inherit;
-  font-size:typo(caption);font-weight:600;
+  font-size:typo(body-sm);font-weight:600;
   text-align:left;
   cursor:pointer;
 
-  &:hover{background:var(--survol, #{$gris-fond})}
-  &:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  &:hover{background:var(--surelev)}
+  &:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
 
   // La langue active se signale par la coche ET par la couleur : la coche
   // seule disparaît pour qui ne distingue pas les petits symboles.
-  &[aria-current]{color:var(--accent, #{$vert-fonce})}
+  &[aria-current]{color:var(--lien);background:var(--teinte-vert)}
 }
 
 .langue__coche{flex:0 0 auto}
@@ -874,10 +978,6 @@
   right:auto;
 }
 
-// MOBILE — la barre supérieure est étroite, le doigt ne l'est pas.
-// La largeur minimale du menu vaut pour tous les écrans : une liste de
-// deux langues n'a aucune raison de rétrécir au-delà de 640px.
-.langue__menu{min-width:170px}
 
 // Sous 380px, la barre est pleine : le globe devient décoratif et disparaît
 // plutôt que de pousser le reste. Le code de langue, lui, reste.
@@ -904,8 +1004,8 @@
 // petite panne à un incident.
 .erreur__prefs{
   position:absolute;
-  top:16px;right:16px;
-  z-index:5;
+  top:esp(4);right:esp(4);
+  z-index:plan(contenu);
   display:flex;
   align-items:center;
   gap:esp(2);
@@ -914,3 +1014,65 @@
 // Le corps de la page d'erreur est le seul ancêtre positionné disponible.
 .auth-wrapper{position:relative}
 
+
+// -----------------------------------------------------------------------------
+// LA PLANCHE /design-system — page locale de référence
+// -----------------------------------------------------------------------------
+// Le strict nécessaire pour poser les composants en grille : tout le reste
+// vient du socle. Une page qui se servirait de ses propres boutons ne
+// prouverait rien.
+.ds{padding:esp(9) 0 esp(12)}
+.ds-tete{display:grid;gap:esp(4);max-width:900px;margin-bottom:esp(8)}
+.ds-grille{display:grid;gap:esp(5);grid-template-columns:minmax(0, 1fr)}
+@include ecran(xl){
+  .ds-grille{grid-template-columns:repeat(12, minmax(0, 1fr))}
+  @each $n in (4, 5, 6, 7, 8, 12){ .ds-col-#{$n}{grid-column:span $n} }
+  .ds-concept{grid-row:span 2}
+  .ds-col-debut-6{grid-column:6 / span 7}
+}
+.ds-rangee{display:flex;flex-wrap:wrap;align-items:center;gap:esp(3)}
+.ds-pile{display:grid;gap:esp(3)}
+.ds-note{margin:esp(4) 0 0}
+.ds-concept{display:flex;flex-direction:column;justify-content:space-between;gap:esp(7);padding-bottom:esp(8)}
+.ds-concept__titre{margin:0;font-size:typo(h1);font-weight:850;letter-spacing:-.035em;color:var(--sur-couverture);@include ecran(lg){font-size:typo(h1, bureau)}}
+.ds-concept__texte{margin:esp(4) 0 0;font-size:typo(body-lg);color:var(--sur-couverture-2)}
+.ds-sombre{background:var(--page)}
+.ds-nuancier{display:grid;gap:esp(2);grid-template-columns:repeat(auto-fill, minmax(112px, 1fr))}
+.ds-nuance{display:flex;flex-direction:column;border:1px solid var(--bordure);border-radius:rayon(md);overflow:hidden;background:var(--carte)}
+.ds-nuance__pastille{height:56px}
+.ds-nuance__texte{display:flex;flex-direction:column;padding:esp(2) esp(3) esp(3);font-size:typo(caption);line-height:1.3;color:var(--texte-2);b{color:var(--texte)}code{padding:0;background:none;color:var(--texte-2)}}
+@each $role, $var in (marque: marque, lien: lien, accent: accent-trait, terre: terre, or: or, texte: texte, page: page, carte: carte, surelev: surelev, bordure: bordure, texte-2: texte-2, champ: champ-bord, couverture: couverture, sur-marque: texte-inv-marque){
+  .ds-nuance--#{$role}{background:var(--#{$var})}
+}
+.ds-type{margin:0;display:grid;grid-template-columns:minmax(0, 1fr);
+  dt{padding-top:esp(3);border-top:1px solid var(--bordure);font-size:typo(caption);font-weight:500;color:var(--texte-2);font-variant-numeric:tabular-nums}
+  dd{margin:esp(1) 0 esp(2);min-width:0;overflow-wrap:anywhere}
+  @include ecran(md){grid-template-columns:160px minmax(0, 1fr);align-items:baseline;
+    dd{margin:0;padding:esp(3) 0;border-top:1px solid var(--bordure)}}
+}
+.ds-rayons{display:flex;flex-wrap:wrap;gap:esp(4);align-items:flex-end}
+.ds-rayon{margin:0;display:grid;gap:esp(2);justify-items:center;font-size:typo(caption);color:var(--texte-2)}
+.ds-rayon__forme{width:56px;height:56px;background:var(--surelev);border:1.5px solid var(--bordure-f)}
+@each $r in (xs, sm, md, lg, xl){ .ds-rayon--#{$r}{border-radius:rayon($r)} }
+.ds-ombres{display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:esp(4);margin-top:esp(6)}
+.ds-ombre{display:grid;place-items:center;min-height:76px;padding:esp(2);border:1px solid var(--bordure);border-radius:rayon(md);background:var(--carte);font-size:typo(caption);color:var(--texte-2);text-align:center}
+.ds-ombre--1{box-shadow:var(--ombre-1)}
+.ds-ombre--2{box-shadow:var(--ombre-2)}
+.ds-ombre--4{box-shadow:var(--ombre-4)}
+.ds-composants{display:grid;gap:esp(5);align-content:start;color:var(--texte)}
+.ds-composants.theme-dark{background:var(--page);border-color:var(--bordure)}
+.ds-erreur{display:flex;gap:esp(2);align-items:flex-start;.icone{margin-top:esp(1)}}
+.ds-motif{height:150px;border-radius:rayon(md)}
+.ds-motif--gres{display:grid;align-content:center;gap:esp(4);padding:0 esp(5);background:var(--surelev)}
+.ds-monos{display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:esp(3)}
+.ds-mono{display:grid;place-items:center;min-height:120px;border-radius:rayon(md)}
+.ds-mono--gres{background:var(--surelev)}
+.ds-mono.theme-dark{background:var(--page)}
+.ds-indics{display:grid;gap:esp(5);grid-template-columns:repeat(auto-fit, minmax(180px, 1fr))}
+.tuile .ds-or{color:var(--sur-couverture-accent)}
+.tuile .ds-abo__titre{margin:esp(2) 0 esp(4);font-size:typo(h2);font-weight:800}
+.ds-objets{display:grid;gap:esp(4);margin-top:esp(11)}
+.ds-objets__rangee{justify-content:center;margin:esp(6) 0}
+.ds-objets__legende{margin-top:esp(6)}
+.ds-objets__titre{margin-top:esp(9)}
+.ds-faces{display:grid;gap:esp(7);grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));align-items:start}

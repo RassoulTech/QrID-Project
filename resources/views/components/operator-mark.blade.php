@@ -39,17 +39,13 @@
 
 @php
     /*
-     | Couleurs officielles des trois opérateurs. Elles ne sont pas
-     | approximatives : ce sont celles de leurs chartes, et c'est ce qui rend
-     | la pastille reconnaissable même sans le logo.
+     | Les couleurs officielles des trois opérateurs sont des JETONS
+     | ($marque-wave, $marque-orange, $marque-free) : la pastille porte la
+     | classe de l'opérateur, et la feuille lui donne fond et encre mesurés.
+     | Aucune couleur n'est plus écrite dans ce gabarit.
      */
-    $marques = [
-        'wave'         => ['fond' => '#1DC8FF', 'encre' => '#0A2540', 'court' => 'W'],
-        'orange_money' => ['fond' => '#FF7900', 'encre' => '#FFFFFF', 'court' => 'OM'],
-        'free_money'   => ['fond' => '#CD0A2C', 'encre' => '#FFFFFF', 'court' => 'FM'],
-    ];
-
-    $marque = $marques[$methode] ?? ['fond' => '#0B3B2E', 'encre' => '#FFFFFF', 'court' => '?'];
+    $courts = ['wave' => 'W', 'orange_money' => 'OM', 'free_money' => 'FM'];
+    $court = $courts[$methode] ?? '?';
 
     /*
      | Le premier fichier trouvé l'emporte. public_path() et non asset() : on
@@ -71,8 +67,5 @@
          répéter ferait entendre deux fois la même chose à un lecteur d'écran. --}}
     <img src="{{ asset($fichier) }}" alt="" class="pay-option__logo" width="40" height="40">
 @else
-    <span class="pay-option__pastille" aria-hidden="true"
-          style="background:{{ $marque['fond'] }};color:{{ $marque['encre'] }}">
-        {{ $marque['court'] }}
-    </span>
+    <span class="pay-option__pastille pay-option__pastille--{{ $methode }}" aria-hidden="true">{{ $court }}</span>
 @endif

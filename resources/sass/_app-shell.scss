@@ -1,46 +1,230 @@
 // =============================================================================
-// ESPACE CLIENT — coque d'application et parcours de création.
+// ESPACE CLIENT — la coque (direction A), puis les écrans du parcours.
+// =============================================================================
 //
-// Aucune valeur nouvelle : tout vient de _variables.scss.
-// Structure : menu latéral blanc · barre supérieure blanche · contenu gris.
+// LA COQUE (ce fichier, partie 1) : une barre supérieure ivoire avec les
+// onglets sur ordinateur, la barre d'onglets ancrée en bas sur téléphone
+// (`_dock.scss`). La colonne latérale vert foncé n'existe plus pour le
+// client. Toutes les valeurs viennent de `_tokens.scss`.
+//
+// LES ÉCRANS (partie 2, plus bas) : parcours de création, paiement, dépôt
+// de photo — ils appartiennent au lot 5, qui les recompose.
 // =============================================================================
 
-$sidebar-w: 232px;
-$topbar-h: 64px;
+// La hauteur de la barre : l'aperçu plein écran du parcours s'y réfère.
+$topbar-h: $barre-haut-hauteur;
 
 // -----------------------------------------------------------------------------
-// COQUE — SUPPRIMÉE, ELLE VIT DÉSORMAIS DANS _admin.scss
+// 1. LA BARRE SUPÉRIEURE — ivoire, filet, collante
 // -----------------------------------------------------------------------------
-// 175 lignes tenaient ici .app, .app-side, .app-side__link, .app-main,
-// .app-top, .app-top__user, .app-avatar et .app-content — c'est-à-dire, au
-// pixel près, ce que _admin.scss décrit sous le préfixe .adm-.
-//
-// Deux jeux de composants identiques ont un coût qui ne se voit qu'au moment
-// d'un défaut : le fond de colonne effacé par le !important de Bootstrap sur
-// .offcanvas-lg a dû être corrigé DEUX FOIS, à deux moments différents, parce
-// que personne ne pouvait deviner en lisant l'un que l'autre existait.
-//
-// Les gabarits des deux espaces emploient maintenant les mêmes classes .adm-.
-// Ce fichier ne garde que ce qui appartient VRAIMENT à l'espace client : le
-// bandeau d'essai gratuit, le parcours de création, l'aperçu et le paiement.
+// Opaque, sans flou : elle reste présente au défilement.
+.coque-haut{
+  position:sticky;
+  top:0;
+  z-index:plan(collant);
+  background:var(--carte);
+  border-bottom:1px solid var(--bordure);
+}
 
-// --- Bandeau d'essai gratuit --------------------------------------------------
-// Propre à l'espace client : l'administration n'a pas d'abonnement à surveiller.
+.coque-haut__in{
+  display:flex;
+  align-items:center;
+  gap:esp(3);
+  height:$barre-haut-hauteur;
+  max-width:$largeur-app;
+  margin-inline:auto;
+  padding-inline:esp(4);
+
+  @include ecran(lg){ gap:esp(5); padding-inline:esp(6); }
+  @include ecran(xl){ height:$barre-haut-hauteur-bureau; gap:esp(5); padding-inline:esp(7); }
+}
+
+.coque-haut__marque{flex:0 0 auto}
+
+// Le nom à côté du monogramme : là où la barre a la place. Sous 375px,
+// quatre outils de 44 occupent la ligne ; entre 768 et 1280, les onglets.
+.coque-haut__marque .brand__words{display:none}
+@include ecran(sm){
+  .coque-haut__marque .brand__words{display:flex}
+}
+@include ecran(lg){
+  .coque-haut__marque .brand__words{display:none}
+}
+@include ecran(xxl){
+  .coque-haut__marque .brand__words{display:flex}
+}
+
+.coque-haut__outils{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:esp(2);
+}
+
+// -----------------------------------------------------------------------------
+// 2. LES ONGLETS DU HAUT — l'actif est signé par la LISIÈRE
+// -----------------------------------------------------------------------------
+// Absents sous 768px : la barre du bas les remplace. Libellé court jusqu'à
+// 1280px ; au-delà, libellé complet ET icône (maquette desk-2).
+.coque-onglets{
+  display:none;
+  align-self:stretch;
+  min-width:0;
+
+  @include ecran(lg){ display:flex; }
+}
+
+.coque-onglets__liste{
+  display:flex;
+  align-items:stretch;
+  gap:esp(1);
+  margin:0;
+  padding:0;
+  list-style:none;
+
+  > li{display:flex}
+}
+
+.coque-onglet{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  gap:esp(2);
+  padding:0 esp(2);
+  min-height:$tactile-min;
+  font-weight:600;
+  white-space:nowrap;
+  text-decoration:none;
+
+  // La couleur de TOUS les états : aucun onglet n'attend le survol pour se
+  // lire (loi 7).
+  &,&:link,&:visited,&:hover,&:focus{color:var(--texte-2)}
+  &:hover{background:var(--surelev)}
+
+  .adm-nav__icone{display:none;width:18px;height:18px}
+
+  // L'ONGLET ACTIF : couleur pleine + graisse + LISIÈRE de 6px au pied de la
+  // barre (signature 2). Trois signaux, lisibles au repos.
+  &.is-actif{
+    &,&:link,&:visited,&:hover,&:focus{color:var(--texte)}
+    font-weight:750;
+
+    &::after{
+      content:"";
+      position:absolute;
+      left:esp(2);right:esp(2);bottom:-1px;
+      height:$lisiere-h-fine;
+      border-radius:rayon(xs) rayon(xs) 0 0;
+      background:var(--motif-lisiere) repeat-x 0 0 / #{$lisiere-l-fine} #{$lisiere-h-fine};
+    }
+  }
+
+  @include ecran(xl){ padding:0 esp(3); }
+  @include ecran(xxl){ .adm-nav__icone{display:block} }
+}
+
+// Le libellé complet reste lu par le lecteur d'écran à toutes les largeurs :
+// sous 1280px il est masqué À L'ŒIL seulement, et le court (aria-hidden)
+// prend sa place.
+.coque-onglet__long{
+  position:absolute;
+  width:1px;height:1px;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  white-space:nowrap;
+
+  @include ecran(xxl){
+    position:static;
+    width:auto;height:auto;
+    overflow:visible;
+    clip:auto;
+  }
+}
+
+.coque-onglet__court{
+  @include ecran(xxl){ display:none; }
+}
+
+// -----------------------------------------------------------------------------
+// 3. LE MENU DU COMPTE — l'avatar, le nom, le rôle
+// -----------------------------------------------------------------------------
+.menu-compte__declencheur{
+  display:flex;
+  align-items:center;
+  gap:esp(2);
+  min-height:$tactile-min + esp(1);
+  padding:esp(1);
+  border-radius:rayon(md);
+  color:var(--texte);
+
+  &:hover{background:var(--surelev)}
+}
+
+// Le nom et le rôle : dans le panneau du menu seulement. Six onglets, la
+// recherche, l'aide et la cloche occupent la barre ; l'avatar suffit à
+// dire « votre compte », et le nom est écrit dès l'ouverture.
+.menu-compte__qui{
+  display:none;
+  flex-direction:column;
+  text-align:start;
+  line-height:1.2;
+}
+
+.menu-compte__nom{font-size:typo(body-sm);font-weight:700;white-space:nowrap}
+.menu-compte__role{font-size:typo(caption);color:var(--texte-2);white-space:nowrap}
+.menu-compte__chevron{display:none;color:var(--texte-2);@include ecran(xl){display:block}}
+
+// -----------------------------------------------------------------------------
+// 4. LE CONTENU
+// -----------------------------------------------------------------------------
+.coque-contenu{
+  display:block;
+  min-width:0;
+}
+
+.coque-page{
+  max-width:$largeur-app;
+  margin-inline:auto;
+  padding:esp(6) esp(4) esp(8);
+
+  @include ecran(lg){ padding:esp(8) esp(6) esp(10); }
+  @include ecran(xl){ padding:esp(8) esp(7) esp(10); }
+}
+
+// -----------------------------------------------------------------------------
+// 5. LE BANDEAU D'ESSAI — une ligne, alarmant seulement à la fin
+// -----------------------------------------------------------------------------
 .app-trial{
-  background:$vert-clair;
-  color:$vert-fonce;
-  font-size:typo(caption);
-  text-align:center;
-  padding:esp(3) esp(5);
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:esp(2);
+  gap:esp(2) esp(3);
   flex-wrap:wrap;
+  padding:esp(2) esp(4);
+  background:var(--teinte-vert);
+  border-bottom:1px solid var(--succes-trait);
+  color:var(--texte);
+  font-size:typo(body-sm);
+  text-align:center;
 
-  a{font-weight:600;color:$vert-fonce;text-decoration:underline}
-  &.is-urgent{background:#FEF3E2;color:#7A4100;a{color:#7A4100}}
+  a{
+    display:inline-flex;align-items:center;
+    min-height:$tactile-min;
+    font-weight:700;
+    color:var(--lien);
+  }
+
+  // Les trois derniers jours : le cachet « en attente ».
+  &.is-urgent{
+    background:var(--alerte-fond);
+    border-bottom-color:var(--alerte-trait);
+    a{color:var(--texte)}
+  }
 }
+
+// =============================================================================
+// PARTIE 2 — LES ÉCRANS DU PARCOURS (lot 5)
+// =============================================================================
 
 // -----------------------------------------------------------------------------
 // CARTE CENTRALE — le parcours de création vit ici

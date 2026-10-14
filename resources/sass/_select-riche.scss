@@ -50,7 +50,7 @@
   text-align: start;
   cursor: pointer;
 
-  &:hover:not(:disabled) { border-color: var(--marque); }
+  &:hover:not(:disabled) { border-color: var(--champ-bord); background: var(--carte); }
 }
 
 .selr__valeur {
@@ -79,7 +79,7 @@
   position: absolute;
   inset-inline: 0;
   top: calc(100% + #{esp(2)});
-  z-index: 30;
+  z-index: plan(menu);
 
   max-height: 288px;   // six options de 48px : au-delà, on fait défiler
   overflow-y: auto;
@@ -100,7 +100,7 @@
 }
 
 @keyframes selr-ouvre {
-  from { opacity: 0; transform: translateY(-4px) }
+  from { opacity: 0; transform: translateY(-(esp(1))) }
   to   { opacity: 1; transform: translateY(0) }
 }
 
@@ -143,9 +143,10 @@
    | couleur n'est jamais le seul porteur d'une information.
    */
   &.is-choisi {
-    background: var(--marque-doux);
-    color: var(--marque);
-    font-weight: 600;
+    // Fond teinté + coche + graisse : le choix ne repose pas sur la couleur.
+    background: var(--teinte-vert);
+    color: var(--texte);
+    font-weight: 650;
 
     &::after {
       content: "";
@@ -167,8 +168,8 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--marque);
-    outline-offset: -2px;
+    outline: 3px solid var(--focus);
+    outline-offset: -3px;
   }
 }
 

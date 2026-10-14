@@ -1,71 +1,40 @@
 {{--
-  Menu de l'espace administrateur — onze entrées, trois sections plus le bas.
+  Menu de l'administration — onze rubriques en quatre sections, puis le retour.
 
-  L'ENTRÉE ACTIVE EST DÉCIDÉE PAR LE SERVEUR (routeIs), jamais par JavaScript.
-  Un menu dont l'état dépend d'un script perd tout repère quand le script ne
-  charge pas — et c'est le seul élément qui dit où l'on se trouve.
+  LES RUBRIQUES VIENNENT DE App\Support\Navigation::rubriquesAdmin() : la
+  colonne, le fil d'Ariane et la barre du bas lisent la même liste.
 
-  ÉCRANS EN COURS DE CONSTRUCTION : une entrée dont le gabarit n'existe pas
-  encore s'affiche atténuée et non cliquable, plutôt que de mener à une erreur
-  500. Le test porte sur l'existence RÉELLE de la vue : l'atténuation disparaît
-  d'elle-même à la livraison de l'écran, sans rien à modifier ici.
+  L'ENTRÉE ACTIVE EST DÉCIDÉE PAR LE SERVEUR (routeIs) : fond de grès, trait
+  latérite à gauche, graisse — et aria-current. Jamais la couleur seule.
+
+  « Paiements » porte le NOMBRE de paiements à vérifier, calculé une fois par
+  le gabarit (`$aVerifier`) : un chiffre dans un cachet « en attente », dit
+  en toutes lettres au lecteur d'écran.
+
+  ÉCRANS EN CONSTRUCTION : une rubrique dont la vue n'existe pas encore
+  s'affiche non cliquable plutôt que de mener à une erreur 500.
+
+  SUR TÉLÉPHONE, la colonne devient le panneau « Plus » : ce que la barre du
+  bas porte déjà en est retiré (`adm-nav__item--dans-le-dock`).
 --}}
 @php
     use App\Support\Navigation;
 
-    /*
-     | [identifiant, route, motif d'activation, vue attendue]
-     |
-     | L'IDENTIFIANT N'EST PLUS LE LIBELLÉ. Il servait aux deux : à écrire
-     | l'intitulé du menu ET à choisir l'icône. Traduire l'intitulé aurait
-     | donc fait retomber les onze icônes sur celle par défaut — sans
-     | erreur, sans test rouge, onze entrées portant le même dessin.
-     |
-     | Le libellé vient maintenant de navigation.admin.*, l'icône de
-     | l'identifiant. Les deux peuvent diverger sans se casser.
-     */
-    /* Ce que le dock du bas porte deja : ces entrees sont retirees du
-       panneau SUR TELEPHONE UNIQUEMENT, pour qu'il ne les repete pas. */
     $routesDuDock = Navigation::routesDuDockAdmin();
+    $aVerifier = $aVerifier ?? 0;
 
-    $sections = [
-        'pilotage' => [
-            ['vue-ensemble',  'admin.overview',        'admin.overview',      'admin.overview'],
-            ['statistiques',  'admin.statistics',      'admin.statistics',    'admin.statistics'],
-        ],
-        'gestion' => [
-            ['clients',       'admin.clients.index',   'admin.clients.*',     'admin.clients.index'],
-            ['profils',       'admin.profiles.index',  'admin.profiles.*',    'admin.profiles.index'],
-            ['paiements',     'admin.payments.index',  'admin.payments.*',    'admin.payments.index'],
-            ['abonnements',   'admin.subscriptions',   'admin.subscriptions', 'admin.subscriptions'],
-            ['cartes',        'admin.cards.index',     'admin.cards.*',       'admin.cards.index'],
-        ],
-        'configuration' => [
-            ['modeles',       'admin.templates.index', 'admin.templates.*',   'admin.templates.index'],
-            ['parametres',    'admin.settings',        'admin.settings*',     'admin.settings.index'],
-            ['journal',       'admin.audit.index',     'admin.audit.*',       'admin.audit.index'],
-        ],
-        'systeme' => [
-            ['etat-systeme',  'admin.system.health',   'admin.system.health', 'admin.system-health'],
-        ],
-    ];
-
-    /* La correspondance identifiant → clé de traduction. Les tirets ne
-       passent pas dans une clé de tableau PHP imbriquée : on les convertit
-       une fois ici plutôt qu'à chaque ligne. */
     $cle = fn (string $id) => 'navigation.admin.'.str_replace('-', '_', $id);
 
-    /* Un titre pose au-dessus du vide se lit comme une page cassee. */
+    /* Un titre posé au-dessus du vide se lit comme une page cassée. */
     $sectionEntiereDansLeDock = [];
-
-    foreach ($sections as $nom => $entrees) {
+    foreach (Navigation::rubriquesAdmin() as $nom => $entrees) {
         $hors = array_filter($entrees, fn ($e) => ! Navigation::estDansLeDock($e[1], $routesDuDock));
         $sectionEntiereDansLeDock[$nom] = $hors === [];
     }
 @endphp
 
 <nav class="adm-nav" aria-label="{{ __('navigation.administration') }}">
-    @foreach ($sections as $section => $entrees)
+    @foreach (Navigation::rubriquesAdmin() as $section => $entrees)
         <p @class([
             'adm-nav__titre',
             'adm-nav__titre--dans-le-dock' => $sectionEntiereDansLeDock[$section],
@@ -73,8 +42,8 @@
 
         <ul class="adm-nav__liste">
             @foreach ($entrees as [$id, $route, $motif, $vue])
-                @php $libelle = __($cle($id)); @endphp
                 @php
+                    $libelle = __($cle($id));
                     $existe = Route::has($route) && View::exists($vue);
                     $actif = $existe && request()->routeIs($motif);
                 @endphp
@@ -86,6 +55,11 @@
                            @if ($actif) aria-current="page" @endif>
                             <x-admin-icon :name="$id" />
                             <span>{{ $libelle }}</span>
+
+                            @if ($id === 'paiements' && $aVerifier > 0)
+                                <span class="adm-nav__compte" aria-hidden="true">{{ $aVerifier > 99 ? '99+' : $aVerifier }}</span>
+                                <span class="visually-hidden">{{ trans_choice('navigation.admin.a_verifier', $aVerifier, ['compte' => $aVerifier]) }}</span>
+                            @endif
                         </a>
                     @else
                         <span class="adm-nav__lien is-muted" aria-disabled="true"
@@ -99,9 +73,8 @@
         </ul>
     @endforeach
 
-    {{-- BAS DE MENU — deux entrées, détachées du reste.
-         La déconnexion est un formulaire POST : en GET, une simple image
-         distante suffirait à déconnecter l'administrateur. --}}
+    {{-- BAS DE COLONNE — le retour à l'espace client et la déconnexion.
+         La déconnexion est un formulaire POST. --}}
     <div class="adm-nav__bas">
         <a class="adm-nav__lien" href="{{ route('dashboard') }}">
             <x-admin-icon name="retour" />

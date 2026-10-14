@@ -1,179 +1,118 @@
 {{--
-  layouts/app — coque de l'espace client.
+  layouts/app — LA COQUE DE L'ESPACE CLIENT, direction A « Teranga ».
 
-  ELLE PARTAGE LA COQUE DE L'ADMINISTRATION. Les classes `adm-` ne sont plus
-  celles « de l'admin » : ce sont celles de l'application connectée, des deux
-  côtés. Auparavant, colonne, barre supérieure, recherche, avatar et zone de
-  contenu existaient en double sous les préfixes `app-` et `adm-` — huit
-  familles de composants écrites deux fois, pour deux résultats identiques.
+      <x-app-layout title="Tableau de bord">…</x-app-layout>
 
-  Le prix de ce doublon n'était pas théorique : Bootstrap efface le fond des
-  éléments `offcanvas-lg` au-dessus de 992px, et le défaut a dû être corrigé
-  dans les deux feuilles, à deux moments différents.
+  ═══════════════════════════════════════════════════════════════════════════
+  SUR ORDINATEUR (≥ 768px) — une barre ivoire, des onglets en haut
+  ═══════════════════════════════════════════════════════════════════════════
+  La colonne vert foncé a disparu. Six destinations tiennent dans une barre :
+  la marque, les onglets (l'onglet actif est signé par la LISIÈRE), puis
+  l'aide, la recherche, la cloche et le menu du compte. Le contenu prend
+  toute la largeur, jusqu'à 1376px.
 
-  CE QUI RESTE PROPRE À CET ESPACE : le bandeau d'essai gratuit, la recherche
-  qui vise les contenus du client, et les icônes en trait plutôt qu'en aplat.
+  ═══════════════════════════════════════════════════════════════════════════
+  SUR TÉLÉPHONE (< 768px) — une barre d'onglets ANCRÉE en bas
+  ═══════════════════════════════════════════════════════════════════════════
+  Opaque, sans flou, filet supérieur, zone sûre ; le corps de page lui
+  réserve sa hauteur (`avec-onglets-bas`). Plus aucun hamburger ni panneau
+  latéral pour la navigation : tout ce qui n'est pas dans la barre est dans
+  le menu du compte (un <details>, sans JavaScript).
 
-  Sous 992px, la colonne se replie dans l'offcanvas Bootstrap natif : aucune
-  navigation ne dépend d'un script maison.
+  LES DESTINATIONS NE SONT PAS ÉCRITES ICI : elles viennent de
+  App\Support\Navigation, que les deux barres et les tests lisent.
 
-  <x-app-layout title="Tableau de bord">…</x-app-layout>
+  Le `title` sert la balise <title>. Chaque écran porte son propre <h1>.
 --}}
+@php
+    use App\Support\Navigation;
+
+    $u = Auth::user();
+    $aProfil = $u->profile !== null;
+
+    /* « Mon profil » mène à la création tant qu'il n'y a pas de profil :
+       c'est la même destination aux yeux de la personne. */
+    $urlOnglet = fn (array $o) => $o['route'] === 'profil.index' && ! $aProfil
+        ? route('profile.create.step1')
+        : route($o['route']);
+
+    $onglets = Navigation::ongletsClient();
+
+    $ongletsDuBas = array_map(fn (array $o) => [
+        'url' => $urlOnglet($o),
+        'actif' => array_merge($o['actif'], $o['actif_bas'] ?? []),
+        'icone' => $o['icone'],
+        'libelle' => __($o['court']),
+    ], Navigation::ongletsClientDuBas());
+@endphp
 <!DOCTYPE html>
 @include('layouts.partials.html-open')
 <head>
     @include('layouts.partials.head')
 </head>
-<body>
+<body class="avec-onglets-bas">
 <a href="#contenu" class="skip-link">{{ __('navigation.aller_au_contenu') }}</a>
 
-<div class="adm">
+<header class="coque-haut">
+    <div class="coque-haut__in">
+        <x-brand size="sm" :href="route('dashboard')" class="coque-haut__marque" />
 
-    {{-- ===================== COLONNE LATÉRALE ===================== --}}
-    {{-- `offcanvas-md` et non `offcanvas-lg` : la colonne redevient fixe à
-     768px, la rupture `lg` de `$ruptures`, et non à 992px — une borne de
-     Bootstrap qui n'appartient pas à notre échelle.
+        {{-- LES ONGLETS DU HAUT — à partir de 768px. Libellé court jusqu'à
+             1024px, complet au-delà ; le libellé complet reste toujours lu
+             par le lecteur d'écran. --}}
+        <nav class="coque-onglets" aria-label="{{ __('navigation.principale') }}">
+            <ul class="coque-onglets__liste">
+                @foreach ($onglets as $onglet)
+                    @php $actif = request()->routeIs(...$onglet['actif']); @endphp
+                    <li>
+                        <a href="{{ $urlOnglet($onglet) }}"
+                           @class(['coque-onglet', 'is-actif' => $actif])
+                           @if ($actif) aria-current="page" @endif>
+                            <x-client-icon :name="$onglet['icone']" />
+                            <span class="coque-onglet__long">{{ __($onglet['libelle']) }}</span>
+                            <span class="coque-onglet__court" aria-hidden="true">{{ __($onglet['court']) }}</span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </nav>
 
-     LE DÉCALAGE LAISSAIT UN TROU. Le dock disparaît à 768px ; la colonne
-     ne réapparaissait qu'à 992. Entre les deux, aucune navigation visible
-     — seulement un bouton hamburger. Le relevé l'a mesuré. --}}
-    <aside class="adm-side offcanvas-md offcanvas-start" tabindex="-1"
-           id="menuLateral" aria-labelledby="menuLateralTitre">
+        <div class="coque-haut__outils">
+            <x-whatsapp-fab variante="barre" />
 
-        <div class="adm-side__marque" id="menuLateralTitre">
-            <x-brand size="sm" tone="light" :href="route('dashboard')" />
-            <span class="adm-side__portail">{{ __('navigation.coque.espace_client') }}</span>
+            @include('layouts.partials.recherche', [
+                'action' => route('recherche'),
+                'libelle' => __('navigation.coque.rechercher'),
+                'id' => 'rechercheGlobale',
+            ])
+
+            @include('layouts.partials.notifications-menu')
+
+            @include('layouts.partials.menu-compte', ['espace' => 'client'])
         </div>
-
-        @include('layouts.partials.sidebar-links')
-    </aside>
-
-    {{-- ===================== COLONNE PRINCIPALE ===================== --}}
-    <div class="adm-main">
-
-        @php
-            $u = Auth::user();
-            $initiales = collect(explode(' ', $u->name))
-                ->take(2)
-                ->map(fn ($mot) => mb_strtoupper(mb_substr($mot, 0, 1)))
-                ->implode('');
-        @endphp
-
-        {{-- PLUS DE HAMBURGER.
-             Il vivait ici, en haut à gauche — le coin le plus éloigné du
-             pouce sur un téléphone — et faisait double emploi avec le dock.
-             Son rôle est repris par l'entrée « Plus » du dock, en bas. --}}
-        <header class="adm-top">
-            <span class="adm-top__section">{{ __('navigation.coque.section_client') }}</span>
-
-            {{-- Recherche : formulaire GET, terme en query string.
-                 Partageable, rechargeable, sans JavaScript. --}}
-            <form method="GET" action="{{ route('recherche') }}" class="adm-search" role="search">
-                <label for="rechercheGlobale" class="visually-hidden">{{ __('navigation.coque.rechercher') }}</label>
-                <svg class="adm-search__icone" width="15" height="15" viewBox="0 0 16 16"
-                     fill="currentColor" aria-hidden="true">
-                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                </svg>
-                <input type="search" id="rechercheGlobale" name="q" class="adm-search__champ"
-                       value="{{ request('q') }}" placeholder="{{ __('navigation.coque.rechercher') }}" autocomplete="off">
-            </form>
-
-            <div class="adm-top__actions">
-                @include('layouts.partials.notifications-menu')
-
-                <x-language-toggle />
-                <x-theme-toggle />
-
-                <div class="dropdown">
-                    <button class="adm-top__user" type="button" id="menuCompte"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="d-none d-sm-inline">{{ $u->name }}</span>
-                        {{-- LA PHOTO DU COMPTE, ou les initiales à défaut.
-                             Le repli est le cas NORMAL : la plupart des comptes
-                             n'importeront jamais d'image, et deux lettres sur un
-                             rond sont une identité suffisante. --}}
-                        @if ($avatarUrl = $u->avatarUrl())
-                            <img src="{{ $avatarUrl }}" alt="" class="adm-avatar adm-avatar--photo"
-                                 width="32" height="32" loading="lazy">
-                        @else
-                            <span class="adm-avatar" aria-hidden="true">{{ $initiales }}</span>
-                        @endif
-                    </button>
-
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuCompte">
-                        <li><span class="dropdown-item-text small text-secondary">{{ $u->email }}</span></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ route('compte.edit') }}">{{ __('navigation.coque.mon_compte') }}</a></li>
-
-                        {{-- Passerelle vers l'administration, pour les seuls
-                             comptes qui en ont une. Elle n'apparaît pas
-                             ailleurs : un client ne doit pas deviner qu'un
-                             back-office existe. --}}
-                        @if ($u->isAdmin())
-                            <li><a class="dropdown-item" href="{{ route('admin.home') }}">{{ __('navigation.coque.administration') }}</a></li>
-                        @endif
-
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="dropdown-item text-danger">{{ __('navigation.coque.se_deconnecter') }}</button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </header>
-
-        {{-- Bandeau d'essai : une ligne, alarmant seulement sur les trois
-             derniers jours. Propre à l'espace client. --}}
-        @php $sub = $u->activeSubscription(); @endphp
-        @if ($sub && $sub->isTrial() && ($restants = $sub->daysRemaining()) !== null)
-            <div class="app-trial {{ $restants <= 3 ? 'is-urgent' : '' }}">
-                {{-- trans_choice et non une concaténation : l'anglais ne place
-                     ni le pluriel ni les mots dans le même ordre. --}}
-                <span>{{ trans_choice('navigation.essai.restants', $restants, ['compte' => $restants]) }}</span>
-                <a href="{{ route('abonnement.paiement') }}">{{ __('navigation.essai.mettre_a_jour') }}</a>
-            </div>
-        @endif
-
-        <main id="contenu" class="adm-content">
-            <div class="adm-page">
-                {{-- AUCUN EN-TÊTE POSÉ ICI, contrairement à la coque
-                     d'administration. Les dix écrans clients portent déjà
-                     leur propre <h1> — « Mon profil », « Mon QR Code »,
-                     « Votre carte est prête ». En ajouter un second donnerait
-                     deux titres sur chaque page, et deux titres de niveau 1
-                     désorientent un lecteur d'écran autant qu'un œil.
-
-                     Le `title` passé au composant sert la balise <title> du
-                     navigateur, pas l'affichage. --}}
-                <x-flash />
-
-                {{ $slot }}
-            </div>
-        </main>
     </div>
-</div>
+</header>
 
-{{-- ESPACE CLIENT — le message est déduit de l'écran exact : étape 2 de la
-     création, paiement, QR Code, statistiques. C'est ce qui permet à l'équipe
-     de savoir où la personne était sans avoir à le lui demander. --}}
-{{-- LE DOCK — navigation permanente sous 768px.
-     Cinq destinations : c'est exactement ce que compte l'espace client,
-     donc aucune n'est reléguée. Le panneau latéral reste accessible par
-     le bouton de la barre supérieure pour l'aide et la déconnexion. --}}
-{{-- LES LIBELLÉS VIENNENT DE `navigation.client.court.*`, PAS DE LA COLONNE.
-     Le dock reprenait les libellés longs : à 320px, « Tableau de bord »,
-     « Mon QR Code » et « Mon abonnement » s'affichaient tronqués — trois
-     entrées sur cinq. Voir le commentaire dans lang/fr/navigation.php. --}}
-<x-dock jeu="client" panneau="menuLateral" :entrees="[
-    ['route' => 'dashboard',    'icone' => 'grille',   'libelle' => __('navigation.client.court.tableau_de_bord')],
-    ['route' => 'profil.index', 'icone' => 'personne', 'libelle' => __('navigation.client.court.mon_profil')],
-    ['route' => 'carte.qr',     'icone' => 'qr',       'libelle' => __('navigation.client.court.mon_qr')],
-    ['route' => 'statistiques', 'icone' => 'courbe',   'libelle' => __('navigation.client.court.statistiques')],
-]" />
+{{-- Bandeau d'essai : une ligne, alarmant seulement sur les trois derniers
+     jours. Propre à l'espace client. --}}
+@php $sub = $u->activeSubscription(); @endphp
+@if ($sub && $sub->isTrial() && ($restants = $sub->daysRemaining()) !== null)
+    <div class="app-trial {{ $restants <= 3 ? 'is-urgent' : '' }}">
+        <span>{{ trans_choice('navigation.essai.restants', $restants, ['compte' => $restants]) }}</span>
+        <a href="{{ route('abonnement.paiement') }}">{{ __('navigation.essai.mettre_a_jour') }}</a>
+    </div>
+@endif
 
-<x-whatsapp-fab />
+<main id="contenu" class="coque-contenu">
+    <div class="coque-page">
+        <x-flash />
+
+        {{ $slot }}
+    </div>
+</main>
+
+{{-- LA BARRE D'ONGLETS DU BAS — sous 768px. Cinq destinations, libellés
+     courts (huit caractères au plus, mesurés à 320px). --}}
+<x-barre-onglets jeu="client" :entrees="$ongletsDuBas" />
 </body>
 </html>

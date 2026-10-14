@@ -1,24 +1,25 @@
 {{--
-  x-breadcrumb — fil d'Ariane.
+  x-breadcrumb — le fil d'Ariane.
 
-  <x-breadcrumb :items="[
-      ['label' => 'Tableau de bord', 'url' => route('dashboard')],
-      ['label' => 'Mon profil'],
-  ]" />
+      <x-breadcrumb :items="[
+          ['label' => 'Clients', 'url' => route('admin.clients.index')],
+          ['label' => 'Awa Ndiaye'],
+      ]" />
 
-  Props : items (tableau de ['label' => ..., 'url' => ...]).
-  Le dernier élément, sans url, est marqué comme page courante.
+  Le dernier élément est la page courante (aria-current), sans lien. Les
+  séparateurs sont des chevrons décoratifs, cachés au lecteur d'écran.
 --}}
 @props(['items' => []])
 
 @if (count($items))
     <nav aria-label="{{ __('common.divers.fil_ariane') }}">
-        <ol class="breadcrumb">
+        <ol class="fil">
             @foreach ($items as $item)
                 @php $isLast = $loop->last || empty($item['url']); @endphp
-
-                <li class="breadcrumb-item {{ $isLast ? 'active' : '' }}"
-                    @if ($isLast) aria-current="page" @endif>
+                <li @if ($isLast) aria-current="page" @endif>
+                    @unless ($loop->first)
+                        <x-icone name="chevron-right" />
+                    @endunless
                     @if (! $isLast)
                         <a href="{{ $item['url'] }}">{{ $item['label'] }}</a>
                     @else

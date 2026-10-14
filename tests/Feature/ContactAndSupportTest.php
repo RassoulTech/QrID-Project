@@ -330,6 +330,12 @@ class ContactAndSupportTest extends TestCase
     // =======================================================================
     // LE BOUTON WHATSAPP
     // =======================================================================
+    //
+    // Classe `aide-wa` depuis la direction A : le bouton ne flotte plus (il
+    // recouvrait du contenu). Il vit DANS la page — icône « ? » de la barre
+    // des espaces connectés, pied de page de la vitrine, bas des écrans
+    // d'accès. Ces tests gardent ce qu'ils protégeaient : l'aide est
+    // présente partout où l'on peut être bloqué, et son lien est correct.
 
     public function test_the_whatsapp_button_is_present_on_the_landing_page(): void
     {
@@ -337,7 +343,7 @@ class ContactAndSupportTest extends TestCase
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('wa-fab', false)
+            ->assertSee('aide-wa', false)
             ->assertSee('https://wa.me/221773831364', false);
     }
 
@@ -349,7 +355,7 @@ class ContactAndSupportTest extends TestCase
 
         $this->actingAs($user)->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('wa-fab', false);
+            ->assertSee('aide-wa', false);
     }
 
     /**
@@ -362,7 +368,7 @@ class ContactAndSupportTest extends TestCase
     {
         config(['landing.support.whatsapp' => '']);
 
-        $this->get(route('home'))->assertOk()->assertDontSee('wa-fab', false);
+        $this->get(route('home'))->assertOk()->assertDontSee('aide-wa', false);
     }
 
     /**
@@ -469,7 +475,7 @@ class ContactAndSupportTest extends TestCase
         foreach (['login', 'register', 'password.request'] as $ecran) {
             $this->get(route($ecran))
                 ->assertOk()
-                ->assertSee('wa-fab', false);
+                ->assertSee('aide-wa', false);
         }
     }
 

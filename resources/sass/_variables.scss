@@ -42,15 +42,20 @@ $light:     $c-surelev;
 $dark:      $c-texte;
 
 $body-color:   $c-texte;
-$body-bg:      $c-carte;
+$body-bg:      $c-page;
 $border-color: $c-bordure;
+
+// Les liens de Bootstrap (`.btn-link`, `.alert-link`…) prennent la feuille,
+// l'accent de texte de la direction A.
+$link-color:   $c-lien;
 
 // -----------------------------------------------------------------------------
 // Typographie
 // -----------------------------------------------------------------------------
 $font-family-sans-serif: $font;
 $font-size-base:   1rem;
-$line-height-base: 1.6;
+$line-height-base: typo(body, interligne);
+$headings-font-weight: typo(h2, graisse);
 
 // -----------------------------------------------------------------------------
 // Formes
@@ -59,9 +64,17 @@ $border-radius:    rayon(sm);
 $border-radius-lg: rayon(md);
 $border-radius-xl: rayon(lg);
 
+$border-radius-sm:   rayon(xs);
+$border-radius-pill: rayon(full);
+
 $box-shadow-sm: $c-ombre-1;
-$box-shadow:    $c-ombre-3;
+$box-shadow:    $c-ombre-2;
 $box-shadow-lg: $c-ombre-4;
+
+// Le contour de focus de Bootstrap (halo bleu) cède la place au nôtre,
+// posé par le socle : 3px latérite, décalé de 2px.
+$focus-ring-width:   0;
+$input-btn-focus-width: 0;
 
 // -----------------------------------------------------------------------------
 // Interdits du concept — « ni dégradé décoratif, ni ombre lourde »

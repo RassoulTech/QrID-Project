@@ -244,15 +244,23 @@ class ClientAreaMatrixTest extends TestCase
             $html = $this->get(route($route))->assertOk()->getContent();
 
             /*
-             | Le motif ne suppose PAS l'ordre des attributs : depuis la fusion
-             | des deux coques, `href` précède `class` dans le partial. Un motif
-             | qui l'imposait a échoué sur un simple déplacement d'attribut,
-             | alors que le comportement testé n'avait pas bougé d'un pouce.
+             | Le motif ne suppose PAS l'ordre des attributs : `href` précède
+             | `class` dans la coque. Depuis la direction A, la navigation du
+             | client est une rangée d'onglets (`coque-onglet`) en haut et une
+             | barre ancrée en bas (`onglets-bas__lien`) : l'entrée « Mon
+             | profil » doit être allumée sur LES DEUX, sinon l'une des deux
+             | surfaces perd son repère au milieu du parcours.
              */
             $this->assertMatchesRegularExpression(
-                '/<a[^>]*href="[^"]*profil[^"]*"[^>]*class="[^"]*adm-nav__lien is-active/',
+                '/<a[^>]*href="[^"]*profil[^"]*"[^>]*class="[^"]*coque-onglet is-actif/',
                 $html,
-                "L'entrée « Mon profil » devrait être active sur {$route}."
+                "L'onglet « Mon profil » devrait être actif sur {$route}."
+            );
+
+            $this->assertMatchesRegularExpression(
+                '/<a[^>]*href="[^"]*profil[^"]*"[^>]*class="[^"]*onglets-bas__lien is-actif/',
+                $html,
+                "L'entrée « Profil » de la barre du bas devrait être active sur {$route}."
             );
         }
     }

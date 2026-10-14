@@ -65,3 +65,9 @@
 // LE DOCK APRÈS LE SOCLE : il consomme ses tokens et ses
 // fonctions, et doit gagner sur les règles de coque.
 @import "dock";
+
+// LES FEUILLES DE PAGE DE LA REFONTE « TERANGA », EN DERNIER : elles
+// composent des écrans à partir du socle et doivent gagner sur les
+// règles historiques sans surenchère.
+@import "p-accueil";
+@import "p-client";

@@ -34,6 +34,11 @@ return [
         'comment_ca_marche' => 'How it works',
         'metiers' => 'Professions served',
         'contact' => 'Contact',
+        'fonctionnement' => 'How it works',
+        'carte_pvc' => 'PVC card',
+        'exemple' => 'Example',
+        'aide' => 'Help',
+        'se_connecter' => 'Sign in',
     ],
 
     'coque' => [
@@ -49,6 +54,18 @@ return [
         'deconnexion' => 'Sign out',
         'retour_espace_client' => 'Back to my client area',
         'aide' => 'Help',
+
+        // Shell A (lot 1) — top bar, menus that work without JavaScript.
+        'menu_compte' => 'Account menu',
+        'connecte' => 'Signed in',
+        'role_client' => 'Client area',
+        'role_admin' => 'Administrator',
+        'preferences' => 'Display',
+        'aide_whatsapp' => 'A question? Write to us on WhatsApp',
+        'aide_court' => 'A question?',
+        'lancer_recherche' => 'Search',
+        'fermer_menu' => 'Close the menu',
+        'fil_ariane' => 'Breadcrumb',
     ],
 
     'sections' => [
@@ -66,6 +83,19 @@ return [
         'mon_profil' => 'My profile',
         'mon_qr' => 'My QR code',
         'mon_abonnement' => 'My subscription',
+        /*
+         | TOP TABS (desktop) — six destinations, full labels. The list and
+         | its order live in App\Support\Navigation.
+         */
+        'onglet' => [
+            'tableau_de_bord' => 'Dashboard',
+            'statistiques' => 'Statistics',
+            'mon_profil' => 'My profile',
+            'mon_qr' => 'My QR code',
+            'abonnement' => 'Subscription',
+            'compte' => 'Account',
+        ],
+
 
         /*
          | SHORT DOCK LABELS — see the French file for the measurement.
@@ -77,6 +107,7 @@ return [
             'mon_qr' => 'Card',
             'statistiques' => 'Stats',
             'mon_abonnement' => 'Plan',
+            'compte' => 'Account',
         ],
     ],
 
@@ -94,6 +125,8 @@ return [
         'etat_systeme' => 'System health',
         'retour' => 'Back',
         'en_construction' => 'Screen under construction',
+        'tag' => 'Admin',
+        'a_verifier' => ':compte payment to verify|:compte payments to verify',
 
         /* Short dock labels — eight characters maximum. */
         'court' => [
@@ -130,11 +163,20 @@ return [
         'confidentialite' => 'Privacy',
         'mentions' => 'Legal notice',
         'conditions' => 'Terms and conditions',
+
+        // Footer A (lot 1).
+        'description' => 'The digital business card for professionals in Senegal: a PVC card, a QR code, a page in your name.',
+        'produit' => 'Product',
+        'aide' => 'Help',
+        'exemple_carte' => 'Card example',
+        'nous_ecrire' => 'Write to us',
+        'paiement' => 'Payment: Wave · Orange Money · Free Money · in FCFA',
     ],
 
     'dock' => [
         'aria' => 'Main navigation',
         'en_attente' => ':compte item pending|:compte items pending',
         'plus' => 'More',
+        'fermer' => 'Close',
     ],
 ];

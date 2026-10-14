@@ -1,50 +1,19 @@
 // =============================================================================
-// THÈMES CLAIR ET SOMBRE
-//
-// La palette passe par des VARIABLES CSS, pas par des variables Sass : celles
-// de Sass sont figées à la compilation et ne peuvent pas basculer à l'exécution.
-// Chaque couleur de surface a donc un jeton, redéclaré sous .theme-dark.
-//
-// La classe est posée par le SERVEUR sur <html>, d'après users.theme. Aucun
-// éclair blanc au chargement, et la bascule fonctionne sans JavaScript.
-//
-// CONTRASTES — tous vérifiés au-delà de 4,5:1 pour le texte :
-//   clair  · texte #0A1F1A sur #FFFFFF ......... 17,4:1
-//            secondaire #5C6B66 sur #FFFFFF .....  5,6:1
-//            secondaire #5C6B66 sur #F2F3F1 .....  5,2:1
-//   sombre · texte #E8EDEB sur #0F1714 ......... 14,1:1
-//            secondaire #9BB0A8 sur #0F1714 .....  7,3:1
-//            secondaire #9BB0A8 sur #16211D .....  6,6:1
-// =============================================================================
-
-// =============================================================================
-// ALIAS — les noms historiques, branchés sur les tokens
+// THÈMES CLAIR ET SOMBRE — les alias historiques
 // =============================================================================
 //
-// CE FICHIER NE CONTIENT PLUS AUCUNE VALEUR. Toutes sont dans
-// `_tokens.scss`, qui est la source unique.
+// La palette passe par des PROPRIÉTÉS CSS : une variable Sass est figée à la
+// compilation et ne peut pas basculer. La classe `theme-dark` est posée par
+// le SERVEUR sur <html> (App\Support\Theme) : aucun éclair blanc, et la
+// bascule fonctionne sans JavaScript.
 //
-// ─────────────────────────────────────────────────────────────────────────
-// POURQUOI DES ALIAS PLUTÔT QU'UN RENOMMAGE
-// ─────────────────────────────────────────────────────────────────────────
-// Ces noms sont employés dans 448 lignes de `_carte-publique.scss` et dans
-// une dizaine d'autres feuilles. Les renommer aurait été un chantier
-// séparé, avec son propre risque de régression, pour un gain nul : un
-// alias coûte zéro octet une fois compilé, et fait converger les deux
-// systèmes immédiatement.
+// CE FICHIER NE CONTIENT AUCUNE VALEUR. Il branche les noms historiques
+// (`--surface`, `--accent`, `--bord`…), employés par les feuilles de pages,
+// sur les jetons de `_tokens.scss`. Un alias ne coûte rien une fois compilé
+// et fait converger les deux vocabulaires.
 //
-// ─────────────────────────────────────────────────────────────────────────
-// CE QUE LA FUSION CORRIGE
-// ─────────────────────────────────────────────────────────────────────────
-// Cinq noms étaient déclarés DEUX FOIS — --texte, --texte-2, --danger,
-// --ombre-1, --ombre-2 — dans deux fichiers importés l'un après l'autre.
-// C'est le dernier qui gagnait, donc la valeur appliquée dépendait de
-// l'ordre des @import. Un ordre d'import n'est pas une décision de design.
-//
-// Deux valeurs changent au passage, et dans le bon sens :
-//   · --texte-2 en thème clair : #5C6B66 -> #42524C (5,03:1 -> 7,42:1)
-//   · --texte-2 en thème sombre : #9BB0A8 -> #B8C7C1 (7,04:1 -> 8,40:1)
-//
+// Les contrastes sont mesurés et notés dans `_tokens.scss`, pas ici : une
+// mesure recopiée finit toujours par mentir.
 // =============================================================================
 
 :root {
@@ -59,41 +28,27 @@
   --bord-fort:      var(--bordure-f);
 
   // ── Marque ─────────────────────────────────────────────────────────────
-  // --accent porte le vert FONCÉ : c'est lui qui sert de fond de bouton.
-  // --accent-vif porte le vert moyen, réservé aux traits et aux icônes —
-  // il ne passe pas 4,5:1 sous du blanc, mesuré à 3,37:1.
+  // --accent porte le vert de FOND de bouton (baobab / menthe claire).
+  // --accent-vif porte la menthe, réservée aux traits et remplissages.
   --accent:         var(--marque);
   --accent-doux:    var(--marque-doux);
   --accent-vif:     var(--accent-trait);
   --accent-survol:  var(--marque-survol);
 
-  // RÈGLE INCHANGÉE : partout où --accent sert de FOND, le texte prend
-  // --sur-accent. C'est le jeton dont l'absence avait produit un compteur
-  // d'onglets invisible sur la moitié des écrans.
+  // Partout où --accent sert de FOND, le texte prend --sur-accent.
   --sur-accent:     var(--texte-inv-marque);
 
   // ── Teintes de catégorie ───────────────────────────────────────────────
-  // Décoratives : elles n'accueillent jamais de texte long. La première
-  // rejoint la marque, les trois autres restent des teintes propres.
-  --pastel-1:       var(--marque-doux);
+  // Décoratives : elles portent une icône ou un chiffre court. Elles
+  // reprennent les teintes A — vert, info, or pâle, terre, or.
+  --pastel-1:       var(--teinte-vert);
   --pastel-2:       var(--info-fond);
   --pastel-3:       var(--alerte-fond);
-  --pastel-4:       #{$pastel-violet};
-
-  // La cinquième porte les PARTAGES. Teinte propre et non reprise de la
-  // marque : les partages ne sont pas une consultation de plus, et la
-  // couleur doit le dire avant le libellé.
-  --pastel-5:       #{$pastel-ambre};
+  --pastel-4:       var(--teinte-terre);
+  --pastel-5:       var(--teinte-or);
 }
 
 .theme-dark {
-  --pastel-4:       #{$pastel-violet-sombre};
-  --pastel-5:       #{$pastel-ambre-sombre};
-
-  // Les barres de défilement et les champs natifs suivent le thème. Sans
-  // cette ligne, un sélecteur de date ouvert en thème sombre s'affiche en
-  // blanc éclatant au milieu d'une page sombre.
-  color-scheme: dark;
   background-color: var(--page);
 }
 
@@ -106,37 +61,25 @@
 // -----------------------------------------------------------------------------
 // Bascule de thème — un bouton dans un formulaire, jamais un lien
 // -----------------------------------------------------------------------------
-// Le formulaire ne sert qu'à porter le POST : il ne doit occuper aucune place
-// propre dans les barres où il est posé.
+// Le formulaire ne sert qu'à porter le POST : il n'occupe aucune place propre.
 .theme-form{
   display:inline-flex;
   margin:0;
   line-height:0;
 }
 
+// Le bouton-icône de la coque : carré à coins de 12, filet, fond de carte.
 .theme-toggle{
   display:inline-grid;
   place-items:center;
-  width:36px;height:36px;
-  border:1px solid var(--bord);
-  border-radius:$r-full;
-  background:var(--surface);
-  color:var(--texte-2);
+  width:$tactile-min;height:$tactile-min;
+  border:1px solid var(--bordure);
+  border-radius:rayon(sm);
+  background:var(--carte);
+  color:var(--texte);
   cursor:pointer;
 
-  &:hover{color:var(--texte);background:var(--survol)}
-  &:focus-visible{outline:2px solid var(--accent-vif);outline-offset:2px}
-}
-
-// L'en-tête d'administration est sombre en permanence, indépendamment du
-// thème : le bouton y prend les couleurs de la barre, pas celles des jetons.
-.admin-topbar__theme .theme-toggle{
-  border-color:rgba(255,255,255,.22);
-  background:transparent;
-  color:rgba(255,255,255,.75);
-
-  &:hover{background:rgba(255,255,255,.10);color:#fff}
-  &:focus-visible{outline-color:#fff}
+  &:hover{background:var(--surelev)}
 }
 
 // -----------------------------------------------------------------------------
@@ -146,5 +89,5 @@
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:1rem;
+  gap:esp(4);
 }

@@ -1,53 +1,28 @@
 // =============================================================================
-// QrID — SOCLE
+// QrID — SOCLE — les composants partagés, direction A « Teranga »
 // =============================================================================
 //
-// LA COUCHE QUI FAIT EXISTER LES TOKENS.
+// LA COUCHE QUI FAIT EXISTER LES TOKENS sur le balisage réel. Une seule
+// apparence par objet : un bouton, un champ, un cachet, une alerte, une
+// carte — quelle que soit la famille de classes historique qui le désigne
+// (`.btn-pill`, `.btn--vert`, `.adm-btn`, `.btn-primary`…).
 //
-// L'étape précédente a posé `_tokens.scss` : des variables que RIEN ne
-// consommait. Le rendu n'avait donc pas bougé d'un pixel, ce qui était
-// exact mais inutile. Ce fichier est la contrepartie : il branche les
-// tokens sur le balisage réel.
+// POURQUOI IL EST IMPORTÉ EN DERNIER : Bootstrap et les feuilles de pages
+// déclarent déjà ces sélecteurs. À spécificité égale, le dernier déclaré
+// gagne — le socle l'emporte par l'ordre, jamais par `!important`.
 //
-// ─────────────────────────────────────────────────────────────────────────
-// CE QU'IL RÉPARE, ET POURQUOI IL EST NÉCESSAIRE
-// ─────────────────────────────────────────────────────────────────────────
-// L'audit a relevé, sur le balisage réellement employé dans les vues :
-//
-//   · QUATRE systèmes de boutons  — .btn-pill, .btn--vert, .btn--clair,
-//     et les .btn-* de Bootstrap ;
-//   · CINQ systèmes de champs     — .f__control (parcours de création),
-//     .form-control (Bootstrap brut, via x-input), .adm-champ, .adm-select,
-//     .auth-fields.
-//
-// Deux composants Blade voisins produisent donc deux apparences
-// différentes pour le même objet. `x-field` rend `.f__control` ;
-// `x-input` rend du Bootstrap non habillé. C'est la cause directe du
-// « rien ne se ressemble » : ce n'est pas un défaut de goût, c'est un
-// défaut de plomberie.
-//
-// Le socle les ramène tous sur UNE apparence, décrite une seule fois.
-//
-// ─────────────────────────────────────────────────────────────────────────
-// POURQUOI IL EST IMPORTÉ EN DERNIER
-// ─────────────────────────────────────────────────────────────────────────
-// Bootstrap et les feuilles historiques déclarent déjà ces sélecteurs.
-// À spécificité égale, c'est le dernier déclaré qui gagne. Importer le
-// socle en fin de chaîne évite d'avoir à surenchérir en `!important` —
-// et un projet qui commence à empiler des `!important` a perdu le
-// contrôle de sa cascade.
-//
+// POUR COMPOSER UN ÉCRAN, voir docs/DESIGN.md : les classes ci-dessous sont
+// l'API. Une page qui réinvente un bouton ou un badge réintroduit le
+// « rien ne se ressemble » que ce fichier supprime.
 // =============================================================================
 
 
 // =============================================================================
-// 1. LE SHELL — la page prend enfin ses couleurs du thème
+// 1. LE SHELL — la page prend ses couleurs du thème
 // =============================================================================
 
 html {
-  // La propagation du fond : <html> transparent laisse le canvas prendre
-  // celui de <body>. On le pose ici pour que le rebond élastique d'iOS
-  // ne découvre pas une bande blanche sous une page sombre.
+  // Le rebond élastique d'iOS ne découvre pas une bande blanche.
   background: var(--page);
   -webkit-text-size-adjust: 100%;
 }
@@ -58,11 +33,11 @@ body {
   font-family: $font;
   font-size: typo(body);
   line-height: typo(body, interligne);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 
-  // AUCUN ESPACE MORT : le fond du thème couvre toute la hauteur, quelle
-  // que soit la quantité de contenu. Sans ça, une page courte laisse un
-  // bloc blanc résiduel en bas — le défaut le plus visible d'un thème
-  // sombre mal posé.
+  // Le fond du thème couvre toute la hauteur : une page courte ne laisse
+  // pas de bloc résiduel en bas.
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -71,16 +46,15 @@ body {
 .bg-white,
 .bg-light { background: var(--carte) !important; }
 
-::selection { background: var(--marque); color: #FFFFFF; }
+::selection { background: var(--marque); color: var(--texte-inv-marque); }
 
 
 // =============================================================================
-// 2. TYPOGRAPHIE — l'échelle, appliquée
+// 2. TYPOGRAPHIE — l'échelle A, appliquée
 // =============================================================================
 //
-// L'audit a relevé 41 tailles de police distinctes, dont 12,5px employé
-// 40 fois. Neuf tailles nommées les remplacent, chacune avec sa valeur
-// mobile et sa valeur bureau.
+// display 72/850 · H1 44/820 · H2 36/800 · H3 22/760 · chapô 20 · corps 16 ·
+// surtitre 13/650 en capitales. Valeurs mobiles réduites, lecture ≥ 16 px.
 
 @each $nom, $balise in (h1: 'h1', h2: 'h2', h3: 'h3') {
   #{$balise}, .t-#{$nom} {
@@ -95,9 +69,10 @@ body {
 }
 
 h4, h5, h6 {
-  font-size: typo(h3);
-  font-weight: typo(h3, graisse);
+  font-size: typo(body-lg);
+  font-weight: 700;
   line-height: typo(h3, interligne);
+  letter-spacing: -.01em;
   color: var(--texte);
 }
 
@@ -109,39 +84,74 @@ h4, h5, h6 {
   @include ecran(lg) { font-size: typo(display, bureau); }
 }
 
-.t-lead    { font-size: typo(body-lg); line-height: typo(body-lg, interligne); color: var(--texte-2); }
+// Le chapô.
+.t-lead {
+  font-size: typo(body-lg);
+  line-height: typo(body-lg, interligne);
+  color: var(--texte-2);
+  @include ecran(lg) { font-size: typo(body-lg, bureau); }
+}
+
 .t-sm      { font-size: typo(body-sm); line-height: typo(body-sm, interligne); }
 .t-caption { font-size: typo(caption); color: var(--texte-2); }
+
+// Le surtitre neutre (en-tête de tuile, colonne de tableau).
 .t-over {
   font-size: typo(overline);
   font-weight: typo(overline, graisse);
   letter-spacing: typo(overline, espacement);
+  line-height: typo(overline, interligne);
   text-transform: uppercase;
-  color: var(--texte-3);
+  color: var(--texte-2);
 }
 
+// Le surtitre de section — la latérite, seconde voix (signature 6), avec
+// sa courte lisière.
+.t-surtitre {
+  display: inline-flex;
+  align-items: center;
+  gap: esp(3);
+  font-size: typo(overline);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--terre);
+
+  &::before {
+    content: "";
+    flex: 0 0 auto;
+    width: $lisiere-l-fine + $lisiere-h * 1.5;
+    height: $lisiere-h-fine;
+    border-radius: rayon(xs);
+    background: var(--motif-lisiere) repeat-x 0 0 / #{$lisiere-l-fine} #{$lisiere-h-fine};
+  }
+}
+
+// Les chiffres qui se comparent : tabulaires (signature 5).
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
 // Les utilitaires de texte de Bootstrap, ramenés sur les tokens : ils
-// écrivaient des gris fixes qui devenaient illisibles en thème sombre.
+// écrivaient des gris fixes illisibles en thème sombre.
 .text-muted,
-.text-secondary { color: var(--texte-3) !important; }
+.text-secondary { color: var(--texte-2) !important; }
 .text-body      { color: var(--texte) !important; }
 .text-success   { color: var(--succes) !important; }
 .text-danger    { color: var(--danger) !important; }
 .text-warning   { color: var(--alerte) !important; }
 .text-info      { color: var(--info) !important; }
 
-a { color: var(--marque); text-decoration-thickness: 1px; text-underline-offset: 2px; }
-a:hover { color: var(--marque); }
+// Le lien de texte : la feuille (clair), la menthe (sombre). Aucun
+// soulignement (loi 8) — la couleur et la graisse distinguent.
+a { color: var(--lien); }
+a:hover { color: var(--lien); }
 
 hr { border-color: var(--bordure); opacity: 1; }
 
 code, kbd, samp, pre {
-  // #D63384 sur fond sombre donnait 4,05:1 — sous le seuil. La couleur
-  // d'information passe les deux thèmes.
   color: var(--info);
   background: var(--surelev);
-  padding: 2px 6px;
-  border-radius: rayon(sm);
+  padding: esp(1) esp(2);
+  border-radius: rayon(xs);
   font-size: .9em;
 }
 pre { padding: esp(3); }
@@ -149,17 +159,16 @@ pre code { background: none; padding: 0; }
 
 
 // =============================================================================
-// 3. LE FOCUS — visible, et le même partout
+// 3. LE FOCUS — 3px plein, latérite (or sur sombre et sur vert)
 // =============================================================================
 //
 // Un contour de focus n'est pas une décoration : c'est la seule chose qui
-// dit où l'on est quand on navigue au clavier. Bootstrap en pose un bleu
-// qui n'a rien à voir avec la charte ; on le remplace partout.
+// dit où l'on est au clavier. Il n'est jamais vert : un contour vert sur un
+// bouton vert ne se voit pas.
 
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--marque);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
-  border-radius: rayon(sm);
 }
 
 // On ne supprime le contour par défaut que là où l'on en repose un.
@@ -169,8 +178,11 @@ pre code { background: none; padding: 0; }
 
 
 // =============================================================================
-// 4. BOUTONS — quatre familles, une seule apparence
+// 4. BOUTONS — principal baobab, secondaire, discret, danger
 // =============================================================================
+//
+// Rayon 10, hauteur 48 (44 en petit, 56 en grand), graisse 600, 16px. La
+// couleur du texte ne change dans AUCUN état (loi 7) : seul le fond bouge.
 
 %bouton {
   display: inline-flex;
@@ -178,94 +190,124 @@ pre code { background: none; padding: 0; }
   justify-content: center;
   gap: esp(2);
 
-  // 44px est le minimum tactile (WCAG 2.5.5). Le bouton du menu n'en
-  // faisait que 34, et un menu qu'on rate une fois sur trois n'est pas
-  // un menu.
-  min-height: $tactile-min;
-  padding: esp(3) esp(5);
+  min-height: $bouton-hauteur;
+  padding: esp(2) esp(5);
 
   font-family: $font;
-  font-size: typo(body-sm);
+  font-size: typo(body);
   font-weight: 600;
   line-height: 1.2;
+  letter-spacing: -.005em;
   text-align: center;
   text-decoration: none;
   white-space: nowrap;
 
-  border: 1px solid transparent;
-  border-radius: rayon(full);
+  border: 1.5px solid transparent;
+  border-radius: rayon(sm);
   cursor: pointer;
 
-  // Uniquement transform et opacity : aucun décalage de mise en page.
   transition: background-color $d-rapide $courbe,
               border-color $d-rapide $courbe,
               color $d-rapide $courbe,
-              transform $d-rapide $courbe,
-              box-shadow $d-normal $courbe;
+              transform $d-rapide $courbe;
+
+  .icone { flex: 0 0 auto; }
 
   &:disabled,
-  &.disabled {
+  &.disabled,
+  &.is-disabled {
     opacity: .55;
     cursor: not-allowed;
     transform: none;
   }
 
-  // L'enfoncement au clic : 1px, et seulement au clic. C'est le retour
-  // qui manque le plus sur mobile, où il n'y a pas de survol.
+  // L'enfoncement au clic : 1px, le seul retour qui existe au doigt.
   &:active:not(:disabled) { transform: translateY(1px); }
+
+  // L'ENVOI EN COURS — posé par `envoi-unique.js` (aria-busy). Le bouton
+  // garde sa taille ; une roue tourne à côté du libellé. Sans JavaScript,
+  // rien ne change : le formulaire part, la page suivante répond.
+  &[aria-busy="true"] {
+    cursor: progress;
+
+    &::after {
+      content: "";
+      flex: 0 0 auto;
+      width: 1em;
+      height: 1em;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: rayon(full);
+      animation: tourne $d-carte linear infinite;
+    }
+  }
 }
 
-// ── La variante pleine ───────────────────────────────────────────────────
+@keyframes tourne { to { transform: rotate(360deg); } }
+
+// ── Principal : le baobab (menthe claire en sombre) ────────────────────────
 %bouton-plein {
   background: var(--marque);
   border-color: var(--marque);
-  // Le texte inversé est calculé : blanc sur le vert foncé du thème clair
-  // (12,51:1), vert-très-sombre sur le vert remonté du thème sombre
-  // (7,04:1). Un blanc fixe donnerait 1,5:1 en sombre.
-  color: var(--texte-inv-marque);
+  color: var(--texte-inv-marque);           // 12,19:1 clair · 9,69:1 sombre
 
   &:hover:not(:disabled) {
     background: var(--marque-survol);
     border-color: var(--marque-survol);
     color: var(--texte-inv-marque);
-    box-shadow: var(--ombre-2);
   }
 }
 
-// ── La variante contour ──────────────────────────────────────────────────
+// ── Secondaire : ivoire, filet marqué ──────────────────────────────────────
 %bouton-contour {
-  // Le fond est TRANSPARENT, pas blanc. Un fond blanc figé donnait, en
-  // thème sombre, du texte clair sur du blanc : 1,18:1. Le défaut ne se
-  // voyait que dans un thème, celui qu'on regarde le moins.
-  background: transparent;
+  background: var(--carte);
   border-color: var(--bordure-f);
   color: var(--texte);
 
   &:hover:not(:disabled) {
     background: var(--surelev);
-    border-color: var(--marque);
+    border-color: var(--bordure-f);
     color: var(--texte);
   }
 }
 
+// ── Discret : un lien qui a la taille d'un bouton ──────────────────────────
 %bouton-discret {
   background: transparent;
   border-color: transparent;
-  color: var(--texte-2);
-  &:hover:not(:disabled) { background: var(--surelev); color: var(--texte); }
+  color: var(--lien);
+  padding-inline: esp(3);
+
+  &:hover:not(:disabled) { background: var(--surelev); color: var(--lien); }
 }
 
+// ── Danger : la seule action rouge, réservée à l'irréversible ──────────────
 %bouton-danger {
   background: var(--danger);
   border-color: var(--danger);
-  color: #FFFFFF;
-  &:hover:not(:disabled) { filter: brightness(1.08); color: #FFFFFF; }
+  color: var(--sur-danger);                 // 7,28:1 clair · 9,18:1 sombre
+
+  &:hover:not(:disabled) { filter: brightness(.94); color: var(--sur-danger); }
 }
 
-// ── Le raccordement des quatre familles ──────────────────────────────────
-// Chaque nom historique retombe sur la même apparence. Aucun n'est
-// renommé : renommer 46 occurrences de `.btn` dans les vues aurait été
-// un chantier séparé, avec son propre risque de régression.
+// ── Sur une couverture verte : ivoire plein, ou contour ivoire ─────────────
+%bouton-ivoire {
+  background: var(--sur-couverture);
+  border-color: var(--sur-couverture);
+  color: var(--couverture);
+
+  &:hover:not(:disabled) { background: var(--surelev); color: var(--couverture); }
+}
+
+%bouton-contour-ivoire {
+  background: transparent;
+  border-color: rgba($sur-couverture, .5);
+  color: var(--sur-couverture);
+
+  &:hover:not(:disabled) { background: rgba($sur-couverture, .08); color: var(--sur-couverture); }
+}
+
+// ── Le raccordement des familles historiques ───────────────────────────────
 .btn,
 .btn-pill,
 .adm-btn { @extend %bouton; }
@@ -278,32 +320,49 @@ pre code { background: none; padding: 0; }
 .adm-btn--primaire { @extend %bouton-plein; }
 
 .btn-pill.btn-outline,
+.btn-outline,
+.btn-secondary,
 .btn-outline-secondary,
 .btn-outline-primary,
-.btn-light,
 .btn--clair,
 .adm-btn--clair { @extend %bouton-contour; }
 
-.btn-ghost-light,
 .btn-link,
+.btn-quiet,
 .adm-btn--discret { @extend %bouton-discret; }
 
 .btn-danger,
 .btn--danger,
 .adm-btn--danger { @extend %bouton-danger; }
 
+.btn-light,
+.btn-ivoire { @extend %bouton-ivoire; }
+
+.btn-ghost-light,
+.btn-contour-ivoire { @extend %bouton-contour-ivoire; }
+
+// Le petit : 44px, jamais moins (loi 5).
 .btn-sm,
 .btn-sm-pill,
 .adm-btn--sm {
-  min-height: 38px;
+  min-height: $tactile-min;
   padding: esp(2) esp(4);
-  font-size: typo(caption);
+  font-size: typo(body-sm);
 }
 
 .btn-lg {
-  min-height: 56px;
-  padding: esp(4) esp(7);
-  font-size: typo(body);
+  min-height: $bouton-hauteur-lg;
+  padding: esp(3) esp(7);
+  font-size: typo(body-lg);
+}
+
+// Le bouton-icône : 44×44, une icône, un nom accessible (aria-label).
+.btn-icone {
+  @extend %bouton;
+  @extend %bouton-contour;
+  width: $tactile-min;
+  min-height: $tactile-min;
+  padding: 0;
 }
 
 .btn-block,
@@ -311,59 +370,54 @@ pre code { background: none; padding: 0; }
 
 
 // =============================================================================
-// 5. CHAMPS — cinq familles, une seule apparence
+// 5. CHAMPS — 52px, contour #8F826C 1,5px, focus latérite 3px
 // =============================================================================
 
 %champ {
   display: block;
   width: 100%;
 
-  // 48px sur mobile : la hauteur confortable au pouce. En dessous, on
-  // vise, et viser un champ est le meilleur moyen d'abandonner un
-  // formulaire.
   min-height: $champ-hauteur;
   padding: esp(3) esp(4);
 
   font-family: $font;
-  // 16px EXACTEMENT, et ce n'est pas négociable : en dessous, iOS zoome
-  // tout seul à la mise au point et la page part de travers. Le zoom ne
-  // se défait pas ; l'utilisateur se retrouve à faire défiler
-  // horizontalement un formulaire.
-  font-size: 16px;
+  // 16px EXACTEMENT : en dessous, iOS zoome à la mise au point.
+  font-size: typo(body);
   line-height: 1.4;
   color: var(--texte);
 
-  background: var(--carte);
-  border: 1px solid var(--bordure-f);
-  border-radius: rayon(md);
+  background: var(--champ-fond);
+  // 3,29:1 sur sable — WCAG 1.4.11 exige 3:1 pour délimiter une saisie.
+  border: 1.5px solid var(--champ-bord);
+  border-radius: rayon(sm);
 
   transition: border-color $d-rapide $courbe,
               box-shadow $d-rapide $courbe,
               background-color $d-rapide $courbe;
 
+  // Un marque-place n'est jamais atténué : il se lit (5,98:1 sur ivoire).
   &::placeholder { color: var(--texte-3); opacity: 1; }
 
-  &:hover:not(:disabled):not(:focus) { border-color: var(--marque); }
-
   &:focus {
-    outline: none;
-    border-color: var(--marque);
-    // Le halo remplace le contour : il suit le rayon du champ, ce qu'un
-    // outline ne fait pas toujours sur les anciens moteurs.
-    box-shadow: 0 0 0 3px var(--marque-halo);
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+    border-color: var(--champ-bord);
+    box-shadow: none;
   }
 
   &:disabled,
   &[readonly] {
     background: var(--surelev);
-    color: var(--texte-3);
+    color: var(--texte-2);
     cursor: not-allowed;
   }
 
+  // L'erreur : bordure danger ET halo teinté — jamais la couleur seule, le
+  // message sous le champ porte l'icône et le texte.
   &.is-invalid,
   &[aria-invalid="true"] {
     border-color: var(--danger);
-    &:focus { box-shadow: 0 0 0 3px var(--danger-halo); }
+    box-shadow: 0 0 0 3px var(--danger-fond);
   }
 }
 
@@ -383,29 +437,20 @@ textarea { @extend %champ; }
 
 textarea {
   min-height: 120px;
-  padding-top: esp(3);
+  padding-block: esp(3);
   resize: vertical;
 }
 
 
-// ── Selects — la flèche est à nous ───────────────────────────────────────
-//
-// La flèche native est dessinée par le système : elle ignore le thème et
-// reste noire sur fond sombre. On la remplace par un chevron en fond,
-// décliné pour chaque thème — une image encodée ne peut pas lire une
-// propriété CSS, il en faut donc deux.
+// ── Selects — la flèche est à nous, déclinée par thème ─────────────────────
 
 %select {
   @extend %champ;
   appearance: none;
-
-  // PROPRIÉTÉS LOGIQUES, pas physiques. `padding-inline-end` suit le sens
-  // d'écriture ; `padding-right` le fige. Le reste du socle emploie déjà
-  // les logiques — cette règle était la seule à ne pas le faire.
   padding-inline-end: esp(9);
   background-repeat: no-repeat;
   background-position: right esp(4) center;
-  background-size: 14px;
+  background-size: 20px;
   cursor: pointer;
 }
 
@@ -414,11 +459,13 @@ textarea {
 .adm-select,
 select { @extend %select; }
 
+// Une image encodée ne lit pas une propriété CSS : deux chevrons, aux
+// couleurs du texte secondaire de chaque thème.
 :root {
-  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230A1F1A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2356605A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 .theme-dark {
-  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EAF1EE' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ABB3AB' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
 .f__select,
@@ -426,10 +473,9 @@ select { @extend %select; }
 .adm-select,
 select { background-image: var(--chevron); }
 
-// LES OPTIONS SONT DESSINÉES PAR LE SYSTÈME, PAS PAR NOUS. On ne peut
-// leur imposer que la couleur et le fond ; sans ces deux lignes, une
-// liste déroulante ouverte en thème sombre affiche du texte clair sur
-// fond clair sous Windows.
+// Les options sont dessinées par le système : on ne leur impose que la
+// couleur et le fond, sans quoi une liste ouverte en sombre affiche du
+// texte clair sur fond clair sous Windows.
 select option,
 .form-select option,
 .f__select option {
@@ -437,32 +483,19 @@ select option,
   color: var(--texte);
 }
 
-/*
- | LES GROUPES ET LES OPTIONS INACTIVES.
- |
- | Le sélecteur d'indicatif met l'Afrique de l'Ouest en tête : c'est
- | exactement un cas d'`optgroup`, et il n'était pas habillé. Le titre d'un
- | groupe non stylé s'affiche en italique gras dans une teinte que le
- | système choisit — souvent illisible en thème sombre.
- |
- | Une option DÉSACTIVÉE est le marque-place : il nomme l'action, il n'est
- | pas une réponse valable. Il doit donc se distinguer sans disparaître.
- */
 select optgroup,
 .f__select optgroup {
   background: var(--carte);
-  color: var(--texte-3);
+  color: var(--texte-2);
   font-style: normal;
   font-weight: 700;
 }
 
 select option:disabled,
-.f__select option:disabled {
-  color: var(--texte-3);
-}
+.f__select option:disabled { color: var(--texte-3); }
 
 
-// ── Libellés, aides, erreurs ─────────────────────────────────────────────
+// ── Libellés, aides, erreurs ───────────────────────────────────────────────
 
 .f__label,
 .form-label,
@@ -475,47 +508,46 @@ label.form-label {
   color: var(--texte);
 }
 
-// L'astérisque est ROUGE et porte le rouge du token, pas celui de
-// Bootstrap : #DC3545 sur fond clair passe tout juste, et échoue sur
-// certaines surfaces.
 .f__requis,
 .form-label .text-danger { color: var(--danger); font-weight: 700; }
 
 .f__opt,
 .optional {
   margin-left: esp(1);
-  font-size: typo(caption);
+  font-size: typo(body-sm);
   font-weight: 400;
-  color: var(--texte-3);
+  color: var(--texte-2);
 }
 
+// L'aide : 15px, 16 sur téléphone (lecture ≥ 16).
 .f__hint,
 .form-text,
 .adm-aide {
   display: block;
   margin-top: esp(2);
-  font-size: typo(caption);
-  color: var(--texte-3);
+  font-size: typo(body);
+  color: var(--texte-2);
+
+  @include ecran(lg) { font-size: typo(body-sm); }
 }
 
-// L'ERREUR EST SOUS SON CHAMP, jamais regroupée en haut. Un message
-// d'erreur loin de sa cause oblige à chercher lequel des douze champs
-// est concerné.
+// L'ERREUR EST SOUS SON CHAMP, jamais regroupée en haut.
 .f__error,
 .invalid-feedback,
 .adm-erreur {
   display: block;
   margin-top: esp(2);
-  font-size: typo(caption);
+  font-size: typo(body);
   font-weight: 500;
   color: var(--danger);
+
+  @include ecran(lg) { font-size: typo(body-sm); }
 }
 
 .f,
 .mb-3 { margin-bottom: esp(5); }
 
-// SUR MOBILE, ON EMPILE. Deux colonnes en dessous de 640px donnent des
-// champs de 140px de large où plus rien n'est lisible.
+// SUR MOBILE, ON EMPILE.
 .f-duo,
 .form-duo {
   display: grid;
@@ -524,70 +556,128 @@ label.form-label {
 }
 
 
-// ── Cases et boutons radio ───────────────────────────────────────────────
+// ── Cases et boutons radio — 24px, coins de 6 ──────────────────────────────
 
 .form-check-input {
-  width: 20px;
-  height: 20px;
-  margin-top: .15em;
-  background-color: var(--carte);
-  border: 1px solid var(--bordure-f);
+  width: 24px;
+  height: 24px;
+  margin-top: 0;
+  flex: 0 0 auto;
+  background-color: var(--champ-fond);
+  border: 1.5px solid var(--champ-bord);
   cursor: pointer;
   transition: background-color $d-rapide $courbe, border-color $d-rapide $courbe;
 
+  &[type="checkbox"] { border-radius: rayon(xs); }
+
   &:checked { background-color: var(--marque); border-color: var(--marque); }
-  &:focus-visible { box-shadow: 0 0 0 3px var(--marque-halo); }
+  &:focus { box-shadow: none; border-color: var(--champ-bord); }
+  &:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+}
+
+// La coche en sombre : encre profonde sur la menthe, pas blanc.
+.theme-dark .form-check-input:checked[type="checkbox"] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%230B1A15' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
 }
 
 .form-check-label,
 .form-check label {
   color: var(--texte);
   cursor: pointer;
-  // La zone tactile couvre le libellé, pas seulement la case de 20px.
   padding: esp(1) 0;
 }
 
-.form-check { min-height: $tactile-min; display: flex; align-items: center; gap: esp(2); }
+.form-check {
+  min-height: $tactile-min;
+  display: flex;
+  align-items: center;
+  gap: esp(3);
+  padding-left: 0;
+
+  .form-check-input { float: none; margin-left: 0; }
+}
+
+// L'interrupteur garde sa pilule.
+.form-switch .form-check-input { width: 44px; border-radius: rayon(full); }
 
 
 // =============================================================================
-// 6. SURFACES — cartes, panneaux, listes
+// 6. SURFACES — cartes (16), tuiles (24), panneaux (32)
 // =============================================================================
+//
+// `.card` DÉSIGNE AUSSI LA CARTE DE VISITE PVC dans `_card.scss` : celle-ci
+// porte toujours `.light` ou `.dark`, et le socle l'exclut.
 
-/*
- | `.card` DÉSIGNE DEUX CHOSES DANS CE PROJET, ET C'EST LA COLLISION.
- |
- |   · ici, une SURFACE D'INTERFACE : un panneau blanc, arrondi, bordé ;
- |   · dans `_card.scss`, la CARTE DE VISITE PVC — un objet physique, au
- |     format CR80, dont les angles sont presque droits.
- |
- | Le socle est importé en dernier : à spécificité égale il gagnait, et
- | imposait donc `rayon(lg)` — 22px — à la carte de visite. Mesuré sur le
- | tableau de bord : une face de 142px de large portait 22px de rayon, soit
- | 15,5 % de sa largeur, là où une vraie carte CR80 est à 3,7 %. Quatre fois
- | trop arrondie, sur toutes les surfaces qui montrent la carte.
- |
- | La carte de visite porte TOUJOURS `.light` ou `.dark` — c'est ce qui
- | décide de sa variante. On l'exclut donc ici, et le socle cesse d'habiller
- | un objet qui ne lui appartient pas.
- */
 .card:not(.light):not(.dark),
 .adm-fiche,
 .adm-carte,
 .panneau {
   background: var(--carte);
   border: 1px solid var(--bordure);
-  border-radius: rayon(lg);
+  border-radius: rayon(md);
+  box-shadow: var(--ombre-1);
   color: var(--texte);
 }
 
 .card-body { padding: esp(6); }
 
-// L'élévation au survol ne s'applique QU'AUX cartes cliquables. Une
-// carte qui se soulève sans être cliquable ment sur ce qu'elle est.
+// LA TUILE — la brique du tableau de bord (rayon 24, 28px de marge).
+.tuile {
+  position: relative;
+  padding: esp(5);
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+  border-radius: rayon(lg);
+  box-shadow: var(--ombre-1);
+  color: var(--texte);
+
+  @include ecran(lg) { padding: esp(7) - esp(1); }
+}
+
+.tuile__tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: esp(4);
+  margin-bottom: esp(5);
+  flex-wrap: wrap;
+}
+
+.tuile__titre {
+  margin: 0;
+  font-size: typo(body-lg);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--texte);
+}
+
+// La tuile verte (abonnement, offre) : couverture + claustra.
+.tuile--couverture {
+  background-color: var(--couverture);
+  background-image: var(--motif-claustra);
+  background-size: $claustra-pas $claustra-pas;
+  border-color: transparent;
+  color: var(--sur-couverture);
+  --focus: var(--sur-couverture-accent);
+
+  .tuile__titre { color: var(--sur-couverture); }
+}
+
+// La tuile de grès : un aplat, sans trait ni ombre.
+.tuile--gres {
+  background: var(--surelev);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+// Le grand panneau (rayon 32).
+.tuile--panneau { border-radius: rayon(xl); }
+
+// L'élévation au survol ne s'applique QU'AUX cartes cliquables.
 a.card,
 .card--cliquable,
-.adm-fiche--cliquable {
+.adm-fiche--cliquable,
+a.tuile {
   text-decoration: none;
   transition: transform $d-normal $courbe, box-shadow $d-normal $courbe,
               border-color $d-normal $courbe;
@@ -595,16 +685,30 @@ a.card,
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--ombre-3);
-    border-color: var(--marque);
+    border-color: var(--bordure-f);
   }
+}
+
+// Le lien fléché (« Toutes les statistiques → »).
+.lien-fleche {
+  display: inline-flex;
+  align-items: center;
+  gap: esp(2);
+  min-height: $tactile-min;
+  font-weight: 600;
+  color: var(--lien);
+  text-decoration: none;
+
+  .icone { width: 18px; height: 18px; transition: transform $d-rapide $courbe; }
+  &:hover { color: var(--lien); .icone { transform: translateX(2px); } }
 }
 
 .dropdown-menu,
 .adm-menu {
   background: var(--carte);
-  border: 1px solid var(--bordure-f);
+  border: 1px solid var(--bordure);
   border-radius: rayon(md);
-  box-shadow: var(--ombre-3);
+  box-shadow: var(--ombre-2);
   padding: esp(2);
   color: var(--texte);
 }
@@ -616,17 +720,15 @@ a.card,
   min-height: $tactile-min;
   display: flex;
   align-items: center;
-  transition: background-color $d-rapide $courbe, transform $d-rapide $courbe;
+  gap: esp(3);
+  transition: background-color $d-rapide $courbe;
 
   &:hover,
-  &:focus {
-    background: var(--surelev);
-    color: var(--texte);
-    // Le décalage de 2px sur une ligne de liste : assez pour se voir,
-    // trop peu pour déranger la lecture.
-    transform: translateX(2px);
-  }
+  &:focus { background: var(--surelev); color: var(--texte); }
 }
+
+.dropdown-divider { border-color: var(--bordure); opacity: 1; }
+.dropdown-item-text { color: var(--texte-2); }
 
 .offcanvas,
 .modal-content {
@@ -635,76 +737,111 @@ a.card,
   border-color: var(--bordure);
 }
 
+.modal-content {
+  border-radius: rayon(lg);
+  box-shadow: var(--ombre-4);
+}
+
 .offcanvas-header,
 .modal-header,
 .modal-footer { border-color: var(--bordure); }
 
-// Le bouton de fermeture de Bootstrap est une image noire : invisible
-// sur fond sombre. On l'inverse plutôt que de le redessiner.
+.modal-header { padding: esp(5) esp(6); }
+.modal-body   { padding: esp(6); }
+.modal-footer { padding: esp(4) esp(6); gap: esp(2); }
+
+.modal-title {
+  font-size: typo(h3);
+  font-weight: typo(h3, graisse);
+  letter-spacing: typo(h3, espacement);
+}
+
+// Le voile d'une modale : l'encre, pas le noir de Bootstrap.
+.modal-backdrop { background-color: var(--texte); }
+
+// Le bouton de fermeture de Bootstrap est une image noire : invisible en
+// sombre. On l'inverse plutôt que de le redessiner.
 .theme-dark .btn-close { filter: invert(1) grayscale(1) brightness(2); }
 
+.btn-close {
+  width: $tactile-min;
+  height: $tactile-min;
+  padding: 0;
+  background-size: 14px;
+  border-radius: rayon(sm);
+  opacity: .8;
+}
+
 
 // =============================================================================
-// 7. BADGES — le défaut le plus grave de l'audit
+// 7. BADGES « CACHET » — fond teinté + bordure 1px + rayon 6 + icône + libellé
 // =============================================================================
 //
-// `.badge.text-bg-light` gardait son fond clair #F2F3F1 Y COMPRIS en
-// thème sombre, et écrivait dessus les couleurs d'état de Bootstrap.
-// Mesuré : « En attente » en #FFC107 sur #F2F3F1 donnait 1,46:1 —
-// illisible, affiché 23 fois sur trois écrans dont la liste des
-// paiements.
-//
-// Chaque teinte est maintenant calculée pour passer 4,5:1 sur son
-// propre fond doux, dans les deux thèmes.
+// Signature 4. La couleur ne porte JAMAIS seule l'information : l'icône et
+// le libellé disent la même chose (Réussi ✓, En attente ◷, Échoué ✕).
+// Chaque texte est mesuré sur SON fond teinté, dans les deux thèmes.
 
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: esp(1);
-  padding: esp(1) esp(3);
-  border-radius: rayon(full);
-  font-size: typo(caption);
+  gap: esp(1) + 2px;
+  min-height: 28px;
+  padding: esp(1) esp(3) esp(1) esp(2);
+  border: 1px solid var(--neutre-trait);
+  border-radius: rayon(xs);
+  background: var(--neutre-fond);
+  color: var(--neutre);
+  font-size: typo(overline);
   font-weight: 600;
-  line-height: 1.4;
+  letter-spacing: .01em;
+  line-height: 1.1;
   white-space: nowrap;
-  border: 1px solid transparent;
+  vertical-align: middle;
+
+  .icone { width: 14px; height: 14px; stroke-width: 2.4; }
 }
 
 @each $nom in (succes, alerte, danger, info, neutre) {
   .badge--#{$nom} {
     background: var(--#{$nom}-fond);
+    border-color: var(--#{$nom}-trait);
     color: var(--#{$nom});
   }
+}
+
+// Le cachet « premium » (offre Standard) : or.
+.badge--or {
+  background: var(--teinte-or);
+  border-color: var(--or);
+  color: var(--or-texte);
+}
+
+// Le cachet posé sur une couverture verte (« Actif »).
+.badge--couverture {
+  background: rgba($sur-couverture, .1);
+  border-color: rgba($sur-couverture, .28);
+  color: var(--sur-couverture);
 }
 
 // Les noms de Bootstrap, ramenés sur les mêmes valeurs.
 .badge.text-bg-light,
 .badge.bg-light,
-.badge.text-bg-secondary { background: var(--neutre-fond) !important; color: var(--neutre) !important; }
+.badge.text-bg-secondary { background: var(--neutre-fond) !important; color: var(--neutre) !important; border-color: var(--neutre-trait); }
 .badge.text-bg-success,
-.badge.bg-success        { background: var(--succes-fond) !important; color: var(--succes) !important; }
+.badge.bg-success        { background: var(--succes-fond) !important; color: var(--succes) !important; border-color: var(--succes-trait); }
 .badge.text-bg-warning,
-.badge.bg-warning        { background: var(--alerte-fond) !important; color: var(--alerte) !important; }
+.badge.bg-warning        { background: var(--alerte-fond) !important; color: var(--alerte) !important; border-color: var(--alerte-trait); }
 .badge.text-bg-danger,
-.badge.bg-danger         { background: var(--danger-fond) !important; color: var(--danger) !important; }
+.badge.bg-danger         { background: var(--danger-fond) !important; color: var(--danger) !important; border-color: var(--danger-trait); }
 .badge.text-bg-info,
-.badge.bg-info           { background: var(--info-fond) !important; color: var(--info) !important; }
+.badge.bg-info           { background: var(--info-fond) !important; color: var(--info) !important; border-color: var(--info-trait); }
 .badge.text-bg-primary,
-.badge.bg-primary        { background: var(--marque-doux) !important; color: var(--marque) !important; }
+.badge.bg-primary        { background: var(--marque-doux) !important; color: var(--lien) !important; border-color: var(--succes-trait); }
 
 
 // =============================================================================
-// 7 bis. L'ÉTAT VIDE — il n'avait aucune classe
+// 7 BIS. L'ÉTAT VIDE — dire ce qui manque, donner l'action qui le comble
 // =============================================================================
-//
-// `x-empty-state` existait comme composant, mais SANS CSS dédié : chaque
-// page réinventait son vide, avec son espacement et sa taille d'icône.
-// L'audit a compté zéro racine pour cette famille — la seule à n'en avoir
-// aucune.
-//
-// Un état vide n'est pas une page ratée : c'est le PREMIER écran d'un
-// compte neuf. Il doit dire ce qui manque et donner l'action qui le
-// comble.
 
 .etat-vide {
   display: grid;
@@ -719,60 +856,97 @@ a.card,
   height: esp(10);
   display: grid;
   place-items: center;
-  border-radius: rayon(full);
-  background: var(--marque-doux);
-  color: var(--marque);
+  border-radius: rayon(lg);
+  background: var(--teinte-vert);
+  color: var(--lien);
+
+  .icone { width: 28px; height: 28px; }
 }
 
 .etat-vide__titre {
   margin: 0;
   font-size: typo(h3);
   font-weight: typo(h3, graisse);
+  letter-spacing: typo(h3, espacement);
   color: var(--texte);
 }
 
 .etat-vide__texte {
   margin: 0;
   max-width: 46ch;
-  font-size: typo(body-sm);
-  line-height: typo(body-sm, interligne);
-  color: var(--texte-3);
+  font-size: typo(body);
+  line-height: typo(body, interligne);
+  color: var(--texte-2);
 }
 
 .etat-vide__action { margin-top: esp(2); }
 
 
 // =============================================================================
-// 8. MESSAGES
+// 8. ALERTES — le cachet en grand : fond teinté, trait, bande, icône
 // =============================================================================
+//
+// Le texte courant reste à l'ENCRE du thème (13,1:1 au pire) ; seuls
+// l'icône et le titre prennent la couleur d'état. Une bande de 6px à gauche
+// signe l'état sans dépendre de la couleur du texte.
 
 .alert,
 .alerte {
+  position: relative;
   display: flex;
+  align-items: flex-start;
   gap: esp(3);
-  padding: esp(4) esp(5);
+  padding: esp(4) esp(5) esp(4) esp(6);
   border-radius: rayon(md);
-  border: 1px solid transparent;
-  font-size: typo(body-sm);
-  line-height: 1.55;
+  border: 1px solid var(--info-trait);
+  background: var(--info-fond);
+  color: var(--texte);
+  font-size: typo(body);
+  line-height: typo(body, interligne);
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: esp(1) + 2px;
+    background: var(--alerte-bande, var(--info));
+  }
+
+  > .icone,
+  .alerte__icone { flex: 0 0 auto; margin-top: 2px; color: var(--alerte-encre, var(--info)); }
+
+  strong { color: var(--texte); font-weight: 700; }
+  .alerte__titre { display: block; color: var(--texte); font-weight: 700; }
+
+  a:not(.btn):not(.btn-pill) { color: var(--texte); font-weight: 600; }
 }
 
-@each $nom in (succes, alerte, danger, info) {
+@each $nom, $bande in (succes: succes, alerte: or, danger: danger, info: info) {
   .alerte--#{$nom} {
     background: var(--#{$nom}-fond);
-    color: var(--#{$nom});
-    border-color: var(--#{$nom});
+    border-color: var(--#{$nom}-trait);
+    --alerte-bande: var(--#{$bande});
+    --alerte-encre: var(--#{$nom});
   }
 }
 
-.alert-success { background: var(--succes-fond); color: var(--succes); border-color: var(--succes); }
-.alert-warning { background: var(--alerte-fond); color: var(--alerte); border-color: var(--alerte); }
-.alert-danger  { background: var(--danger-fond); color: var(--danger); border-color: var(--danger); }
-.alert-info    { background: var(--info-fond);  color: var(--info);  border-color: var(--info); }
+.alert-success { background: var(--succes-fond); border-color: var(--succes-trait); --alerte-bande: var(--succes); --alerte-encre: var(--succes); color: var(--texte); }
+.alert-warning { background: var(--alerte-fond); border-color: var(--alerte-trait); --alerte-bande: var(--or);     --alerte-encre: var(--alerte); color: var(--texte); }
+.alert-danger  { background: var(--danger-fond); border-color: var(--danger-trait); --alerte-bande: var(--danger); --alerte-encre: var(--danger); color: var(--texte); }
+.alert-info    { background: var(--info-fond);   border-color: var(--info-trait);   --alerte-bande: var(--info);   --alerte-encre: var(--info);   color: var(--texte); }
+
+.alert .btn-close,
+.alerte .btn-close {
+  flex: 0 0 auto;
+  margin-top: -(esp(2));
+  margin-right: -(esp(2));
+  margin-left: auto;
+}
 
 
 // =============================================================================
-// 9. TABLEAUX — et leur bascule en cartes sur mobile
+// 9. TABLEAUX — en-têtes en surtitre, lignes à filet, défilement contenu
 // =============================================================================
 
 .table,
@@ -782,17 +956,19 @@ a.card,
   border-color: var(--bordure);
 
   th {
-    font-size: typo(overline);
+    font-size: typo(overline) - 1px;
     font-weight: 700;
-    letter-spacing: typo(overline, espacement);
+    letter-spacing: .1em;
     text-transform: uppercase;
-    color: var(--texte-3);
-    border-bottom: 1px solid var(--bordure-f);
+    color: var(--texte-2);
+    background: var(--page);
+    border-bottom: 1px solid var(--bordure);
     padding: esp(3) esp(4);
+    white-space: nowrap;
   }
 
   td {
-    padding: esp(4);
+    padding: esp(3) esp(4);
     border-bottom: 1px solid var(--bordure);
     vertical-align: middle;
   }
@@ -801,46 +977,358 @@ a.card,
     transition: background-color $d-rapide $courbe;
     &:hover { background: var(--surelev); }
   }
+
+  // Les montants et références : tabulaires.
+  .num, .montant { font-variant-numeric: tabular-nums; font-weight: 700; }
+}
+
+// Bootstrap colore les cellules par une variable : on la ramène au thème.
+.table > :not(caption) > * > * {
+  background-color: transparent;
+  color: inherit;
+  border-bottom-color: var(--bordure);
 }
 
 
 // =============================================================================
-// 10. LE MÉDAILLON DE MARQUE — 3,37:1 sur dix-huit pages
+// 10. L'INDICATEUR CHIFFRÉ — gros chiffres tabulaires (signature 5)
 // =============================================================================
-//
-// Il écrivait du blanc sur le vert ACCENT. Le vert accent est une
-// couleur de trait, pas un fond de texte : #FFFFFF dessus plafonne à
-// 3,37:1, et l'assombrir assez pour passer le changerait de couleur.
-//
-// On inverse : fond vert FONCÉ, blanc dessus, 12,51:1. Un seul endroit,
-// dix-huit pages corrigées.
 
-.brand__mark {
-  background: $vert-fonce !important;
-  color: #FFFFFF !important;
-}
-.theme-dark .brand__mark {
-  background: var(--marque) !important;
-  color: var(--texte-inv-marque) !important;
+.indic {
+  display: grid;
+  gap: esp(1);
+  min-width: 0;
 }
 
-// Le nom de la marque reprenait le vert foncé sur fond sombre : 1,32:1.
-.theme-dark .brand__name { color: var(--texte); }
+.indic__libelle {
+  display: flex;
+  align-items: center;
+  gap: esp(2);
+  font-size: typo(caption);
+  font-weight: 600;
+  color: var(--texte-2);
+
+  .icone { width: 18px; height: 18px; color: var(--lien); }
+}
+
+.indic__valeur {
+  margin-top: esp(1);
+  font-size: map-get($chiffre, mobile);
+  font-weight: map-get($chiffre, graisse);
+  letter-spacing: map-get($chiffre, espacement);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  color: var(--texte);
+
+  @include ecran(lg) { font-size: map-get($chiffre, bureau); }
+
+  small {
+    margin-left: esp(1);
+    font-size: typo(body-sm);
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+}
+
+// La tendance porte une FLÈCHE et un signe : jamais la couleur seule.
+.indic__tendance {
+  display: inline-flex;
+  align-items: center;
+  gap: esp(1);
+  font-size: typo(caption);
+  font-weight: 600;
+  color: var(--texte-2);
+
+  .icone { width: 16px; height: 16px; stroke-width: 2.2; }
+
+  &.is-hausse { color: var(--succes); }
+  &.is-baisse { color: var(--danger); }
+}
+
+.indic__aide { font-size: typo(caption); color: var(--texte-2); }
+
+// L'ancien nom du composant x-stat, ramené sur l'indicateur.
+.stat { @extend .indic; }
+.stat__label { @extend .indic__libelle; }
+.stat__value { @extend .indic__valeur; }
+.stat__trend { @extend .indic__tendance; }
+.stat__trend--up { color: var(--succes); }
+.stat__trend--down { color: var(--danger); }
 
 
 // =============================================================================
-// 10 bis. LES CIBLES TACTILES RELEVÉES DANS LE NAVIGATEUR
+// 11. FIL D'ARIANE
+// =============================================================================
+
+.fil {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: esp(2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: typo(body-sm);
+  color: var(--texte-2);
+
+  li { display: inline-flex; align-items: center; gap: esp(2); }
+
+  .icone { width: 16px; height: 16px; color: var(--texte-3); }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: $tactile-min;
+    color: var(--texte-2);
+    text-decoration: none;
+
+    &:hover { color: var(--texte); }
+  }
+
+  [aria-current="page"] { color: var(--texte); font-weight: 650; }
+}
+
+
+// =============================================================================
+// 12. PAGINATION — cases de 44, page courante en baobab
+// =============================================================================
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: esp(2);
+  margin: 0;
+  padding: 0;
+}
+
+.page-link {
+  display: grid;
+  place-items: center;
+  min-width: $tactile-min;
+  min-height: $tactile-min;
+  padding: 0 esp(3);
+  border: 1px solid var(--bordure);
+  border-radius: rayon(sm);
+  background: var(--carte);
+  color: var(--texte);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+
+  &:hover { background: var(--surelev); color: var(--texte); border-color: var(--bordure-f); }
+  &:focus { box-shadow: none; }
+}
+
+.page-item.active .page-link {
+  background: var(--marque);
+  border-color: var(--marque);
+  color: var(--texte-inv-marque);
+}
+
+.page-item.disabled .page-link {
+  background: var(--page);
+  color: var(--texte-3);
+  border-color: var(--bordure);
+}
+
+.page-item:first-child .page-link,
+.page-item:last-child .page-link { border-radius: rayon(sm); }
+
+.pagination-resume {
+  margin: 0;
+  font-size: typo(body-sm);
+  color: var(--texte-2);
+
+  b { color: var(--texte); font-variant-numeric: tabular-nums; }
+}
+
+
+// =============================================================================
+// 12 BIS. LE BOUTON GOOGLE — un bouton secondaire pleine largeur, logo couleur
 // =============================================================================
 //
-// Mesurées sur le DOM rendu, pas déduites du CSS. Chacune était sous les
-// 44px de la loi 5, et aucune ne se voyait à la lecture du code : c'est
-// la hauteur CALCULÉE qui compte, pas celle qu'on croit avoir écrite.
+// Le logo garde ses quatre couleurs (charte Google) ; le bouton prend nos
+// surfaces en clair, et les trois valeurs imposées par Google en sombre.
 
-// L'onglet Connexion / Créer un compte : 38px de haut.
+.oauth__btn {
+  min-height: $champ-hauteur;
+  padding: esp(3) esp(5);
+  border: 1.5px solid var(--bordure-f);
+  border-radius: rayon(sm);
+  background: var(--carte);
+  font-size: typo(body);
+  font-weight: 600;
+
+  &:hover { border-color: var(--bordure-f); background: var(--surelev); box-shadow: none; }
+
+  &:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}
+
+.theme-dark .oauth__btn {
+  background: $google-sombre-fond;
+  border-color: $google-sombre-trait;
+
+  &, &:link, &:visited, &:hover, &:focus, &:focus-visible, &:active { color: $google-sombre-texte; }
+  &:hover { border-color: $google-sombre-texte; }
+}
+
+
+// =============================================================================
+// 12 TER. LES PIÈCES QUI COMPOSENT LES ÉCRANS
+// =============================================================================
+
+// ── L'icône (x-icone) ──────────────────────────────────────────────────────
+.icone { flex: 0 0 auto; display: inline-block; vertical-align: middle; }
+.icone--sm { width: 16px; height: 16px; }
+.icone--lg { width: 24px; height: 24px; }
+
+// La flèche de tendance « baisse » : la même, tournée.
+.indic__fleche--bas { transform: rotate(90deg); }
+
+// ── Les étapes d'un assistant (x-wizard-progress) ─────────────────────────
+.etapes { display: grid; gap: esp(2); }
+
+.etapes__liste {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: esp(2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.etapes__item {
+  display: inline-flex;
+  align-items: center;
+  gap: esp(2);
+  font-size: typo(body-sm);
+  font-weight: 600;
+  color: var(--texte-2);
+
+  // Le trait entre deux étapes.
+  & + &::before {
+    content: "";
+    width: esp(5);
+    height: 2px;
+    margin-right: esp(1);
+    background: var(--bordure-f);
+  }
+
+  &.is-courante { color: var(--texte); }
+}
+
+.etapes__rang {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: rayon(sm);
+  background: var(--surelev);
+  color: var(--texte-2);
+  font-size: typo(caption);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+
+  .icone { width: 16px; height: 16px; stroke-width: 2.6; }
+
+  .is-faite & { background: var(--marque); color: var(--texte-inv-marque); }
+  .is-courante & { background: var(--carte); color: var(--texte); box-shadow: inset 0 0 0 2px var(--marque); }
+}
+
+// Les libellés d'étape : à partir de 640px — en dessous, le rang écrit suffit.
+.etapes__libelle {
+  display: none;
+  @include ecran(md) { display: inline; }
+}
+
+.etapes__resume {
+  margin: 0;
+  font-size: typo(overline);
+  font-weight: typo(overline, graisse);
+  letter-spacing: typo(overline, espacement);
+  text-transform: uppercase;
+  color: var(--terre);
+}
+
+// ── Le pied de liste (x-pagination) ───────────────────────────────────────
+.pagination-pied {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: esp(3);
+  margin-top: esp(5);
+
+  @include ecran(ms) { flex-direction: row; align-items: center; justify-content: space-between; }
+}
+
+// ── La modale rendue ouverte par le serveur ───────────────────────────────
+.modal--ouverte { background-color: var(--overlay); }
+
+// ── Les pastilles d'opérateur ─────────────────────────────────────────────
+// x-operator-mark (initiales, quand le logo manque) et x-puce-operateur
+// (point + nom). Les couleurs viennent des jetons ; le NOM porte toujours
+// l'information à côté.
+.pay-option__pastille--wave         { background: $marque-wave;   color: $marque-wave-encre; }
+.pay-option__pastille--orange_money { background: $marque-orange; color: $marque-orange-encre; }
+.pay-option__pastille--free_money   { background: $marque-free;   color: $marque-free-encre; }
+
+.puce-op {
+  display: inline-flex;
+  align-items: center;
+  gap: esp(2);
+  min-height: 36px;
+  padding: 0 esp(3);
+  border: 1px solid var(--bordure);
+  border-radius: rayon(full);
+  background: var(--carte);
+  color: var(--texte);
+  font-size: typo(body-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.puce-op--nue {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 500;
+}
+
+.puce-op__point {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: rayon(xs) - 3px;
+  background: var(--texte-2);
+}
+
+.puce-op__point--wave         { background: $marque-wave; }
+.puce-op__point--orange_money { background: $marque-orange; }
+.puce-op__point--free_money   { background: $marque-free; }
+
+// La puce posée sur une couverture verte (offre, pied de page).
+.claustra .puce-op,
+.tuile--couverture .puce-op,
+.site-footer .puce-op {
+  background: rgba($sur-couverture, .08);
+  border-color: rgba($sur-couverture, .25);
+  color: var(--sur-couverture);
+}
+
+
+// =============================================================================
+// 13. LES CIBLES TACTILES RELEVÉES DANS LE NAVIGATEUR
+// =============================================================================
+//
+// Mesurées sur le DOM rendu : chacune était sous les 44px de la loi 5.
+
 .auth-tabs__item { min-height: $tactile-min; }
 
-// La révélation du mot de passe : 34×34. C'est le contrôle qu'on vise le
-// plus mal, parce qu'il est collé au bord droit du champ.
 .f__eye,
 .auth-field__eye {
   min-width: $tactile-min;
@@ -849,30 +1337,25 @@ a.card,
   place-items: center;
 }
 
-// Une entrée du menu de langue : 40px.
 .langue__option { min-height: $tactile-min; }
 
-// La bascule de thème : 36×36, sur neuf pages.
 .theme-toggle {
   min-width: $tactile-min;
   min-height: $tactile-min;
 }
 
-// Un lien de pagination : 34px.
 .pagin__lien { min-height: $tactile-min; }
 
 
 // =============================================================================
-// 11. ANIMATIONS — discrètes, et désactivables
+// 14. ANIMATIONS — discrètes, et désactivables (voir _animations.scss)
 // =============================================================================
 //
-// L'animation accompagne, elle ne se remarque pas. Uniquement `transform`
-// et `opacity` : toute autre propriété force un recalcul de mise en page
-// à chaque image, et le défilement saccade sur un téléphone d'entrée de
-// gamme — exactement l'appareil de la majorité de nos visiteurs.
+// Uniquement `transform` et `opacity` : toute autre propriété force un
+// recalcul de mise en page à chaque image.
 
 @keyframes monte {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(esp(4)); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -880,38 +1363,17 @@ a.card,
   animation: monte $d-normal $courbe both;
 }
 
-// Le décalage progressif : 60ms entre les éléments d'un même groupe.
-// Uniquement sur les blocs principaux — appliqué à chaque ligne de
-// texte, l'effet devient un défaut.
 @for $i from 1 through 8 {
   .anim-entree:nth-child(#{$i}) { animation-delay: #{($i - 1) * 60}ms; }
 }
 
-// LA RÉVÉLATION AU DÉFILEMENT EST VISIBLE PAR DÉFAUT DANS LE HTML.
-// C'est la classe qui MASQUE qui est ajoutée par le script au
-// chargement. Sans JavaScript, la page reste entièrement lisible —
-// l'inverse produirait une page vide chez qui bloque les scripts.
-// La convention est celle du module `scroll-reveal.js`, qui existait
-// déjà : `[data-reveal]` dans le HTML, `.is-hidden` posée par le script.
-// En inventer une seconde aurait ajouté au désordre que ce chantier
-// doit supprimer.
+// LA RÉVÉLATION AU DÉFILEMENT EST VISIBLE PAR DÉFAUT : c'est le script
+// (`scroll-reveal.js`) qui ajoute `.is-hidden` au chargement. Sans
+// JavaScript, la page reste entièrement lisible.
 [data-reveal] {
   transition: opacity $d-lent $courbe, transform $d-lent $courbe;
 }
 [data-reveal].is-hidden {
   opacity: 0;
-  transform: translateY(20px);
-}
-
-// prefers-reduced-motion coupe TOUT, sans exception. Ce n'est pas une
-// préférence esthétique : le mouvement déclenche des nausées chez les
-// personnes sujettes au mal des transports vestibulaire.
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-    scroll-behavior: auto !important;
-  }
-  [data-reveal].is-hidden { opacity: 1; transform: none; }
+  transform: translateY(esp(4));
 }

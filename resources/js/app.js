@@ -30,6 +30,7 @@ import autoFiltre from './modules/auto-filtre';
 import flashAuto from './modules/flash-auto';
 import telephone from './modules/telephone';
 import langue from './modules/langue';
+import menus from './modules/menus';
 import enregistrerContact from './modules/enregistrer-contact';
 import selectRiche from './modules/select-riche';
 import envoiUnique from './modules/envoi-unique';
@@ -52,6 +53,7 @@ const modules = [
     flashAuto,
     telephone,
     langue,
+    menus,
     enregistrerContact,
 
     /* EN DERNIER : il enveloppe les <select> déjà en place, y compris ceux

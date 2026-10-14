@@ -1,124 +1,105 @@
 // =============================================================================
 // ESPACE ADMINISTRATEUR
+// =============================================================================
 //
-// Préfixe `adm-` pour tout. L'espace client utilise `app-` : deux coques
-// distinctes, deux préfixes distincts, et aucune règle de l'une ne peut
-// atteindre l'autre par accident.
+// CE FICHIER A DEUX PROPRIÉTAIRES, et la frontière est marquée plus bas :
 //
-// LA COLONNE LATÉRALE RESTE SOMBRE DANS LES DEUX THÈMES. Ce n'est pas un
-// oubli de la bascule : c'est le repère qui dit « vous gérez la plateforme,
-// pas votre compte ». Une colonne qui blanchirait en thème clair perdrait
-// exactement ce qu'elle sert à dire.
+//   · PARTIE 1 — LA COQUE (lot 1) : la colonne, la barre supérieure, la zone
+//     de contenu, l'en-tête d'écran, l'avatar ;
+//   · PARTIE 2 — LES PAGES (lot 6) : boutons, cartes de chiffres, tableaux,
+//     filtres, fiches, histogrammes.
+//
+// DIRECTION A : la colonne est CLAIRE (ivoire, filets, rubrique active sur
+// fond de grès avec un trait latérite). La marque « ADMIN » en tête de
+// colonne et le fil d'Ariane disent l'espace ; il n'est plus besoin de
+// peindre la moitié de l'écran en vert pour le dire.
 // =============================================================================
 
-$adm-side-w: 248px;
-$adm-top-h: 62px;
 
-// Vert plus profond que $vert-fonce : la colonne doit rester en retrait du
-// contenu, pas rivaliser avec lui.
-// LE VERT DU PANNEAU VIENT DE L'ÉCHELLE.
-//
-// Il valait #0A2A21 — une teinte inventée ici, dans aucun nuancier du
-// projet, et donc impossible à retrouver ailleurs. $vert-900 est le degré
-// le plus profond de la charte : c'est sa place.
-$adm-nuit: $panneau;
+// =============================================================================
+// PARTIE 1 — LA COQUE (lot 1)
+// =============================================================================
+
+$adm-side-w: $colonne-largeur;
+$adm-top-h: $barre-haut-hauteur + esp(2);
 
 .adm {
   display: flex;
-  // 100dvh et non 100vh : sur mobile, 100vh vaut la hauteur AVEC la barre
-  // d'adresse dépliée, ce qui laisse un vide en bas quand elle se replie.
+  // 100dvh et non 100vh : sur mobile, 100vh compte la barre d'adresse.
   min-height: 100dvh;
-  background: var(--surface-2);
+  background: var(--page);
+
+  // La bande de la colonne descend jusqu'au bas de la page, même quand le
+  // contenu est plus long que la colonne (elle est collante, pas étirée).
+  @include ecran(lg) {
+    background: linear-gradient(90deg,
+      var(--carte) 0 $adm-side-w,
+      var(--bordure) $adm-side-w calc(#{$adm-side-w} + 1px),
+      var(--page) calc(#{$adm-side-w} + 1px));
+  }
 }
 
-/*
- | LE CANEVAS PREND LE FOND DE LA COQUILLE, ET NON DU BLANC.
- |
- | <html> ne déclare aucun fond : le canevas — la surface peinte au-delà du
- | contenu — prend donc celui du <body>, qui vaut blanc en dur dans
- | _base.scss. Tant que rien ne dépasse, cela ne se voit pas. Dès qu'un
- | élément déborde d'un pixel, une bande blanche apparaît sous la page, et
- | elle est blanche même en thème sombre.
- |
- | La cause du débordement est corrigée par ailleurs (voir le tableau
- | accessible de activity-chart). Cette règle est la ceinture : quoi qu'il
- | arrive en dessous, la couleur est celle de la page.
- |
- | :has() plutôt qu'une classe sur <body> : les deux coquilles — client et
- | administration — partagent .adm, et une classe de plus serait une chose
- | de plus à ne pas oublier dans un troisième gabarit.
- */
+// Le canevas prend le fond de la coque : un débordement d'un pixel ne
+// découvre jamais une bande d'une autre couleur.
 body:has(> .adm){
-  background: var(--surface-2);
+  background: var(--page);
 }
 
 // -----------------------------------------------------------------------------
-// COLONNE LATÉRALE
+// LA COLONNE — ivoire, filet à droite, collante
 // -----------------------------------------------------------------------------
 .adm-side {
   width: $adm-side-w;
   flex: 0 0 $adm-side-w;
-  color: var(--panneau-texte-2);
   display: flex;
   flex-direction: column;
-  padding:esp(5) esp(4) esp(4);
+  gap: esp(1);
+  padding: esp(5) esp(4) esp(4);
   position: sticky;
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  color: var(--texte);
+  border-right: 1px solid var(--bordure);
 
   /*
    | LE SEUL !important DE CETTE FEUILLE, et il répond à celui de Bootstrap.
    |
-   | L'élément porte `offcanvas-lg` pour se replier sous 992px. Or Bootstrap
-   | écrit, au-dessus de ce seuil :
-   |
-   |     @media (min-width:992px){ .offcanvas-lg{ background-color:#0000!important } }
-   |
-   | La colonne devenait donc TRANSPARENTE sur écran large : le texte blanc
-   | se retrouvait posé sur le fond clair de la page, illisible. Aucune
-   | spécificité ne bat un !important — seul un autre !important le peut.
-   |
-   | Le fond ne suit volontairement pas le thème : cette colonne est le
-   | repère qui distingue « je gère la plateforme » de « je gère mon
-   | compte ». La voir blanchir en thème clair lui ferait perdre son rôle.
+   | L'élément porte `offcanvas-md` pour se replier sous 768px. Au-dessus,
+   | Bootstrap écrit `.offcanvas-md{ background-color:#0000!important }` :
+   | la colonne deviendrait transparente. Aucune spécificité ne bat un
+   | !important — seul un autre !important le peut.
    */
-  background: $adm-nuit !important;
+  background: var(--carte) !important;
 }
 
-/*
-| EN-TÊTE DE COLONNE — pastille, nom, mention.
-|
-| La mention était indentée de 36px pour se glisser sous le nom. Résultat :
-| un bloc de trois éléments alignés sur trois axes différents — pastille à
-| gauche, nom décalé, mention flottant entre les deux — pendant que les
-| entrées du menu en dessous suivaient, elles, un seul axe.
-|
-| Tout part maintenant du MÊME bord gauche que les icônes du menu. Le bloc se
-| lit comme un en-tête, séparé par un trait, et non comme une entrée de menu
-| ratée.
-*/
 .adm-side__marque {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap:esp(2);
-  padding:2px esp(3) esp(5);
-  margin-bottom:esp(4);
-  border-bottom: 1px solid var(--panneau-bord);
+  align-items: center;
+  gap: esp(2);
+  padding: 0 esp(2) esp(4);
+  margin-bottom: esp(2);
+  border-bottom: 1px solid var(--bordure);
 }
 
-.adm-side__portail {
-  font-size:typo(overline);
-  font-weight: 700;
-  letter-spacing: .13em;
+// La marque ADMIN : un cachet latérite — le seul repère d'espace.
+.adm-side__tag {
+  margin-left: auto;
+  padding: esp(1) esp(2);
+  border-radius: rayon(xs);
+  background: var(--teinte-terre);
+  color: var(--terre);
+  font-size: typo(overline) - 1px;
+  font-weight: 750;
+  letter-spacing: .1em;
   text-transform: uppercase;
-  color: var(--panneau-texte-3);
-  // Aucune indentation : la mention s'aligne sur la pastille, pas sur le nom.
 }
+
+// Fermer : sur téléphone seulement (voir _panneau-mobile.scss).
+.adm-side__fermer { display: none; }
 
 // -----------------------------------------------------------------------------
-// NAVIGATION — onze entrées, quatre sections
+// LA NAVIGATION — onze rubriques, quatre sections
 // -----------------------------------------------------------------------------
 .adm-nav {
   display: flex;
@@ -126,47 +107,27 @@ body:has(> .adm){
   flex: 1 1 auto;
 }
 
-// Intitulé de section. Il doit être DISCRET, pas invisible : à 36 % de blanc
-// sur ce vert, il tombait sous 2:1 et disparaissait. `--panneau-texte-2` le
-// tient à 7,64:1 tout en le laissant clairement en retrait des entrées.
+// L'intitulé de section : discret, pas invisible (5,17:1 au pire).
 .adm-nav__titre {
-  margin:esp(4) 0 esp(2);
-  padding:0 esp(3);
-  font-size:typo(overline);
+  margin: esp(4) 0 esp(1);
+  padding: 0 esp(3);
+  font-size: typo(overline) - 1px;
   font-weight: 700;
-  letter-spacing: .15em;
+  letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--panneau-texte-2);
+  color: var(--texte-2);
 
-  &:first-child { margin-top:0; }
+  &:first-child { margin-top: esp(1); }
 }
 
 /*
- | ══════════════════════════════════════════════════════════════════════════
- | CE QUE LE DOCK PORTE DÉJÀ NE SE RÉPÈTE PAS DANS « PLUS ».
- | ══════════════════════════════════════════════════════════════════════════
- | Le défaut corrigé ici était visible à l'œil nu : le dock du bas proposait
- | quatre destinations, et le panneau « Plus » qu'il ouvre rouvrait
- | exactement les quatre mêmes. Le pouce avait deux chemins vers la même
- | page, dont l'un demandait un geste de plus. Un menu « Plus » ne peut
- | contenir que ce qui ne tient PAS ailleurs.
+ | CE QUE LA BARRE DU BAS PORTE DÉJÀ NE SE RÉPÈTE PAS DANS « PLUS ».
  |
- | LA RUPTURE EST CELLE DU DOCK, ET C'EST LA SEULE QUI SOIT JUSTE.
- | `.dock` disparaît à `lg` (_dock.scss). En deçà, le dock existe et ces
- | entrées y sont : le panneau les retire. À partir de `lg`, il n'y a plus
- | de dock du tout, la colonne redevient la navigation entière, et rien
- | n'est masqué. Une rupture différente laisserait, sur une bande de
- | largeurs, soit un doublon soit une destination inatteignable.
- |
- | `display: none` ET NON `visibility` NI UN DÉCALAGE HORS ÉCRAN : le lien
- | doit sortir de l'arbre d'accessibilité, pas seulement de la vue. Un
- | lecteur d'écran qui annoncerait « Tableau de bord » deux fois décrirait
- | une interface qui n'existe pas. La destination n'est pas perdue pour
- | autant — elle est dans le dock, que la synthèse vocale lit aussi.
- |
- | Le titre de section suit le même sort quand TOUTES ses entrées sont dans
- | le dock : sans cela, « Pilotage » et « Ma carte » resteraient posés
- | au-dessus du vide, ce qui se lit comme une page cassée.
+ | Sous 768px, la colonne devient le panneau « Plus » ouvert depuis la barre
+ | d'onglets du bas : les quatre rubriques que la barre porte en sont
+ | retirées (`display:none`, qui les sort aussi de l'arbre d'accessibilité).
+ | À partir de 768px, il n'y a plus de barre : la colonne redevient la
+ | navigation entière.
  */
 .adm-nav__item--dans-le-dock {
   display: none;
@@ -182,84 +143,122 @@ body:has(> .adm){
 
 .adm-nav__liste {
   list-style: none;
-  margin:0;
-  padding:0;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap:2px;
+  gap: esp(1);
 }
 
-// L'entrée : pilule arrondie, pleine en vert quand elle est active.
 .adm-nav__lien {
+  position: relative;
   display: flex;
   align-items: center;
-  gap:esp(3);
+  gap: esp(3);
   width: 100%;
-  padding:esp(3) esp(3);
+  min-height: $tactile-min;
+  padding: 0 esp(3);
   border: 0;
-  border-radius: $r-full;
+  border-radius: rayon(sm);
   background: transparent;
-  font-size:typo(caption);
-  font-weight: 500;
+  font-family: inherit;
+  font-size: typo(body-sm);
+  font-weight: 600;
   text-align: left;
   line-height: 1.25;
+  text-decoration: none;
+  cursor: pointer;
 
-  // La couleur est déclarée pour TOUS les états : aucune entrée de menu ne
-  // doit attendre un survol pour devenir lisible.
-  // `--panneau-texte` — 12,82:1. Une entrée de menu se lit en diagonale, elle
-  // ne se déchiffre pas. Les 74 % de blanc d'avant passaient tout juste, et
-  // la moindre luminosité d'écran basse les faisait décrocher.
-  &, &:link, &:visited, &:hover, &:focus, &:focus-visible {
-    color: var(--panneau-texte);
-    text-decoration: none;
-  }
+  // La couleur de TOUS les états : aucune entrée n'attend un survol.
+  &, &:link, &:visited, &:hover, &:focus, &:focus-visible { color: var(--texte); }
 
-  &:hover { background: var(--panneau-survol); color: var(--panneau-texte); }
-  &:focus-visible { outline: 2px solid $vert-accent; outline-offset: 2px; }
+  &:hover { background: var(--surelev); }
 
+  // LA RUBRIQUE ACTIVE : fond de grès, trait latérite, graisse — et
+  // aria-current. Lisible au repos, sans dépendre de la seule couleur.
   &.is-active {
     &, &:link, &:visited, &:hover, &:focus, &:focus-visible {
-      background: $vert-accent;
-      color: var(--sur-vert-500);   // 8,40:1 — jeton, voir _tokens.scss
-      font-weight: 600;
+      background: var(--surelev);
+      color: var(--texte);
+      font-weight: 750;
     }
-    .adm-nav__icone { opacity: 1; }
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: -(esp(4));
+      top: esp(2);
+      bottom: esp(2);
+      width: esp(1) + 1px;
+      border-radius: 0 rayon(xs) rayon(xs) 0;
+      background: var(--terre);
+    }
+
+    .adm-nav__icone { color: var(--lien); }
   }
 
-  /*
-   | Écran non encore construit : non cliquable, mais LISIBLE.
-   |
-   | À 28 % de blanc, ces huit entrées étaient illisibles — le menu paraissait
-   | vide. `--panneau-texte-3` les tient à 5,33:1. Une entrée désactivée doit
-   | se lire : c'est elle qui annonce ce que le produit contiendra. C'est
-   | l'opacité de l'ICÔNE et le curseur qui disent l'indisponibilité, pas
-   | l'effacement du texte.
-   */
+  // Écran non encore construit : non cliquable, mais LISIBLE.
   &.is-muted {
-    color: var(--panneau-texte-3);
+    color: var(--texte-2);
     cursor: not-allowed;
 
-    .adm-nav__icone { opacity: .45; }
-
-    &:hover { background: transparent; color: var(--panneau-texte-3); }
+    .adm-nav__icone { opacity: .5; }
+    &:hover { background: transparent; }
   }
 }
 
 .adm-nav__lien--action { cursor: pointer; }
 
-.adm-nav__icone { flex: 0 0 16px; opacity: .8; }
+.adm-nav__icone {
+  flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  color: var(--texte-2);
+}
+
+// Le nombre de paiements à vérifier : un cachet « en attente », chiffré.
+.adm-nav__compte {
+  margin-left: auto;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 esp(2);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--alerte-trait);
+  border-radius: rayon(xs);
+  background: var(--alerte-fond);
+  color: var(--alerte);
+  font-size: typo(overline) - 1px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
 
 .adm-nav__bas {
   margin-top: auto;
-  padding-top:esp(3);
-  border-top: 1px solid var(--panneau-bord);
+  padding-top: esp(3);
+  border-top: 1px solid var(--bordure);
   display: flex;
   flex-direction: column;
-  gap:2px;
+  gap: esp(1);
 }
 
+// L'administrateur, en pied de colonne.
+.adm-side__moi {
+  display: flex;
+  align-items: center;
+  gap: esp(3);
+  margin-top: esp(2);
+  padding: esp(3) esp(2) 0;
+  border-top: 1px solid var(--bordure);
+  min-width: 0;
+}
+
+.adm-side__qui { display: flex; flex-direction: column; min-width: 0; }
+.adm-side__nom { font-size: typo(body-sm); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-side__role { font-size: typo(caption); color: var(--texte-2); }
+
 // -----------------------------------------------------------------------------
-// BARRE SUPÉRIEURE
+// LA BARRE SUPÉRIEURE — ivoire, fil d'Ariane, recherche, cloche, compte
 // -----------------------------------------------------------------------------
 .adm-main {
   flex: 1 1 auto;
@@ -269,175 +268,169 @@ body:has(> .adm){
 }
 
 .adm-top {
-  min-height: $adm-top-h;
+  min-height: $barre-haut-hauteur;
   display: flex;
   align-items: center;
-  gap:esp(4);
-  padding:0 esp(5);
-  background: var(--surface);
-  border-bottom: 1px solid var(--bord);
+  gap: esp(3);
+  padding: 0 esp(4);
+  background: var(--carte);
+  border-bottom: 1px solid var(--bordure);
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: plan(collant);
+
+  @include ecran(lg) { min-height: $adm-top-h; padding: 0 esp(6); gap: esp(5); }
+  @include ecran(xl) { padding: 0 esp(8) + esp(1); }
 }
 
-.adm-top__burger {
+// Le monogramme : sur téléphone seulement, la colonne le porte au-delà.
+.adm-top__marque {
+  @include ecran(lg) { display: none; }
+}
+
+// Le fil d'Ariane : à partir de 768px.
+.adm-top__fil {
   display: none;
-  border: 0;
-  background: transparent;
-  color: var(--texte);
-  padding:esp(2);
-  border-radius: $r-sm;
-  &:hover { background: var(--survol); }
+  min-width: 0;
+
+  @include ecran(lg) { display: block; }
+
+  .fil li:first-child { color: var(--texte-2); }
 }
 
-.adm-top__section {
-  font-size:typo(caption);
-  font-weight: 600;
-  color: var(--texte-2);
-  white-space: nowrap;
+// La recherche : un champ visible à partir de 1024px, une loupe en dessous.
+.adm-top__recherche {
+  display: none;
+  margin-left: auto;
+  flex: 0 1 420px;
+  min-width: 0;
+
+  @include ecran(xl) { display: block; }
+}
+
+.adm-top__loupe {
+  @include ecran(xl) { display: none; }
 }
 
 .adm-top__actions {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap:esp(3);
+  gap: esp(2);
+
+  @include ecran(xl) { margin-left: 0; }
 }
 
 .adm-search {
   position: relative;
-  flex: 0 1 300px;
+  margin: 0;
   min-width: 0;
-  margin:0;
 }
 
 .adm-search__icone {
   position: absolute;
-  // Propriété logique, et sur l'échelle : 11px n'était pas un cran.
   inset-inline-start: esp(4);
   top: 50%;
   transform: translateY(-50%);
-  // 15px se lisait comme un détail sali. 18px est la taille d'icône
-  // courante du produit, et elle tient dans un champ de 48px.
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   color: var(--texte-2);
   pointer-events: none;
 }
 
 /*
- | LA LOUPE ÉTAIT POSÉE SUR LE TEXTE, DANS LES DEUX ESPACES.
- |
- | Relevé dans le navigateur : le marque-place démarrait à 28px, l'icône
- | occupait 23 à 38px. Dix pixels de recouvrement — d'où le « ⌕Rechercher »
- | visible sur le tableau de bord comme en administration.
- |
- | LA CAUSE N'EST PAS ICI, ET C'EST TOUT LE PROBLÈME. Cette règle réservait
- | bien la place, avec `padding:0 esp(3) 0 esp(7)`. Mais `_socle.scss` est
- | importé EN DERNIER et applique `padding: esp(3) esp(4)` à tout champ : à
- | spécificité égale (0,1,0), c'est lui qui gagnait, et les 32px réservés
- | tombaient à 16.
- |
- | Le sélecteur double porte la spécificité à (0,2,0) et reprend la main sans
- | un seul !important. La hauteur et la police, elles, sont volontairement
- | LAISSÉES au socle : 48px et 16px valent mieux que les 35px et 13px d'ici,
- | qui passaient sous le minimum tactile.
+ | LA LOUPE NE SE POSE PAS SUR LE TEXTE. Le socle (importé en dernier) pose
+ | `padding: esp(3) esp(4)` sur tout champ : le sélecteur double reprend la
+ | main sans !important et réserve la place de l'icône.
  */
 .adm-search .adm-search__champ {
-  // 16 (bord) + 18 (icône) + 14 (gouttière) = 48px = esp(9).
-  //
-  // La première correction posait 40px, soit 8px entre l'icône et le texte.
-  // Le chevauchement disparaissait, mais les deux restaient collés — une
-  // gouttière de 8px sur un champ de 48px de haut se lit comme un défaut.
-  // 14px les sépare franchement, et la valeur reste sur l'échelle.
   padding-inline-start: esp(9);
   padding-inline-end: esp(4);
-  border-radius: $r-full;
+  min-height: $bouton-hauteur;
 }
 
-.adm-top__user {
-  display: flex;
-  align-items: center;
-  gap:esp(3);
-  border: 0;
-  background: transparent;
-  padding:esp(1) esp(2);
-  border-radius: $r-full;
-  font-size:typo(caption);
-  font-weight: 600;
-  color: var(--texte);
-
-  &:hover, &[aria-expanded="true"] { background: var(--survol); }
-}
-
+// L'avatar : coins de 11, initiales sur baobab — la marque, pas la menthe.
 .adm-avatar {
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
-  border-radius: $r-full;
-  background: $vert-accent;
-  color: var(--sur-vert-500);
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: rayon(sm);
+  background: var(--marque);
+  color: var(--texte-inv-marque);
   display: grid;
   place-items: center;
-  font-size:typo(overline);
-  font-weight: 700;
-  letter-spacing: .02em;
+  font-size: typo(caption);
+  font-weight: 800;
+  letter-spacing: -.01em;
+  object-fit: cover;
 }
 
 .adm-avatar--sm {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
-  background: var(--accent-doux);
-  color: var(--accent);
-  font-size:typo(overline);
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  background: var(--surelev);
+  color: var(--texte);
 }
 
 // -----------------------------------------------------------------------------
-// ZONE DE CONTENU
+// LA ZONE DE CONTENU ET L'EN-TÊTE D'ÉCRAN
 // -----------------------------------------------------------------------------
 .adm-content {
   flex: 1 1 auto;
-  background: var(--surface-2);
-  padding:esp(6) esp(5) esp(8);
+  background: var(--page);
+  padding: esp(6) esp(4) esp(8);
+
+  @include ecran(lg) { padding: esp(7) esp(6) esp(9); }
+  @include ecran(xl) { padding: esp(7) esp(8) + esp(1) esp(9); }
 }
 
 .adm-page {
-  max-width: 1320px;
+  max-width: $largeur-app;
   margin-inline: auto;
 }
 
 .adm-head {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
-  gap:esp(4);
+  gap: esp(4);
   flex-wrap: wrap;
-  margin-bottom:esp(5);
+  margin-bottom: esp(6);
 }
 
 .adm-head__titre {
-  font-size:typo(h2);
-  font-weight: 700;
-  letter-spacing: -.02em;
+  font-size: typo(h2);
+  font-weight: typo(h1, graisse);
+  line-height: typo(h2, interligne);
+  letter-spacing: typo(h2, espacement);
   color: var(--texte);
-  margin:0;
+  margin: 0;
+
+  @include ecran(lg) { font-size: typo(h2, bureau); }
 }
 
 .adm-head__sous {
-  margin:esp(1) 0 0;
-  font-size:typo(caption);
+  margin: esp(2) 0 0;
+  font-size: typo(body);
   color: var(--texte-2);
-  max-width: 64ch;
+  max-width: 72ch;
 }
 
 .adm-head__actions {
   display: flex;
   align-items: center;
-  gap:esp(2);
+  gap: esp(2);
   flex-wrap: wrap;
 }
+
+
+// =============================================================================
+// ═════════════════════════════════════════════════════════════════════════════
+// PARTIE 2 — LES PAGES (lot 6) — tout ce qui suit appartient aux écrans
+// d'administration. La coque s'arrête ici.
+// ═════════════════════════════════════════════════════════════════════════════
+// =============================================================================
 
 // -----------------------------------------------------------------------------
 // BOUTONS ET CHAMPS DE L'ADMINISTRATION
